@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Details - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  
+  <div class="main-content">
+    <div id="header"></div>
+    
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="loans.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white">Loan Details</h1>
+          <p class="text-secondary">View loan information</p>
+        </div>
+      </div>
+      
+      <!-- Loading -->
+      <div id="loadingContainer" class="loading-container">
+        <div class="spinner"></div>
+      </div>
+      
+      <!-- Loan Details -->
+      <div id="loanContainer" style="display: none;">
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-6" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <h2 id="loanId" class="text-2xl font-bold text-white" style="margin: 0;"></h2>
+                <span id="statusBadge"></span>
+              </div>
+              <p class="text-muted" style="margin: 0;">Loan Application</p>
+            </div>
+            <div class="flex gap-2" style="display: flex; gap: 0.5rem;">
+              <a id="editBtn" class="btn btn-primary">Edit</a>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-6 mb-6" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            <div>
+              <p class="text-muted mb-1">Customer</p>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <a id="customerLink" href="#" class="text-white font-medium hover:text-primary" style="text-decoration: none; transition: color 0.2s;">
+                  <span id="customerName"></span>
+                </a>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: rgba(148, 163, 184, 0.6);">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </div>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Branch</p>
+              <p id="branchName" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Institution</p>
+              <p id="institutionName" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Product</p>
+              <p id="productName" class="text-white font-medium"></p>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-6" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+            <div>
+              <p class="text-muted mb-1">Principal Amount</p>
+              <p id="principalAmount" class="text-white font-medium text-lg"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Due Date</p>
+              <p id="dueDate" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Status</p>
+              <p id="status" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Given By</p>
+              <p id="givenBy" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Created At</p>
+              <p id="createdAt" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Last Updated</p>
+              <p id="updatedAt" class="text-white font-medium"></p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Payment Progress -->
+        <div id="paymentProgressCard" class="glass-card p-6 mb-6" style="display: none;">
+          <h3 class="text-xl font-bold text-white mb-4">Payment Progress</h3>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1rem;">
+            <div>
+              <p class="text-muted mb-1">Payment Plan</p>
+              <p id="paymentPlan" class="text-white font-medium text-lg"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Monthly Installment</p>
+              <p id="monthlyInstallment" class="text-white font-medium text-lg"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Total Paid</p>
+              <p id="totalPaid" class="text-white font-medium text-lg"></p>
+            </div>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span class="text-muted text-sm">Progress</span>
+              <span id="progressPercentage" class="text-white text-sm font-medium">0%</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden;">
+              <div id="progressBar" style="height: 100%; background: linear-gradient(90deg, #10b981, #3b82f6); width: 0%; transition: width 0.3s;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Installments -->
+        <div id="installmentsCard" class="glass-card p-6 mb-6" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 class="text-xl font-bold text-white">Payment Installments</h3>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <span class="badge badge-info" id="installmentsSummary">0 of 0 paid</span>
+            </div>
+          </div>
+          
+          <div id="installmentsContainer" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <!-- Installments will be loaded here -->
+          </div>
+        </div>
+        
+        <!-- Status Management -->
+        <div class="glass-card p-6">
+          <h3 class="text-xl font-bold text-white mb-4">Loan Status Management</h3>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <label for="statusSelect" class="text-muted" style="min-width: 120px;">Update Status:</label>
+              <select id="statusSelect" class="input" style="flex: 1; max-width: 300px;">
+                <option value="Active">Active</option>
+                <option value="Late">Late</option>
+                <option value="Paid">Paid</option>
+                <option value="Finished">Finished</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+              <button id="updateStatusBtn" class="btn btn-primary" style="padding: 0.5rem 1.5rem;">
+                Update Status
+              </button>
+              <p class="text-muted" style="font-size: 0.875rem; margin: 0.5rem 0 0 0;">
+                Status changes are tracked for audit purposes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div id="paymentModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="glass-card" style="max-width: 500px; width: 90%; padding: 2rem; position: relative;">
+      <button id="closeModal" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+      <h3 class="text-xl font-bold text-white mb-4">Record Payment</h3>
+      
+      <div class="mb-4" style="padding: 1rem; border-radius: 8px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span class="text-muted">Installment</span>
+          <span class="text-white font-medium" id="modalInstallmentNumber"></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span class="text-muted">Amount Due</span>
+          <span class="text-white font-medium text-lg" id="modalAmount"></span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span class="text-muted">Due Date</span>
+          <span class="text-white font-medium" id="modalDueDate"></span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="label">Payment Date</label>
+        <input type="date" id="paymentDate" class="input" required />
+      </div>
+      
+      <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+        <button id="confirmPayment" class="btn btn-primary" style="flex: 1;">Confirm Payment</button>
+        <button id="cancelPayment" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    // Check authentication
+    if (!isAuthenticated()) {
+      window.location.href = '../index.html';
+    }
+    
+    const user = getCurrentUser();
+    document.getElementById('sidebar').innerHTML = createSidebar(user);
+    document.getElementById('header').innerHTML = createHeader('Loan Details', 'View loan information');
+    setActiveNav('loans');
+    
+    const loadingContainer = document.getElementById('loadingContainer');
+    const loanContainer = document.getElementById('loanContainer');
+    
+    // Get loan ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const loanId = urlParams.get('id');
+    
+    if (!loanId) {
+      window.location.href = 'loans.html';
+    }
+    
+    let loanData = null;
+    
+    // Load loan data
+    async function loadLoan() {
+      try {
+        loanData = await api.loans.getById(loanId);
+        
+        // Populate loan details
+        document.getElementById('loanId').textContent = `Loan #${loanData.loanId}`;
+        
+        // Customer link
+        const customerLink = document.getElementById('customerLink');
+        customerLink.href = `customers-view.html?id=${loanData.customer.customerId}`;
+        document.getElementById('customerName').textContent = loanData.customer.name;
+        
+        document.getElementById('branchName').textContent = loanData.branch?.name || '--';
+        document.getElementById('institutionName').textContent = loanData.branch?.institution?.name || '--';
+        document.getElementById('productName').textContent = loanData.product?.name || '--';
+        document.getElementById('principalAmount').textContent = formatCurrency(loanData.principalAmount);
+        document.getElementById('dueDate').textContent = formatDate(loanData.dueDate);
+        document.getElementById('status').textContent = loanData.status;
+        document.getElementById('givenBy').textContent = loanData.createdByName || '--';
+        document.getElementById('createdAt').textContent = formatDateTime(loanData.createdAt);
+        document.getElementById('updatedAt').textContent = formatDateTime(loanData.updatedAt);
+        
+        // Display status badge
+        const statusBadge = document.getElementById('statusBadge');
+        const statusClass = 
+          loanData.status === 'Active' ? 'badge-success' :
+          loanData.status === 'Late' ? 'badge-warning' :
+          loanData.status === 'Paid' || loanData.status === 'Finished' ? 'badge-info' :
+          'badge-secondary';
+        statusBadge.innerHTML = `<span class="badge ${statusClass}">${loanData.status}</span>`;
+        
+        // Set status select
+        document.getElementById('statusSelect').value = loanData.status;
+        
+        document.getElementById('editBtn').href = `loans-edit.html?id=${loanId}`;
+        
+        // Load installments if payment plan exists
+        if (loanData.paymentPlanMonths && loanData.paymentPlanMonths > 1) {
+          await loadPaymentProgress();
+          await loadInstallments();
+        }
+        
+        loadingContainer.style.display = 'none';
+        loanContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading loan:', error);
+        showToast('Failed to load loan', 'error');
+        setTimeout(() => window.location.href = 'loans.html', 2000);
+      }
+    }
+    
+    // Load payment progress
+    async function loadPaymentProgress() {
+      try {
+        const paymentProgressCard = document.getElementById('paymentProgressCard');
+        paymentProgressCard.style.display = 'block';
+        
+        const monthlyAmount = loanData.principalAmount / loanData.paymentPlanMonths;
+        const progressPercent = (loanData.paidAmount / loanData.principalAmount) * 100;
+        
+        document.getElementById('paymentPlan').textContent = `${loanData.paymentPlanMonths} Months`;
+        document.getElementById('monthlyInstallment').textContent = formatCurrency(monthlyAmount);
+        document.getElementById('totalPaid').textContent = formatCurrency(loanData.paidAmount);
+        document.getElementById('progressPercentage').textContent = `${Math.round(progressPercent)}%`;
+        document.getElementById('progressBar').style.width = `${progressPercent}%`;
+      } catch (error) {
+        console.error('Error loading payment progress:', error);
+      }
+    }
+    
+    // Load installments
+    let installmentsData = [];
+    async function loadInstallments() {
+      try {
+        // Force fresh data by adding cache busting
+        installmentsData = await api.loans.getInstallments(loanId);
+        
+        // Sort by installment number to ensure correct order
+        installmentsData.sort((a, b) => a.installmentNumber - b.installmentNumber);
+        
+        const installmentsCard = document.getElementById('installmentsCard');
+        installmentsCard.style.display = 'block';
+        
+        const paidCount = installmentsData.filter(i => i.status === 'Paid').length;
+        document.getElementById('installmentsSummary').textContent = `${paidCount} of ${installmentsData.length} paid`;
+        
+        renderInstallments();
+      } catch (error) {
+        console.error('Error loading installments:', error);
+      }
+    }
+    
+    // Render installments
+    function renderInstallments() {
+      const container = document.getElementById('installmentsContainer');
+      
+      if (installmentsData.length === 0) {
+        container.innerHTML = '<p class=\"text-muted\">No installments found</p>';
+        return;
+      }
+      
+      console.log('Rendering installments:', installmentsData.map(i => ({ num: i.installmentNumber, status: i.status })));
+      
+      container.innerHTML = installmentsData.map((installment, index) => {
+        const isPaid = installment.status === 'Paid';
+        const isOverdue = installment.status === 'Overdue';
+        const isPending = installment.status === 'Pending';
+        
+        // Check if all previous installments are paid (for sequential payment)
+        const previousInstallments = installmentsData.slice(0, index);
+        const canPay = index === 0 || previousInstallments.every(inst => inst.status === 'Paid');
+        
+        console.log(`Installment #${installment.installmentNumber}: isPaid=${isPaid}, canPay=${canPay}, previousPaid=${previousInstallments.map(i => i.status).join(',')}`);
+        
+        const statusColor = 
+          isPaid ? '#10b981' : 
+          isOverdue ? '#ef4444' : 
+          '#f59e0b';
+        
+        const statusBg = 
+          isPaid ? 'rgba(16, 185, 129, 0.1)' : 
+          isOverdue ? 'rgba(239, 68, 68, 0.1)' : 
+          'rgba(245, 158, 11, 0.1)';
+        
+        const statusBorder = 
+          isPaid ? 'rgba(16, 185, 129, 0.2)' : 
+          isOverdue ? 'rgba(239, 68, 68, 0.2)' : 
+          'rgba(245, 158, 11, 0.2)';
+        
+        const statusIcon = 
+          isPaid ? '✓' : 
+          isOverdue ? '!' : 
+          '○';
+        
+        return `
+          <div style=\"padding: 1rem; border-radius: 8px; background: ${statusBg}; border: 1px solid ${statusBorder};\">
+            <div style=\"display: flex; justify-content: space-between; align-items: center;\">
+              <div style=\"flex: 1;\">
+                <div style=\"display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;\">
+                  <span style=\"width: 24px; height: 24px; border-radius: 50%; background: ${statusColor}; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: bold;\">${statusIcon}</span>
+                  <span class=\"text-white font-medium\">Installment #${installment.installmentNumber}</span>
+                  <span class=\"badge\" style=\"background: ${statusBg}; color: ${statusColor}; border: 1px solid ${statusBorder};\">${installment.status}</span>
+                  ${!canPay && !isPaid ? '<span class=\"badge badge-warning\" style=\"font-size: 0.75rem;\">🔒 Pay previous first</span>' : ''}
+                </div>
+                <div style=\"display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 0.75rem;\">
+                  <div>
+                    <p class=\"text-muted\" style=\"font-size: 0.75rem;\">Amount</p>
+                    <p class=\"text-white font-medium\">${formatCurrency(installment.amount)}</p>
+                  </div>
+                  <div>
+                    <p class=\"text-muted\" style=\"font-size: 0.75rem;\">Due Date</p>
+                    <p class=\"text-white font-medium\">${formatDate(installment.dueDate)}</p>
+                  </div>
+                  <div>
+                    <p class=\"text-muted\" style=\"font-size: 0.75rem;\">${isPaid ? 'Paid On' : 'Payment Date'}</p>
+                    <p class=\"text-white font-medium\">${isPaid ? formatDate(installment.paymentDate) : '--'}</p>
+                  </div>
+                </div>
+              </div>
+              ${!isPaid ? `
+                <button 
+                  onclick=\"openPaymentModal(${installment.id}, ${installment.installmentNumber}, ${installment.amount}, '${installment.dueDate}')\"
+                  class=\"btn btn-primary\" 
+                  style=\"padding: 0.5rem 1rem; margin-left: 1rem; ${!canPay ? 'opacity: 0.5; cursor: not-allowed;' : ''}\"
+                  ${!canPay ? 'disabled title=\"Please pay previous installments first\"' : ''}
+                >
+                  Pay Now
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // Payment modal functionality
+    let currentInstallmentId = null;
+    
+    window.openPaymentModal = function(installmentId, installmentNumber, amount, dueDate) {
+      currentInstallmentId = installmentId;
+      document.getElementById('modalInstallmentNumber').textContent = `#${installmentNumber}`;
+      document.getElementById('modalAmount').textContent = formatCurrency(amount);
+      document.getElementById('modalDueDate').textContent = formatDate(dueDate);
+      
+      // Set default payment date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('paymentDate').value = today;
+      
+      const modal = document.getElementById('paymentModal');
+      modal.style.display = 'flex';
+    }
+    
+    function closePaymentModal() {
+      document.getElementById('paymentModal').style.display = 'none';
+      currentInstallmentId = null;
+    }
+    
+    document.getElementById('closeModal').addEventListener('click', closePaymentModal);
+    document.getElementById('cancelPayment').addEventListener('click', closePaymentModal);
+    
+    document.getElementById('confirmPayment').addEventListener('click', async () => {
+      const paymentDate = document.getElementById('paymentDate').value;
+      
+      if (!paymentDate) {
+        showToast('Please select a payment date', 'error');
+        return;
+      }
+      
+      try {
+        const confirmBtn = document.getElementById('confirmPayment');
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Processing...';
+        
+        await api.installments.payInstallment(currentInstallmentId, paymentDate);
+        
+        closePaymentModal();
+        showToast('Payment recorded successfully', 'success');
+        
+        // Reload loan and installments data
+        loanData = await api.loans.getById(loanId);
+        await loadPaymentProgress();
+        await loadInstallments();
+        
+        // Reset button state
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Confirm Payment';
+      } catch (error) {
+        console.error('Error recording payment:', error);
+        showToast(error.message || 'Failed to record payment', 'error');
+        
+        const confirmBtn = document.getElementById('confirmPayment');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Confirm Payment';
+      }
+    });
+    
+    // Update status
+    document.getElementById('updateStatusBtn').addEventListener('click', async () => {
+      const newStatus = document.getElementById('statusSelect').value;
+      
+      if (newStatus === loanData.status) {
+        showToast('Status is already set to ' + newStatus, 'info');
+        return;
+      }
+      
+      if (!confirm(`Are you sure you want to change the loan status to "${newStatus}"?`)) {
+        return;
+      }
+      
+      try {
+        const updateBtn = document.getElementById('updateStatusBtn');
+        updateBtn.disabled = true;
+        updateBtn.textContent = 'Updating...';
+        
+        await api.loans.updateStatus(loanId, newStatus);
+        
+        showToast('Loan status updated successfully', 'success');
+        
+        // Reload the loan data
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } catch (error) {
+        console.error('Error updating loan status:', error);
+        showToast(error.message || 'Failed to update loan status', 'error');
+        
+        const updateBtn = document.getElementById('updateStatusBtn');
+        updateBtn.disabled = false;
+        updateBtn.textContent = 'Update Status';
+      }
+    });
+    
+    // Load loan on page load
+    loadLoan();
+  </script>
+</body>
+</html>

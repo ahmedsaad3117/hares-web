@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hares Platform - Login</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="min-h-screen flex items-center justify-center" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+    <div class="glass-card p-8" style="padding: 2rem; width: 100%; max-width: 450px;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 class="text-3xl font-bold text-white" style="font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5rem;">
+          Hares Platform
+        </h1>
+        <p class="text-secondary" style="color: #cbd5e1;">Sign in to your account</p>
+      </div>
+
+      <form id="loginForm" style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- Email -->
+        <div class="form-group">
+          <label class="label">Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            class="input" 
+            placeholder="admin@example.com"
+            required
+          />
+          <div id="emailError" class="error-text hidden"></div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="label">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="input" 
+            placeholder="••••••••"
+            required
+          />
+          <div id="passwordError" class="error-text hidden"></div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="hidden" style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+          <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          id="loginButton"
+          class="btn btn-primary w-full"
+          style="width: 100%; margin-top: 0.5rem;"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const loginButton = document.getElementById('loginButton');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    // Check if already logged in
+    if (isAuthenticated()) {
+      console.log('Already authenticated, redirecting to dashboard...');
+      window.location.replace('pages/dashboard.html');
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      // Hide previous errors
+      errorMessage.classList.add('hidden');
+      document.getElementById('emailError').classList.add('hidden');
+      document.getElementById('passwordError').classList.add('hidden');
+      
+      // Validation
+      if (!email || !email.includes('@')) {
+        document.getElementById('emailError').textContent = 'Invalid email address';
+        document.getElementById('emailError').classList.remove('hidden');
+        return;
+      }
+      
+      if (!password || password.length < 6) {
+        document.getElementById('passwordError').textContent = 'Password must be at least 6 characters';
+        document.getElementById('passwordError').classList.remove('hidden');
+        return;
+      }
+      
+      // Disable button and show loading
+      loginButton.disabled = true;
+      loginButton.innerHTML = `
+        <div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
+        Signing in...
+      `;
+      
+      try {
+        const response = await api.auth.login({ email, password });
+        
+        console.log('Login successful:', response);
+        
+        // Save auth data
+        saveAuthData(response.access_token, response.user);
+        
+        console.log('Auth data saved. Token:', getToken()?.substring(0, 20) + '...');
+        console.log('User:', getCurrentUser());
+        
+        // Redirect to dashboard
+        console.log('Login successful, redirecting to dashboard...');
+        window.location.replace('pages/dashboard.html');
+      } catch (error) {
+        console.error('Login error:', error);
+        errorMessage.querySelector('p').textContent = error.message || 'Invalid credentials';
+        errorMessage.classList.remove('hidden');
+        
+        // Re-enable button
+        loginButton.disabled = false;
+        loginButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          Sign In
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

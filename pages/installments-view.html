@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Installment Details | Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div id="sidebarContainer"></div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <div id="headerContainer"></div>
+      
+      <!-- Page Content -->
+      <div class="page-wrapper">
+        <div class="container">
+          <!-- Loading State -->
+          <div id="loadingState" class="flex items-center justify-center" style="display: flex; align-items: center; justify-content: center; padding: 4rem;">
+            <div class="spinner"></div>
+            <p class="text-muted ml-3">Loading installment details...</p>
+          </div>
+          
+          <!-- Content -->
+          <div id="contentContainer" style="display: none;">
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-6" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+              <div>
+                <div class="flex items-center gap-3 mb-2" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                  <h1 class="text-3xl font-bold text-white">Installment <span id="installmentNumber"></span></h1>
+                  <span id="statusBadge" class="badge"></span>
+                </div>
+                <p class="text-muted">View and manage installment payment</p>
+              </div>
+              <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+                <a href="installments.html" class="btn btn-secondary">
+                  ← Back to List
+                </a>
+                <button id="payBtn" onclick="openPaymentModal()" class="btn btn-success" style="background: #10b981; display: none;">
+                  💰 Process Payment
+                </button>
+              </div>
+            </div>
+            
+            <!-- Installment Details Card -->
+            <div class="glass-card p-6 mb-6">
+              <h2 class="text-xl font-bold text-white mb-4">Installment Information</h2>
+              <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                <div>
+                  <p class="text-muted mb-1">Installment Number</p>
+                  <p id="detailInstallmentNumber" class="text-white font-medium text-lg"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Amount</p>
+                  <p id="detailAmount" class="text-white font-semibold text-xl"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Status</p>
+                  <p id="detailStatus" class="text-white font-medium"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Due Date</p>
+                  <p id="detailDueDate" class="text-white font-medium"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Payment Date</p>
+                  <p id="detailPaymentDate" class="text-white font-medium"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Days Status</p>
+                  <p id="detailDaysStatus" class="text-white font-medium"></p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Loan Details Card -->
+            <div class="glass-card p-6 mb-6">
+              <h2 class="text-xl font-bold text-white mb-4">Related Loan</h2>
+              <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                <div>
+                  <p class="text-muted mb-1">Loan ID</p>
+                  <a id="loanIdLink" href="#" class="text-primary font-medium text-lg" style="text-decoration: underline;"></a>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Principal Amount</p>
+                  <p id="loanPrincipal" class="text-white font-semibold"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Payment Plan</p>
+                  <p id="loanPaymentPlan" class="text-white font-medium"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Product</p>
+                  <p id="loanProduct" class="text-white font-medium"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Loan Status</p>
+                  <p id="loanStatus" class="text-white font-medium"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Total Paid</p>
+                  <p id="loanPaidAmount" class="text-white font-medium"></p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Customer Details Card -->
+            <div class="glass-card p-6 mb-6">
+              <h2 class="text-xl font-bold text-white mb-4">Customer Information</h2>
+              <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                <div>
+                  <p class="text-muted mb-1">Customer Name</p>
+                  <a id="customerLink" href="#" class="text-primary font-medium text-lg" style="text-decoration: underline;"></a>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Customer ID</p>
+                  <p id="customerId" class="text-white font-medium"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Contact Number</p>
+                  <p id="customerPhone" class="text-white font-medium"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Branch</p>
+                  <p id="customerBranch" class="text-white font-medium"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">National ID</p>
+                  <p id="customerNationalId" class="text-white font-medium"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1">Address</p>
+                  <p id="customerAddress" class="text-white font-medium"></p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- All Installments for this Loan -->
+            <div class="glass-card p-6">
+              <h2 class="text-xl font-bold text-white mb-4">All Installments for Loan <span id="allInstallmentsLoanId"></span></h2>
+              <div id="allInstallmentsContainer" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <!-- Will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Payment Modal -->
+  <div id="paymentModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Process Payment</h2>
+        <button onclick="closePaymentModal()" class="modal-close">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div id="errorMessage" class="alert alert-danger hidden"></div>
+        
+        <div class="form-group">
+          <label class="label">Installment Details</label>
+          <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span class="text-muted">Installment #</span>
+              <span class="text-white font-medium" id="modalInstallmentNumber"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span class="text-muted">Customer</span>
+              <span class="text-white font-medium" id="modalCustomer"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span class="text-muted">Amount Due</span>
+              <span class="text-white font-semibold text-lg" id="modalAmount"></span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="label">Payment Date *</label>
+          <input 
+            type="date" 
+            id="paymentDate" 
+            class="input" 
+            required
+          />
+          <div id="paymentDateError" class="error-text hidden"></div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" onclick="closePaymentModal()" class="btn btn-secondary">Cancel</button>
+        <button type="button" onclick="processPayment()" id="processPaymentBtn" class="btn btn-primary">Process Payment</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+  
+  <!-- Scripts -->
+  <script src="../components/header.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../js/api.js"></script>
+  
+  <script>
+    // Authentication check
+    const user = getCurrentUser();
+    if (!user) {
+      window.location.href = '../index.html';
+    }
+    
+    // Load components
+    document.getElementById('sidebarContainer').innerHTML = createSidebar(user);
+    document.getElementById('headerContainer').innerHTML = createHeader('Installment Details');
+    setActiveNav('installments');
+    
+    // Get installment ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const installmentId = parseInt(urlParams.get('id'));
+    
+    if (!installmentId) {
+      window.location.href = 'installments.html';
+    }
+    
+    let installmentData = null;
+    let loanData = null;
+    
+    // Toast notification
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast show ${type === 'success' ? 'toast-success' : type === 'error' ? 'toast-error' : 'toast-info'}`;
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    // Date formatting
+    function formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+    
+    // Currency formatting
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', { 
+        style: 'currency', 
+        currency: 'USD',
+        minimumFractionDigits: 2
+      }).format(amount || 0);
+    }
+    
+    // Calculate days difference
+    function getDaysDifference(date1, date2) {
+      const diffTime = Math.abs(date2 - date1);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+    
+    // Check if installment is overdue
+    function isOverdue(installment) {
+      if (installment.status === 'Paid') return false;
+      const dueDate = new Date(installment.dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return dueDate < today;
+    }
+    
+    // Load installment details
+    async function loadInstallment() {
+      try {
+        installmentData = await api.installments.getById(installmentId);
+        loanData = await api.loans.getById(installmentData.loanId);
+        
+        // Update page title
+        document.getElementById('installmentNumber').textContent = `#${installmentData.installmentNumber}`;
+        
+        // Status badge
+        const overdue = isOverdue(installmentData);
+        const statusBadge = document.getElementById('statusBadge');
+        if (installmentData.status === 'Paid') {
+          statusBadge.textContent = '✅ Paid';
+          statusBadge.className = 'badge badge-success';
+        } else if (overdue) {
+          statusBadge.textContent = '⚠️ Overdue';
+          statusBadge.className = 'badge badge-danger';
+        } else {
+          statusBadge.textContent = '⏳ Pending';
+          statusBadge.className = 'badge badge-warning';
+        }
+        
+        // Show pay button if not paid and previous installments are paid
+        if (installmentData.status !== 'Paid') {
+          // Check if this is the first installment or if all previous are paid
+          if (installmentData.installmentNumber === 1) {
+            document.getElementById('payBtn').style.display = 'block';
+          } else {
+            // Load all installments to check
+            const allInstallments = await api.loans.getInstallments(loanData.loanId);
+            const previousInstallments = allInstallments.filter(i => i.installmentNumber < installmentData.installmentNumber);
+            const allPreviousPaid = previousInstallments.every(i => i.status === 'Paid');
+            
+            if (allPreviousPaid) {
+              document.getElementById('payBtn').style.display = 'block';
+            } else {
+              const unpaidPrevious = previousInstallments.find(i => i.status !== 'Paid');
+              document.getElementById('payBtn').style.display = 'none';
+              
+              // Show warning message
+              const warningDiv = document.createElement('div');
+              warningDiv.className = 'alert alert-warning';
+              warningDiv.style.marginTop = '1rem';
+              warningDiv.innerHTML = `⚠️ Cannot pay this installment. Please pay installment #${unpaidPrevious.installmentNumber} first.`;
+              document.querySelector('.flex.items-center.gap-3').appendChild(warningDiv);
+            }
+          }
+        }
+        
+        // Installment details
+        document.getElementById('detailInstallmentNumber').textContent = `#${installmentData.installmentNumber}`;
+        document.getElementById('detailAmount').textContent = formatCurrency(installmentData.amount);
+        document.getElementById('detailStatus').textContent = installmentData.status;
+        document.getElementById('detailDueDate').textContent = formatDate(installmentData.dueDate);
+        document.getElementById('detailPaymentDate').textContent = installmentData.paymentDate ? formatDate(installmentData.paymentDate) : 'Not paid yet';
+        
+        // Days status
+        const today = new Date();
+        const dueDate = new Date(installmentData.dueDate);
+        if (installmentData.status === 'Paid') {
+          const paidDate = new Date(installmentData.paymentDate);
+          const daysDiff = getDaysDifference(dueDate, paidDate);
+          if (paidDate <= dueDate) {
+            document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #10b981;">Paid ${daysDiff} days early</span>`;
+          } else {
+            document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #f59e0b;">Paid ${daysDiff} days late</span>`;
+          }
+        } else if (overdue) {
+          const daysDiff = getDaysDifference(dueDate, today);
+          document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #ef4444;">${daysDiff} days overdue</span>`;
+        } else {
+          const daysDiff = getDaysDifference(today, dueDate);
+          document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #3b82f6;">${daysDiff} days remaining</span>`;
+        }
+        
+        // Loan details
+        document.getElementById('loanIdLink').textContent = `#${loanData.loanId}`;
+        document.getElementById('loanIdLink').href = `loans-view.html?id=${loanData.loanId}`;
+        document.getElementById('loanPrincipal').textContent = formatCurrency(loanData.principalAmount);
+        document.getElementById('loanPaymentPlan').textContent = `${loanData.paymentPlanMonths} Month${loanData.paymentPlanMonths > 1 ? 's' : ''}`;
+        document.getElementById('loanProduct').textContent = loanData.product?.name || 'N/A';
+        document.getElementById('loanStatus').textContent = loanData.status;
+        document.getElementById('loanPaidAmount').textContent = formatCurrency(loanData.paidAmount);
+        
+        // Customer details
+        document.getElementById('customerLink').textContent = loanData.customer.name;
+        document.getElementById('customerLink').href = `customers-view.html?id=${loanData.customer.customerId}`;
+        document.getElementById('customerId').textContent = loanData.customer.customerId;
+        document.getElementById('customerPhone').textContent = loanData.customer.contactNumber || 'N/A';
+        document.getElementById('customerBranch').textContent = loanData.branch?.name || 'N/A';
+        document.getElementById('customerNationalId').textContent = loanData.customer.nationalId || 'N/A';
+        document.getElementById('customerAddress').textContent = loanData.customer.address || 'N/A';
+        
+        // Load all installments for this loan
+        await loadAllInstallments();
+        
+        // Show content
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('contentContainer').style.display = 'block';
+        
+      } catch (error) {
+        console.error('Failed to load installment:', error);
+        showToast('Failed to load installment details', 'error');
+        setTimeout(() => window.location.href = 'installments.html', 2000);
+      }
+    }
+    
+    // Load all installments for this loan
+    async function loadAllInstallments() {
+      try {
+        const installments = await api.loans.getInstallments(loanData.loanId);
+        document.getElementById('allInstallmentsLoanId').textContent = `#${loanData.loanId}`;
+        
+        const container = document.getElementById('allInstallmentsContainer');
+        const installmentsHTML = installments.map(inst => {
+          const overdue = isOverdue(inst);
+          const isCurrent = inst.id === installmentId;
+          const statusColor = inst.status === 'Paid' ? '#10b981' : overdue ? '#ef4444' : '#f59e0b';
+          
+          return `
+            <div style="padding: 1rem; background: ${isCurrent ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255, 255, 255, 0.05)'}; border-radius: 8px; border: 1px solid ${isCurrent ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.1)'};">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <span class="font-semibold text-white">Installment #${inst.installmentNumber}</span>
+                  ${isCurrent ? '<span class="badge badge-info" style="margin-left: 0.5rem; font-size: 0.75rem;">Current</span>' : ''}
+                </div>
+                <div style="text-align: right;">
+                  <div class="font-semibold text-white">${formatCurrency(inst.amount)}</div>
+                  <div class="text-sm" style="color: ${statusColor};">${inst.status === 'Paid' ? '✅ Paid' : overdue ? '⚠️ Overdue' : '⏳ Pending'}</div>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.875rem;">
+                <span class="text-muted">Due: ${formatDate(inst.dueDate)}</span>
+                <span class="text-muted">${inst.paymentDate ? `Paid: ${formatDate(inst.paymentDate)}` : 'Not paid'}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        container.innerHTML = installmentsHTML;
+      } catch (error) {
+        console.error('Failed to load all installments:', error);
+      }
+    }
+    
+    // Payment modal
+    function openPaymentModal() {
+      document.getElementById('modalInstallmentNumber').textContent = `#${installmentData.installmentNumber}`;
+      document.getElementById('modalCustomer').textContent = loanData.customer.name;
+      document.getElementById('modalAmount').textContent = formatCurrency(installmentData.amount);
+      document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+      
+      document.getElementById('errorMessage').classList.add('hidden');
+      document.getElementById('paymentDateError').classList.add('hidden');
+      
+      document.getElementById('paymentModal').style.display = 'flex';
+    }
+    
+    function closePaymentModal() {
+      document.getElementById('paymentModal').style.display = 'none';
+    }
+    
+    async function processPayment() {
+      const paymentDate = document.getElementById('paymentDate').value;
+      
+      // Clear previous errors
+      document.getElementById('errorMessage').classList.add('hidden');
+      document.getElementById('paymentDateError').classList.add('hidden');
+      
+      // Validate
+      if (!paymentDate) {
+        document.getElementById('paymentDateError').textContent = 'Payment date is required';
+        document.getElementById('paymentDateError').classList.remove('hidden');
+        return;
+      }
+      
+      try {
+        const btn = document.getElementById('processPaymentBtn');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+        
+        await api.installments.payInstallment(installmentId, paymentDate);
+        
+        showToast('Payment processed successfully', 'success');
+        closePaymentModal();
+        
+        // Reload page
+        await loadInstallment();
+        
+      } catch (error) {
+        console.error('Payment failed:', error);
+        const errorMsg = error.error || error.message || 'Failed to process payment';
+        document.getElementById('errorMessage').textContent = errorMsg;
+        document.getElementById('errorMessage').classList.remove('hidden');
+      } finally {
+        const btn = document.getElementById('processPaymentBtn');
+        btn.disabled = false;
+        btn.textContent = 'Process Payment';
+      }
+    }
+    
+    // Initialize
+    loadInstallment();
+  </script>
+</body>
+</html>

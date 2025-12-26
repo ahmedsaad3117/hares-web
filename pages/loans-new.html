@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Loan - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  
+  <div class="main-content">
+    <div id="header"></div>
+    
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="loans.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white">Create Loan</h1>
+          <p class="text-secondary">Issue a new loan application</p>
+        </div>
+      </div>
+      
+      <!-- Form -->
+      <div class="glass-card p-6" style="max-width: 800px;">
+        <form id="loanForm">
+          <!-- Customer -->
+          <div class="form-group">
+            <label class="label">Customer *</label>
+            <select id="customerId" name="customerId" class="input" required>
+              <option value="">Loading customers...</option>
+            </select>
+            <div id="customerIdError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Branch -->
+          <div class="form-group" id="branchField">
+            <label class="label">Branch *</label>
+            <select id="branchId" name="branchId" class="input" required>
+              <option value="">Loading branches...</option>
+            </select>
+            <!-- Capacity Warning Display -->
+            <div id="capacityInfo" class="hidden mt-2" style="margin-top: 0.5rem;">
+              <div id="capacityStatus" class="flex items-center justify-between p-3" style="display: flex; justify-content: space-between; padding: 0.75rem; border-radius: 6px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+                <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span id="capacityIcon">✓</span>
+                  <span class="text-sm" id="capacityText" style="font-size: 0.875rem; color: #10b981;">Available capacity</span>
+                </div>
+                <span class="font-semibold" id="capacityNumbers" style="color: #10b981;">-</span>
+              </div>
+            </div>
+            <div id="branchIdError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Product -->
+          <div class="form-group">
+            <label class="label">Product *</label>
+            <select id="productId" name="productId" class="input" required>
+              <option value="">Loading products...</option>
+            </select>
+            <div id="productIdError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Principal Amount -->
+          <div class="form-group">
+            <label class="label">Principal Amount *</label>
+            <input 
+              type="number" 
+              id="principalAmount" 
+              name="principalAmount" 
+              class="input" 
+              placeholder="5000.00"
+              step="0.01"
+              min="0"
+              required
+            />
+            <div id="principalAmountError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Payment Plan -->
+          <div class="form-group">
+            <label class="label">Payment Plan (Months) *</label>
+            <select id="paymentPlanMonths" name="paymentPlanMonths" class="input" required>
+              <option value="1">1 Month</option>
+              <option value="2">2 Months</option>
+              <option value="3">3 Months</option>
+              <option value="4">4 Months</option>
+              <option value="5">5 Months</option>
+              <option value="6" selected>6 Months</option>
+              <option value="7">7 Months</option>
+              <option value="8">8 Months</option>
+              <option value="9">9 Months</option>
+              <option value="10">10 Months</option>
+              <option value="11">11 Months</option>
+              <option value="12">12 Months</option>
+            </select>
+            <p class="text-muted text-sm mt-1" style="font-size: 0.875rem; margin-top: 0.25rem;">Select the number of monthly installments for this loan</p>
+            <div id="paymentPlanMonthsError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Installment Preview -->
+          <div id="installmentPreview" class="hidden" style="padding: 1rem; border-radius: 8px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); margin-bottom: 1rem;">
+            <p class="text-sm font-semibold text-white mb-2" style="font-size: 0.875rem; margin-bottom: 0.5rem;">📋 Installment Preview</p>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+              <div>
+                <p class="text-muted" style="font-size: 0.75rem;">Monthly Payment</p>
+                <p id="monthlyPayment" class="text-white font-medium" style="font-size: 1.125rem;">--</p>
+              </div>
+              <div>
+                <p class="text-muted" style="font-size: 0.75rem;">Number of Installments</p>
+                <p id="installmentCount" class="text-white font-medium" style="font-size: 1.125rem;">--</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Due Date -->
+          <div class="form-group">
+            <label class="label">Due Date *</label>
+            <input 
+              type="date" 
+              id="dueDate" 
+              name="dueDate" 
+              class="input" 
+              required
+            />
+            <div id="dueDateError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Error Message -->
+          <div id="errorMessage" class="hidden mb-4" style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
+            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+          </div>
+          
+          <!-- Buttons -->
+          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+            <button type="submit" id="submitButton" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Create Loan
+            </button>
+            <a href="loans.html" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    // Check authentication
+    if (!isAuthenticated()) {
+      window.location.href = '../index.html';
+    }
+    
+    const user = getCurrentUser();
+    document.getElementById('sidebar').innerHTML = createSidebar(user);
+    document.getElementById('header').innerHTML = createHeader('Create Loan', 'Issue a new loan application');
+    setActiveNav('loans');
+    
+    // Load form data
+    loadFormData();
+    
+    let branchesData = [];
+    
+    async function loadFormData() {
+      try {
+        // For Branch users, only load customers and products
+        let promises = [
+          api.customers.getAll(1, 100),
+          api.products.getActive(),
+        ];
+        
+        // Only load branches if not a Branch user
+        if (user.roleName !== 'Branch') {
+          promises.splice(1, 0, api.branches.getAll(1, 100));
+        }
+        
+        const responses = await Promise.all(promises);
+        
+        const customers = responses[0].data || [];
+        const products = user.roleName === 'Branch' ? responses[1] : responses[2];
+        const branches = user.roleName === 'Branch' ? [] : responses[1].data || [];
+        
+        branchesData = branches; // Store for capacity checks
+        
+        // Populate customers
+        const customerSelect = document.getElementById('customerId');
+        customerSelect.innerHTML = '<option value="">Select a customer</option>' +
+          customers.map(c => `<option value="${c.customerId}">${c.name} (${c.nationalId})</option>`).join('');
+        
+        // Handle branch field
+        const branchField = document.getElementById('branchField');
+        const branchSelect = document.getElementById('branchId');
+        
+        if (user.roleName === 'Branch' && user.branchId) {
+          // Hide branch field for Branch users
+          branchField.style.display = 'none';
+          branchSelect.removeAttribute('required');
+        } else {
+          // Show branch selector for other users
+          branchSelect.innerHTML = '<option value="">Select a branch</option>' +
+            branches.map(b => `<option value="${b.branchId}">${b.name} - ${b.institution.name}</option>`).join('');
+        }
+        
+        // Populate products
+        const productSelect = document.getElementById('productId');
+        productSelect.innerHTML = '<option value="">Select a product</option>' +
+          products.map(p => `<option value="${p.productId}">${p.name}</option>`).join('');
+        
+      } catch (error) {
+        console.error('Error loading form data:', error);
+        showToast('Failed to load form data', 'error');
+      }
+    }
+    
+    // Branch selection handler - show capacity
+    document.getElementById('branchId').addEventListener('change', function(e) {
+      const branchId = parseInt(e.target.value);
+      if (!branchId) {
+        document.getElementById('capacityInfo').classList.add('hidden');
+        return;
+      }
+      
+      const branch = branchesData.find(b => b.branchId === branchId);
+      if (branch) {
+        updateBranchCapacityDisplay(branch);
+      }
+    });
+    
+    function updateBranchCapacityDisplay(branch) {
+      const totalLoans = branch.totalLoans || 0;
+      const maximumLoans = branch.maximumLoans || 0;
+      const available = Math.max(0, maximumLoans - totalLoans);
+      const utilizationPercent = maximumLoans > 0 ? (totalLoans / maximumLoans) * 100 : 0;
+      
+      const capacityInfo = document.getElementById('capacityInfo');
+      const capacityStatus = document.getElementById('capacityStatus');
+      const capacityIcon = document.getElementById('capacityIcon');
+      const capacityText = document.getElementById('capacityText');
+      const capacityNumbers = document.getElementById('capacityNumbers');
+      const submitButton = document.getElementById('submitButton');
+      
+      capacityInfo.classList.remove('hidden');
+      capacityNumbers.textContent = `${formatCurrency(available)} / ${formatCurrency(maximumLoans)} available`;
+      
+      if (available === 0) {
+        // At capacity - RED
+        capacityStatus.style.background = 'rgba(239, 68, 68, 0.1)';
+        capacityStatus.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+        capacityIcon.textContent = '🚫';
+        capacityText.textContent = 'Branch at capacity - Cannot create loan';
+        capacityText.style.color = '#ef4444';
+        capacityNumbers.style.color = '#ef4444';
+        submitButton.disabled = true;
+      } else if (utilizationPercent >= 90) {
+        // Near capacity - YELLOW
+        capacityStatus.style.background = 'rgba(245, 158, 11, 0.1)';
+        capacityStatus.style.borderColor = 'rgba(245, 158, 11, 0.2)';
+        capacityIcon.textContent = '⚠️';
+        capacityText.textContent = 'Near capacity - Limited availability';
+        capacityText.style.color = '#f59e0b';
+        capacityNumbers.style.color = '#f59e0b';
+        submitButton.disabled = false;
+      } else {
+        // Good capacity - GREEN
+        capacityStatus.style.background = 'rgba(16, 185, 129, 0.1)';
+        capacityStatus.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+        capacityIcon.textContent = '✓';
+        capacityText.textContent = 'Available capacity';
+        capacityText.style.color = '#10b981';
+        capacityNumbers.style.color = '#10b981';
+        submitButton.disabled = false;
+      }
+    }
+    
+    // Installment preview calculation
+    function updateInstallmentPreview() {
+      const principalAmount = parseFloat(document.getElementById('principalAmount').value);
+      const paymentPlanMonths = parseInt(document.getElementById('paymentPlanMonths').value);
+      
+      if (principalAmount && paymentPlanMonths && principalAmount > 0) {
+        const monthlyPayment = principalAmount / paymentPlanMonths;
+        document.getElementById('monthlyPayment').textContent = formatCurrency(monthlyPayment);
+        document.getElementById('installmentCount').textContent = paymentPlanMonths;
+        document.getElementById('installmentPreview').classList.remove('hidden');
+      } else {
+        document.getElementById('installmentPreview').classList.add('hidden');
+      }
+    }
+    
+    // Add event listeners for installment preview
+    document.getElementById('principalAmount').addEventListener('input', updateInstallmentPreview);
+    document.getElementById('paymentPlanMonths').addEventListener('change', updateInstallmentPreview);
+    
+    const form = document.getElementById('loanForm');
+    const submitButton = document.getElementById('submitButton');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Clear errors
+      errorMessage.classList.add('hidden');
+      
+      // Get form data
+      const formData = {
+        customerId: parseInt(document.getElementById('customerId').value),
+        productId: parseInt(document.getElementById('productId').value),
+        principalAmount: parseFloat(document.getElementById('principalAmount').value),
+        paymentPlanMonths: parseInt(document.getElementById('paymentPlanMonths').value),
+        dueDate: document.getElementById('dueDate').value,
+      };
+      
+      // Add branchId based on user role
+      if (user.roleName === 'Branch' && user.branchId) {
+        formData.branchId = user.branchId;
+      } else {
+        formData.branchId = parseInt(document.getElementById('branchId').value);
+      }
+      
+      // Validation
+      if (!formData.customerId || !formData.branchId || !formData.productId || !formData.principalAmount || !formData.paymentPlanMonths || !formData.dueDate) {
+        errorMessage.querySelector('p').textContent = 'Please fill in all required fields';
+        errorMessage.classList.remove('hidden');
+        return;
+      }
+      
+      if (formData.principalAmount <= 0) {
+        errorMessage.querySelector('p').textContent = 'Principal amount must be greater than 0';
+        errorMessage.classList.remove('hidden');
+        return;
+      }
+      
+      // Disable submit button
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Creating...';
+      
+      try {
+        await api.loans.create(formData);
+        showToast('Loan created successfully', 'success');
+        window.location.href = 'loans.html';
+      } catch (error) {
+        console.error('Error creating loan:', error);
+        errorMessage.querySelector('p').textContent = error.message || 'Failed to create loan';
+        errorMessage.classList.remove('hidden');
+        
+        // Re-enable button
+        submitButton.disabled = false;
+        submitButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Create Loan
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add User - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  
+  <div class="main-content">
+    <div id="header"></div>
+    
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="users.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white">Add User</h1>
+          <p class="text-secondary">Create a new user account</p>
+        </div>
+      </div>
+      
+      <!-- Form -->
+      <div class="glass-card p-6" style="max-width: 800px;">
+        <form id="userForm">
+          <!-- Name -->
+          <div class="form-group">
+            <label class="label">Full Name *</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              class="input" 
+              placeholder="Enter full name"
+              required
+            />
+            <div id="nameError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Email -->
+          <div class="form-group">
+            <label class="label">Email *</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="input" 
+              placeholder="user@example.com"
+              required
+            />
+            <div id="emailError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Password -->
+          <div class="form-group">
+            <label class="label">Password *</label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              class="input" 
+              placeholder="Enter password (min 6 characters)"
+              required
+            />
+            <div id="passwordError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Role -->
+          <div class="form-group">
+            <label class="label">Role *</label>
+            <select id="roleId" name="roleId" class="input" required>
+              <option value="">Select role...</option>
+              <option value="1">Super Admin</option>
+              <option value="2">Institution</option>
+              <option value="3">Branch</option>
+            </select>
+            <div id="roleIdError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Institution (conditional) -->
+          <div class="form-group" id="institutionGroup" style="display: none;">
+            <label class="label">Institution *</label>
+            <select id="institutionId" name="institutionId" class="input">
+              <option value="">Select institution...</option>
+            </select>
+            <div id="institutionIdError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Branch (conditional) -->
+          <div class="form-group" id="branchGroup" style="display: none;">
+            <label class="label">Branch *</label>
+            <select id="branchId" name="branchId" class="input">
+              <option value="">Select branch...</option>
+            </select>
+            <div id="branchIdError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Active Status -->
+          <div class="form-group">
+            <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="isActive" name="isActive" checked>
+              <span class="label" style="margin: 0;">Active</span>
+            </label>
+          </div>
+          
+          <!-- Error Message -->
+          <div id="errorMessage" class="hidden mb-4" style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
+            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+          </div>
+          
+          <!-- Buttons -->
+          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+            <button type="submit" id="submitButton" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Create User
+            </button>
+            <a href="users.html" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    // Check authentication
+    if (!isAuthenticated()) {
+      window.location.href = '../index.html';
+    }
+    
+    const user = getCurrentUser();
+    document.getElementById('sidebar').innerHTML = createSidebar(user);
+    document.getElementById('header').innerHTML = createHeader('Add User', 'Create a new user account');
+    setActiveNav('users');
+    
+    const form = document.getElementById('userForm');
+    const submitButton = document.getElementById('submitButton');
+    const errorMessage = document.getElementById('errorMessage');
+    const roleSelect = document.getElementById('roleId');
+    const institutionGroup = document.getElementById('institutionGroup');
+    const branchGroup = document.getElementById('branchGroup');
+    const institutionSelect = document.getElementById('institutionId');
+    const branchSelect = document.getElementById('branchId');
+    
+    let institutions = [];
+    let branches = [];
+    
+    // Load institutions and branches
+    async function loadData() {
+      try {
+        const [institutionsResponse, branchesResponse] = await Promise.all([
+          api.institutions.getAll(1, 100),
+          api.branches.getAll(1, 100)
+        ]);
+        
+        institutions = institutionsResponse.data || [];
+        branches = branchesResponse.data || [];
+        
+        // Populate institutions dropdown
+        institutionSelect.innerHTML = '<option value="">Select institution...</option>';
+        institutions.forEach(inst => {
+          institutionSelect.innerHTML += `<option value="${inst.institutionId}">${inst.name}</option>`;
+        });
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    }
+    
+    loadData();
+    
+    // Handle role change
+    roleSelect.addEventListener('change', (e) => {
+      const roleId = parseInt(e.target.value);
+      
+      // Role 1 = Super Admin (no institution/branch)
+      // Role 2 = Institution (needs institution)
+      // Role 3 = Branch (needs institution and branch)
+      
+      if (roleId === 1) {
+        institutionGroup.style.display = 'none';
+        branchGroup.style.display = 'none';
+        institutionSelect.value = '';
+        branchSelect.value = '';
+      } else if (roleId === 2) {
+        institutionGroup.style.display = 'block';
+        branchGroup.style.display = 'none';
+        branchSelect.value = '';
+      } else if (roleId === 3) {
+        institutionGroup.style.display = 'block';
+        branchGroup.style.display = 'block';
+      }
+    });
+    
+    // Handle institution change (for Branch role)
+    institutionSelect.addEventListener('change', (e) => {
+      const institutionId = parseInt(e.target.value);
+      const roleId = parseInt(roleSelect.value);
+      
+      if (roleId === 3 && institutionId) {
+        // Filter branches by institution
+        const filteredBranches = branches.filter(b => b.institutionId === institutionId);
+        branchSelect.innerHTML = '<option value="">Select branch...</option>';
+        filteredBranches.forEach(branch => {
+          branchSelect.innerHTML += `<option value="${branch.branchId}">${branch.name}</option>`;
+        });
+      }
+    });
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Clear errors
+      errorMessage.classList.add('hidden');
+      document.querySelectorAll('.error-text').forEach(el => el.classList.add('hidden'));
+      
+      // Get form data
+      const roleId = parseInt(document.getElementById('roleId').value);
+      const institutionId = document.getElementById('institutionId').value;
+      const branchId = document.getElementById('branchId').value;
+      
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value,
+        roleId: roleId,
+        isActive: document.getElementById('isActive').checked,
+      };
+      
+      // Add institution/branch based on role
+      if (roleId === 2 && institutionId) {
+        formData.institutionId = parseInt(institutionId);
+      } else if (roleId === 3 && institutionId && branchId) {
+        formData.institutionId = parseInt(institutionId);
+        formData.branchId = parseInt(branchId);
+      }
+      
+      // Validation
+      let hasError = false;
+      
+      if (formData.name.length < 2) {
+        document.getElementById('nameError').textContent = 'Name must be at least 2 characters';
+        document.getElementById('nameError').classList.remove('hidden');
+        hasError = true;
+      }
+      
+      if (!formData.email.includes('@')) {
+        document.getElementById('emailError').textContent = 'Valid email is required';
+        document.getElementById('emailError').classList.remove('hidden');
+        hasError = true;
+      }
+      
+      if (formData.password.length < 6) {
+        document.getElementById('passwordError').textContent = 'Password must be at least 6 characters';
+        document.getElementById('passwordError').classList.remove('hidden');
+        hasError = true;
+      }
+      
+      if (!formData.roleId) {
+        document.getElementById('roleIdError').textContent = 'Role is required';
+        document.getElementById('roleIdError').classList.remove('hidden');
+        hasError = true;
+      }
+      
+      if (roleId === 2 && !institutionId) {
+        document.getElementById('institutionIdError').textContent = 'Institution is required for Institution role';
+        document.getElementById('institutionIdError').classList.remove('hidden');
+        hasError = true;
+      }
+      
+      if (roleId === 3 && (!institutionId || !branchId)) {
+        if (!institutionId) {
+          document.getElementById('institutionIdError').textContent = 'Institution is required for Branch role';
+          document.getElementById('institutionIdError').classList.remove('hidden');
+        }
+        if (!branchId) {
+          document.getElementById('branchIdError').textContent = 'Branch is required for Branch role';
+          document.getElementById('branchIdError').classList.remove('hidden');
+        }
+        hasError = true;
+      }
+      
+      if (hasError) return;
+      
+      // Disable submit button
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Creating...';
+      
+      try {
+        await api.users.create(formData);
+        showToast('User created successfully', 'success');
+        window.location.href = 'users.html';
+      } catch (error) {
+        console.error('Error creating user:', error);
+        errorMessage.querySelector('p').textContent = error.message || 'Failed to create user';
+        errorMessage.classList.remove('hidden');
+        
+        // Re-enable button
+        submitButton.disabled = false;
+        submitButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Create User
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Product - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <div id="sidebar"></div>
+    
+    <div class="main-content">
+      <div id="header"></div>
+      
+      <!-- Breadcrumb -->
+      <div class="breadcrumb mb-6">
+        <a href="dashboard.html">Dashboard</a>
+        <span>/</span>
+        <a href="products.html">Products</a>
+        <span>/</span>
+        <span>Add Product</span>
+      </div>
+      
+      <!-- Form Card -->
+      <div class="glass-card p-8" style="max-width: 800px;">
+        <div class="flex items-center gap-3 mb-6" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+          <div style="font-size: 2rem;">📦</div>
+          <div>
+            <h1 class="text-2xl font-bold text-white">Add New Product</h1>
+            <p class="text-secondary">Create a new loan product</p>
+          </div>
+        </div>
+        
+        <form id="productForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="name" class="form-label">Product Name *</label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                class="input" 
+                placeholder="e.g., Personal Loan"
+                required
+              />
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label for="description" class="form-label">Description *</label>
+              <textarea 
+                id="description" 
+                name="description" 
+                class="input" 
+                rows="3"
+                placeholder="Describe the loan product features and benefits..."
+                required
+              ></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="isActive" class="form-label">Status</label>
+              <select id="isActive" name="isActive" class="input">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            <button type="submit" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Create Product
+            </button>
+            <a href="products.html" class="btn btn-secondary">
+              Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    // Check authentication
+    if (!isAuthenticated()) {
+      window.location.href = '../index.html';
+    }
+    
+    const user = getCurrentUser();
+    
+    // Allow Super Admin, Institution, and Branch roles
+    if (!['Super Admin', 'Institution', 'Branch'].includes(user.roleName)) {
+      window.location.href = 'dashboard.html';
+    }
+    
+    document.getElementById('sidebar').innerHTML = createSidebar(user);
+    document.getElementById('header').innerHTML = createHeader('Add Product', 'Create a new loan product');
+    setActiveNav('products');
+    
+    // Handle form submission
+    const form = document.getElementById('productForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        isActive: document.getElementById('isActive').value === 'true'
+      };
+      
+      // Validate
+      if (!formData.name) {
+        showToast('Product name is required', 'error');
+        return;
+      }
+      
+      if (!formData.description) {
+        showToast('Description is required', 'error');
+        return;
+      }
+      
+      try {
+        await api.products.create(formData);
+        showToast('Product created successfully', 'success');
+        setTimeout(() => {
+          window.location.href = 'products.html';
+        }, 1000);
+      } catch (error) {
+        console.error('Error creating product:', error);
+        showToast(error.message || 'Failed to create product', 'error');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+🚀 QUICK START GUIDE - READ THIS FIRST!
+
+STEP 1: OPEN THE CORRECT URL
+================================
+❌ WRONG: http://127.0.0.1:5500/index.html
+✅ RIGHT: http://127.0.0.1:5500/web/
+
+The "web" folder contains all the files!
+
+
+STEP 2: LOGIN
+=============
+Email: admin@example.com
+Password: password123
+
+
+STEP 3: OPEN BROWSER CONSOLE (F12)
+===================================
+Press F12 on your keyboard
+Click "Console" tab
+Watch for messages when you login
+
+
+STEP 4: WHAT TO CHECK IF WHITE PAGE APPEARS
+===========================================
+
+A) Check the URL after login - it should be:
+   http://127.0.0.1:5500/web/pages/dashboard.html
+
+B) If URL is wrong, check Console for errors
+
+C) Clear browser cache and localStorage:
+   - Press F12
+   - Click Console tab
+   - Type: localStorage.clear()
+   - Press Enter
+   - Refresh page (F5)
+
+
+STEP 5: ALTERNATIVE - USE PYTHON SERVER
+========================================
+1. Close Live Server in VS Code
+2. Open terminal in project root (C:\Users\ahmed\hares)
+3. Run: python -m http.server 8080
+4. Open: http://localhost:8080/web/
+5. Login and test
+
+
+COMMON ISSUES:
+==============
+
+Issue: White page after login
+Fix: Check browser console (F12) for errors
+
+Issue: "Cannot GET /index.html"  
+Fix: Add /web/ to URL: http://127.0.0.1:5500/web/
+
+Issue: Login button keeps spinning
+Fix: Check if backend is running on port 3001
+
+Issue: Infinite redirect loop
+Fix: Clear localStorage and cookies
+
+
+QUICK TEST:
+===========
+1. Go to: http://127.0.0.1:5500/web/system-check.html
+2. This will test if everything is working
+3. All items should show green checkmarks
+
+
+NEED MORE HELP?
+===============
+Open browser console (F12) and share what errors you see there!

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Check - Hares Platform</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+    <div class="glass-card" style="padding: 3rem; max-width: 600px; width: 100%;">
+      <h1 class="text-3xl font-bold text-white mb-6" style="text-align: center;">
+        🚀 Hares Platform - System Check
+      </h1>
+      
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- API Connection -->
+        <div id="apiCheck" class="glass-card p-4" style="padding: 1rem;">
+          <div class="flex items-center justify-between" style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="text-white">API Connection</span>
+            <span id="apiStatus" class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></span>
+          </div>
+        </div>
+        
+        <!-- Files Check -->
+        <div class="glass-card p-4" style="padding: 1rem;">
+          <div class="flex items-center justify-between" style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="text-white">CSS Loaded</span>
+            <span class="badge badge-success">✓</span>
+          </div>
+        </div>
+        
+        <div class="glass-card p-4" style="padding: 1rem;">
+          <div class="flex items-center justify-between" style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="text-white">JavaScript Loaded</span>
+            <span id="jsStatus" class="badge badge-success">✓</span>
+          </div>
+        </div>
+        
+        <!-- System Info -->
+        <div class="glass-card p-4" style="padding: 1rem; margin-top: 1rem;">
+          <h3 class="text-white font-semibold mb-3">System Information</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
+            <div class="flex justify-between" style="display: flex; justify-content: space-between;">
+              <span class="text-muted">API URL:</span>
+              <span class="text-secondary" id="apiUrl">Loading...</span>
+            </div>
+            <div class="flex justify-between" style="display: flex; justify-content: space-between;">
+              <span class="text-muted">Browser:</span>
+              <span class="text-secondary" id="browser">Loading...</span>
+            </div>
+            <div class="flex justify-between" style="display: flex; justify-content: space-between;">
+              <span class="text-muted">LocalStorage:</span>
+              <span class="text-secondary" id="localStorage">Loading...</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+          <a href="index.html" class="btn btn-primary" style="flex: 1;">
+            Go to Login
+          </a>
+          <button onclick="location.reload()" class="btn btn-secondary">
+            Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Check API connection
+    async function checkAPI() {
+      const apiStatus = document.getElementById('apiStatus');
+      const apiUrl = document.getElementById('apiUrl');
+      
+      apiUrl.textContent = API_BASE_URL;
+      
+      try {
+        // Try to call a public endpoint or auth endpoint
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+          method: 'OPTIONS'
+        });
+        
+        apiStatus.className = 'badge badge-success';
+        apiStatus.textContent = '✓ Connected';
+      } catch (error) {
+        apiStatus.className = 'badge badge-danger';
+        apiStatus.textContent = '✗ Failed - ' + error.message;
+        console.error('API Check failed:', error);
+      }
+    }
+    
+    // Check browser
+    document.getElementById('browser').textContent = navigator.userAgent.split(' ').pop();
+    
+    // Check localStorage
+    try {
+      localStorage.setItem('test', 'test');
+      localStorage.removeItem('test');
+      document.getElementById('localStorage').textContent = '✓ Available';
+    } catch (e) {
+      document.getElementById('localStorage').textContent = '✗ Disabled';
+    }
+    
+    // Run checks
+    checkAPI();
+  </script>
+</body>
+</html>

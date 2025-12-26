@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  
+  <div class="main-content">
+    <div id="header"></div>
+    
+    <div class="page-content">
+      <!-- Stats Grid -->
+      <div id="statsGrid" class="stats-grid mb-8"></div>
+      
+      <!-- Quick Actions and Recent Activity -->
+      <div class="grid grid-cols-2 gap-4 mb-8" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+        <!-- Quick Actions -->
+        <div class="glass-card p-6">
+          <h2 class="text-xl font-bold text-white mb-6">Quick Actions</h2>
+          <div id="quickActions" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="glass-card p-6">
+          <h2 class="text-xl font-bold text-white mb-6">Recent Activity</h2>
+          <div id="recentActivity" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div class="loading-container">
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    console.log('Dashboard loading...');
+    console.log('Token:', getToken()?.substring(0, 20) + '...');
+    console.log('User:', getCurrentUser());
+    
+    // Check authentication
+    if (!requireAuth()) {
+      console.log('Not authenticated, redirecting...');
+    } else {
+      console.log('Authentication passed!');
+      try {
+        initializeDashboard();
+      } catch (error) {
+        console.error('Error initializing dashboard:', error);
+      }
+    }
+    
+    function initializeDashboard() {
+      const user = getCurrentUser();
+      console.log('Initializing dashboard for user:', user);
+      
+      if (!user) {
+        console.error('User object is null/undefined!');
+        clearAuthData();
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      // Render sidebar and header
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader('Dashboard', 'Welcome back, ' + user.name);
+      setActiveNav('dashboard');
+      
+      // Initialize dashboard
+      console.log('Calling initDashboard...');
+      initDashboard();
+    }
+    
+    async function initDashboard() {
+      const user = getCurrentUser();
+      console.log('initDashboard - User role:', user?.roleName || user?.role_name);
+      
+      try {
+        // Branch users should see their branch dashboard
+        if ((user.roleName === 'Branch' || user.role_name === 'Branch') && user.branchId) {
+          console.log('Loading branch dashboard...');
+          await loadBranchDashboard(user.branchId);
+        } else {
+          console.log('Loading global dashboard...');
+          await loadGlobalDashboard(user);
+        }
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        showToast('Failed to load dashboard data', 'error');
+      }
+    }
+    
+    async function loadGlobalDashboard(user) {
+      console.log('Loading global dashboard data...');
+      
+      // Load statistics
+      try {
+        console.log('Fetching institutions, branches, customers, loans...');
+        const [institutionsResponse, branchesResponse, customersResponse, loansResponse] = await Promise.all([
+          (user.roleName === 'Super Admin' || user.role_name === 'Super Admin') ? api.institutions.getAll(1, 100) : Promise.resolve({ data: [] }),
+          api.branches.getAll(1, 100),
+          api.customers.getAll(1, 100),
+          api.loans.getAll(1, 100),
+        ]);
+        
+        const institutions = institutionsResponse.data || [];
+        const branches = branchesResponse.data || [];
+        const customers = customersResponse.data || [];
+        const loans = loansResponse.data || [];
+        
+        console.log('Fetched:', { institutions: institutions.length, branches: branches.length, customers: customers.length, loans: loans.length });
+        
+        console.log('Fetching loan statistics...');
+        const loanStats = await api.loans.getStatistics();
+        console.log('Loan stats:', loanStats);
+      
+      // Render stats
+      const statsHTML = `
+        ${user.roleName === 'Super Admin' ? `
+        <div class="glass-card stat-card">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(139, 92, 246, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+              🏛️
+            </div>
+            <span class="badge badge-info">${institutions.length}</span>
+          </div>
+          <div class="stat-card-value">${institutions.length}</div>
+          <div class="stat-card-label">Total Institutions</div>
+        </div>
+        ` : ''}
+        
+        ${user.roleName !== 'Branch' ? `
+        <div class="glass-card stat-card">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+              🏢
+            </div>
+            <span class="badge badge-info">${branches.length}</span>
+          </div>
+          <div class="stat-card-value">${branches.length}</div>
+          <div class="stat-card-label">Total Branches</div>
+        </div>
+        ` : ''}
+        
+        <div class="glass-card stat-card">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+              👥
+            </div>
+            <span class="badge badge-success">${customers.length}</span>
+          </div>
+          <div class="stat-card-value">${customers.length}</div>
+          <div class="stat-card-label">Total Customers</div>
+        </div>
+        
+        <div class="glass-card stat-card">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+              💰
+            </div>
+            <span class="badge badge-success">${loanStats.byStatus.active || 0}</span>
+          </div>
+          <div class="stat-card-value">${loanStats.total}</div>
+          <div class="stat-card-label">Total Loans</div>
+        </div>
+        
+        <div class="glass-card stat-card">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+              ⚠️
+            </div>
+            <span class="badge badge-warning">${loanStats.byStatus.late || 0}</span>
+          </div>
+          <div class="stat-card-value">${loanStats.byStatus.late || 0}</div>
+          <div class="stat-card-label">Late Loans</div>
+        </div>
+      `;
+      
+      document.getElementById('statsGrid').innerHTML = statsHTML;
+      
+      // Render quick actions
+      renderQuickActions();
+      
+      // Render recent activity (mock data for now)
+      renderRecentActivity([
+        { type: 'loan', message: 'New loan created', time: 'Just now' },
+        { type: 'customer', message: 'Customer added', time: '5 min ago' },
+        { type: 'payment', message: 'Payment received', time: '1 hour ago' },
+      ]);
+      
+      } catch (error) {
+        console.error('Error loading global dashboard:', error);
+        showToast('Failed to load dashboard data', 'error');
+      }
+    }
+    
+    async function loadBranchDashboard(branchId) {
+      const dashboardData = await api.branches.getDashboard(branchId);
+      
+      // Render branch-specific stats
+      const statsHTML = `
+        <div class="glass-card stat-card">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+              👥
+            </div>
+            <span class="badge badge-success">${dashboardData.metrics.totalCustomers}</span>
+          </div>
+          <div class="stat-card-value">${dashboardData.metrics.totalCustomers}</div>
+          <div class="stat-card-label">Total Customers</div>
+        </div>
+        
+        <div class="glass-card stat-card">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+              💰
+            </div>
+            <span class="badge badge-success">${dashboardData.metrics.activeLoans}</span>
+          </div>
+          <div class="stat-card-value">${dashboardData.metrics.totalLoans}</div>
+          <div class="stat-card-label">Total Loans</div>
+        </div>
+        
+        <div class="glass-card stat-card">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+              ⚠️
+            </div>
+            <span class="badge badge-warning">${dashboardData.metrics.lateLoans}</span>
+          </div>
+          <div class="stat-card-value">${dashboardData.metrics.lateLoans}</div>
+          <div class="stat-card-label">Late Loans</div>
+        </div>
+        
+        <div class="glass-card stat-card">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+              📊
+            </div>
+          </div>
+          <div class="stat-card-value">${formatCurrency(dashboardData.metrics.totalPortfolioValue)}</div>
+          <div class="stat-card-label">Total Portfolio</div>
+        </div>
+      `;
+      
+      document.getElementById('statsGrid').innerHTML = statsHTML;
+      
+      // Render quick actions
+      renderQuickActions();
+      
+      // Render recent activity
+      renderRecentActivity(dashboardData.recentActivities || []);
+    }
+    
+    function renderQuickActions() {
+      const user = getCurrentUser();
+      const actions = [
+        { icon: '👤', title: 'Add Customer', subtitle: 'Create new customer profile', href: 'customers-new.html' },
+        { icon: '💰', title: 'Issue Loan', subtitle: 'Create new loan application', href: 'loans-new.html' },
+      ];
+      
+      if (user.roleName === 'Super Admin' || user.role_name === 'Super Admin') {
+        actions.push({ icon: '🏛️', title: 'Add Institution', subtitle: 'Create new institution', href: 'institutions-new.html' });
+      }
+      
+      const actionsHTML = actions.map(action => `
+        <a href="${action.href}" class="flex items-center gap-3 p-4 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-200" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); text-decoration: none; transition: all 0.2s ease;">
+          <div style="font-size: 1.5rem;">${action.icon}</div>
+          <div>
+            <p class="text-white font-medium">${action.title}</p>
+            <p class="text-sm text-muted">${action.subtitle}</p>
+          </div>
+        </a>
+      `).join('');
+      
+      document.getElementById('quickActions').innerHTML = actionsHTML;
+    }
+    
+    function renderRecentActivity(activities) {
+      if (!activities || activities.length === 0) {
+        document.getElementById('recentActivity').innerHTML = '<p class="text-muted text-sm">No recent activity</p>';
+        return;
+      }
+      
+      const activityHTML = activities.slice(0, 5).map(activity => {
+        const icon = activity.type === 'loan_created' ? '💰' : 
+                     activity.type === 'customer_added' ? '👤' : 
+                     activity.type === 'payment_received' ? '💳' : '📝';
+        
+        return `
+          <div class="flex items-center gap-3 p-3 rounded-lg bg-white/5" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
+            <div style="font-size: 1.25rem;">${icon}</div>
+            <div style="flex: 1;">
+              <p class="text-white text-sm">${activity.description}</p>
+              <p class="text-muted text-sm">${formatDateTime(activity.timestamp)}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('recentActivity').innerHTML = activityHTML;
+    }
+  </script>
+</body>
+</html>

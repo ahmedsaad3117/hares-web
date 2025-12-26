@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Branches - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  
+  <div class="main-content">
+    <div id="header"></div>
+    
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center justify-between mb-8" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+        <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: 2rem;">🏢</div>
+          <div>
+            <h1 class="text-3xl font-bold text-white">Branches</h1>
+            <p class="text-secondary">Manage branch locations</p>
+          </div>
+        </div>
+        <a href="branches-new.html" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Branch
+        </a>
+      </div>
+      
+      <!-- Branches Grid -->
+      <div id="branchesGrid" class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+        <div class="loading-container" style="grid-column: 1 / -1;">
+          <div class="spinner"></div>
+        </div>
+      </div>
+      
+      <!-- Pagination -->
+      <div id="paginationContainer" class="flex justify-center" style="display: flex; justify-content: center; margin-top: 2rem;"></div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script src="../components/pagination.js"></script>
+  <script>
+    // Check authentication
+    if (!isAuthenticated()) {
+      window.location.href = '../index.html';
+    }
+    
+    const user = getCurrentUser();
+    document.getElementById('sidebar').innerHTML = createSidebar(user);
+    document.getElementById('header').innerHTML = createHeader('Branches', 'Manage branch locations');
+    setActiveNav('branches');
+    
+    let currentPage = 1;
+    let totalPages = 1;
+    const pageSize = 12;
+    
+    // Load branches with pagination
+    loadBranches();
+    
+    async function loadBranches(page = 1) {
+      try {
+        const response = await api.branches.getAll(page, pageSize, null);
+        currentPage = response.meta.page;
+        totalPages = response.meta.totalPages;
+        renderBranches(response.data);
+      } catch (error) {
+        console.error('Error loading branches:', error);
+        showToast('Failed to load branches', 'error');
+        document.getElementById('branchesGrid').innerHTML = '<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">Failed to load branches</p>';
+      }
+    }
+    
+    function changePage(page) {
+      if (page < 1 || page > totalPages || page === currentPage) return;
+      loadBranches(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function renderBranches(branches) {
+      const grid = document.getElementById('branchesGrid');
+      
+      if (branches.length === 0) {
+        grid.innerHTML = `
+          <div class="glass-card p-6" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <svg style="width: 64px; height: 64px; margin: 0 auto 1rem; color: #475569;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            <p class="text-muted">No branches yet</p>
+          </div>
+        `;
+        return;
+      }
+      
+      const branchesHTML = branches.map(branch => {
+        const totalLoans = branch.totalLoans || 0;
+        const maximumLoans = branch.maximumLoans || 0;
+        const utilizationPercent = maximumLoans > 0 ? (totalLoans / maximumLoans) * 100 : 0;
+        const capacityColor = utilizationPercent >= 90 ? '#ef4444' : utilizationPercent >= 70 ? '#f59e0b' : '#10b981';
+        
+        return `
+        <div class="glass-card p-6">
+          <div class="flex items-center justify-between mb-4" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem;">
+            <div>
+              <h3 class="text-xl font-bold text-white mb-1">${branch.name}</h3>
+              <p class="text-sm text-secondary">${branch.institution.name}</p>
+            </div>
+            <span class="badge ${branch.isActive ? 'badge-success' : 'badge-danger'}">
+              ${branch.isActive ? 'Active' : 'Inactive'}
+            </span>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; padding: 1rem 0; border-top: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
+              <span class="text-muted text-sm">Branch ID</span>
+              <span class="text-white font-semibold">#${branch.branchId}</span>
+            </div>
+            <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
+              <span class="text-muted text-sm">Institution ID</span>
+              <span class="text-secondary">#${branch.institutionId}</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+              <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
+                <span class="text-muted text-sm">Loan Capacity</span>
+                <span class="text-white font-semibold">${formatCurrency(totalLoans)}/${formatCurrency(maximumLoans)}</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden;">
+                <div style="width: ${utilizationPercent}%; height: 100%; background: ${capacityColor}; transition: width 0.3s ease;"></div>
+              </div>
+              ${utilizationPercent >= 90 ? '<span class="text-xs" style="color: #ef4444;">⚠️ Near capacity</span>' : ''}
+              ${utilizationPercent >= 100 ? '<span class="text-xs" style="color: #ef4444;">🚫 At capacity</span>' : ''}
+            </div>
+          </div>
+          
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 1rem;">
+            Created: ${formatDate(branch.createdAt)}
+          </div>
+          
+          <div class="flex items-center gap-2" style="display: flex; gap: 0.5rem;">
+            <a href="branches-view.html?id=${branch.branchId}" class="btn btn-secondary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem 1rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              View
+            </a>
+            <a href="branches-edit.html?id=${branch.branchId}" class="btn btn-secondary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem 1rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+              </svg>
+              Edit
+            </a>
+            ${user.roleName === 'Super Admin' ? `
+            <button onclick="toggleActive(${branch.branchId}, ${branch.isActive})" class="btn ${branch.isActive ? 'btn-danger' : 'btn-secondary'}" style="font-size: 0.875rem; padding: 0.5rem 0.75rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+            </button>
+            ` : ''}
+          </div>
+        </div>
+      `}).join('');
+      
+      grid.innerHTML = branchesHTML;
+      
+      // Render pagination
+      const paginationContainer = document.getElementById('paginationContainer');
+      if (paginationContainer) {
+        paginationContainer.innerHTML = createPagination(currentPage, totalPages, changePage);
+      }
+    }
+    
+    async function toggleActive(id, currentStatus) {
+      const action = currentStatus ? 'deactivate' : 'activate';
+      if (!confirm(`Are you sure you want to ${action} this branch?`)) return;
+      
+      try {
+        await api.branches.toggleActive(id);
+        showToast(`Branch ${action}d successfully`, 'success');
+        loadBranches(currentPage);
+      } catch (error) {
+        console.error('Error toggling branch status:', error);
+        showToast('Failed to update branch status', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

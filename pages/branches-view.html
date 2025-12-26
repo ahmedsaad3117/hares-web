@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Branch Details - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  
+  <div class="main-content">
+    <div id="header"></div>
+    
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="branches.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white">Branch Details</h1>
+          <p class="text-secondary">View branch information</p>
+        </div>
+      </div>
+      
+      <!-- Loading -->
+      <div id="loadingContainer" class="loading-container">
+        <div class="spinner"></div>
+      </div>
+      
+      <!-- Branch Details -->
+      <div id="branchContainer" style="display: none;">
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-6" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div>
+              <h2 id="branchName" class="text-2xl font-bold text-white mb-2"></h2>
+              <p class="text-muted">Branch ID: <span id="branchId"></span></p>
+              <p class="text-muted">Institution: <span id="institutionName"></span></p>
+            </div>
+            <div class="flex gap-2" style="display: flex; gap: 0.5rem;">
+              <span id="statusBadge" class="badge"></span>
+              <a id="editBtn" class="btn btn-primary">Edit</a>
+              <button id="deleteBtn" class="btn btn-danger">Delete</button>
+            </div>
+          </div>
+          
+          <!-- Capacity Info -->
+          <div id="capacityInfo" class="mb-6"></div>
+          
+          <div class="grid grid-cols-2 gap-6" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+            <div>
+              <p class="text-muted mb-1">Total Loans Amount</p>
+              <p id="totalLoans" class="text-2xl font-bold text-white"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Maximum Loans Amount</p>
+              <p id="maximumLoans" class="text-2xl font-bold text-white"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Created At</p>
+              <p id="createdAt" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1">Last Updated</p>
+              <p id="updatedAt" class="text-white font-medium"></p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="glass-card p-6 mb-6">
+          <h3 class="text-xl font-bold text-white mb-4">Statistics</h3>
+          <div id="statsContainer">
+            <div class="loading-container">
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Recent Loans -->
+        <div class="glass-card p-6">
+          <h3 class="text-xl font-bold text-white mb-4">Recent Loans</h3>
+          <div id="loansContainer">
+            <div class="loading-container">
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    // Check authentication
+    if (!isAuthenticated()) {
+      window.location.href = '../index.html';
+    }
+    
+    const user = getCurrentUser();
+    document.getElementById('sidebar').innerHTML = createSidebar(user);
+    document.getElementById('header').innerHTML = createHeader('Branch Details', 'View branch information');
+    setActiveNav('branches');
+    
+    const loadingContainer = document.getElementById('loadingContainer');
+    const branchContainer = document.getElementById('branchContainer');
+    
+    // Get branch ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const branchId = urlParams.get('id');
+    
+    if (!branchId) {
+      window.location.href = 'branches.html';
+    }
+    
+    let branchData = null;
+    
+    // Load branch data
+    async function loadBranch() {
+      try {
+        branchData = await api.branches.getById(branchId);
+        
+        // Populate branch details
+        document.getElementById('branchName').textContent = branchData.name;
+        document.getElementById('branchId').textContent = branchData.branchId;
+        document.getElementById('institutionName').textContent = branchData.institution?.name || 'N/A';
+        document.getElementById('totalLoans').textContent = formatCurrency(branchData.totalLoans || 0);
+        document.getElementById('maximumLoans').textContent = branchData.maximumLoans ? formatCurrency(branchData.maximumLoans) : 'Unlimited';
+        document.getElementById('createdAt').textContent = formatDateTime(branchData.createdAt);
+        document.getElementById('updatedAt').textContent = formatDateTime(branchData.updatedAt);
+        
+        const statusBadge = document.getElementById('statusBadge');
+        statusBadge.textContent = branchData.isActive ? 'Active' : 'Inactive';
+        statusBadge.className = `badge ${branchData.isActive ? 'badge-success' : 'badge-danger'}`;
+        
+        // Show capacity info if maximum loans is set
+        if (branchData.maximumLoans) {
+          const utilizationPercent = (branchData.totalLoans / branchData.maximumLoans) * 100;
+          const capacityColor = utilizationPercent >= 90 ? '#ef4444' : utilizationPercent >= 70 ? '#f59e0b' : '#10b981';
+          
+          document.getElementById('capacityInfo').innerHTML = `
+            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+              <div class="flex items-center justify-between mb-2" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <p class="text-sm text-muted">Capacity Utilization</p>
+                <p class="text-sm font-medium" style="color: ${capacityColor};">${utilizationPercent.toFixed(1)}%</p>
+              </div>
+              <div style="width: 100%; height: 8px; background: rgba(30, 41, 59, 0.8); border-radius: 9999px; overflow: hidden;">
+                <div style="width: ${Math.min(utilizationPercent, 100)}%; height: 100%; background: ${capacityColor}; transition: width 0.3s;"></div>
+              </div>
+            </div>
+          `;
+        }
+        
+        document.getElementById('editBtn').href = `branches-edit.html?id=${branchId}`;
+        
+        loadingContainer.style.display = 'none';
+        branchContainer.style.display = 'block';
+        
+        // Load statistics and loans
+        loadStatistics();
+        loadLoans();
+      } catch (error) {
+        console.error('Error loading branch:', error);
+        showToast('Failed to load branch', 'error');
+        setTimeout(() => window.location.href = 'branches.html', 2000);
+      }
+    }
+    
+    async function loadStatistics() {
+      try {
+        const stats = await api.branches.getStatistics(branchId);
+        const statsContainer = document.getElementById('statsContainer');
+        
+        statsContainer.innerHTML = `
+          <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+              <p class="text-muted text-sm">Total Customers</p>
+              <p class="text-2xl font-bold text-white">${stats.totalCustomers || 0}</p>
+            </div>
+            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+              <p class="text-muted text-sm">Active Loans Count</p>
+              <p class="text-2xl font-bold text-white">${stats.activeLoans || 0}</p>
+            </div>
+            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+              <p class="text-muted text-sm">Total Loan Amount</p>
+              <p class="text-2xl font-bold text-white">${formatCurrency(stats.totalLoanAmount || 0)}</p>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error loading statistics:', error);
+        document.getElementById('statsContainer').innerHTML = '<p class="text-muted">Failed to load statistics</p>';
+      }
+    }
+    
+    async function loadLoans() {
+      try {
+        const loans = await api.branches.getLoans(branchId);
+        const loansContainer = document.getElementById('loansContainer');
+        
+        if (loans.length === 0) {
+          loansContainer.innerHTML = '<p class="text-muted">No loans found for this branch</p>';
+          return;
+        }
+        
+        const loansHTML = loans.slice(0, 10).map(loan => `
+          <div class="glass-card p-4 mb-3" style="background: rgba(30, 41, 59, 0.5);">
+            <div class="flex items-center justify-between" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <p class="text-white font-medium">Loan #${loan.loanId}</p>
+                <p class="text-sm text-muted">${loan.customer?.name || 'N/A'} - ${formatCurrency(loan.principalAmount)}</p>
+              </div>
+              <span class="badge ${loan.status === 'active' ? 'badge-success' : loan.status === 'pending' ? 'badge-warning' : 'badge-danger'}">${loan.status}</span>
+            </div>
+          </div>
+        `).join('');
+        
+        loansContainer.innerHTML = loansHTML;
+      } catch (error) {
+        console.error('Error loading loans:', error);
+        document.getElementById('loansContainer').innerHTML = '<p class="text-muted">Failed to load loans</p>';
+      }
+    }
+    
+    // Delete branch
+    document.getElementById('deleteBtn').addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to delete this branch? This will affect all associated users and loans.')) return;
+      
+      try {
+        await api.branches.delete(branchId);
+        showToast('Branch deleted successfully', 'success');
+        window.location.href = 'branches.html';
+      } catch (error) {
+        console.error('Error deleting branch:', error);
+        showToast(error.message || 'Failed to delete branch', 'error');
+      }
+    });
+    
+    loadBranch();
+  </script>
+</body>
+</html>

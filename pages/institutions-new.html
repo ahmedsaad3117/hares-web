@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Institution - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  
+  <div class="main-content">
+    <div id="header"></div>
+    
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="institutions.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white">Add Institution</h1>
+          <p class="text-secondary">Create a new institution</p>
+        </div>
+      </div>
+      
+      <!-- Form -->
+      <div class="glass-card p-6" style="max-width: 800px;">
+        <form id="institutionForm">
+          <!-- Name -->
+          <div class="form-group">
+            <label class="label">Institution Name *</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              class="input" 
+              placeholder="Enter institution name"
+              required
+            />
+            <div id="nameError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Max Users -->
+          <div class="form-group">
+            <label class="label">Maximum Users *</label>
+            <input 
+              type="number" 
+              id="maxUsers" 
+              name="maxUsers" 
+              class="input" 
+              placeholder="Enter maximum users"
+              min="1"
+              value="10"
+              required
+            />
+            <div id="maxUsersError" class="error-text hidden"></div>
+            <p class="text-sm text-muted" style="margin-top: 0.25rem;">Maximum number of users allowed for this institution</p>
+          </div>
+          
+          <!-- Active Status -->
+          <div class="form-group">
+            <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="isActive" name="isActive" checked>
+              <span class="label" style="margin: 0;">Active</span>
+            </label>
+          </div>
+          
+          <!-- Error Message -->
+          <div id="errorMessage" class="hidden mb-4" style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
+            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+          </div>
+          
+          <!-- Buttons -->
+          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+            <button type="submit" id="submitButton" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Create Institution
+            </button>
+            <a href="institutions.html" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    // Check authentication
+    if (!isAuthenticated()) {
+      window.location.href = '../index.html';
+    }
+    
+    const user = getCurrentUser();
+    document.getElementById('sidebar').innerHTML = createSidebar(user);
+    document.getElementById('header').innerHTML = createHeader('Add Institution', 'Create a new institution');
+    setActiveNav('institutions');
+    
+    const form = document.getElementById('institutionForm');
+    const submitButton = document.getElementById('submitButton');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Clear errors
+      errorMessage.classList.add('hidden');
+      document.getElementById('nameError').classList.add('hidden');
+      document.getElementById('maxUsersError').classList.add('hidden');
+      
+      // Get form data
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        maxUsers: parseInt(document.getElementById('maxUsers').value),
+        isActive: document.getElementById('isActive').checked,
+      };
+      
+      // Validation
+      let hasError = false;
+      
+      if (formData.name.length < 2) {
+        document.getElementById('nameError').textContent = 'Name must be at least 2 characters';
+        document.getElementById('nameError').classList.remove('hidden');
+        hasError = true;
+      }
+      
+      if (formData.maxUsers < 1) {
+        document.getElementById('maxUsersError').textContent = 'Max users must be at least 1';
+        document.getElementById('maxUsersError').classList.remove('hidden');
+        hasError = true;
+      }
+      
+      if (hasError) return;
+      
+      // Disable submit button
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Creating...';
+      
+      try {
+        await api.institutions.create(formData);
+        showToast('Institution created successfully', 'success');
+        window.location.href = 'institutions.html';
+      } catch (error) {
+        console.error('Error creating institution:', error);
+        errorMessage.querySelector('p').textContent = error.message || 'Failed to create institution';
+        errorMessage.classList.remove('hidden');
+        
+        // Re-enable button
+        submitButton.disabled = false;
+        submitButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Create Institution
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

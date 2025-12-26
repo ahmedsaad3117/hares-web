@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Customer - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  
+  <div class="main-content">
+    <div id="header"></div>
+    
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="customers.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white">Add Customer</h1>
+          <p class="text-secondary">Create a new customer profile</p>
+        </div>
+      </div>
+      
+      <!-- Form -->
+      <div class="glass-card p-6" style="max-width: 800px;">
+        <form id="customerForm">
+          <!-- Name -->
+          <div class="form-group">
+            <label class="label">Customer Name *</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              class="input" 
+              placeholder="Enter customer name"
+              required
+            />
+            <div id="nameError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- National ID -->
+          <div class="form-group">
+            <label class="label">National ID *</label>
+            <input 
+              type="text" 
+              id="nationalId" 
+              name="nationalId" 
+              class="input" 
+              placeholder="Enter national ID"
+              required
+            />
+            <div id="nationalIdError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label class="label">Phone Number *</label>
+            <input 
+              type="tel" 
+              id="phoneNumber" 
+              name="phoneNumber" 
+              class="input" 
+              placeholder="+1234567890"
+              required
+            />
+            <div id="phoneNumberError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Error Message -->
+          <div id="errorMessage" class="hidden mb-4" style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
+            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+          </div>
+          
+          <!-- Buttons -->
+          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+            <button type="submit" id="submitButton" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Create Customer
+            </button>
+            <a href="customers.html" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    // Check authentication
+    if (!isAuthenticated()) {
+      window.location.href = '../index.html';
+    }
+    
+    const user = getCurrentUser();
+    document.getElementById('sidebar').innerHTML = createSidebar(user);
+    document.getElementById('header').innerHTML = createHeader('Add Customer', 'Create a new customer profile');
+    setActiveNav('customers');
+    
+    const form = document.getElementById('customerForm');
+    const submitButton = document.getElementById('submitButton');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Clear errors
+      errorMessage.classList.add('hidden');
+      document.getElementById('nameError').classList.add('hidden');
+      document.getElementById('nationalIdError').classList.add('hidden');
+      document.getElementById('phoneNumberError').classList.add('hidden');
+      
+      // Get form data
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        nationalId: document.getElementById('nationalId').value.trim(),
+        phoneNumber: document.getElementById('phoneNumber').value.trim(),
+      };
+      
+      // Validation
+      let hasError = false;
+      
+      if (formData.name.length < 2) {
+        document.getElementById('nameError').textContent = 'Name must be at least 2 characters';
+        document.getElementById('nameError').classList.remove('hidden');
+        hasError = true;
+      }
+      
+      if (formData.nationalId.length < 3) {
+        document.getElementById('nationalIdError').textContent = 'National ID is required';
+        document.getElementById('nationalIdError').classList.remove('hidden');
+        hasError = true;
+      }
+      
+      if (formData.phoneNumber.length < 10) {
+        document.getElementById('phoneNumberError').textContent = 'Valid phone number is required';
+        document.getElementById('phoneNumberError').classList.remove('hidden');
+        hasError = true;
+      }
+      
+      if (hasError) return;
+      
+      // Disable submit button
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Creating...';
+      
+      try {
+        await api.customers.create(formData);
+        showToast('Customer created successfully', 'success');
+        window.location.href = 'customers.html';
+      } catch (error) {
+        console.error('Error creating customer:', error);
+        errorMessage.querySelector('p').textContent = error.message || 'Failed to create customer';
+        errorMessage.classList.remove('hidden');
+        
+        // Re-enable button
+        submitButton.disabled = false;
+        submitButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Create Customer
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

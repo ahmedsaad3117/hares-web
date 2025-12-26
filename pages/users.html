@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  
+  <div class="main-content">
+    <div id="header"></div>
+    
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center justify-between mb-8" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+        <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: 2rem;">👤</div>
+          <div>
+            <h1 class="text-3xl font-bold text-white">Users</h1>
+            <p class="text-secondary">Manage system users</p>
+          </div>
+        </div>
+        <a href="users-new.html" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add User
+        </a>
+      </div>
+      
+      <!-- Users Table -->
+      <div class="glass-card">
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Institution</th>
+                <th>Branch</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 3rem;">
+                  <div class="spinner" style="margin: 0 auto;"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div id="paginationContainer" class="flex justify-center" style="display: flex; justify-content: center; margin-top: 2rem; padding: 1rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script src="../components/pagination.js"></script>
+  <script>
+    // Check authentication
+    if (!isAuthenticated()) {
+      window.location.href = '../index.html';
+    }
+    
+    const user = getCurrentUser();
+    
+    // Only Super Admin can access
+    if (user.roleName !== 'Super Admin') {
+      window.location.href = 'dashboard.html';
+    }
+    
+    document.getElementById('sidebar').innerHTML = createSidebar(user);
+    document.getElementById('header').innerHTML = createHeader('Users', 'Manage system users');
+    setActiveNav('users');
+    
+    let currentPage = 1;
+    let totalPages = 1;
+    const pageSize = 10;
+    
+    // Load users with pagination
+    loadUsers();
+    
+    async function loadUsers(page = 1) {
+      try {
+        const response = await api.users.getAll(page, pageSize);
+        currentPage = response.meta.page;
+        totalPages = response.meta.totalPages;
+        renderUsers(response.data);
+      } catch (error) {
+        console.error('Error loading users:', error);
+        showToast('Failed to load users', 'error');
+        document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #94a3b8;">Failed to load users</td></tr>';
+      }
+    }
+    
+    function changePage(page) {
+      if (page < 1 || page > totalPages || page === currentPage) return;
+      loadUsers(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function renderUsers(users) {
+      const tbody = document.getElementById('usersTableBody');
+      
+      if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #94a3b8;">No users yet</td></tr>';
+        return;
+      }
+      
+      const usersHTML = users.map(usr => `
+        <tr>
+          <td><span class="font-semibold">#${usr.userId}</span></td>
+          <td>
+            <div>
+              <div class="text-white font-medium">${usr.name}</div>
+            </div>
+          </td>
+          <td class="text-secondary">${usr.email}</td>
+          <td>
+            <span class="badge badge-info">${usr.roleName || 'N/A'}</span>
+          </td>
+          <td>
+            <span class="badge ${usr.isActive ? 'badge-success' : 'badge-danger'}">
+              ${usr.isActive ? 'Active' : 'Inactive'}
+            </span>
+          </td>
+          <td class="text-secondary">${usr.institutionId ? '#' + usr.institutionId : 'N/A'}</td>
+          <td class="text-secondary">${usr.branchId ? '#' + usr.branchId : 'N/A'}</td>
+          <td>
+            <div class="flex items-center gap-2" style="display: flex; gap: 0.5rem;">
+              <a href="users-edit.html?id=${usr.userId}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
+                Edit
+              </a>
+              <button onclick="toggleActive(${usr.userId}, ${usr.isActive})" class="btn ${usr.isActive ? 'btn-danger' : 'btn-secondary'}" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
+                ${usr.isActive ? 'Deactivate' : 'Activate'}
+              </button>
+              <button onclick="deleteUser(${usr.userId})" class="btn btn-danger" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+      
+      tbody.innerHTML = usersHTML;
+      
+      // Render pagination
+      const paginationContainer = document.getElementById('paginationContainer');
+      if (paginationContainer) {
+        paginationContainer.innerHTML = createPagination(currentPage, totalPages, changePage);
+      }
+    }
+    
+    async function toggleActive(id, currentStatus) {
+      const action = currentStatus ? 'deactivate' : 'activate';
+      if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+      
+      try {
+        await api.users.toggleActive(id);
+        showToast(`User ${action}d successfully`, 'success');
+        loadUsers(currentPage);
+      } catch (error) {
+        console.error('Error toggling user status:', error);
+        showToast('Failed to update user status', 'error');
+      }
+    }
+    
+    async function deleteUser(id) {
+      if (!confirm('Are you sure you want to delete this user?')) return;
+      
+      try {
+        await api.users.delete(id);
+        showToast('User deleted successfully', 'success');
+        loadUsers(currentPage);
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        showToast('Failed to delete user', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

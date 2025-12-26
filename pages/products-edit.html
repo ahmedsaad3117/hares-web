@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Product - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <div id="sidebar"></div>
+    
+    <div class="main-content">
+      <div id="header"></div>
+      
+      <!-- Breadcrumb -->
+      <div class="breadcrumb mb-6">
+        <a href="dashboard.html">Dashboard</a>
+        <span>/</span>
+        <a href="products.html">Products</a>
+        <span>/</span>
+        <span>Edit Product</span>
+      </div>
+      
+      <!-- Form Card -->
+      <div class="glass-card p-8" style="max-width: 800px;">
+        <div class="flex items-center gap-3 mb-6" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+          <div style="font-size: 2rem;">📦</div>
+          <div>
+            <h1 class="text-2xl font-bold text-white">Edit Product</h1>
+            <p class="text-secondary" id="productId"></p>
+          </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="loadingState" style="text-align: center; padding: 3rem;">
+          <div class="spinner" style="margin: 0 auto;"></div>
+          <p class="text-muted" style="margin-top: 1rem;">Loading product details...</p>
+        </div>
+        
+        <!-- Form -->
+        <form id="productForm" style="display: none;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="name" class="form-label">Product Name *</label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                class="input" 
+                placeholder="e.g., Personal Loan"
+                required
+              />
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label for="description" class="form-label">Description *</label>
+              <textarea 
+                id="description" 
+                name="description" 
+                class="input" 
+                rows="3"
+                placeholder="Describe the loan product features and benefits..."
+                required
+              ></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="isActive" class="form-label">Status</label>
+              <select id="isActive" name="isActive" class="input">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            <button type="submit" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Update Product
+            </button>
+            <a href="products.html" class="btn btn-secondary">
+              Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    // Check authentication
+    if (!isAuthenticated()) {
+      window.location.href = '../index.html';
+    }
+    
+    const user = getCurrentUser();
+    
+    // Allow Super Admin, Institution, and Branch roles
+    if (!['Super Admin', 'Institution', 'Branch'].includes(user.roleName)) {
+      window.location.href = 'dashboard.html';
+    }
+    
+    document.getElementById('sidebar').innerHTML = createSidebar(user);
+    document.getElementById('header').innerHTML = createHeader('Edit Product', 'Update product information');
+    setActiveNav('products');
+    
+    // Get product ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    
+    if (!productId) {
+      showToast('Product ID is required', 'error');
+      setTimeout(() => {
+        window.location.href = 'products.html';
+      }, 1000);
+    }
+    
+    // Load product details
+    loadProduct();
+    
+    async function loadProduct() {
+      try {
+        const product = await api.products.getById(productId);
+        
+        // Display product ID
+        document.getElementById('productId').textContent = `Product ID: ${product.productId}`;
+        
+        // Populate form
+        document.getElementById('name').value = product.name;
+        document.getElementById('description').value = product.description;
+        document.getElementById('isActive').value = product.isActive.toString();
+        
+        // Show form, hide loading
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('productForm').style.display = 'block';
+      } catch (error) {
+        console.error('Error loading product:', error);
+        showToast('Failed to load product', 'error');
+        setTimeout(() => {
+          window.location.href = 'products.html';
+        }, 1500);
+      }
+    }
+    
+    // Handle form submission
+    const form = document.getElementById('productForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        isActive: document.getElementById('isActive').value === 'true'
+      };
+      
+      // Validate
+      if (!formData.name) {
+        showToast('Product name is required', 'error');
+        return;
+      }
+      
+      if (!formData.description) {
+        showToast('Description is required', 'error');
+        return;
+      }
+      
+      try {
+        await api.products.update(productId, formData);
+        showToast('Product updated successfully', 'success');
+        setTimeout(() => {
+          window.location.href = 'products.html';
+        }, 1000);
+      } catch (error) {
+        console.error('Error updating product:', error);
+        showToast(error.message || 'Failed to update product', 'error');
+      }
+    });
+  </script>
+</body>
+</html>

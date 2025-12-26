@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit User - Hares Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  
+  <div class="main-content">
+    <div id="header"></div>
+    
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="users.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white">Edit User</h1>
+          <p class="text-secondary">Update user account</p>
+        </div>
+      </div>
+      
+      <!-- Loading -->
+      <div id="loadingContainer" class="loading-container">
+        <div class="spinner"></div>
+      </div>
+      
+      <!-- Form -->
+      <div id="formContainer" class="glass-card p-6" style="max-width: 800px; display: none;">
+        <form id="userForm">
+          <!-- Name -->
+          <div class="form-group">
+            <label class="label">Full Name *</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              class="input" 
+              placeholder="Enter full name"
+              required
+            />
+            <div id="nameError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Email -->
+          <div class="form-group">
+            <label class="label">Email *</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="input" 
+              placeholder="user@example.com"
+              required
+              disabled
+            />
+            <div id="emailError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Password (optional for edit) -->
+          <div class="form-group">
+            <label class="label">New Password (leave blank to keep current)</label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              class="input" 
+              placeholder="Enter new password (min 6 characters)"
+            />
+            <div id="passwordError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Active Status -->
+          <div class="form-group">
+            <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="isActive" name="isActive">
+              <span class="label" style="margin: 0;">Active</span>
+            </label>
+          </div>
+          
+          <!-- Error Message -->
+          <div id="errorMessage" class="hidden mb-4" style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
+            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+          </div>
+          
+          <!-- Buttons -->
+          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+            <button type="submit" id="submitButton" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Update User
+            </button>
+            <a href="users.html" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    // Check authentication
+    if (!isAuthenticated()) {
+      window.location.href = '../index.html';
+    }
+    
+    const user = getCurrentUser();
+    document.getElementById('sidebar').innerHTML = createSidebar(user);
+    document.getElementById('header').innerHTML = createHeader('Edit User', 'Update user account');
+    setActiveNav('users');
+    
+    const form = document.getElementById('userForm');
+    const submitButton = document.getElementById('submitButton');
+    const errorMessage = document.getElementById('errorMessage');
+    const loadingContainer = document.getElementById('loadingContainer');
+    const formContainer = document.getElementById('formContainer');
+    
+    // Get user ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
+    
+    if (!userId) {
+      window.location.href = 'users.html';
+    }
+    
+    // Load user data
+    async function loadUser() {
+      try {
+        const userData = await api.users.getById(userId);
+        
+        // Populate form
+        document.getElementById('name').value = userData.name;
+        document.getElementById('email').value = userData.email;
+        document.getElementById('isActive').checked = userData.isActive;
+        
+        loadingContainer.style.display = 'none';
+        formContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading user:', error);
+        showToast('Failed to load user', 'error');
+        setTimeout(() => window.location.href = 'users.html', 2000);
+      }
+    }
+    
+    loadUser();
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Clear errors
+      errorMessage.classList.add('hidden');
+      document.querySelectorAll('.error-text').forEach(el => el.classList.add('hidden'));
+      
+      // Get form data
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        isActive: document.getElementById('isActive').checked,
+      };
+      
+      // Only include password if provided
+      const password = document.getElementById('password').value;
+      if (password) {
+        if (password.length < 6) {
+          document.getElementById('passwordError').textContent = 'Password must be at least 6 characters';
+          document.getElementById('passwordError').classList.remove('hidden');
+          return;
+        }
+        formData.password = password;
+      }
+      
+      // Validation
+      if (formData.name.length < 2) {
+        document.getElementById('nameError').textContent = 'Name must be at least 2 characters';
+        document.getElementById('nameError').classList.remove('hidden');
+        return;
+      }
+      
+      // Disable submit button
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Updating...';
+      
+      try {
+        await api.users.update(userId, formData);
+        showToast('User updated successfully', 'success');
+        window.location.href = 'users.html';
+      } catch (error) {
+        console.error('Error updating user:', error);
+        errorMessage.querySelector('p').textContent = error.message || 'Failed to update user';
+        errorMessage.classList.remove('hidden');
+        
+        // Re-enable button
+        submitButton.disabled = false;
+        submitButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Update User
+        `;
+      }
+    });
+  </script>
+</body>
+</html>
