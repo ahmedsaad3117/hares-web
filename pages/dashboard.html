@@ -157,11 +157,7 @@
           
           document.getElementById('statsGrid').innerHTML = statsHTML;
           renderQuickActions();
-          renderRecentActivity([
-            { type: 'loan', message: 'undefined', time: 'Invalid Date' },
-            { type: 'customer', message: 'undefined', time: 'Invalid Date' },
-            { type: 'payment', message: 'undefined', time: 'Invalid Date' },
-          ]);
+          await loadRecentActivity();
           return;
         }
         
@@ -252,12 +248,8 @@
       // Render quick actions
       renderQuickActions();
       
-      // Render recent activity (mock data for now)
-      renderRecentActivity([
-        { type: 'loan', message: 'New loan created', time: 'Just now' },
-        { type: 'customer', message: 'Customer added', time: '5 min ago' },
-        { type: 'payment', message: 'Payment received', time: '1 hour ago' },
-      ]);
+      // Load recent activity
+      await loadRecentActivity();
       
       } catch (error) {
         console.error('Error loading global dashboard:', error);
@@ -351,6 +343,50 @@
       if (!activities || activities.length === 0) {
         document.getElementById('recentActivity').innerHTML = '<p class="text-muted text-sm">No recent activity</p>';
         return;
+    async function loadRecentActivity() {
+      try {
+        const user = getCurrentUser();
+        let activities = [];
+        
+        // Get recent loans and customers to build activity feed
+        const [loansResponse, customersResponse] = await Promise.all([
+          api.loans.getAll(1, 5),  // Get last 5 loans
+          api.customers.getAll(1, 5)  // Get last 5 customers
+        ]);
+        
+        const recentLoans = loansResponse.data || [];
+        const recentCustomers = customersResponse.data || [];
+        
+        // Build activity feed from recent items
+        recentLoans.forEach(loan => {
+          activities.push({
+            type: 'loan_created',
+            description: `Loan of ${formatCurrency(loan.principalAmount)} created for ${loan.customerName || 'customer'}`,
+            timestamp: loan.createdAt
+          });
+        });
+        
+        recentCustomers.forEach(customer => {
+          activities.push({
+            type: 'customer_added',
+            description: `New customer "${customer.name}" added`,
+            timestamp: customer.createdAt
+          });
+        });
+        
+        // Sort by timestamp (newest first)
+        activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        // Take top 5
+        activities = activities.slice(0, 5);
+        
+        renderRecentActivity(activities);
+      } catch (error) {
+        console.error('Error loading recent activity:', error);
+        renderRecentActivity([]);
+      }
+    }
+    
       }
       
       const activityHTML = activities.slice(0, 5).map(activity => {
