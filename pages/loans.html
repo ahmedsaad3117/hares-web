@@ -75,7 +75,7 @@
             </thead>
             <tbody id="loansTableBody">
               <tr>
-                <td colspan="8" style="text-align: center; padding: 3rem;">
+                <td colspan="9" style="text-align: center; padding: 3rem;">
                   <div class="spinner" style="margin: 0 auto;"></div>
                 </td>
               </tr>
@@ -108,20 +108,34 @@
     let totalPages = 1;
     const pageSize = 10;
     let currentFilter = 'all';
+    let allLoans = [];
     
     // Load loans with pagination
     loadLoans();
     
     async function loadLoans(page = 1) {
       try {
-        const response = await api.loans.getAll(page, pageSize);
-        currentPage = response.meta.page;
-        totalPages = response.meta.totalPages;
-        renderLoans(response.data);
+        let response;
+        if (currentFilter === 'all') {
+          response = await api.loans.getAll(page, pageSize);
+          currentPage = response.meta.page;
+          totalPages = response.meta.totalPages;
+          renderLoans(response.data);
+        } else {
+          // Load filtered loans by status (no pagination from backend)
+          allLoans = await api.loans.getByStatus(currentFilter);
+          // Implement client-side pagination for filtered results
+          const startIndex = (page - 1) * pageSize;
+          const endIndex = startIndex + pageSize;
+          const paginatedLoans = allLoans.slice(startIndex, endIndex);
+          currentPage = page;
+          totalPages = Math.ceil(allLoans.length / pageSize);
+          renderLoans(paginatedLoans);
+        }
       } catch (error) {
         console.error('Error loading loans:', error);
         showToast('Failed to load loans', 'error');
-        document.getElementById('loansTableBody').innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #94a3b8;">Failed to load loans</td></tr>';
+        document.getElementById('loansTableBody').innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">Failed to load loans</td></tr>';
       }
     }
     
@@ -133,6 +147,7 @@
     
     function filterByStatus(status) {
       currentFilter = status;
+      currentPage = 1; // Reset to first page
       
       // Update active filter button
       document.querySelectorAll('[id^="filter-"]').forEach(btn => {
@@ -142,16 +157,15 @@
       document.getElementById(`filter-${status}`).style.background = 'rgba(99, 102, 241, 0.2)';
       document.getElementById(`filter-${status}`).style.borderColor = 'rgba(99, 102, 241, 0.4)';
       
-      // Note: Client-side filtering removed as pagination should be server-side
-      // For full implementation, API would need to support status filtering with pagination
-      showToast('Status filtering with pagination requires API support', 'info');
+      // Reload with new filter
+      loadLoans(1);
     }
     
     function renderLoans(loans) {
       const tbody = document.getElementById('loansTableBody');
       
       if (loans.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #94a3b8;">No loans found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">No loans found</td></tr>';
         return;
       }
       

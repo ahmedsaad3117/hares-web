@@ -53,6 +53,10 @@
               <p id="maxUsers" class="text-white font-medium"></p>
             </div>
             <div>
+              <p class="text-muted mb-1">Expiration Date</p>
+              <p id="expirationDate" class="text-white font-medium"></p>
+            </div>
+            <div>
               <p class="text-muted mb-1">Created At</p>
               <p id="createdAt" class="text-white font-medium"></p>
             </div>
@@ -122,6 +126,7 @@
         document.getElementById('institutionName').textContent = institutionData.name;
         document.getElementById('institutionId').textContent = institutionData.institutionId;
         document.getElementById('maxUsers').textContent = institutionData.maxUsers;
+        document.getElementById('expirationDate').textContent = institutionData.expirationDate ? formatDate(institutionData.expirationDate) : 'No expiration';
         document.getElementById('createdAt').textContent = formatDateTime(institutionData.createdAt);
         document.getElementById('updatedAt').textContent = formatDateTime(institutionData.updatedAt);
         

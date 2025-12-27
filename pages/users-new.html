@@ -77,9 +77,6 @@
             <label class="label">Role *</label>
             <select id="roleId" name="roleId" class="input" required>
               <option value="">Select role...</option>
-              <option value="1">Super Admin</option>
-              <option value="2">Institution</option>
-              <option value="3">Branch</option>
             </select>
             <div id="roleIdError" class="error-text hidden"></div>
           </div>
@@ -140,6 +137,12 @@
     }
     
     const user = getCurrentUser();
+    
+    // Only Super Admin and Institution can access
+    if (user.roleName !== 'Super Admin' && user.roleName !== 'Institution') {
+      window.location.href = 'dashboard.html';
+    }
+    
     document.getElementById('sidebar').innerHTML = createSidebar(user);
     document.getElementById('header').innerHTML = createHeader('Add User', 'Create a new user account');
     setActiveNav('users');
@@ -156,6 +159,24 @@
     let institutions = [];
     let branches = [];
     
+    // Populate role dropdown based on user role
+    const roleSelect = document.getElementById('roleId');
+    if (user.roleName === 'Super Admin') {
+      roleSelect.innerHTML = `
+        <option value="">Select role...</option>
+        <option value="1">Super Admin</option>
+        <option value="2">Institution</option>
+        <option value="3">Branch</option>
+      `;
+    } else if (user.roleName === 'Institution') {
+      // Institution users can only create Branch users
+      roleSelect.innerHTML = `
+        <option value="">Select role...</option>
+        <option value="3">Branch</option>
+      `;
+      roleSelect.value = '3'; // Pre-select Branch role
+    }
+    
     // Load institutions and branches
     async function loadData() {
       try {
@@ -167,11 +188,26 @@
         institutions = institutionsResponse.data || [];
         branches = branchesResponse.data || [];
         
+        // If user is Institution role, pre-select and lock their institution
+        if (user.roleName === 'Institution' && user.institutionId) {
+          // Filter to show only their institution
+          institutions = institutions.filter(inst => inst.institutionId === user.institutionId);
+          // Filter branches to only their institution's branches
+          branches = branches.filter(b => b.institutionId === user.institutionId);
+        }
+        
         // Populate institutions dropdown
         institutionSelect.innerHTML = '<option value="">Select institution...</option>';
         institutions.forEach(inst => {
           institutionSelect.innerHTML += `<option value="${inst.institutionId}">${inst.name}</option>`;
         });
+        
+        // If Institution user, auto-select their institution and hide dropdown
+        if (user.roleName === 'Institution' && user.institutionId) {
+          institutionSelect.value = user.institutionId;
+          institutionSelect.disabled = true;
+          institutionGroup.style.display = 'block';
+        }
       } catch (error) {
         console.error('Error loading data:', error);
       }

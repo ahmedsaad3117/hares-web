@@ -89,7 +89,7 @@ function createSidebar(user) {
             </a>
           </li>
           
-          ${user.roleName === 'Super Admin' ? `
+          ${user.roleName === 'Super Admin' || user.roleName === 'Institution' ? `
           <li class="sidebar-nav-item">
             <a href="users.html" class="sidebar-nav-link" id="nav-users">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -99,7 +99,9 @@ function createSidebar(user) {
               Users
             </a>
           </li>
+          ` : ''}
           
+          ${user.roleName === 'Super Admin' ? `
           <li class="sidebar-nav-item">
             <a href="search-logs.html" class="sidebar-nav-link" id="nav-search-logs">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

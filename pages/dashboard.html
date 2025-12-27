@@ -102,6 +102,70 @@
       
       // Load statistics
       try {
+        // For Institution users, load institution-specific statistics
+        if ((user.roleName === 'Institution' || user.role_name === 'Institution') && user.institutionId) {
+          console.log('Loading institution-specific dashboard for institutionId:', user.institutionId);
+          const stats = await api.institutions.getStatistics(user.institutionId);
+          console.log('Institution stats:', stats);
+          
+          // Render institution stats
+          const statsHTML = `
+            <div class="glass-card stat-card">
+              <div class="flex items-center justify-between mb-4">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+                  🏢
+                </div>
+                <span class="badge badge-info">${stats.totalBranches}</span>
+              </div>
+              <div class="stat-card-value">${stats.totalBranches}</div>
+              <div class="stat-card-label">Total Branches</div>
+            </div>
+            
+            <div class="glass-card stat-card">
+              <div class="flex items-center justify-between mb-4">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+                  👥
+                </div>
+                <span class="badge badge-success">${stats.totalCustomers}</span>
+              </div>
+              <div class="stat-card-value">${stats.totalCustomers}</div>
+              <div class="stat-card-label">Total Customers</div>
+            </div>
+            
+            <div class="glass-card stat-card">
+              <div class="flex items-center justify-between mb-4">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+                  💰
+                </div>
+                <span class="badge badge-success">${stats.totalLoans}</span>
+              </div>
+              <div class="stat-card-value">${stats.totalLoans}</div>
+              <div class="stat-card-label">Total Loans</div>
+            </div>
+            
+            <div class="glass-card stat-card">
+              <div class="flex items-center justify-between mb-4">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+                  ⚠️
+                </div>
+                <span class="badge badge-warning">0</span>
+              </div>
+              <div class="stat-card-value">0</div>
+              <div class="stat-card-label">Late Loans</div>
+            </div>
+          `;
+          
+          document.getElementById('statsGrid').innerHTML = statsHTML;
+          renderQuickActions();
+          renderRecentActivity([
+            { type: 'loan', message: 'undefined', time: 'Invalid Date' },
+            { type: 'customer', message: 'undefined', time: 'Invalid Date' },
+            { type: 'payment', message: 'undefined', time: 'Invalid Date' },
+          ]);
+          return;
+        }
+        
+        // For Super Admin and other roles, load all data
         console.log('Fetching institutions, branches, customers, loans...');
         const [institutionsResponse, branchesResponse, customersResponse, loansResponse] = await Promise.all([
           (user.roleName === 'Super Admin' || user.role_name === 'Super Admin') ? api.institutions.getAll(1, 100) : Promise.resolve({ data: [] }),

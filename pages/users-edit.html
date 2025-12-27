@@ -115,6 +115,12 @@
     }
     
     const user = getCurrentUser();
+    
+    // Only Super Admin and Institution can access
+    if (user.roleName !== 'Super Admin' && user.roleName !== 'Institution') {
+      window.location.href = 'dashboard.html';
+    }
+    
     document.getElementById('sidebar').innerHTML = createSidebar(user);
     document.getElementById('header').innerHTML = createHeader('Edit User', 'Update user account');
     setActiveNav('users');

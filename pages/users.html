@@ -75,8 +75,8 @@
     
     const user = getCurrentUser();
     
-    // Only Super Admin can access
-    if (user.roleName !== 'Super Admin') {
+    // Only Super Admin and Institution can access
+    if (user.roleName !== 'Super Admin' && user.roleName !== 'Institution') {
       window.location.href = 'dashboard.html';
     }
     
@@ -96,7 +96,14 @@
         const response = await api.users.getAll(page, pageSize);
         currentPage = response.meta.page;
         totalPages = response.meta.totalPages;
-        renderUsers(response.data);
+        
+        // Filter users by institution if user is Institution role
+        let users = response.data;
+        if (user.roleName === 'Institution' && user.institutionId) {
+          users = users.filter(u => u.institutionId === user.institutionId);
+        }
+        
+        renderUsers(users);
       } catch (error) {
         console.error('Error loading users:', error);
         showToast('Failed to load users', 'error');

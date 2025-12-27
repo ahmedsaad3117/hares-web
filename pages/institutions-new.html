@@ -61,6 +61,20 @@
             <p class="text-sm text-muted" style="margin-top: 0.25rem;">Maximum number of users allowed for this institution</p>
           </div>
           
+          <!-- Expiration Date -->
+          <div class="form-group">
+            <label class="label">Expiration Date</label>
+            <input 
+              type="date" 
+              id="expirationDate" 
+              name="expirationDate" 
+              class="input" 
+              placeholder="Select expiration date"
+            />
+            <div id="expirationDateError" class="error-text hidden"></div>
+            <p class="text-sm text-muted" style="margin-top: 0.25rem;">Institution will be automatically deactivated after this date</p>
+          </div>
+          
           <!-- Active Status -->
           <div class="form-group">
             <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
@@ -121,6 +135,12 @@
         maxUsers: parseInt(document.getElementById('maxUsers').value),
         isActive: document.getElementById('isActive').checked,
       };
+      
+      // Add expiration date if provided
+      const expirationDate = document.getElementById('expirationDate').value;
+      if (expirationDate) {
+        formData.expirationDate = expirationDate;
+      }
       
       // Validation
       let hasError = false;

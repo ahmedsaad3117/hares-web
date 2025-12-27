@@ -27,10 +27,18 @@
             </div>
           </div>
           
+          <!-- Summary Cards -->
+          <div class="grid grid-cols-4 gap-4 mb-6" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;" id="summaryCards">
+            <!-- Will be populated by JavaScript -->
+          </div>
+          
           <!-- Status Filters -->
           <div class="glass-card p-4 mb-6" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
             <button id="filter-all" onclick="filterByStatus('all')" class="btn" style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4);">
-              All Installments
+              📋 All Installments
+            </button>
+            <button id="filter-this-month" onclick="filterByStatus('this-month')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+              📅 Due This Month
             </button>
             <button id="filter-pending" onclick="filterByStatus('Pending')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
               ⏳ Pending
@@ -46,18 +54,18 @@
           <!-- Installments Table -->
           <div class="glass-card">
             <div class="table-container">
-              <table class="data-table">
+              <table class="data-table" style="width: 100%; table-layout: fixed;">
                 <thead>
                   <tr>
-                    <th>Installment #</th>
-                    <th>Loan ID</th>
-                    <th>Customer</th>
-                    <th>Branch</th>
-                    <th>Amount</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
-                    <th>Payment Date</th>
-                    <th>Actions</th>
+                    <th style="width: 70px; text-align: center;">#</th>
+                    <th style="width: 90px; text-align: center;">Loan</th>
+                    <th style="width: 180px;">Customer</th>
+                    <th style="width: 140px;">Branch</th>
+                    <th style="width: 110px; text-align: right;">Amount</th>
+                    <th style="width: 120px; text-align: center;">Due Date</th>
+                    <th style="width: 100px; text-align: center;">Status</th>
+                    <th style="width: 120px; text-align: center;">Paid Date</th>
+                    <th style="width: 150px; text-align: center;">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="installmentsTableBody">
@@ -194,13 +202,25 @@
     // Load installments from all loans
     async function loadInstallments() {
       try {
-        // Get all loans with installments
-        const loansResponse = await api.loans.getAll({ page: 1, limit: 1000 });
-        const loans = loansResponse.data || [];
+        // Get all loans with installments (paginated to get all)
+        let allLoansData = [];
+        let currentPage = 1;
+        let hasMore = true;
+        
+        while (hasMore) {
+          const loansResponse = await api.loans.getAll(currentPage, 100);
+          allLoansData = allLoansData.concat(loansResponse.data || []);
+          
+          if (currentPage >= loansResponse.meta.totalPages) {
+            hasMore = false;
+          } else {
+            currentPage++;
+          }
+        }
         
         // Collect all installments from all loans
         allInstallments = [];
-        for (const loan of loans) {
+        for (const loan of allLoansData) {
           const installments = await api.loans.getInstallments(loan.loanId);
           installments.forEach(inst => {
             allInstallments.push({
@@ -215,6 +235,9 @@
         // Sort by due date
         allInstallments.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
         
+        // Update summary cards
+        updateSummaryCards();
+        
         filterAndRenderInstallments();
       } catch (error) {
         console.error('Failed to load installments:', error);
@@ -222,6 +245,65 @@
         document.getElementById('installmentsTableBody').innerHTML = 
           '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load installments</td></tr>';
       }
+    }
+    
+    // Update summary cards
+    function updateSummaryCards() {
+      const totalInstallments = allInstallments.length;
+      const paidCount = allInstallments.filter(i => i.status === 'Paid').length;
+      const pendingCount = allInstallments.filter(i => i.status === 'Pending').length;
+      const overdueCount = allInstallments.filter(i => isOverdue(i)).length;
+      
+      // This month
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      const thisMonthCount = allInstallments.filter(inst => {
+        const dueDate = new Date(inst.dueDate);
+        return dueDate.getMonth() === currentMonth && 
+               dueDate.getFullYear() === currentYear &&
+               inst.status !== 'Paid';
+      }).length;
+      
+      const totalAmount = allInstallments.reduce((sum, i) => sum + Number(i.amount), 0);
+      const paidAmount = allInstallments.filter(i => i.status === 'Paid').reduce((sum, i) => sum + Number(i.amount), 0);
+      
+      const summaryHTML = `
+        <div class="glass-card p-4" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <span class="text-muted" style="font-size: 0.875rem;">Paid</span>
+            <span style="font-size: 1.5rem;">✅</span>
+          </div>
+          <div class="text-white font-bold" style="font-size: 1.75rem; margin-bottom: 0.25rem;">${paidCount}</div>
+          <div class="text-success" style="font-size: 0.85rem; color: #10b981;">${formatCurrency(paidAmount)}</div>
+        </div>
+        
+        <div class="glass-card p-4" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <span class="text-muted" style="font-size: 0.875rem;">Pending</span>
+            <span style="font-size: 1.5rem;">⏳</span>
+          </div>
+          <div class="text-white font-bold" style="font-size: 1.75rem;">${pendingCount}</div>
+        </div>
+        
+        <div class="glass-card p-4" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <span class="text-muted" style="font-size: 0.875rem;">Overdue</span>
+            <span style="font-size: 1.5rem;">⚠️</span>
+          </div>
+          <div class="text-white font-bold" style="font-size: 1.75rem;">${overdueCount}</div>
+        </div>
+        
+        <div class="glass-card p-4" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <span class="text-muted" style="font-size: 0.875rem;">Due This Month</span>
+            <span style="font-size: 1.5rem;">📅</span>
+          </div>
+          <div class="text-white font-bold" style="font-size: 1.75rem;">${thisMonthCount}</div>
+        </div>
+      `;
+      
+      document.getElementById('summaryCards').innerHTML = summaryHTML;
     }
     
     // Filter by status
@@ -233,8 +315,12 @@
         btn.style.background = 'rgba(255, 255, 255, 0.05)';
         btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
       });
-      document.getElementById(`filter-${status}`).style.background = 'rgba(99, 102, 241, 0.2)';
-      document.getElementById(`filter-${status}`).style.borderColor = 'rgba(99, 102, 241, 0.4)';
+      const buttonId = `filter-${status.toLowerCase()}`;
+      const activeButton = document.getElementById(buttonId);
+      if (activeButton) {
+        activeButton.style.background = 'rgba(99, 102, 241, 0.2)';
+        activeButton.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+      }
       
       filterAndRenderInstallments();
     }
@@ -243,13 +329,34 @@
     function filterAndRenderInstallments() {
       let filtered = allInstallments;
       
-      if (currentFilter !== 'all') {
-        if (currentFilter === 'Overdue') {
-          filtered = allInstallments.filter(inst => isOverdue(inst));
-        } else {
-          filtered = allInstallments.filter(inst => inst.status === currentFilter);
-        }
+      if (currentFilter === 'this-month') {
+        // Filter for unpaid installments due this month
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        
+        filtered = allInstallments.filter(inst => {
+          const dueDate = new Date(inst.dueDate);
+          return dueDate.getMonth() === currentMonth && 
+                 dueDate.getFullYear() === currentYear &&
+                 inst.status !== 'Paid';
+        });
+      } else if (currentFilter === 'Overdue') {
+        // Show all overdue installments (not paid and past due date)
+        filtered = allInstallments.filter(inst => isOverdue(inst));
+      } else if (currentFilter === 'Pending') {
+        // Show all pending installments (status === 'Pending')
+        filtered = allInstallments.filter(inst => inst.status === 'Pending');
+      } else if (currentFilter === 'Paid') {
+        // Show all paid installments
+        filtered = allInstallments.filter(inst => inst.status === 'Paid');
+      } else if (currentFilter !== 'all') {
+        // Default: filter by status
+        filtered = allInstallments.filter(inst => inst.status === currentFilter);
       }
+      
+      // Sort by due date (ascending - earliest first)
+      filtered.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
       
       renderInstallments(filtered);
     }
@@ -272,27 +379,53 @@
         
         const statusText = inst.status === 'Paid' ? '✅ Paid' : overdue ? '⚠️ Overdue' : '⏳ Pending';
         
+        // Check days until/past due
+        const today = new Date();
+        const dueDate = new Date(inst.dueDate);
+        const daysDiff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+        let dueDateClass = '';
+        if (inst.status !== 'Paid') {
+          if (daysDiff < 0) dueDateClass = 'style="color: #ef4444;"'; // overdue - red
+          else if (daysDiff <= 7) dueDateClass = 'style="color: #f59e0b;"'; // due soon - orange
+        }
+        
         return `
-          <tr>
-            <td><span class="font-semibold">#${inst.installmentNumber}</span></td>
-            <td>
-              <a href="loans-view.html?id=${inst.loan.loanId}" class="text-primary font-medium" style="text-decoration: underline;">
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <td style="text-align: center; padding: 1rem 0.5rem;">
+              <span class="font-semibold text-white" style="font-size: 0.95rem;">#${inst.installmentNumber}</span>
+            </td>
+            <td style="text-align: center; padding: 1rem 0.5rem;">
+              <a href="loans-view.html?id=${inst.loan.loanId}" class="text-primary font-medium" style="text-decoration: underline; font-size: 0.95rem;">
                 #${inst.loan.loanId}
               </a>
             </td>
-            <td>
+            <td style="padding: 1rem 0.75rem;">
               <div>
-                <div class="text-white font-medium">${inst.customer.name}</div>
-                <div class="text-muted text-sm">ID: ${inst.customer.customerId}</div>
+                <div class="text-white font-medium" style="font-size: 0.95rem; margin-bottom: 0.125rem;">${inst.customer.name}</div>
+                <div class="text-muted" style="font-size: 0.8rem;">ID: ${inst.customer.customerId}</div>
               </div>
             </td>
-            <td class="text-secondary">${inst.branch.name}</td>
-            <td class="text-white font-semibold">${formatCurrency(inst.amount)}</td>
-            <td class="text-secondary">${formatDate(inst.dueDate)}</td>
-            <td><span class="badge ${statusBadge}">${statusText}</span></td>
-            <td class="text-secondary">${inst.paymentDate ? formatDate(inst.paymentDate) : '-'}</td>
-            <td>
-              <div class="flex items-center gap-2" style="display: flex; gap: 0.5rem;">
+            <td style="padding: 1rem 0.75rem;">
+              <span class="text-secondary" style="font-size: 0.9rem;">${inst.branch.name}</span>
+            </td>
+            <td style="text-align: right; padding: 1rem 0.75rem;">
+              <span class="text-white font-semibold" style="font-size: 1rem;">${formatCurrency(inst.amount)}</span>
+            </td>
+            <td ${dueDateClass} style="text-align: center; padding: 1rem 0.5rem;">
+              <div style="font-size: 0.9rem;">${formatDate(inst.dueDate)}</div>
+              ${inst.status !== 'Paid' && daysDiff <= 7 && daysDiff >= 0 ? 
+                `<div style="font-size: 0.75rem; color: #f59e0b; margin-top: 0.125rem;">${daysDiff} day${daysDiff !== 1 ? 's' : ''} left</div>` : 
+                inst.status !== 'Paid' && daysDiff < 0 ?
+                `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.125rem;">${Math.abs(daysDiff)} day${Math.abs(daysDiff) !== 1 ? 's' : ''} late</div>` : ''}
+            </td>
+            <td style="text-align: center; padding: 1rem 0.5rem;">
+              <span class="badge ${statusBadge}" style="font-size: 0.85rem; white-space: nowrap;">${statusText}</span>
+            </td>
+            <td style="text-align: center; padding: 1rem 0.5rem;">
+              <span class="text-secondary" style="font-size: 0.9rem;">${inst.paymentDate ? formatDate(inst.paymentDate) : '-'}</span>
+            </td>
+            <td style="text-align: center; padding: 1rem 0.5rem;">
+              <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: center;">
                 <a href="installments-view.html?id=${inst.id}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
                   View
                 </a>

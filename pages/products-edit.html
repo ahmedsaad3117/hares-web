@@ -7,74 +7,77 @@
   <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-  <div class="app-container">
-    <div id="sidebar"></div>
+  <div id="sidebar"></div>
+  
+  <div class="main-content">
+    <div id="header"></div>
     
-    <div class="main-content">
-      <div id="header"></div>
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="products.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white">Edit Product</h1>
+          <p class="text-secondary" id="productId">Loading...</p>
+        </div>
+      </div>
       
-      <!-- Breadcrumb -->
-      <div class="breadcrumb mb-6">
-        <a href="dashboard.html">Dashboard</a>
-        <span>/</span>
-        <a href="products.html">Products</a>
-        <span>/</span>
-        <span>Edit Product</span>
+      <!-- Loading State -->
+      <div id="loadingState" class="glass-card p-6" style="max-width: 800px; text-align: center;">
+        <div class="spinner" style="margin: 0 auto;"></div>
+        <p class="text-muted" style="margin-top: 1rem;">Loading product details...</p>
       </div>
       
       <!-- Form Card -->
-      <div class="glass-card p-8" style="max-width: 800px;">
-        <div class="flex items-center gap-3 mb-6" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
-          <div style="font-size: 2rem;">📦</div>
-          <div>
-            <h1 class="text-2xl font-bold text-white">Edit Product</h1>
-            <p class="text-secondary" id="productId"></p>
-          </div>
-        </div>
-        
-        <!-- Loading State -->
-        <div id="loadingState" style="text-align: center; padding: 3rem;">
-          <div class="spinner" style="margin: 0 auto;"></div>
-          <p class="text-muted" style="margin-top: 1rem;">Loading product details...</p>
-        </div>
-        
-        <!-- Form -->
-        <form id="productForm" style="display: none;">
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="name" class="form-label">Product Name *</label>
-              <input 
-                type="text" 
-                id="name" 
-                name="name" 
-                class="input" 
-                placeholder="e.g., Personal Loan"
-                required
-              />
-            </div>
-            
-            <div class="form-group" style="grid-column: 1 / -1;">
-              <label for="description" class="form-label">Description *</label>
-              <textarea 
-                id="description" 
-                name="description" 
-                class="input" 
-                rows="3"
-                placeholder="Describe the loan product features and benefits..."
-                required
-              ></textarea>
-            </div>
-            
-            <div class="form-group">
-              <label for="isActive" class="form-label">Status</label>
-              <select id="isActive" name="isActive" class="input">
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
-            </div>
+      <div class="glass-card p-6" id="productForm" style="max-width: 800px; display: none;">
+        <form id="editForm">
+          <!-- Institution (Super Admin only) -->
+          <div class="form-group" id="institutionGroup" style="display: none;">
+            <label class="label">Institution</label>
+            <select id="institutionId" name="institutionId" class="input">
+              <option value="">All Institutions (Global Product)</option>
+            </select>
+            <p class="text-sm text-muted" style="margin-top: 0.25rem;">Leave empty to make this product available to all institutions</p>
           </div>
           
-          <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+          <div class="form-group">
+            <label class="label">Product Name *</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              class="input" 
+              placeholder="e.g., Personal Loan"
+              required
+            />
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Description *</label>
+            <textarea 
+              id="description" 
+              name="description" 
+              class="input" 
+              rows="4"
+              placeholder="Describe the loan product features and benefits..."
+              required
+            ></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="label">Status</label>
+            <select id="isActive" name="isActive" class="input">
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem; margin-top: 1.5rem;">
             <button type="submit" class="btn btn-primary">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
@@ -110,6 +113,29 @@
     document.getElementById('header').innerHTML = createHeader('Edit Product', 'Update product information');
     setActiveNav('products');
     
+    // Load institutions if Super Admin
+    if (user.roleName === 'Super Admin') {
+      document.getElementById('institutionGroup').style.display = 'block';
+      loadInstitutions();
+    }
+    
+    async function loadInstitutions() {
+      try {
+        const response = await api.institutions.getAll(1, 100);
+        const institutions = response.data || [];
+        const select = document.getElementById('institutionId');
+        
+        institutions.forEach(inst => {
+          const option = document.createElement('option');
+          option.value = inst.institutionId;
+          option.textContent = inst.name;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading institutions:', error);
+      }
+    }
+    
     // Get product ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
@@ -136,6 +162,11 @@
         document.getElementById('description').value = product.description;
         document.getElementById('isActive').value = product.isActive.toString();
         
+        // Set institution if Super Admin
+        if (user.roleName === 'Super Admin' && product.institutionId) {
+          document.getElementById('institutionId').value = product.institutionId;
+        }
+        
         // Show form, hide loading
         document.getElementById('loadingState').style.display = 'none';
         document.getElementById('productForm').style.display = 'block';
@@ -149,7 +180,7 @@
     }
     
     // Handle form submission
-    const form = document.getElementById('productForm');
+    const form = document.getElementById('editForm');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -158,6 +189,16 @@
         description: document.getElementById('description').value.trim(),
         isActive: document.getElementById('isActive').value === 'true'
       };
+      
+      // Add institutionId if Super Admin selected one
+      if (user.roleName === 'Super Admin') {
+        const institutionId = document.getElementById('institutionId').value;
+        if (institutionId) {
+          formData.institutionId = parseInt(institutionId);
+        } else {
+          formData.institutionId = null;
+        }
+      }
       
       // Validate
       if (!formData.name) {

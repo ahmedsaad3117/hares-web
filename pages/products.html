@@ -48,7 +48,7 @@
             </thead>
             <tbody id="productsTableBody">
               <tr>
-                <td colspan="6" style="text-align: center; padding: 3rem;">
+                <td colspan="7" style="text-align: center; padding: 3rem;">
                   <div class="spinner" style="margin: 0 auto;"></div>
                 </td>
               </tr>
@@ -99,7 +99,7 @@
       } catch (error) {
         console.error('Error loading products:', error);
         showToast('Failed to load products', 'error');
-        document.getElementById('productsTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">Failed to load products</td></tr>';
+        document.getElementById('productsTableBody').innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8;">Failed to load products</td></tr>';
       }
     }
     
@@ -113,16 +113,16 @@
       const tbody = document.getElementById('productsTableBody');
       
       if (products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">No products yet</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8;">No products yet</td></tr>';
         return;
       }
       
       const productsHTML = products.map(product => {
         let scopeBadge = '';
         if (product.branchId) {
-          scopeBadge = `<span class="badge badge-info">${product.branchName || 'Branch'}</span>`;
+          scopeBadge = `<span class="badge badge-info">${product.branch?.name || 'Branch'}</span>`;
         } else if (product.institutionId) {
-          scopeBadge = `<span class="badge badge-primary">${product.institutionName || 'Institution'}</span>`;
+          scopeBadge = `<span class="badge badge-primary">${product.institution?.name || 'Institution'}</span>`;
         } else {
           scopeBadge = '<span class="badge badge-secondary">Global</span>';
         }
