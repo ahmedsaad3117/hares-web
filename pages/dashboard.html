@@ -339,10 +339,6 @@
       document.getElementById('quickActions').innerHTML = actionsHTML;
     }
     
-    function renderRecentActivity(activities) {
-      if (!activities || activities.length === 0) {
-        document.getElementById('recentActivity').innerHTML = '<p class="text-muted text-sm">No recent activity</p>';
-        return;
     async function loadRecentActivity() {
       try {
         const user = getCurrentUser();
@@ -387,6 +383,10 @@
       }
     }
     
+    function renderRecentActivity(activities) {
+      if (!activities || activities.length === 0) {
+        document.getElementById('recentActivity').innerHTML = '<p class="text-muted text-sm">No recent activity</p>';
+        return;
       }
       
       const activityHTML = activities.slice(0, 5).map(activity => {

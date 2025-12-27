@@ -1,7 +1,7 @@
 // Hares Platform - API Client
 // Base configuration and utilities for API calls
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:3001';
 
 // Get auth token from localStorage
 function getToken() {
