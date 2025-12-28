@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Installments | Hares Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
-</head>
+  <title>Installments | Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">  <script src="../js/i18n.js"></script></head>
 <body>
   <div class="layout">
     <!-- Sidebar -->
@@ -22,8 +21,8 @@
           <!-- Page Header -->
           <div class="flex items-center justify-between mb-6" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
             <div>
-              <h1 class="text-3xl font-bold text-white">Payment Installments</h1>
-              <p class="text-muted mt-1">Track and manage loan payment schedules</p>
+              <h1 class="text-3xl font-bold text-white" data-i18n-key="installments.title">Payment Installments</h1>
+              <p class="text-muted mt-1" data-i18n-key="installments.subtitle">Track and manage loan payment schedules</p>
             </div>
           </div>
           
@@ -34,45 +33,45 @@
           
           <!-- Status Filters -->
           <div class="glass-card p-4 mb-6" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-            <button id="filter-all" onclick="filterByStatus('all')" class="btn" style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4);">
-              📋 All Installments
+            <button id="filter-all" onclick="filterByStatus('all')" class="btn" style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #fff;">
+              📋 <span data-i18n-key="installments.all_installments">All Installments</span>
             </button>
-            <button id="filter-this-month" onclick="filterByStatus('this-month')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
-              📅 Due This Month
+            <button id="filter-this-month" onclick="filterByStatus('this-month')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+              📅 <span data-i18n-key="installments.due_this_month">Due This Month</span>
             </button>
-            <button id="filter-pending" onclick="filterByStatus('Pending')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
-              ⏳ Pending
+            <button id="filter-pending" onclick="filterByStatus('Pending')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+              ⏳ <span data-i18n-key="installments.pending">Pending</span>
             </button>
-            <button id="filter-paid" onclick="filterByStatus('Paid')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
-              ✅ Paid
+            <button id="filter-paid" onclick="filterByStatus('Paid')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+              ✅ <span data-i18n-key="installments.paid">Paid</span>
             </button>
-            <button id="filter-overdue" onclick="filterByStatus('Overdue')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
-              ⚠️ Overdue
+            <button id="filter-overdue" onclick="filterByStatus('Overdue')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+              ⚠️ <span data-i18n-key="installments.overdue">Overdue</span>
             </button>
           </div>
           
           <!-- Installments Table -->
           <div class="glass-card">
             <div class="table-container">
-              <table class="data-table" style="width: 100%; table-layout: fixed;">
+              <table class="table">
                 <thead>
                   <tr>
-                    <th style="width: 70px; text-align: center;">#</th>
-                    <th style="width: 90px; text-align: center;">Loan</th>
-                    <th style="width: 180px;">Customer</th>
-                    <th style="width: 140px;">Branch</th>
-                    <th style="width: 110px; text-align: right;">Amount</th>
-                    <th style="width: 120px; text-align: center;">Due Date</th>
-                    <th style="width: 100px; text-align: center;">Status</th>
-                    <th style="width: 120px; text-align: center;">Paid Date</th>
-                    <th style="width: 150px; text-align: center;">Actions</th>
+                    <th>#</th>
+                    <th data-i18n-key="installments.loan">Loan</th>
+                    <th data-i18n-key="installments.customer">Customer</th>
+                    <th data-i18n-key="installments.branch">Branch</th>
+                    <th data-i18n-key="installments.amount">Amount</th>
+                    <th data-i18n-key="installments.due_date">Due Date</th>
+                    <th data-i18n-key="installments.status">Status</th>
+                    <th data-i18n-key="installments.paid_date">Paid Date</th>
+                    <th data-i18n-key="installments.actions">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="installmentsTableBody">
                   <tr>
                     <td colspan="9" style="text-align: center; padding: 3rem;">
                       <div class="spinner"></div>
-                      <p class="text-muted mt-2">Loading installments...</p>
+                      <p class="text-muted mt-2" data-i18n-key="installments.loading">Loading installments...</p>
                     </td>
                   </tr>
                 </tbody>
@@ -91,7 +90,7 @@
   <div id="paymentModal" class="modal-overlay" style="display: none;">
     <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">
-        <h2 class="modal-title">Process Payment</h2>
+        <h2 class="modal-title" data-i18n-key="installments.process_payment">Process Payment</h2>
         <button onclick="closePaymentModal()" class="modal-close">&times;</button>
       </div>
       
@@ -99,29 +98,29 @@
         <div id="errorMessage" class="alert alert-danger hidden"></div>
         
         <div class="form-group">
-          <label class="label">Installment Details</label>
+          <label class="label" data-i18n-key="installments.installment_details">Installment Details</label>
           <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px; margin-bottom: 1rem;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span class="text-muted">Installment #</span>
+              <span class="text-muted" data-i18n-key="installments.installment_number">Installment #</span>
               <span class="text-white font-medium" id="modalInstallmentNumber"></span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span class="text-muted">Loan ID</span>
+              <span class="text-muted" data-i18n-key="installments.loan_id">Loan ID</span>
               <span class="text-white font-medium" id="modalLoanId"></span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span class="text-muted">Customer</span>
+              <span class="text-muted" data-i18n-key="installments.customer">Customer</span>
               <span class="text-white font-medium" id="modalCustomer"></span>
             </div>
             <div style="display: flex; justify-content: space-between;">
-              <span class="text-muted">Amount Due</span>
+              <span class="text-muted" data-i18n-key="installments.amount_due">Amount Due</span>
               <span class="text-white font-semibold text-lg" id="modalAmount"></span>
             </div>
           </div>
         </div>
         
         <div class="form-group">
-          <label class="label">Payment Date *</label>
+          <label class="label" data-i18n-key="installments.payment_date">Payment Date *</label>
           <input 
             type="date" 
             id="paymentDate" 
@@ -133,8 +132,8 @@
       </div>
       
       <div class="modal-footer">
-        <button type="button" onclick="closePaymentModal()" class="btn btn-secondary">Cancel</button>
-        <button type="button" onclick="processPayment()" id="processPaymentBtn" class="btn btn-primary">Process Payment</button>
+        <button type="button" onclick="closePaymentModal()" class="btn btn-secondary" data-i18n-key="installments.cancel">Cancel</button>
+        <button type="button" onclick="processPayment()" id="processPaymentBtn" class="btn btn-primary" data-i18n-key="installments.process_payment">Process Payment</button>
       </div>
     </div>
   </div>
@@ -149,16 +148,36 @@
   <script src="../js/api.js"></script>
   
   <script>
-    // Authentication check
-    const user = getCurrentUser();
-    if (!user) {
-      window.location.href = '../index.html';
+    async function initPage() {
+      await waitForI18n();
+      
+      // Authentication check
+      const user = getCurrentUser();
+      if (!user) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      // Load components
+      document.getElementById('sidebarContainer').innerHTML = createSidebar(user);
+      document.getElementById('headerContainer').innerHTML = createHeader(
+        t('installments.title')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('installments');
+      
+      // Translate all static content with data-i18n-key attributes
+      window.i18n.translatePage();
+      
+      // Initialize page
+      loadInstallments();
     }
     
-    // Load components
-    document.getElementById('sidebarContainer').innerHTML = createSidebar(user);
-    document.getElementById('headerContainer').innerHTML = createHeader('Installments Management');
-    setActiveNav('installments');
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
     
     // State
     let currentPage = 1;
@@ -271,7 +290,7 @@
       const summaryHTML = `
         <div class="glass-card p-4" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-            <span class="text-muted" style="font-size: 0.875rem;">Paid</span>
+            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.paid')}</span>
             <span style="font-size: 1.5rem;">✅</span>
           </div>
           <div class="text-white font-bold" style="font-size: 1.75rem; margin-bottom: 0.25rem;">${paidCount}</div>
@@ -280,7 +299,7 @@
         
         <div class="glass-card p-4" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-            <span class="text-muted" style="font-size: 0.875rem;">Pending</span>
+            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.pending')}</span>
             <span style="font-size: 1.5rem;">⏳</span>
           </div>
           <div class="text-white font-bold" style="font-size: 1.75rem;">${pendingCount}</div>
@@ -288,7 +307,7 @@
         
         <div class="glass-card p-4" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-            <span class="text-muted" style="font-size: 0.875rem;">Overdue</span>
+            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.overdue')}</span>
             <span style="font-size: 1.5rem;">⚠️</span>
           </div>
           <div class="text-white font-bold" style="font-size: 1.75rem;">${overdueCount}</div>
@@ -296,7 +315,7 @@
         
         <div class="glass-card p-4" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-            <span class="text-muted" style="font-size: 0.875rem;">Due This Month</span>
+            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.due_this_month')}</span>
             <span style="font-size: 1.5rem;">📅</span>
           </div>
           <div class="text-white font-bold" style="font-size: 1.75rem;">${thisMonthCount}</div>
@@ -377,7 +396,11 @@
           overdue ? 'badge-danger' :
           'badge-warning';
         
-        const statusText = inst.status === 'Paid' ? '✅ Paid' : overdue ? '⚠️ Overdue' : '⏳ Pending';
+        const statusText = inst.status === 'Paid'
+          ? `✅ ${t('installments.paid')}`
+          : overdue
+            ? `⚠️ ${t('installments.overdue')}`
+            : `⏳ ${t('installments.pending')}`;
         
         // Check days until/past due
         const today = new Date();
@@ -391,10 +414,10 @@
         
         return `
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-            <td style="text-align: center; padding: 1rem 0.5rem;">
+            <td style="padding: 1rem 0.5rem;">
               <span class="font-semibold text-white" style="font-size: 0.95rem;">#${inst.installmentNumber}</span>
             </td>
-            <td style="text-align: center; padding: 1rem 0.5rem;">
+            <td style="padding: 1rem 0.5rem;">
               <a href="loans-view.html?id=${inst.loan.loanId}" class="text-primary font-medium" style="text-decoration: underline; font-size: 0.95rem;">
                 #${inst.loan.loanId}
               </a>
@@ -408,30 +431,30 @@
             <td style="padding: 1rem 0.75rem;">
               <span class="text-secondary" style="font-size: 0.9rem;">${inst.branch.name}</span>
             </td>
-            <td style="text-align: right; padding: 1rem 0.75rem;">
+            <td style="padding: 1rem 0.75rem;">
               <span class="text-white font-semibold" style="font-size: 1rem;">${formatCurrency(inst.amount)}</span>
             </td>
-            <td ${dueDateClass} style="text-align: center; padding: 1rem 0.5rem;">
+            <td ${dueDateClass} style="padding: 1rem 0.5rem;">
               <div style="font-size: 0.9rem;">${formatDate(inst.dueDate)}</div>
               ${inst.status !== 'Paid' && daysDiff <= 7 && daysDiff >= 0 ? 
                 `<div style="font-size: 0.75rem; color: #f59e0b; margin-top: 0.125rem;">${daysDiff} day${daysDiff !== 1 ? 's' : ''} left</div>` : 
                 inst.status !== 'Paid' && daysDiff < 0 ?
                 `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.125rem;">${Math.abs(daysDiff)} day${Math.abs(daysDiff) !== 1 ? 's' : ''} late</div>` : ''}
             </td>
-            <td style="text-align: center; padding: 1rem 0.5rem;">
+            <td style="padding: 1rem 0.5rem;">
               <span class="badge ${statusBadge}" style="font-size: 0.85rem; white-space: nowrap;">${statusText}</span>
             </td>
-            <td style="text-align: center; padding: 1rem 0.5rem;">
+            <td style="padding: 1rem 0.5rem;">
               <span class="text-secondary" style="font-size: 0.9rem;">${inst.paymentDate ? formatDate(inst.paymentDate) : '-'}</span>
             </td>
-            <td style="text-align: center; padding: 1rem 0.5rem;">
+            <td style="padding: 1rem 0.5rem;">
               <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: center;">
                 <a href="installments-view.html?id=${inst.id}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
-                  View
+                  ${t('installments.view')}
                 </a>
                 ${inst.status !== 'Paid' ? `
                   <button onclick="openPaymentModal(${inst.id})" class="btn btn-success" style="font-size: 0.75rem; padding: 0.375rem 0.75rem; background: #10b981;">
-                    Pay
+                    ${t('installments.pay')}
                   </button>
                 ` : ''}
               </div>

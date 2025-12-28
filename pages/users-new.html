@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add User - Hares Platform</title>
+  <title>Add User - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -22,8 +23,8 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white">Add User</h1>
-          <p class="text-secondary">Create a new user account</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="users.add_user">Add User</h1>
+          <p class="text-secondary" data-i18n-key="users.create_new_user">Create a new user account</p>
         </div>
       </div>
       
@@ -32,12 +33,13 @@
         <form id="userForm">
           <!-- Name -->
           <div class="form-group">
-            <label class="label">Full Name *</label>
+            <label class="label" data-i18n-key="users.form.full_name">Full Name *</label>
             <input 
               type="text" 
               id="name" 
               name="name" 
               class="input" 
+              data-i18n-placeholder="users.form.full_name_placeholder"
               placeholder="Enter full name"
               required
             />
@@ -46,12 +48,13 @@
           
           <!-- Email -->
           <div class="form-group">
-            <label class="label">Email *</label>
+            <label class="label" data-i18n-key="users.form.email_label">Email *</label>
             <input 
               type="email" 
               id="email" 
               name="email" 
               class="input" 
+              data-i18n-placeholder="users.form.email_placeholder"
               placeholder="user@example.com"
               required
             />
@@ -60,12 +63,13 @@
           
           <!-- Password -->
           <div class="form-group">
-            <label class="label">Password *</label>
+            <label class="label" data-i18n-key="users.form.password">Password *</label>
             <input 
               type="password" 
               id="password" 
               name="password" 
               class="input" 
+              data-i18n-placeholder="users.form.password_placeholder"
               placeholder="Enter password (min 6 characters)"
               required
             />
@@ -74,27 +78,27 @@
           
           <!-- Role -->
           <div class="form-group">
-            <label class="label">Role *</label>
+            <label class="label" data-i18n-key="users.form.role_label">Role *</label>
             <select id="roleId" name="roleId" class="input" required>
-              <option value="">Select role...</option>
+              <option value="" data-i18n-key="users.form.role_placeholder">Select role...</option>
             </select>
             <div id="roleIdError" class="error-text hidden"></div>
           </div>
           
           <!-- Institution (conditional) -->
           <div class="form-group" id="institutionGroup" style="display: none;">
-            <label class="label">Institution *</label>
+            <label class="label" data-i18n-key="users.form.institution_label">Institution *</label>
             <select id="institutionId" name="institutionId" class="input">
-              <option value="">Select institution...</option>
+              <option value="" data-i18n-key="users.form.institution_placeholder">Select institution...</option>
             </select>
             <div id="institutionIdError" class="error-text hidden"></div>
           </div>
           
           <!-- Branch (conditional) -->
           <div class="form-group" id="branchGroup" style="display: none;">
-            <label class="label">Branch *</label>
+            <label class="label" data-i18n-key="users.form.branch_label">Branch *</label>
             <select id="branchId" name="branchId" class="input">
-              <option value="">Select branch...</option>
+              <option value="" data-i18n-key="users.form.branch_placeholder">Select branch...</option>
             </select>
             <div id="branchIdError" class="error-text hidden"></div>
           </div>
@@ -103,7 +107,7 @@
           <div class="form-group">
             <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
               <input type="checkbox" id="isActive" name="isActive" checked>
-              <span class="label" style="margin: 0;">Active</span>
+              <span class="label" style="margin: 0;" data-i18n-key="users.form.active_label">Active</span>
             </label>
           </div>
           
@@ -118,9 +122,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
-              Create User
+              <span data-i18n-key="users.form.create_user">Create User</span>
             </button>
-            <a href="users.html" class="btn btn-secondary">Cancel</a>
+            <a href="users.html" class="btn btn-secondary" data-i18n-key="users.form.cancel">Cancel</a>
           </div>
         </form>
       </div>
@@ -131,21 +135,32 @@
   <script src="../components/sidebar.js"></script>
   <script src="../components/header.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
-    }
-    
-    const user = getCurrentUser();
-    
-    // Only Super Admin and Institution can access
-    if (user.roleName !== 'Super Admin' && user.roleName !== 'Institution') {
-      window.location.href = 'dashboard.html';
-    }
-    
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Add User', 'Create a new user account');
-    setActiveNav('users');
+    async function initPage() {
+      await waitForI18n();
+      
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      
+      // Only Super Admin and Institution can access
+      if (user.roleName !== 'Super Admin' && user.roleName !== 'Institution') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('users.add_user'),
+        t('users.create_new_user')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('users');
+      
+      // Translate all static content with data-i18n-key attributes
+      window.i18n.translatePage();
     
     const form = document.getElementById('userForm');
     const submitButton = document.getElementById('submitButton');
@@ -162,16 +177,16 @@
     // Populate role dropdown based on user role
     if (user.roleName === 'Super Admin') {
       roleSelect.innerHTML = `
-        <option value="">Select role...</option>
-        <option value="1">Super Admin</option>
-        <option value="2">Institution</option>
-        <option value="3">Branch</option>
+        <option value="">${t('users.form.role_placeholder')}</option>
+        <option value="1">${t('users.roles.super_admin')}</option>
+        <option value="2">${t('users.roles.institution')}</option>
+        <option value="3">${t('users.roles.branch')}</option>
       `;
     } else if (user.roleName === 'Institution') {
       // Institution users can only create Branch users
       roleSelect.innerHTML = `
-        <option value="">Select role...</option>
-        <option value="3">Branch</option>
+        <option value="">${t('users.form.role_placeholder')}</option>
+        <option value="3">${t('users.roles.branch')}</option>
       `;
       roleSelect.value = '3'; // Pre-select Branch role
     }
@@ -196,7 +211,7 @@
         }
         
         // Populate institutions dropdown
-        institutionSelect.innerHTML = '<option value="">Select institution...</option>';
+        institutionSelect.innerHTML = `<option value="">${t('users.form.institution_placeholder')}</option>`;
         institutions.forEach(inst => {
           institutionSelect.innerHTML += `<option value="${inst.institutionId}">${inst.name}</option>`;
         });
@@ -245,7 +260,7 @@
       if (roleId === 3 && institutionId) {
         // Filter branches by institution
         const filteredBranches = branches.filter(b => b.institutionId === institutionId);
-        branchSelect.innerHTML = '<option value="">Select branch...</option>';
+        branchSelect.innerHTML = `<option value="">${t('users.form.branch_placeholder')}</option>`;
         filteredBranches.forEach(branch => {
           branchSelect.innerHTML += `<option value="${branch.branchId}">${branch.name}</option>`;
         });
@@ -350,6 +365,13 @@
         `;
       }
     });
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
   </script>
 </body>
 </html>

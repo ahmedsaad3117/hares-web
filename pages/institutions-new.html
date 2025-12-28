@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Institution - Hares Platform</title>
+  <title>Add Institution - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -32,54 +33,108 @@
         <form id="institutionForm">
           <!-- Name -->
           <div class="form-group">
-            <label class="label">Institution Name *</label>
+            <label class="label" data-i18n-key="institutions.form.name_label">Institution Name</label> <span data-i18n-key="institutions.form.name_required">*</span>
             <input 
               type="text" 
               id="name" 
               name="name" 
               class="input" 
+              data-i18n-placeholder="institutions.form.name_placeholder"
               placeholder="Enter institution name"
               required
             />
             <div id="nameError" class="error-text hidden"></div>
           </div>
           
+          <!-- Tax ID -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="institutions.form.tax_id_label">Tax ID</label>
+            <input 
+              type="text" 
+              id="taxId" 
+              name="taxId" 
+              class="input" 
+              data-i18n-placeholder="institutions.form.tax_id_placeholder"
+              placeholder="Enter tax ID"
+            />
+            <div id="taxIdError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="institutions.form.phone_label">Phone Number</label>
+            <input 
+              type="tel" 
+              id="phoneNumber" 
+              name="phoneNumber" 
+              class="input" 
+              data-i18n-placeholder="institutions.form.phone_placeholder"
+              placeholder="Enter phone number"
+            />
+            <div id="phoneNumberError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Email -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="institutions.form.email_label">Email</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="input" 
+              data-i18n-placeholder="institutions.form.email_placeholder"
+              placeholder="Enter email address"
+            />
+            <div id="emailError" class="error-text hidden"></div>
+          </div>
+          
           <!-- Max Users -->
           <div class="form-group">
-            <label class="label">Maximum Users *</label>
+            <label class="label" data-i18n-key="institutions.form.max_users_label">Maximum Users</label> <span data-i18n-key="institutions.form.max_users_required">*</span>
             <input 
               type="number" 
               id="maxUsers" 
               name="maxUsers" 
               class="input" 
+              data-i18n-placeholder="institutions.form.max_users_placeholder"
               placeholder="Enter maximum users"
               min="1"
               value="10"
               required
             />
             <div id="maxUsersError" class="error-text hidden"></div>
-            <p class="text-sm text-muted" style="margin-top: 0.25rem;">Maximum number of users allowed for this institution</p>
+            <p class="text-sm text-muted" style="margin-top: 0.25rem;" data-i18n-key="institutions.form.max_users_help">Maximum number of users allowed for this institution</p>
+          </div>
+          
+          <!-- Can Create Branches -->
+          <div class="form-group">
+            <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="canCreateBranches" name="canCreateBranches" checked>
+              <span class="label" style="margin: 0;" data-i18n-key="institutions.form.can_create_branches_label">Allow Branch Creation</span>
+            </label>
+            <p class="text-sm text-muted" style="margin-top: 0.25rem;" data-i18n-key="institutions.form.can_create_branches_help">Allow this institution to create and manage branches</p>
           </div>
           
           <!-- Expiration Date -->
           <div class="form-group">
-            <label class="label">Expiration Date</label>
+            <label class="label" data-i18n-key="institutions.form.expiration_date_label">Expiration Date</label>
             <input 
               type="date" 
               id="expirationDate" 
               name="expirationDate" 
               class="input" 
+              data-i18n-placeholder="institutions.form.expiration_date_placeholder"
               placeholder="Select expiration date"
             />
             <div id="expirationDateError" class="error-text hidden"></div>
-            <p class="text-sm text-muted" style="margin-top: 0.25rem;">Institution will be automatically deactivated after this date</p>
+            <p class="text-sm text-muted" style="margin-top: 0.25rem;" data-i18n-key="institutions.form.expiration_date_help">Institution will be automatically deactivated after this date</p>
           </div>
           
           <!-- Active Status -->
           <div class="form-group">
             <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
               <input type="checkbox" id="isActive" name="isActive" checked>
-              <span class="label" style="margin: 0;">Active</span>
+              <span class="label" style="margin: 0;" data-i18n-key="institutions.form.active_label">Active</span>
             </label>
           </div>
           
@@ -94,9 +149,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
-              Create Institution
+              <span data-i18n-key="institutions.form.create_institution">Create Institution</span>
             </button>
-            <a href="institutions.html" class="btn btn-secondary">Cancel</a>
+            <a href="institutions.html" class="btn btn-secondary" data-i18n-key="institutions.form.cancel">Cancel</a>
           </div>
         </form>
       </div>
@@ -107,15 +162,23 @@
   <script src="../components/sidebar.js"></script>
   <script src="../components/header.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
-    }
-    
-    const user = getCurrentUser();
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Add Institution', 'Create a new institution');
-    setActiveNav('institutions');
+    async function initPage() {
+      await waitForI18n();
+      
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('institutions.add_institution'),
+        t('institutions.create_new_institution')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('institutions');
+      window.i18n.translatePage();
     
     const form = document.getElementById('institutionForm');
     const submitButton = document.getElementById('submitButton');
@@ -133,8 +196,19 @@
       const formData = {
         name: document.getElementById('name').value.trim(),
         maxUsers: parseInt(document.getElementById('maxUsers').value),
+        canCreateBranches: document.getElementById('canCreateBranches').checked,
         isActive: document.getElementById('isActive').checked,
       };
+      
+      // Add optional fields if provided
+      const taxId = document.getElementById('taxId').value.trim();
+      if (taxId) formData.taxId = taxId;
+      
+      const phoneNumber = document.getElementById('phoneNumber').value.trim();
+      if (phoneNumber) formData.phoneNumber = phoneNumber;
+      
+      const email = document.getElementById('email').value.trim();
+      if (email) formData.email = email;
       
       // Add expiration date if provided
       const expirationDate = document.getElementById('expirationDate').value;
@@ -146,13 +220,13 @@
       let hasError = false;
       
       if (formData.name.length < 2) {
-        document.getElementById('nameError').textContent = 'Name must be at least 2 characters';
+        document.getElementById('nameError').textContent = t('institutions.form.name_error');
         document.getElementById('nameError').classList.remove('hidden');
         hasError = true;
       }
       
       if (formData.maxUsers < 1) {
-        document.getElementById('maxUsersError').textContent = 'Max users must be at least 1';
+        document.getElementById('maxUsersError').textContent = t('institutions.form.max_users_error');
         document.getElementById('maxUsersError').classList.remove('hidden');
         hasError = true;
       }
@@ -161,7 +235,7 @@
       
       // Disable submit button
       submitButton.disabled = true;
-      submitButton.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Creating...';
+      submitButton.innerHTML = `<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> ${t('institutions.form.creating')}`;
       
       try {
         await api.institutions.create(formData);
@@ -178,10 +252,17 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"/>
           </svg>
-          Create Institution
+          <span data-i18n-key="institutions.form.create_institution">${t('institutions.form.create_institution')}</span>
         `;
       }
     });
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
   </script>
 </body>
 </html>

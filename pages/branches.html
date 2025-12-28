@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Branches - Hares Platform</title>
+  <title>Branches - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -18,8 +19,8 @@
         <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
           <div style="font-size: 2rem;">🏢</div>
           <div>
-            <h1 class="text-3xl font-bold text-white">Branches</h1>
-            <p class="text-secondary">Manage branch locations</p>
+            <h1 class="text-3xl font-bold text-white" data-i18n-key="branches.title">${t('branches.title')}</h1>
+            <p class="text-secondary" data-i18n-key="branches.branch_details">${t('branches.branch_details')}</p>
           </div>
         </div>
         <a href="branches-new.html" class="btn btn-primary">
@@ -27,7 +28,7 @@
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          Add Branch
+          <span data-i18n-key="branches.add_branch">${t('branches.add_branch')}</span>
         </a>
       </div>
       
@@ -48,33 +49,47 @@
   <script src="../components/header.js"></script>
   <script src="../components/pagination.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
+    // Wait for i18n to be ready
+    async function initPage() {
+      await waitForI18n();
+      
+      // Check authentication
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(t('branches.title'), t('branches.branch_details'));
+      initializeLanguageSwitcher();
+      setActiveNav('branches');
+      
+      // Load branches with pagination
+      loadBranches();
     }
     
-    const user = getCurrentUser();
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Branches', 'Manage branch locations');
-    setActiveNav('branches');
+    // Start when ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
     
     let currentPage = 1;
     let totalPages = 1;
     const pageSize = 12;
     
-    // Load branches with pagination
-    loadBranches();
-    
     async function loadBranches(page = 1) {
       try {
-        const response = await api.branches.getAll(page, pageSize, null);
+        const response = await api.branches.getAll(page, pageSize);
         currentPage = response.meta.page;
         totalPages = response.meta.totalPages;
         renderBranches(response.data);
       } catch (error) {
         console.error('Error loading branches:', error);
-        showToast('Failed to load branches', 'error');
-        document.getElementById('branchesGrid').innerHTML = '<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">Failed to load branches</p>';
+        showToast(t('branches.failed_to_load'), 'error');
+        document.getElementById('branchesGrid').innerHTML = `<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">${t('branches.failed_to_load')}</p>`;
       }
     }
     
@@ -86,6 +101,7 @@
     
     function renderBranches(branches) {
       const grid = document.getElementById('branchesGrid');
+      const user = getCurrentUser(); // Get user for role check
       
       if (branches.length === 0) {
         grid.innerHTML = `
@@ -93,7 +109,7 @@
             <svg style="width: 64px; height: 64px; margin: 0 auto 1rem; color: #475569;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
             </svg>
-            <p class="text-muted">No branches yet</p>
+            <p class="text-muted">${t('branches.no_branches')}</p>
           </div>
         `;
         return;
@@ -113,34 +129,34 @@
               <p class="text-sm text-secondary">${branch.institution.name}</p>
             </div>
             <span class="badge ${branch.isActive ? 'badge-success' : 'badge-danger'}">
-              ${branch.isActive ? 'Active' : 'Inactive'}
+              ${branch.isActive ? t('branches.active') : t('branches.inactive')}
             </span>
           </div>
           
           <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; padding: 1rem 0; border-top: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
             <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
-              <span class="text-muted text-sm">Branch ID</span>
+              <span class="text-muted text-sm">${t('branches.branch_id')}</span>
               <span class="text-white font-semibold">#${branch.branchId}</span>
             </div>
             <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
-              <span class="text-muted text-sm">Institution ID</span>
+              <span class="text-muted text-sm">${t('branches.institution_id')}</span>
               <span class="text-secondary">#${branch.institutionId}</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
               <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
-                <span class="text-muted text-sm">Loan Capacity</span>
+                <span class="text-muted text-sm">${t('branches.loan_capacity')}</span>
                 <span class="text-white font-semibold">${formatCurrency(totalLoans)}/${formatCurrency(maximumLoans)}</span>
               </div>
               <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden;">
                 <div style="width: ${utilizationPercent}%; height: 100%; background: ${capacityColor}; transition: width 0.3s ease;"></div>
               </div>
-              ${utilizationPercent >= 90 ? '<span class="text-xs" style="color: #ef4444;">⚠️ Near capacity</span>' : ''}
-              ${utilizationPercent >= 100 ? '<span class="text-xs" style="color: #ef4444;">🚫 At capacity</span>' : ''}
+              ${utilizationPercent >= 90 && utilizationPercent < 100 ? `<span class="text-xs" style="color: #ef4444;">⚠️ ${t('branches.near_capacity')}</span>` : ''}
+              ${utilizationPercent >= 100 ? `<span class="text-xs" style="color: #ef4444;">🚫 ${t('branches.at_capacity')}</span>` : ''}
             </div>
           </div>
           
           <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 1rem;">
-            Created: ${formatDate(branch.createdAt)}
+            ${t('branches.created')}: ${formatDate(branch.createdAt)}
           </div>
           
           <div class="flex items-center gap-2" style="display: flex; gap: 0.5rem;">
@@ -149,13 +165,13 @@
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                 <circle cx="12" cy="12" r="3"/>
               </svg>
-              View
+              ${t('branches.view')}
             </a>
             <a href="branches-edit.html?id=${branch.branchId}" class="btn btn-secondary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem 1rem;">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
               </svg>
-              Edit
+              ${t('branches.edit')}
             </a>
             ${user.roleName === 'Super Admin' ? `
             <button onclick="toggleActive(${branch.branchId}, ${branch.isActive})" class="btn ${branch.isActive ? 'btn-danger' : 'btn-secondary'}" style="font-size: 0.875rem; padding: 0.5rem 0.75rem;">
@@ -181,15 +197,17 @@
     
     async function toggleActive(id, currentStatus) {
       const action = currentStatus ? 'deactivate' : 'activate';
-      if (!confirm(`Are you sure you want to ${action} this branch?`)) return;
+      const confirmMsg = currentStatus ? t('branches.deactivate_confirmation') : t('branches.activate_confirmation');
+      if (!confirm(confirmMsg)) return;
       
       try {
         await api.branches.toggleActive(id);
-        showToast(`Branch ${action}d successfully`, 'success');
+        const successMsg = currentStatus ? t('branches.deactivated_success') : t('branches.activated_success');
+        showToast(successMsg, 'success');
         loadBranches(currentPage);
       } catch (error) {
         console.error('Error toggling branch status:', error);
-        showToast('Failed to update branch status', 'error');
+        showToast(t('branches.toggle_failed'), 'error');
       }
     }
   </script>

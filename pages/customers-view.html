@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customer Details - Hares Platform</title>
+  <title>Customer Details - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -22,8 +23,8 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white">Customer Details</h1>
-          <p class="text-secondary">View customer profile</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="customers.view_page.customer_details_title">Customer Details</h1>
+          <p class="text-secondary" data-i18n-key="customers.view_page.view_profile">View customer profile</p>
         </div>
       </div>
       
@@ -43,38 +44,38 @@
                   <h2 id="customerName" class="text-2xl font-bold text-white" style="margin: 0;"></h2>
                   <span id="trustStatusBadge"></span>
                 </div>
-                <p class="text-muted" style="margin: 0;">Customer ID: <span id="customerId"></span></p>
+                <p class="text-muted" style="margin: 0;" data-i18n-key="customers.view_page.customer_id">Customer ID: <span id="customerId"></span></p>
               </div>
             </div>
             <div class="flex gap-2" style="display: flex; gap: 0.5rem;">
-              <a id="editBtn" class="btn btn-primary">Edit</a>
-              <button id="deleteBtn" class="btn btn-danger">Delete</button>
+              <a id="editBtn" class="btn btn-primary" data-i18n-key="customers.view_page.edit">Edit</a>
+              <button id="deleteBtn" class="btn btn-danger" data-i18n-key="customers.view_page.delete">Delete</button>
             </div>
           </div>
           
           <div class="grid grid-cols-2 gap-6" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
             <div>
-              <p class="text-muted mb-1">National ID</p>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.national_id">National ID</p>
               <p id="nationalId" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Phone Number</p>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.phone_number">Phone Number</p>
               <p id="phoneNumber" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Institution</p>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.institution">Institution</p>
               <p id="institutionInfo" class="text-white font-medium">--</p>
             </div>
             <div>
-              <p class="text-muted mb-1">Added By</p>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.added_by">Added By</p>
               <p id="creatorInfo" class="text-white font-medium">--</p>
             </div>
             <div>
-              <p class="text-muted mb-1">Created At</p>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.created_at">Created At</p>
               <p id="createdAt" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Last Updated</p>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.last_updated">Last Updated</p>
               <p id="updatedAt" class="text-white font-medium"></p>
             </div>
           </div>
@@ -82,10 +83,10 @@
         
         <!-- Trust Status Management (Institution/Super Admin only) -->
         <div id="trustStatusSection" class="glass-card p-6 mb-6" style="display: none;">
-          <h3 class="text-xl font-bold text-white mb-4">Trust Status Management</h3>
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="customers.view_page.trust_status_title">Trust Status Management</h3>
           <div style="display: flex; flex-direction: column; gap: 1rem;">
             <div style="display: flex; align-items: center; gap: 1rem;">
-              <label for="trustStatusSelect" class="text-muted" style="min-width: 120px;">Current Status:</label>
+              <label for="trustStatusSelect" class="text-muted" style="min-width: 120px;" data-i18n-key="customers.view_page.current_status">Current Status:</label>
               <select id="trustStatusSelect" class="form-input" style="flex: 1; max-width: 300px;">
                 <option value="Unverified">Unverified</option>
                 <option value="Trusted">Trusted</option>
@@ -95,10 +96,10 @@
               </select>
             </div>
             <div style="display: flex; align-items: flex-start; gap: 1rem;">
-              <button id="updateTrustStatusBtn" class="btn btn-primary" style="padding: 0.5rem 1.5rem;">
+              <button id="updateTrustStatusBtn" class="btn btn-primary" style="padding: 0.5rem 1.5rem;" data-i18n-key="customers.view_page.update_status">
                 Update Status
               </button>
-              <p class="text-muted" style="font-size: 0.875rem; margin: 0.5rem 0 0 0;">
+              <p class="text-muted" style="font-size: 0.875rem; margin: 0.5rem 0 0 0;" data-i18n-key="customers.view_page.status_audit_note">
                 This action will be logged for audit purposes. Only Institution Admins and Super Admins can change trust status.
               </p>
             </div>
@@ -107,7 +108,7 @@
         
         <!-- Customer Loans -->
         <div class="glass-card p-6 mb-6">
-          <h3 class="text-xl font-bold text-white mb-4">Loans</h3>
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="customers.view_page.loans_title">Loans</h3>
           <div id="loansContainer">
             <div class="loading-container">
               <div class="spinner"></div>
@@ -118,9 +119,9 @@
         <!-- Customer Notes -->
         <div class="glass-card p-6">
           <div class="flex items-center justify-between mb-4" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h3 class="text-xl font-bold text-white">Customer Notes</h3>
+            <h3 class="text-xl font-bold text-white" data-i18n-key="customers.view_page.notes_title">Customer Notes</h3>
             <button id="toggleNotesBtn" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
-              <span id="toggleNotesText">Show Notes</span> (<span id="notesCount">0</span>)
+              <span id="toggleNotesText" data-i18n-key="customers.view_page.show_notes">Show Notes</span> (<span id="notesCount">0</span>)
             </button>
           </div>
           
@@ -131,7 +132,7 @@
                   <line x1="12" y1="5" x2="12" y2="19"/>
                   <line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
-                Add Note
+                <span data-i18n-key="customers.view_page.add_note">Add Note</span>
               </button>
             </div>
             
@@ -161,32 +162,32 @@
       
       <form id="noteForm">
         <div class="mb-4">
-          <label for="noteText" class="label">Note Text *</label>
-          <textarea id="noteText" class="input" rows="6" maxlength="1400" required placeholder="Enter note text (max 1400 characters)"></textarea>
+          <label for="noteText" class="label" data-i18n-key="customers.view_page.note_text">Note Text *</label>
+          <textarea id="noteText" class="input" rows="6" maxlength="1400" required data-i18n-placeholder="customers.view_page.note_text_placeholder" placeholder="Enter note text (max 1400 characters)"></textarea>
           <p class="text-sm text-muted" style="margin-top: 0.25rem;"><span id="charCount">0</span>/1400</p>
         </div>
         
         <div class="mb-4">
-          <label for="noteCategory" class="label">Category</label>
+          <label for="noteCategory" class="label" data-i18n-key="customers.view_page.category">Category</label>
           <select id="noteCategory" class="input">
-            <option value="General">General</option>
-            <option value="Follow-up">Follow-up</option>
-            <option value="Complaint">Complaint</option>
-            <option value="Payment Issue">Payment Issue</option>
+            <option value="General" data-i18n-key="customers.view_page.general">General</option>
+            <option value="Follow-up" data-i18n-key="customers.view_page.follow_up">Follow-up</option>
+            <option value="Complaint" data-i18n-key="customers.view_page.complaint">Complaint</option>
+            <option value="Payment Issue" data-i18n-key="customers.view_page.payment_issue">Payment Issue</option>
           </select>
         </div>
         
         <div id="branchFieldContainer" class="mb-4" style="display: none;">
-          <label for="noteBranch" class="label">Branch (Optional for Admins)</label>
+          <label for="noteBranch" class="label" data-i18n-key="customers.view_page.branch_optional">Branch (Optional for Admins)</label>
           <select id="noteBranch" class="input">
-            <option value="">Use My Branch</option>
+            <option value="" data-i18n-key="customers.view_page.use_my_branch">Use My Branch</option>
           </select>
         </div>
         
         <div class="flex gap-2" style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-          <button type="button" id="cancelNoteBtn" class="btn btn-secondary">Cancel</button>
+          <button type="button" id="cancelNoteBtn" class="btn btn-secondary" data-i18n-key="customers.view_page.cancel">Cancel</button>
           <button type="submit" class="btn btn-primary">
-            <span id="submitBtnText">Save Note</span>
+            <span id="submitBtnText" data-i18n-key="customers.view_page.save_note">Save Note</span>
           </button>
         </div>
       </form>
@@ -232,15 +233,23 @@
   <script src="../components/sidebar.js"></script>
   <script src="../components/header.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
-    }
-    
-    const user = getCurrentUser();
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Customer Details', 'View customer profile');
-    setActiveNav('customers');
+    async function initPage() {
+      await waitForI18n();
+      
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('customers.customer_details'),
+        t('customers.view_customer_info')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('customers');
+      window.i18n.translatePage();
     
     const loadingContainer = document.getElementById('loadingContainer');
     const customerContainer = document.getElementById('customerContainer');
@@ -705,6 +714,14 @@
     });
     
     loadCustomer();
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
   </script>
 </body>
 </html>
+

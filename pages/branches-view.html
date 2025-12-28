@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Branch Details - Hares Platform</title>
+  <title>Branch Details - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -98,15 +99,22 @@
   <script src="../components/sidebar.js"></script>
   <script src="../components/header.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
-    }
-    
-    const user = getCurrentUser();
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Branch Details', 'View branch information');
-    setActiveNav('branches');
+    async function initPage() {
+      await waitForI18n();
+      
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('branches.branch_details'),
+        t('branches.view_branch_info')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('branches');
     
     const loadingContainer = document.getElementById('loadingContainer');
     const branchContainer = document.getElementById('branchContainer');
@@ -243,6 +251,13 @@
     });
     
     loadBranch();
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
   </script>
 </body>
 </html>

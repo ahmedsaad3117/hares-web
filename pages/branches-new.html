@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Branch - Hares Platform</title>
+  <title>Add Branch - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -32,40 +33,70 @@
         <form id="branchForm">
           <!-- Institution (only shown for Super Admin) -->
           <div class="form-group" id="institutionField">
-            <label class="label">Institution *</label>
+            <label class="label" data-i18n-key="branches.form.institution_label">Institution</label> <span data-i18n-key="branches.form.institution_required">*</span>
             <select id="institutionId" name="institutionId" class="input" required>
-              <option value="">Select institution</option>
+              <option value="" data-i18n-key="branches.form.select_institution">Select institution</option>
             </select>
             <div id="institutionIdError" class="error-text hidden"></div>
           </div>
           
           <!-- Branch Name -->
           <div class="form-group">
-            <label class="label">Branch Name *</label>
+            <label class="label" data-i18n-key="branches.form.name_label">Branch Name</label> <span data-i18n-key="branches.form.name_required">*</span>
             <input 
               type="text" 
               id="name" 
               name="name" 
               class="input" 
+              data-i18n-placeholder="branches.form.name_placeholder"
               placeholder="Enter branch name"
               required
             />
             <div id="nameError" class="error-text hidden"></div>
           </div>
           
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="branches.form.phone_label">Phone Number</label>
+            <input 
+              type="tel" 
+              id="phoneNumber" 
+              name="phoneNumber" 
+              class="input" 
+              data-i18n-placeholder="branches.form.phone_placeholder"
+              placeholder="Enter phone number"
+            />
+            <div id="phoneNumberError" class="error-text hidden"></div>
+          </div>
+          
+          <!-- Email -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="branches.form.email_label">Email</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="input" 
+              data-i18n-placeholder="branches.form.email_placeholder"
+              placeholder="Enter email address"
+            />
+            <div id="emailError" class="error-text hidden"></div>
+          </div>
+          
           <!-- Maximum Loans -->
           <div class="form-group">
-            <label class="label">Maximum Loan Capacity *</label>
+            <label class="label" data-i18n-key="branches.form.max_loans_label">Maximum Loan Capacity</label> <span data-i18n-key="branches.form.max_loans_required">*</span>
             <input 
               type="number" 
               id="maximumLoans" 
               name="maximumLoans" 
               class="input" 
+              data-i18n-placeholder="branches.form.max_loans_placeholder"
               placeholder="Enter maximum number of loans"
               min="0"
               required
             />
-            <p class="text-xs text-secondary mt-1">Set the maximum number of active loans this branch can handle</p>
+            <p class="text-xs text-secondary mt-1" data-i18n-key="branches.form.max_loans_help">Set the maximum number of active loans this branch can handle</p>
             <div id="maximumLoansError" class="error-text hidden"></div>
           </div>
           
@@ -79,7 +110,7 @@
                 checked
                 style="width: 18px; height: 18px; cursor: pointer;"
               />
-              <span class="label" style="margin: 0;">Branch is Active</span>
+              <span class="label" style="margin: 0;" data-i18n-key="branches.form.active_label">Branch is Active</span>
             </label>
           </div>
           
@@ -94,9 +125,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
-              Create Branch
+              <span data-i18n-key="branches.form.create_branch">Create Branch</span>
             </button>
-            <a href="branches.html" class="btn btn-secondary">Cancel</a>
+            <a href="branches.html" class="btn btn-secondary" data-i18n-key="branches.form.cancel">Cancel</a>
           </div>
         </form>
       </div>
@@ -107,15 +138,23 @@
   <script src="../components/sidebar.js"></script>
   <script src="../components/header.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
-    }
-    
-    const user = getCurrentUser();
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Add Branch', 'Create a new branch location');
-    setActiveNav('branches');
+    async function initPage() {
+      await waitForI18n();
+      
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('branches.add_branch'),
+        t('branches.create_new_branch')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('branches');
+      window.i18n.translatePage();
     
     // Load institutions
     loadInstitutions();
@@ -144,7 +183,7 @@
         });
       } catch (error) {
         console.error('Error loading institutions:', error);
-        showToast('Failed to load institutions', 'error');
+        showToast(t('branches.form.failed_to_load_institutions'), 'error');
       }
     }
     
@@ -165,7 +204,7 @@
           <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        Creating...
+        ${t('branches.form.creating')}
       `;
       
       try {
@@ -175,6 +214,13 @@
           isActive: document.getElementById('isActive').checked
         };
         
+        // Add optional fields if provided
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        if (phoneNumber) formData.phoneNumber = phoneNumber;
+        
+        const email = document.getElementById('email').value.trim();
+        if (email) formData.email = email;
+        
         // Add institutionId based on user role
         if (user.roleName === 'Institution' && user.institutionId) {
           formData.institutionId = user.institutionId;
@@ -183,7 +229,7 @@
         }
         
         await api.branches.create(formData);
-        showToast('Branch created successfully', 'success');
+        showToast(t('branches.form.created_success'), 'success');
         
         // Redirect to branches page
         setTimeout(() => {
@@ -193,7 +239,7 @@
       } catch (error) {
         console.error('Error creating branch:', error);
         errorMessage.classList.remove('hidden');
-        errorMessage.querySelector('p').textContent = error.response?.data?.message || 'Failed to create branch. Please try again.';
+        errorMessage.querySelector('p').textContent = error.response?.data?.message || t('branches.form.create_failed');
         
         // Re-enable submit button
         submitButton.disabled = false;
@@ -201,10 +247,17 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"/>
           </svg>
-          Create Branch
+          <span data-i18n-key="branches.form.create_branch">${t('branches.form.create_branch')}</span>
         `;
       }
     });
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
   </script>
 </body>
 </html>

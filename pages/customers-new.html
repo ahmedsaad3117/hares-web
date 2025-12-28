@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Customer - Hares Platform</title>
+  <title>Add Customer - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -32,12 +33,13 @@
         <form id="customerForm">
           <!-- Name -->
           <div class="form-group">
-            <label class="label">Customer Name *</label>
+            <label class="label" data-i18n-key="customers.form.name_label">Customer Name</label> <span data-i18n-key="customers.form.name_required">*</span>
             <input 
               type="text" 
               id="name" 
               name="name" 
               class="input" 
+              data-i18n-placeholder="customers.form.name_placeholder"
               placeholder="Enter customer name"
               required
             />
@@ -46,12 +48,13 @@
           
           <!-- National ID -->
           <div class="form-group">
-            <label class="label">National ID *</label>
+            <label class="label" data-i18n-key="customers.form.national_id_label">National ID</label> <span data-i18n-key="customers.form.national_id_required">*</span>
             <input 
               type="text" 
               id="nationalId" 
               name="nationalId" 
               class="input" 
+              data-i18n-placeholder="customers.form.national_id_placeholder"
               placeholder="Enter national ID"
               required
             />
@@ -60,12 +63,13 @@
           
           <!-- Phone Number -->
           <div class="form-group">
-            <label class="label">Phone Number *</label>
+            <label class="label" data-i18n-key="customers.form.phone_label">Phone Number</label> <span data-i18n-key="customers.form.phone_required">*</span>
             <input 
               type="tel" 
               id="phoneNumber" 
               name="phoneNumber" 
               class="input" 
+              data-i18n-placeholder="customers.form.phone_placeholder"
               placeholder="+1234567890"
               required
             />
@@ -83,9 +87,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
-              Create Customer
+              <span data-i18n-key="customers.form.create_customer">Create Customer</span>
             </button>
-            <a href="customers.html" class="btn btn-secondary">Cancel</a>
+            <a href="customers.html" class="btn btn-secondary" data-i18n-key="customers.form.cancel">Cancel</a>
           </div>
         </form>
       </div>
@@ -96,15 +100,31 @@
   <script src="../components/sidebar.js"></script>
   <script src="../components/header.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
+    async function initPage() {
+      await waitForI18n();
+      
+      // Check authentication
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('customers.add_customer'),
+        t('customers.create_new_customer')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('customers');
+      window.i18n.translatePage();
     }
     
-    const user = getCurrentUser();
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Add Customer', 'Create a new customer profile');
-    setActiveNav('customers');
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
     
     const form = document.getElementById('customerForm');
     const submitButton = document.getElementById('submitButton');
@@ -130,19 +150,19 @@
       let hasError = false;
       
       if (formData.name.length < 2) {
-        document.getElementById('nameError').textContent = 'Name must be at least 2 characters';
+        document.getElementById('nameError').textContent = t('customers.form.name_error');
         document.getElementById('nameError').classList.remove('hidden');
         hasError = true;
       }
       
       if (formData.nationalId.length < 3) {
-        document.getElementById('nationalIdError').textContent = 'National ID is required';
+        document.getElementById('nationalIdError').textContent = t('customers.form.national_id_error');
         document.getElementById('nationalIdError').classList.remove('hidden');
         hasError = true;
       }
       
       if (formData.phoneNumber.length < 10) {
-        document.getElementById('phoneNumberError').textContent = 'Valid phone number is required';
+        document.getElementById('phoneNumberError').textContent = t('customers.form.phone_error');
         document.getElementById('phoneNumberError').classList.remove('hidden');
         hasError = true;
       }
@@ -151,7 +171,7 @@
       
       // Disable submit button
       submitButton.disabled = true;
-      submitButton.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Creating...';
+      submitButton.innerHTML = `<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> ${t('customers.form.creating')}`;
       
       try {
         await api.customers.create(formData);
@@ -168,7 +188,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"/>
           </svg>
-          Create Customer
+          <span data-i18n-key="customers.form.create_customer">${t('customers.form.create_customer')}</span>
         `;
       }
     });

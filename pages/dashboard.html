@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Hares Platform</title>
+  <title>Dashboard - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -20,13 +21,13 @@
       <div class="grid grid-cols-2 gap-4 mb-8" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
         <!-- Quick Actions -->
         <div class="glass-card p-6">
-          <h2 class="text-xl font-bold text-white mb-6">Quick Actions</h2>
+          <h2 class="text-xl font-bold text-white mb-6" data-i18n-key="dashboard.quick_actions">Quick Actions</h2>
           <div id="quickActions" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
         </div>
         
         <!-- Recent Activity -->
         <div class="glass-card p-6">
-          <h2 class="text-xl font-bold text-white mb-6">Recent Activity</h2>
+          <h2 class="text-xl font-bold text-white mb-6" data-i18n-key="dashboard.recent_activity">Recent Activity</h2>
           <div id="recentActivity" style="display: flex; flex-direction: column; gap: 0.75rem;">
             <div class="loading-container">
               <div class="spinner"></div>
@@ -45,16 +46,28 @@
     console.log('Token:', getToken()?.substring(0, 20) + '...');
     console.log('User:', getCurrentUser());
     
-    // Check authentication
-    if (!requireAuth()) {
-      console.log('Not authenticated, redirecting...');
-    } else {
-      console.log('Authentication passed!');
-      try {
-        initializeDashboard();
-      } catch (error) {
-        console.error('Error initializing dashboard:', error);
+    // Wait for i18n to be ready before initializing
+    async function startDashboard() {
+      await waitForI18n();
+      
+      // Check authentication
+      if (!requireAuth()) {
+        console.log('Not authenticated, redirecting...');
+      } else {
+        console.log('Authentication passed!');
+        try {
+          initializeDashboard();
+        } catch (error) {
+          console.error('Error initializing dashboard:', error);
+        }
       }
+    }
+    
+    // Start when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startDashboard);
+    } else {
+      startDashboard();
     }
     
     function initializeDashboard() {
@@ -68,10 +81,17 @@
         return;
       }
       
-      // Render sidebar and header
+      // Render sidebar and header with translations
       document.getElementById('sidebar').innerHTML = createSidebar(user);
-      document.getElementById('header').innerHTML = createHeader('Dashboard', 'Welcome back, ' + user.name);
+      document.getElementById('header').innerHTML = createHeader(t('dashboard.title'), t('dashboard.welcome_back') + ', ' + user.name);
+      
+      // Initialize language switcher after header is rendered
+      initializeLanguageSwitcher();
+      
       setActiveNav('dashboard');
+      
+      // Translate any data-i18n elements
+      i18n.translatePage();
       
       // Initialize dashboard
       console.log('Calling initDashboard...');
@@ -118,7 +138,7 @@
                 <span class="badge badge-info">${stats.totalBranches}</span>
               </div>
               <div class="stat-card-value">${stats.totalBranches}</div>
-              <div class="stat-card-label">Total Branches</div>
+              <div class="stat-card-label">${t('dashboard.stats.total_branches')}</div>
             </div>
             
             <div class="glass-card stat-card">
@@ -129,7 +149,7 @@
                 <span class="badge badge-success">${stats.totalCustomers}</span>
               </div>
               <div class="stat-card-value">${stats.totalCustomers}</div>
-              <div class="stat-card-label">Total Customers</div>
+              <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
             </div>
             
             <div class="glass-card stat-card">
@@ -140,7 +160,7 @@
                 <span class="badge badge-success">${stats.totalLoans}</span>
               </div>
               <div class="stat-card-value">${stats.totalLoans}</div>
-              <div class="stat-card-label">Total Loans</div>
+              <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
             </div>
             
             <div class="glass-card stat-card">
@@ -151,7 +171,7 @@
                 <span class="badge badge-warning">0</span>
               </div>
               <div class="stat-card-value">0</div>
-              <div class="stat-card-label">Late Loans</div>
+              <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
             </div>
           `;
           
@@ -192,7 +212,7 @@
             <span class="badge badge-info">${institutions.length}</span>
           </div>
           <div class="stat-card-value">${institutions.length}</div>
-          <div class="stat-card-label">Total Institutions</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_institutions')}</div>
         </div>
         ` : ''}
         
@@ -205,7 +225,7 @@
             <span class="badge badge-info">${branches.length}</span>
           </div>
           <div class="stat-card-value">${branches.length}</div>
-          <div class="stat-card-label">Total Branches</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_branches')}</div>
         </div>
         ` : ''}
         
@@ -217,7 +237,7 @@
             <span class="badge badge-success">${customers.length}</span>
           </div>
           <div class="stat-card-value">${customers.length}</div>
-          <div class="stat-card-label">Total Customers</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
         </div>
         
         <div class="glass-card stat-card">
@@ -228,7 +248,7 @@
             <span class="badge badge-success">${loanStats.byStatus.active || 0}</span>
           </div>
           <div class="stat-card-value">${loanStats.total}</div>
-          <div class="stat-card-label">Total Loans</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
         </div>
         
         <div class="glass-card stat-card">
@@ -239,7 +259,7 @@
             <span class="badge badge-warning">${loanStats.byStatus.late || 0}</span>
           </div>
           <div class="stat-card-value">${loanStats.byStatus.late || 0}</div>
-          <div class="stat-card-label">Late Loans</div>
+          <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
         </div>
       `;
       
@@ -270,7 +290,7 @@
             <span class="badge badge-success">${dashboardData.metrics.totalCustomers}</span>
           </div>
           <div class="stat-card-value">${dashboardData.metrics.totalCustomers}</div>
-          <div class="stat-card-label">Total Customers</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
         </div>
         
         <div class="glass-card stat-card">
@@ -281,7 +301,7 @@
             <span class="badge badge-success">${dashboardData.metrics.activeLoans}</span>
           </div>
           <div class="stat-card-value">${dashboardData.metrics.totalLoans}</div>
-          <div class="stat-card-label">Total Loans</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
         </div>
         
         <div class="glass-card stat-card">
@@ -292,7 +312,7 @@
             <span class="badge badge-warning">${dashboardData.metrics.lateLoans}</span>
           </div>
           <div class="stat-card-value">${dashboardData.metrics.lateLoans}</div>
-          <div class="stat-card-label">Late Loans</div>
+          <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
         </div>
         
         <div class="glass-card stat-card">
@@ -302,7 +322,7 @@
             </div>
           </div>
           <div class="stat-card-value">${formatCurrency(dashboardData.metrics.totalPortfolioValue)}</div>
-          <div class="stat-card-label">Total Portfolio</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_portfolio')}</div>
         </div>
       `;
       
@@ -318,12 +338,12 @@
     function renderQuickActions() {
       const user = getCurrentUser();
       const actions = [
-        { icon: '👤', title: 'Add Customer', subtitle: 'Create new customer profile', href: 'customers-new.html' },
-        { icon: '💰', title: 'Issue Loan', subtitle: 'Create new loan application', href: 'loans-new.html' },
+        { icon: '👤', title: t('dashboard.actions.add_customer'), subtitle: t('dashboard.actions.add_customer_desc'), href: 'customers-new.html' },
+        { icon: '💰', title: t('dashboard.actions.issue_loan'), subtitle: t('dashboard.actions.issue_loan_desc'), href: 'loans-new.html' },
       ];
       
       if (user.roleName === 'Super Admin' || user.role_name === 'Super Admin') {
-        actions.push({ icon: '🏛️', title: 'Add Institution', subtitle: 'Create new institution', href: 'institutions-new.html' });
+        actions.push({ icon: '🏛️', title: t('dashboard.actions.add_institution'), subtitle: t('dashboard.actions.add_institution_desc'), href: 'institutions-new.html' });
       }
       
       const actionsHTML = actions.map(action => `

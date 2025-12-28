@@ -1,4 +1,4 @@
-// Hares Platform - API Client
+// Q1KEY Platform - API Client
 // Base configuration and utilities for API calls
 
 const API_BASE_URL = 'http://localhost:3001';

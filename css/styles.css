@@ -1,4 +1,4 @@
-/* Hares Platform - Vanilla CSS with Tailwind-inspired styling */
+/* Q1KEY Platform - Vanilla CSS with Tailwind-inspired styling */
 
 :root {
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
@@ -235,6 +235,39 @@ select.input option {
   background: rgba(255, 255, 255, 0.02);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Language Switcher */
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.language-switcher:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.language-switcher svg {
+  opacity: 0.8;
+}
+
+.language-switcher #currentLanguage {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
 }
 
 .page-content {

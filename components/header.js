@@ -39,6 +39,15 @@ function createHeader(title, subtitle = '') {
       </div>
       
       <div class="flex items-center gap-3">
+        <!-- Language Switcher -->
+        <button id="languageSwitcher" class="language-switcher" title="Switch Language">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+          <span id="currentLanguage">EN</span>
+        </button>
+        
         <div class="text-right">
           <div class="text-white font-semibold text-sm">${user.name}</div>
           <div id="userContext" class="text-muted text-sm">${user.roleName}</div>
@@ -51,6 +60,54 @@ function createHeader(title, subtitle = '') {
   `;
   
   return headerHTML;
+}
+
+// Language switcher functionality
+function initializeLanguageSwitcher() {
+  const switcher = document.getElementById('languageSwitcher');
+  const currentLangLabel = document.getElementById('currentLanguage');
+  
+  if (!switcher) return;
+  
+  // Update label to show current language
+  const updateLanguageLabel = () => {
+    const locale = i18n.getCurrentLocale();
+    currentLangLabel.textContent = locale === 'ar' ? 'ع' : 'EN';
+  };
+  
+  // Initial update
+  updateLanguageLabel();
+  
+  // Handle click
+  switcher.addEventListener('click', async () => {
+    const currentLocale = i18n.getCurrentLocale();
+    const newLocale = currentLocale === 'en' ? 'ar' : 'en';
+    
+    await i18n.setLocale(newLocale);
+    updateLanguageLabel();
+    
+    // Re-render the entire page with new translations
+    const user = getCurrentUser();
+    if (user && typeof initializeDashboard === 'function') {
+      // For dashboard pages, re-initialize
+      initializeDashboard();
+    } else if (user && document.getElementById('sidebar')) {
+      // For other pages with sidebar, re-render sidebar and header
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      const pageTitle = document.querySelector('h1')?.textContent || 'Page';
+      document.getElementById('header').innerHTML = createHeader(pageTitle, '');
+      initializeLanguageSwitcher();
+      i18n.translatePage();
+    } else {
+      // For login page or pages without sidebar
+      i18n.translatePage();
+    }
+  });
+  
+  // Listen for locale changes from other sources
+  window.addEventListener('localeChanged', () => {
+    updateLanguageLabel();
+  });
 }
 
 // Render header and load user context
@@ -67,5 +124,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (sidebarContextElement) {
       sidebarContextElement.textContent = contextInfo;
     }
+    
+    // Initialize language switcher
+    initializeLanguageSwitcher();
   }
 });

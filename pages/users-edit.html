@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit User - Hares Platform</title>
+  <title>Edit User - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -109,21 +110,29 @@
   <script src="../components/sidebar.js"></script>
   <script src="../components/header.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
-    }
-    
-    const user = getCurrentUser();
-    
-    // Only Super Admin and Institution can access
-    if (user.roleName !== 'Super Admin' && user.roleName !== 'Institution') {
-      window.location.href = 'dashboard.html';
-    }
-    
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Edit User', 'Update user account');
-    setActiveNav('users');
+    async function initPage() {
+      await waitForI18n();
+      
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      
+      // Only Super Admin and Institution can access
+      if (user.roleName !== 'Super Admin' && user.roleName !== 'Institution') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('users.edit_user'),
+        t('users.update_user_info')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('users');
     
     const form = document.getElementById('userForm');
     const submitButton = document.getElementById('submitButton');
@@ -214,6 +223,13 @@
         `;
       }
     });
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
   </script>
 </body>
 </html>

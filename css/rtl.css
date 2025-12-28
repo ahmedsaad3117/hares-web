@@ -1,0 +1,389 @@
+/* RTL (Right-to-Left) Styles for Arabic Language */
+
+/* Set text direction for entire document */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Reverse flex directions */
+[dir="rtl"] .flex {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .items-center {
+  flex-direction: row-reverse;
+}
+
+/* Filter buttons in RTL */
+[dir="rtl"] .glass-card.p-4.mb-6 {
+  direction: rtl;
+}
+
+[dir="rtl"] button.btn {
+  flex-direction: row-reverse;
+  gap: 0.5rem;
+}
+
+[dir="rtl"] button.btn svg {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* Table RTL styles */
+[dir="rtl"] table {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] th,
+[dir="rtl"] td {
+  text-align: right;
+}
+
+[dir="rtl"] th:first-child,
+[dir="rtl"] td:first-child {
+  text-align: right;
+}
+
+[dir="rtl"] th:last-child,
+[dir="rtl"] td:last-child {
+  text-align: right;
+}
+
+/* Data table specific */
+[dir="rtl"] .data-table,
+[dir="rtl"] .table {
+  direction: rtl;
+}
+
+[dir="rtl"] .data-table th,
+[dir="rtl"] .data-table td,
+[dir="rtl"] .table th,
+[dir="rtl"] .table td {
+  text-align: right;
+}
+
+/* First column (ID/Number) - center align */
+[dir="rtl"] .data-table td:first-child,
+[dir="rtl"] .data-table th:first-child,
+[dir="rtl"] .table td:first-child,
+[dir="rtl"] .table th:first-child {
+  text-align: center;
+}
+
+/* Last column (Actions) - center align */
+[dir="rtl"] .data-table td:last-child,
+[dir="rtl"] .data-table th:last-child,
+[dir="rtl"] .table td:last-child,
+[dir="rtl"] .table th:last-child {
+  text-align: center;
+}
+
+/* Status column - center align */
+[dir="rtl"] .data-table td:nth-child(7),
+[dir="rtl"] .data-table th:nth-child(7),
+[dir="rtl"] .table td:nth-child(7),
+[dir="rtl"] .table th:nth-child(7) {
+  text-align: center;
+}
+
+/* Paid Date column - center align */
+[dir="rtl"] .data-table td:nth-child(8),
+[dir="rtl"] .data-table th:nth-child(8),
+[dir="rtl"] .table td:nth-child(8),
+[dir="rtl"] .table th:nth-child(8) {
+  text-align: center;
+}
+
+/* Loan ID column - center align */
+[dir="rtl"] .data-table td:nth-child(2),
+[dir="rtl"] .data-table th:nth-child(2),
+[dir="rtl"] .table td:nth-child(2),
+[dir="rtl"] .table th:nth-child(2) {
+  text-align: center;
+}
+
+/* Due Date column - center align */
+[dir="rtl"] .data-table td:nth-child(6),
+[dir="rtl"] .data-table th:nth-child(6),
+[dir="rtl"] .table td:nth-child(6),
+[dir="rtl"] .table th:nth-child(6) {
+  text-align: center;
+}
+
+/* Table container */
+[dir="rtl"] .table-container {
+  direction: rtl;
+}
+
+/* Reset table body */
+[dir="rtl"] table tbody {
+  direction: rtl;
+}
+
+[dir="rtl"] table thead {
+  direction: rtl;
+}
+
+/* Sidebar positioning */
+[dir="rtl"] #sidebar,
+[dir="rtl"] .sidebar {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .main-content {
+  margin-right: 0;
+  margin-left: 250px;
+}
+
+/* Button and badge spacing */
+[dir="rtl"] .btn svg {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+[dir="rtl"] .badge {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Form inputs */
+[dir="rtl"] input,
+[dir="rtl"] select,
+[dir="rtl"] textarea {
+  text-align: right;
+}
+
+/* Modal positioning */
+[dir="rtl"] .modal-close {
+  left: 1rem;
+  right: auto;
+}
+
+/* Pagination */
+[dir="rtl"] .pagination button:first-child {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* Glass card padding adjustments */
+[dir="rtl"] .glass-card {
+  text-align: right;
+}
+
+/* Navigation items */
+[dir="rtl"] .nav-item {
+  flex-direction: row-reverse;
+}
+
+/* Header alignment */
+[dir="rtl"] .page-content {
+  text-align: right;
+}
+
+/* Status badges in tables */
+[dir="rtl"] .table tbody td {
+  text-align: right;
+}
+
+/* Action buttons alignment - keep centered */
+[dir="rtl"] .table tbody td:last-child {
+  text-align: center;
+}
+
+/* Action buttons in installments table */
+[dir="rtl"] .data-table tbody td:last-child {
+  text-align: center;
+}
+
+/* Action buttons alignment */
+[dir="rtl"] .table .btn-group {
+  justify-content: center;
+}
+
+/* Badge spacing in RTL */
+[dir="rtl"] .badge + .badge {
+  margin-right: 0.5rem;
+  margin-left: 0;
+}
+
+/* Center aligned elements should stay centered */
+[dir="rtl"] [style*="text-align: center"],
+[dir="rtl"] .text-center {
+  text-align: center !important;
+}
+
+/* LTR mode - center alignment for specific columns */
+.data-table td:first-child,
+.data-table th:first-child,
+.data-table td:last-child,
+.data-table th:last-child,
+.data-table td:nth-child(2),
+.data-table th:nth-child(2),
+.data-table td:nth-child(6),
+.data-table th:nth-child(6),
+.data-table td:nth-child(7),
+.data-table th:nth-child(7),
+.data-table td:nth-child(8),
+.data-table th:nth-child(8),
+.table td:first-child,
+.table th:first-child,
+.table td:last-child,
+.table th:last-child,
+.table td:nth-child(2),
+.table th:nth-child(2),
+.table td:nth-child(6),
+.table th:nth-child(6),
+.table td:nth-child(7),
+.table th:nth-child(7),
+.table td:nth-child(8),
+.table th:nth-child(8) {
+  text-align: center;
+}
+
+/* Additional RTL Enhancements */
+
+/* Page headers and titles */
+[dir="rtl"] .page-header,
+[dir="rtl"] .page-content h1,
+[dir="rtl"] .page-content h2,
+[dir="rtl"] .page-content h3 {
+  text-align: right;
+}
+
+/* Dashboard stats cards */
+[dir="rtl"] .stats-card,
+[dir="rtl"] .stat-card {
+  text-align: right;
+}
+
+/* Quick actions */
+[dir="rtl"] .quick-action {
+  text-align: right;
+}
+
+/* Form labels */
+[dir="rtl"] .label,
+[dir="rtl"] label {
+  text-align: right;
+}
+
+/* Error messages */
+[dir="rtl"] .error-text,
+[dir="rtl"] .alert {
+  text-align: right;
+}
+
+/* Login page */
+[dir="rtl"] .login-container,
+[dir="rtl"] .login-form {
+  text-align: right;
+}
+
+/* Modal content */
+[dir="rtl"] .modal-content {
+  text-align: right;
+}
+
+[dir="rtl"] .modal-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .modal-footer {
+  flex-direction: row-reverse;
+}
+
+/* Breadcrumbs */
+[dir="rtl"] .breadcrumb {
+  flex-direction: row-reverse;
+}
+
+/* Dropdowns */
+[dir="rtl"] .dropdown-menu {
+  right: auto;
+  left: 0;
+  text-align: right;
+}
+
+/* Search inputs */
+[dir="rtl"] .search-input {
+  padding-right: 2.5rem;
+  padding-left: 1rem;
+}
+
+[dir="rtl"] .search-icon {
+  right: auto;
+  left: 0.75rem;
+}
+
+/* Filter containers */
+[dir="rtl"] .filters {
+  text-align: right;
+}
+
+/* Card headers */
+[dir="rtl"] .card-header {
+  text-align: right;
+}
+
+/* List items */
+[dir="rtl"] ul,
+[dir="rtl"] ol {
+  padding-right: 1.5rem;
+  padding-left: 0;
+}
+
+/* Icons before text */
+[dir="rtl"] .icon-left {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Toast notifications */
+[dir="rtl"] .toast {
+  right: auto;
+  left: 1rem;
+}
+
+/* Summary cards grid */
+[dir="rtl"] .grid {
+  direction: rtl;
+}
+
+/* Status indicators */
+[dir="rtl"] .status-indicator {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Payment plan details */
+[dir="rtl"] .payment-plan {
+  text-align: right;
+}
+
+/* Customer info cards */
+[dir="rtl"] .customer-info,
+[dir="rtl"] .loan-info {
+  text-align: right;
+}
+
+/* Checkbox and radio alignment */
+[dir="rtl"] input[type="checkbox"],
+[dir="rtl"] input[type="radio"] {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Activity feed */
+[dir="rtl"] .activity-item {
+  text-align: right;
+  padding-right: 2rem;
+  padding-left: 0;
+}
+
+/* Language switcher positioning */
+[dir="rtl"] .language-switcher {
+  flex-direction: row-reverse;
+}

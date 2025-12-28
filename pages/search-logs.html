@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Search Logs - Hares Platform</title>
+  <title>Search Logs - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -17,33 +18,32 @@
       <div class="glass-card p-4 mb-6">
         <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
           <div style="flex: 1; min-width: 200px;">
-            <label class="form-label">Filter by Customer ID</label>
+            <label class="form-label" data-i18n-key="search_logs.filter_by_customer">Filter by Customer ID</label>
             <input 
               type="number" 
               id="customerIdFilter"
+              data-i18n-placeholder="search_logs.enter_customer_id"
               placeholder="Enter customer ID" 
               class="input"
             />
           </div>
           <div style="flex: 1; min-width: 200px;">
-            <label class="form-label">Filter by Search Type</label>
+            <label class="form-label" data-i18n-key="search_logs.filter_by_type">Filter by Search Type</label>
             <select id="searchTypeFilter" class="input">
-              <option value="">All Types</option>
-              <option value="view">View</option>
-              <option value="search">Search</option>
-              <option value="edit">Edit</option>
-              <option value="list">List</option>
+              <option value="" data-i18n-key="search_logs.all_types">All Types</option>
+              <option value="view" data-i18n-key="search_logs.view">View</option>
+              <option value="search" data-i18n-key="search_logs.search">Search</option>
+              <option value="edit" data-i18n-key="search_logs.edit">Edit</option>
+              <option value="list" data-i18n-key="search_logs.list">List</option>
             </select>
           </div>
           <button onclick="applyFilters()" class="btn btn-primary">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
             </svg>
-            Apply Filters
+            <span data-i18n-key="search_logs.apply_filters">Apply Filters</span>
           </button>
-          <button onclick="clearFilters()" class="btn btn-secondary">
-            Clear
-          </button>
+          <button onclick="clearFilters()" class="btn btn-secondary" data-i18n-key="search_logs.clear">Clear</button>
         </div>
       </div>
       
@@ -53,14 +53,14 @@
           <table class="table">
             <thead>
               <tr>
-                <th>Log ID</th>
-                <th>Customer</th>
-                <th>User</th>
-                <th>Search Query</th>
-                <th>Type</th>
-                <th>IP Address</th>
-                <th>Date & Time</th>
-                <th>Actions</th>
+                <th data-i18n-key="search_logs.log_id">Log ID</th>
+                <th data-i18n-key="search_logs.customer">Customer</th>
+                <th data-i18n-key="search_logs.user">User</th>
+                <th data-i18n-key="search_logs.search_query">Search Query</th>
+                <th data-i18n-key="search_logs.type">Type</th>
+                <th data-i18n-key="search_logs.ip_address">IP Address</th>
+                <th data-i18n-key="search_logs.date_time">Date & Time</th>
+                <th data-i18n-key="search_logs.actions">Actions</th>
               </tr>
             </thead>
             <tbody id="searchLogsTableBody">
@@ -84,21 +84,30 @@
   <script src="../components/header.js"></script>
   <script src="../components/pagination.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
-    }
-    
-    const user = getCurrentUser();
-    
-    // Only Super Admin can access
-    if (user.roleName !== 'Super Admin') {
-      window.location.href = 'dashboard.html';
-    }
-    
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Search Logs', 'Customer search activity tracking');
-    setActiveNav('search-logs');
+    async function initPage() {
+      await waitForI18n();
+      
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      
+      // Only Super Admin can access
+      if (user.roleName !== 'Super Admin') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('search_logs.title'),
+        t('search_logs.search_history')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('search-logs');
+      window.i18n.translatePage();
     
     let currentPage = 1;
     let totalPages = 1;
@@ -133,8 +142,8 @@
         renderSearchLogs(logs);
       } catch (error) {
         console.error('Error loading search logs:', error);
-        showToast('Failed to load search logs', 'error');
-        document.getElementById('searchLogsTableBody').innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #94a3b8;">Failed to load search logs</td></tr>';
+        showToast(t('search_logs.failed_to_load'), 'error');
+        document.getElementById('searchLogsTableBody').innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('search_logs.failed_to_load')}</td></tr>`;
       }
     }
     
@@ -165,7 +174,7 @@
       const tbody = document.getElementById('searchLogsTableBody');
       
       if (logs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #94a3b8;">No search logs found</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('search_logs.no_logs')}</td></tr>`;
         return;
       }
       
@@ -212,7 +221,7 @@
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
-                View Customer
+                ${t('search_logs.view_customer')}
               </a>
               <button onclick="deleteLog(${log.searchLogId})" class="btn btn-danger" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -235,11 +244,11 @@
     }
     
     async function deleteLog(id) {
-      if (!confirm('Are you sure you want to delete this search log? This action cannot be undone.')) return;
+      if (!confirm(t('search_logs.delete_confirm'))) return;
       
       try {
         await api.searchLogs.delete(id);
-        showToast('Search log deleted successfully', 'success');
+        showToast(t('search_logs.deleted_success'), 'success');
         
         // Reload current page, or go to previous page if current page would be empty
         const response = currentFilters.customerId 
@@ -254,7 +263,7 @@
         }
       } catch (error) {
         console.error('Error deleting search log:', error);
-        showToast('Failed to delete search log', 'error');
+        showToast(t('search_logs.delete_failed'), 'error');
       }
     }
     
@@ -267,6 +276,13 @@
         hour: '2-digit',
         minute: '2-digit'
       });
+    }
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
     }
   </script>
 </body>

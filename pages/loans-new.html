@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Loan - Hares Platform</title>
+  <title>Create Loan - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -22,8 +23,8 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white">Create Loan</h1>
-          <p class="text-secondary">Issue a new loan application</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="loans.add_loan">Create Loan</h1>
+          <p class="text-secondary" data-i18n-key="loans.create_new_loan">Issue a new loan application</p>
         </div>
       </div>
       
@@ -32,25 +33,25 @@
         <form id="loanForm">
           <!-- Customer -->
           <div class="form-group">
-            <label class="label">Customer *</label>
+            <label class="label" data-i18n-key="loans.form.customer_label">Customer *</label>
             <select id="customerId" name="customerId" class="input" required>
-              <option value="">Loading customers...</option>
+              <option value="" data-i18n-key="loans.form.loading_customers">Loading customers...</option>
             </select>
             <div id="customerIdError" class="error-text hidden"></div>
           </div>
           
           <!-- Branch -->
           <div class="form-group" id="branchField">
-            <label class="label">Branch *</label>
+            <label class="label" data-i18n-key="loans.form.branch_label">Branch *</label>
             <select id="branchId" name="branchId" class="input" required>
-              <option value="">Loading branches...</option>
+              <option value="" data-i18n-key="loans.form.loading_branches">Loading branches...</option>
             </select>
             <!-- Capacity Warning Display -->
             <div id="capacityInfo" class="hidden mt-2" style="margin-top: 0.5rem;">
               <div id="capacityStatus" class="flex items-center justify-between p-3" style="display: flex; justify-content: space-between; padding: 0.75rem; border-radius: 6px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
                 <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
                   <span id="capacityIcon">✓</span>
-                  <span class="text-sm" id="capacityText" style="font-size: 0.875rem; color: #10b981;">Available capacity</span>
+                  <span class="text-sm" id="capacityText" style="font-size: 0.875rem; color: #10b981;" data-i18n-key="loans.form.available_capacity">Available capacity</span>
                 </div>
                 <span class="font-semibold" id="capacityNumbers" style="color: #10b981;">-</span>
               </div>
@@ -60,21 +61,22 @@
           
           <!-- Product -->
           <div class="form-group">
-            <label class="label">Product *</label>
+            <label class="label" data-i18n-key="loans.form.product_label">Product *</label>
             <select id="productId" name="productId" class="input" required>
-              <option value="">Loading products...</option>
+              <option value="" data-i18n-key="loans.form.loading_products">Loading products...</option>
             </select>
             <div id="productIdError" class="error-text hidden"></div>
           </div>
           
           <!-- Principal Amount -->
           <div class="form-group">
-            <label class="label">Principal Amount *</label>
+            <label class="label" data-i18n-key="loans.form.principal_amount">Principal Amount *</label>
             <input 
               type="number" 
               id="principalAmount" 
               name="principalAmount" 
               class="input" 
+              data-i18n-placeholder="loans.form.principal_placeholder"
               placeholder="5000.00"
               step="0.01"
               min="0"
@@ -85,35 +87,35 @@
           
           <!-- Payment Plan -->
           <div class="form-group">
-            <label class="label">Payment Plan (Months) *</label>
+            <label class="label" data-i18n-key="loans.form.payment_plan">Payment Plan (Months) *</label>
             <select id="paymentPlanMonths" name="paymentPlanMonths" class="input" required>
-              <option value="1">1 Month</option>
-              <option value="2">2 Months</option>
-              <option value="3">3 Months</option>
-              <option value="4">4 Months</option>
-              <option value="5">5 Months</option>
-              <option value="6" selected>6 Months</option>
-              <option value="7">7 Months</option>
-              <option value="8">8 Months</option>
-              <option value="9">9 Months</option>
-              <option value="10">10 Months</option>
-              <option value="11">11 Months</option>
-              <option value="12">12 Months</option>
+              <option value="1">1 <span data-i18n-key="loans.month">Month</span></option>
+              <option value="2">2 <span data-i18n-key="loans.months">Months</span></option>
+              <option value="3">3 <span data-i18n-key="loans.months">Months</span></option>
+              <option value="4">4 <span data-i18n-key="loans.months">Months</span></option>
+              <option value="5">5 <span data-i18n-key="loans.months">Months</span></option>
+              <option value="6" selected>6 <span data-i18n-key="loans.months">Months</span></option>
+              <option value="7">7 <span data-i18n-key="loans.months">Months</span></option>
+              <option value="8">8 <span data-i18n-key="loans.months">Months</span></option>
+              <option value="9">9 <span data-i18n-key="loans.months">Months</span></option>
+              <option value="10">10 <span data-i18n-key="loans.months">Months</span></option>
+              <option value="11">11 <span data-i18n-key="loans.months">Months</span></option>
+              <option value="12">12 <span data-i18n-key="loans.months">Months</span></option>
             </select>
-            <p class="text-muted text-sm mt-1" style="font-size: 0.875rem; margin-top: 0.25rem;">Select the number of monthly installments for this loan</p>
+            <p class="text-muted text-sm mt-1" style="font-size: 0.875rem; margin-top: 0.25rem;" data-i18n-key="loans.form.payment_plan_help">Select the number of monthly installments for this loan</p>
             <div id="paymentPlanMonthsError" class="error-text hidden"></div>
           </div>
           
           <!-- Installment Preview -->
           <div id="installmentPreview" class="hidden" style="padding: 1rem; border-radius: 8px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); margin-bottom: 1rem;">
-            <p class="text-sm font-semibold text-white mb-2" style="font-size: 0.875rem; margin-bottom: 0.5rem;">📋 Installment Preview</p>
+            <p class="text-sm font-semibold text-white mb-2" style="font-size: 0.875rem; margin-bottom: 0.5rem;">📋 <span data-i18n-key="loans.form.installment_preview">Installment Preview</span></p>
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
               <div>
-                <p class="text-muted" style="font-size: 0.75rem;">Monthly Payment</p>
+                <p class="text-muted" style="font-size: 0.75rem;" data-i18n-key="loans.form.monthly_payment">Monthly Payment</p>
                 <p id="monthlyPayment" class="text-white font-medium" style="font-size: 1.125rem;">--</p>
               </div>
               <div>
-                <p class="text-muted" style="font-size: 0.75rem;">Number of Installments</p>
+                <p class="text-muted" style="font-size: 0.75rem;" data-i18n-key="loans.form.installment_count">Number of Installments</p>
                 <p id="installmentCount" class="text-white font-medium" style="font-size: 1.125rem;">--</p>
               </div>
             </div>
@@ -121,7 +123,7 @@
           
           <!-- Due Date -->
           <div class="form-group">
-            <label class="label">Due Date *</label>
+            <label class="label" data-i18n-key="loans.form.due_date_label">Due Date *</label>
             <input 
               type="date" 
               id="dueDate" 
@@ -143,9 +145,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
-              Create Loan
+              <span data-i18n-key="loans.form.create_loan">Create Loan</span>
             </button>
-            <a href="loans.html" class="btn btn-secondary">Cancel</a>
+            <a href="loans.html" class="btn btn-secondary" data-i18n-key="loans.form.cancel">Cancel</a>
           </div>
         </form>
       </div>
@@ -156,15 +158,23 @@
   <script src="../components/sidebar.js"></script>
   <script src="../components/header.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
-    }
-    
-    const user = getCurrentUser();
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Create Loan', 'Issue a new loan application');
-    setActiveNav('loans');
+    async function initPage() {
+      await waitForI18n();
+      
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('loans.add_loan'),
+        t('loans.create_new_loan')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('loans');
+      window.i18n.translatePage();
     
     // Load form data
     loadFormData();
@@ -194,7 +204,7 @@
         
         // Populate customers
         const customerSelect = document.getElementById('customerId');
-        customerSelect.innerHTML = '<option value="">Select a customer</option>' +
+        customerSelect.innerHTML = `<option value="">${t('loans.form.select_customer')}</option>` +
           customers.map(c => `<option value="${c.customerId}">${c.name} (${c.nationalId})</option>`).join('');
         
         // Handle branch field
@@ -207,13 +217,13 @@
           branchSelect.removeAttribute('required');
         } else {
           // Show branch selector for other users
-          branchSelect.innerHTML = '<option value="">Select a branch</option>' +
+          branchSelect.innerHTML = `<option value="">${t('loans.form.select_branch')}</option>` +
             branches.map(b => `<option value="${b.branchId}">${b.name} - ${b.institution.name}</option>`).join('');
         }
         
         // Populate products
         const productSelect = document.getElementById('productId');
-        productSelect.innerHTML = '<option value="">Select a product</option>' +
+        productSelect.innerHTML = `<option value="">${t('loans.form.select_product')}</option>` +
           products.map(p => `<option value="${p.productId}">${p.name}</option>`).join('');
         
       } catch (error) {
@@ -363,6 +373,13 @@
         `;
       }
     });
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
   </script>
 </body>
 </html>

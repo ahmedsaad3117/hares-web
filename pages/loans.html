@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loans - Hares Platform</title>
+  <title>Loans - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -18,8 +19,8 @@
         <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
           <div style="font-size: 2rem;">💰</div>
           <div>
-            <h1 class="text-3xl font-bold text-white">Loans</h1>
-            <p class="text-secondary">Manage loan applications</p>
+            <h1 class="text-3xl font-bold text-white" data-i18n-key="loans.title">${t('loans.title')}</h1>
+            <p class="text-secondary" data-i18n-key="loans.loan_details">${t('loans.loan_details')}</p>
           </div>
         </div>
         <a href="loans-new.html" class="btn btn-primary">
@@ -27,7 +28,7 @@
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          New Loan
+          <span data-i18n-key="loans.new_loan">${t('loans.new_loan')}</span>
         </a>
       </div>
       
@@ -35,23 +36,23 @@
       <div class="glass-card p-4 mb-6">
         <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
           <button onclick="filterByStatus('all')" id="filter-all" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
-            All Loans
+            <span data-i18n-key="loans.all_loans">${t('loans.all_loans')}</span>
           </button>
           <button onclick="filterByStatus('Active')" id="filter-Active" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
             <span class="badge badge-success" style="margin-right: 0.5rem;">●</span>
-            Active
+            <span data-i18n-key="loans.active">${t('loans.active')}</span>
           </button>
           <button onclick="filterByStatus('Late')" id="filter-Late" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
             <span class="badge badge-warning" style="margin-right: 0.5rem;">●</span>
-            Late
+            <span data-i18n-key="loans.late">${t('loans.late')}</span>
           </button>
           <button onclick="filterByStatus('Paid')" id="filter-Paid" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
             <span class="badge badge-info" style="margin-right: 0.5rem;">●</span>
-            Paid
+            <span data-i18n-key="loans.paid">${t('loans.paid')}</span>
           </button>
           <button onclick="filterByStatus('Finished')" id="filter-Finished" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
             <span class="badge badge-info" style="margin-right: 0.5rem;">●</span>
-            Finished
+            <span data-i18n-key="loans.finished">${t('loans.finished')}</span>
           </button>
         </div>
       </div>
@@ -62,15 +63,15 @@
           <table class="table" id="loansTable">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Customer</th>
-                <th>Branch</th>
-                <th>Product</th>
-                <th>Amount</th>
-                <th>Payment Plan</th>
-                <th>Status</th>
-                <th>Due Date</th>
-                <th>Actions</th>
+                <th data-i18n-key="loans.id">ID</th>
+                <th data-i18n-key="loans.customer">Customer</th>
+                <th data-i18n-key="loans.branch">Branch</th>
+                <th data-i18n-key="loans.product">Product</th>
+                <th data-i18n-key="loans.amount">Amount</th>
+                <th data-i18n-key="loans.payment_plan">Payment Plan</th>
+                <th data-i18n-key="loans.status_head">Status</th>
+                <th data-i18n-key="loans.due_date">Due Date</th>
+                <th data-i18n-key="loans.actions">Actions</th>
               </tr>
             </thead>
             <tbody id="loansTableBody">
@@ -94,24 +95,42 @@
   <script src="../components/header.js"></script>
   <script src="../components/pagination.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
+    async function initPage() {
+      await waitForI18n();
+      
+      // Check authentication
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('loans.title'),
+        t('loans.loan_details')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('loans');
+      
+      // Translate all static content with data-i18n-key attributes
+      window.i18n.translatePage();
+      
+      // Load loans with pagination
+      loadLoans();
     }
     
-    const user = getCurrentUser();
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Loans', 'Manage loan applications');
-    setActiveNav('loans');
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
     
     let currentPage = 1;
     let totalPages = 1;
     const pageSize = 10;
     let currentFilter = 'all';
     let allLoans = [];
-    
-    // Load loans with pagination
-    loadLoans();
     
     async function loadLoans(page = 1) {
       try {
@@ -134,8 +153,8 @@
         }
       } catch (error) {
         console.error('Error loading loans:', error);
-        showToast('Failed to load loans', 'error');
-        document.getElementById('loansTableBody').innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">Failed to load loans</td></tr>';
+        showToast(t('loans.failed_to_load'), 'error');
+        document.getElementById('loansTableBody').innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('loans.failed_to_load')}</td></tr>`;
       }
     }
     
@@ -165,7 +184,7 @@
       const tbody = document.getElementById('loansTableBody');
       
       if (loans.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">No loans found</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('loans.no_loans_found')}</td></tr>`;
         return;
       }
       
@@ -196,27 +215,26 @@
             <td class="text-white font-semibold">${formatCurrency(loan.principalAmount)}</td>
             <td>
               <div style="min-width: 120px;">
-                <div class="text-white font-medium">${paymentPlan} Month${paymentPlan > 1 ? 's' : ''}</div>
+                <div class="text-white font-medium">${paymentPlan} ${paymentPlan > 1 ? t('loans.months') : t('loans.month')}</div>
                 ${paymentPlan > 1 ? `
                   <div style="margin-top: 0.25rem;">
                     <div style="width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden;">
                       <div style="height: 100%; background: ${progressColor}; width: ${Math.min(progressPercent, 100)}%;"></div>
                     </div>
-                    <div class="text-muted text-sm" style="margin-top: 0.125rem;">${formatCurrency(paidAmount)} paid</div>
+                    <div class="text-muted text-sm" style="margin-top: 0.125rem;">${formatCurrency(paidAmount)} ${t('loans.paid_amount')}</div>
                   </div>
-                ` : '<div class="text-muted text-sm">Single payment</div>'}
+                ` : `<div class="text-muted text-sm">${t('loans.single_payment')}</div>`}
               </div>
             </td>
-            <td><span class="badge ${statusBadge}">${loan.status}</span></td>
+            <td><span class="badge ${statusBadge}">${loan.status === 'Active' ? t('loans.active') : loan.status === 'Late' ? t('loans.late') : loan.status === 'Paid' ? t('loans.paid') : loan.status === 'Finished' ? t('loans.finished') : loan.status}</span></td>
             <td class="text-secondary">${loan.dueDate ? formatDate(loan.dueDate) : 'N/A'}</td>
             <td>
               <div class="flex items-center gap-2" style="display: flex; gap: 0.5rem;">
                 <a href="loans-view.html?id=${loan.loanId}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
-                  View
+                  ${t('loans.view')}
                 </a>
                 <a href="loans-edit.html?id=${loan.loanId}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
-                  Edit
-                </a>
+                  ${t('loans.edit')}</a>
               </div>
             </td>
           </tr>

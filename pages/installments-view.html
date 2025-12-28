@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Installment Details | Hares Platform</title>
+  <title>Installment Details | Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div class="layout">
@@ -209,16 +210,24 @@
   <script src="../js/api.js"></script>
   
   <script>
-    // Authentication check
-    const user = getCurrentUser();
-    if (!user) {
-      window.location.href = '../index.html';
-    }
-    
-    // Load components
-    document.getElementById('sidebarContainer').innerHTML = createSidebar(user);
-    document.getElementById('headerContainer').innerHTML = createHeader('Installment Details');
-    setActiveNav('installments');
+    async function initPage() {
+      await waitForI18n();
+      
+      // Authentication check
+      const user = getCurrentUser();
+      if (!user) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      // Load components
+      document.getElementById('sidebarContainer').innerHTML = createSidebar(user);
+      document.getElementById('headerContainer').innerHTML = createHeader(
+        t('installments.installment_details'),
+        t('installments.view_installment_info')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('installments');
     
     // Get installment ID from URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -472,9 +481,13 @@
         btn.textContent = 'Process Payment';
       }
     }
+    }
     
-    // Initialize
-    loadInstallment();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
   </script>
 </body>
 </html>

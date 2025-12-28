@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Product - Hares Platform</title>
+  <title>Add Product - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
 </head>
 <body>
   <div id="sidebar"></div>
@@ -32,42 +33,44 @@
         <form id="productForm">
           <!-- Institution (Super Admin only) -->
           <div class="form-group" id="institutionGroup" style="display: none;">
-            <label class="label">Institution</label>
+            <label class="label" data-i18n-key="products.form.institution_label">Institution</label>
             <select id="institutionId" name="institutionId" class="input">
-              <option value="">All Institutions (Global Product)</option>
+              <option value="" data-i18n-key="products.form.all_institutions">All Institutions (Global Product)</option>
             </select>
-            <p class="text-sm text-muted" style="margin-top: 0.25rem;">Leave empty to make this product available to all institutions</p>
+            <p class="text-sm text-muted" style="margin-top: 0.25rem;" data-i18n-key="products.form.institution_help">Leave empty to make this product available to all institutions</p>
           </div>
           
           <div class="form-group">
-            <label class="label">Product Name *</label>
+            <label class="label" data-i18n-key="products.form.name_label">Product Name</label> <span data-i18n-key="products.form.name_required">*</span>
             <input 
               type="text" 
               id="name" 
               name="name" 
               class="input" 
+              data-i18n-placeholder="products.form.name_placeholder"
               placeholder="e.g., Personal Loan"
               required
             />
           </div>
           
           <div class="form-group">
-            <label class="label">Description *</label>
+            <label class="label" data-i18n-key="products.form.description_label">Description</label> <span data-i18n-key="products.form.description_required">*</span>
             <textarea 
               id="description" 
               name="description" 
               class="input" 
               rows="4"
+              data-i18n-placeholder="products.form.description_placeholder"
               placeholder="Describe the loan product features and benefits..."
               required
             ></textarea>
           </div>
           
           <div class="form-group">
-            <label class="label">Status</label>
+            <label class="label" data-i18n-key="products.form.status_label">Status</label>
             <select id="isActive" name="isActive" class="input">
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
+              <option value="true" data-i18n-key="products.form.active">Active</option>
+              <option value="false" data-i18n-key="products.form.inactive">Inactive</option>
             </select>
           </div>
           
@@ -76,9 +79,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
-              Create Product
+              <span data-i18n-key="products.form.create_product">Create Product</span>
             </button>
-            <a href="products.html" class="btn btn-secondary">
+            <a href="products.html" class="btn btn-secondary" data-i18n-key="products.form.cancel">
               Cancel
             </a>
           </div>
@@ -91,21 +94,30 @@
   <script src="../components/sidebar.js"></script>
   <script src="../components/header.js"></script>
   <script>
-    // Check authentication
-    if (!isAuthenticated()) {
-      window.location.href = '../index.html';
-    }
-    
-    const user = getCurrentUser();
-    
-    // Allow Super Admin, Institution, and Branch roles
-    if (!['Super Admin', 'Institution', 'Branch'].includes(user.roleName)) {
-      window.location.href = 'dashboard.html';
-    }
-    
-    document.getElementById('sidebar').innerHTML = createSidebar(user);
-    document.getElementById('header').innerHTML = createHeader('Add Product', 'Create a new loan product');
-    setActiveNav('products');
+    async function initPage() {
+      await waitForI18n();
+      
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      
+      // Allow Super Admin, Institution, and Branch roles
+      if (!['Super Admin', 'Institution', 'Branch'].includes(user.roleName)) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('products.add_product'),
+        t('products.create_new_product')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('products');
+      window.i18n.translatePage();
     
     // Load institutions if Super Admin
     if (user.roleName === 'Super Admin') {
@@ -151,12 +163,12 @@
       
       // Validate
       if (!formData.name) {
-        showToast('Product name is required', 'error');
+        showToast(t('products.form.name_error'), 'error');
         return;
       }
       
       if (!formData.description) {
-        showToast('Description is required', 'error');
+        showToast(t('products.form.description_error'), 'error');
         return;
       }
       
@@ -171,6 +183,13 @@
         showToast(error.message || 'Failed to create product', 'error');
       }
     });
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
   </script>
 </body>
 </html>
