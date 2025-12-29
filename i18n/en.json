@@ -292,7 +292,40 @@
       "active": "Active",
       "completed": "Completed",
       "rejected": "Rejected",
-      "overdue": "Overdue"
+      "overdue": "Overdue",
+      "late": "Late",
+      "paid": "Paid",
+      "finished": "Finished"
+    },
+    "view_page": {
+      "title": "Loan Details",
+      "subtitle": "View loan information",
+      "loan_application": "Loan Application",
+      "customer": "Customer",
+      "branch": "Branch",
+      "institution": "Institution",
+      "product": "Product",
+      "principal_amount": "Principal Amount",
+      "due_date": "Due Date",
+      "status": "Status",
+      "given_by": "Given By",
+      "created_at": "Created At",
+      "last_updated": "Last Updated",
+      "payment_progress": "Payment Progress",
+      "payment_plan": "Payment Plan",
+      "monthly_installment": "Monthly Installment",
+      "total_paid": "Total Paid",
+      "progress": "Progress",
+      "installments_title": "Payment Installments",
+      "status_management": "Loan Status Management",
+      "update_status_label": "Update Status:",
+      "update_status_button": "Update Status",
+      "status_audit_note": "Status changes are tracked for audit purposes.",
+      "record_payment": "Record Payment",
+      "installment": "Installment",
+      "amount_due": "Amount Due",
+      "payment_date": "Payment Date",
+      "confirm_payment": "Confirm Payment"
     }
   },
   "branches": {
@@ -348,6 +381,18 @@
       "loading_details": "Loading branch details...",
       "updated_success": "Branch updated successfully",
       "update_failed": "Failed to update branch"
+    },
+    "view_page": {
+      "title": "Branch Details",
+      "subtitle": "View branch information",
+      "branch_id": "Branch ID",
+      "institution": "Institution",
+      "total_loans_amount": "Total Loans Amount",
+      "maximum_loans_amount": "Maximum Loans Amount",
+      "created_at": "Created At",
+      "last_updated": "Last Updated",
+      "statistics": "Statistics",
+      "recent_loans": "Recent Loans"
     }
   },
   "institutions": {
@@ -545,7 +590,36 @@
     "payment_processed": "Payment processed successfully",
     "payment_failed": "Failed to process payment",
     "view": "View",
-    "pay": "Pay"
+    "pay": "Pay",
+    "view_page": {
+      "loading": "Loading installment details...",
+      "title": "Installment",
+      "subtitle": "View and manage installment payment",
+      "back_to_list": "← Back to List",
+      "process_payment": "💰 Process Payment",
+      "installment_info": "Installment Information",
+      "installment_number": "Installment Number",
+      "amount": "Amount",
+      "status": "Status",
+      "due_date": "Due Date",
+      "payment_date": "Payment Date",
+      "days_status": "Days Status",
+      "related_loan": "Related Loan",
+      "loan_id": "Loan ID",
+      "principal_amount": "Principal Amount",
+      "payment_plan": "Payment Plan",
+      "product": "Product",
+      "loan_status": "Loan Status",
+      "total_paid": "Total Paid",
+      "customer_info": "Customer Information",
+      "customer_name": "Customer Name",
+      "customer_id": "Customer ID",
+      "contact_number": "Contact Number",
+      "branch": "Branch",
+      "national_id": "National ID",
+      "address": "Address",
+      "all_installments": "All Installments for Loan"
+    }
   },
   "validation": {
     "required": "{field} is required",

@@ -4,9 +4,8 @@
 function createSidebar(user) {
   const sidebarHTML = `
     <div class="sidebar">
-      <div class="sidebar-header">
-        <div style="font-size: 1.5rem;">💰</div>
-        <div class="sidebar-logo">Q1KEY</div>
+      <div class="sidebar-header" style="display: flex; justify-content: center; align-items: center; padding: 1.5rem 0;">
+        <img src="../logo.png" alt="Logo" style="height: 140px; width: auto; max-width: 90%;">
       </div>
       
       <nav>

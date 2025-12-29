@@ -23,8 +23,8 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white">Loan Details</h1>
-          <p class="text-secondary">View loan information</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="loans.view_page.title">Loan Details</h1>
+          <p class="text-secondary" data-i18n-key="loans.view_page.subtitle">View loan information</p>
         </div>
       </div>
       
@@ -42,16 +42,16 @@
                 <h2 id="loanId" class="text-2xl font-bold text-white" style="margin: 0;"></h2>
                 <span id="statusBadge"></span>
               </div>
-              <p class="text-muted" style="margin: 0;">Loan Application</p>
+              <p class="text-muted" style="margin: 0;" data-i18n-key="loans.view_page.loan_application">Loan Application</p>
             </div>
             <div class="flex gap-2" style="display: flex; gap: 0.5rem;">
-              <a id="editBtn" class="btn btn-primary">Edit</a>
+              <a id="editBtn" class="btn btn-primary" data-i18n-key="common.button.edit">Edit</a>
             </div>
           </div>
           
           <div class="grid grid-cols-2 gap-6 mb-6" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
             <div>
-              <p class="text-muted mb-1">Customer</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.customer">Customer</p>
               <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <a id="customerLink" href="#" class="text-white font-medium hover:text-primary" style="text-decoration: none; transition: color 0.2s;">
                   <span id="customerName"></span>
@@ -64,42 +64,42 @@
               </div>
             </div>
             <div>
-              <p class="text-muted mb-1">Branch</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.branch">Branch</p>
               <p id="branchName" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Institution</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.institution">Institution</p>
               <p id="institutionName" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Product</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.product">Product</p>
               <p id="productName" class="text-white font-medium"></p>
             </div>
           </div>
           
           <div class="grid grid-cols-2 gap-6" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
             <div>
-              <p class="text-muted mb-1">Principal Amount</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.principal_amount">Principal Amount</p>
               <p id="principalAmount" class="text-white font-medium text-lg"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Due Date</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.due_date">Due Date</p>
               <p id="dueDate" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Status</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.status">Status</p>
               <p id="status" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Given By</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.given_by">Given By</p>
               <p id="givenBy" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Created At</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.created_at">Created At</p>
               <p id="createdAt" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Last Updated</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.last_updated">Last Updated</p>
               <p id="updatedAt" class="text-white font-medium"></p>
             </div>
           </div>
@@ -107,24 +107,24 @@
         
         <!-- Payment Progress -->
         <div id="paymentProgressCard" class="glass-card p-6 mb-6" style="display: none;">
-          <h3 class="text-xl font-bold text-white mb-4">Payment Progress</h3>
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="loans.view_page.payment_progress">Payment Progress</h3>
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1rem;">
             <div>
-              <p class="text-muted mb-1">Payment Plan</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.payment_plan">Payment Plan</p>
               <p id="paymentPlan" class="text-white font-medium text-lg"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Monthly Installment</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.monthly_installment">Monthly Installment</p>
               <p id="monthlyInstallment" class="text-white font-medium text-lg"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Total Paid</p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.total_paid">Total Paid</p>
               <p id="totalPaid" class="text-white font-medium text-lg"></p>
             </div>
           </div>
           <div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span class="text-muted text-sm">Progress</span>
+              <span class="text-muted text-sm" data-i18n-key="loans.view_page.progress">Progress</span>
               <span id="progressPercentage" class="text-white text-sm font-medium">0%</span>
             </div>
             <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden;">
@@ -136,7 +136,7 @@
         <!-- Installments -->
         <div id="installmentsCard" class="glass-card p-6 mb-6" style="display: none;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h3 class="text-xl font-bold text-white">Payment Installments</h3>
+            <h3 class="text-xl font-bold text-white" data-i18n-key="loans.view_page.installments_title">Payment Installments</h3>
             <div style="display: flex; gap: 0.5rem; align-items: center;">
               <span class="badge badge-info" id="installmentsSummary">0 of 0 paid</span>
             </div>
@@ -149,22 +149,22 @@
         
         <!-- Status Management -->
         <div class="glass-card p-6">
-          <h3 class="text-xl font-bold text-white mb-4">Loan Status Management</h3>
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="loans.view_page.status_management">Loan Status Management</h3>
           <div style="display: flex; flex-direction: column; gap: 1rem;">
             <div style="display: flex; align-items: center; gap: 1rem;">
-              <label for="statusSelect" class="text-muted" style="min-width: 120px;">Update Status:</label>
+              <label for="statusSelect" class="text-muted" style="min-width: 120px;" data-i18n-key="loans.view_page.update_status_label">Update Status:</label>
               <select id="statusSelect" class="input" style="flex: 1; max-width: 300px;">
-                <option value="Active">Active</option>
-                <option value="Late">Late</option>
-                <option value="Paid">Paid</option>
-                <option value="Finished">Finished</option>
+                <option value="Active" data-i18n-key="loans.status.active">Active</option>
+                <option value="Late" data-i18n-key="loans.status.late">Late</option>
+                <option value="Paid" data-i18n-key="loans.status.paid">Paid</option>
+                <option value="Finished" data-i18n-key="loans.status.finished">Finished</option>
               </select>
             </div>
             <div style="display: flex; align-items: flex-start; gap: 1rem;">
-              <button id="updateStatusBtn" class="btn btn-primary" style="padding: 0.5rem 1.5rem;">
+              <button id="updateStatusBtn" class="btn btn-primary" style="padding: 0.5rem 1.5rem;" data-i18n-key="loans.view_page.update_status_button">
                 Update Status
               </button>
-              <p class="text-muted" style="font-size: 0.875rem; margin: 0.5rem 0 0 0;">
+              <p class="text-muted" style="font-size: 0.875rem; margin: 0.5rem 0 0 0;" data-i18n-key="loans.view_page.status_audit_note">
                 Status changes are tracked for audit purposes.
               </p>
             </div>
@@ -178,31 +178,31 @@
   <div id="paymentModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; align-items: center; justify-content: center;">
     <div class="glass-card" style="max-width: 500px; width: 90%; padding: 2rem; position: relative;">
       <button id="closeModal" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
-      <h3 class="text-xl font-bold text-white mb-4">Record Payment</h3>
+      <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="loans.view_page.record_payment">Record Payment</h3>
       
       <div class="mb-4" style="padding: 1rem; border-radius: 8px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
         <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-          <span class="text-muted">Installment</span>
+          <span class="text-muted" data-i18n-key="loans.view_page.installment">Installment</span>
           <span class="text-white font-medium" id="modalInstallmentNumber"></span>
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-          <span class="text-muted">Amount Due</span>
+          <span class="text-muted" data-i18n-key="loans.view_page.amount_due">Amount Due</span>
           <span class="text-white font-medium text-lg" id="modalAmount"></span>
         </div>
         <div style="display: flex; justify-content: space-between;">
-          <span class="text-muted">Due Date</span>
+          <span class="text-muted" data-i18n-key="loans.view_page.due_date">Due Date</span>
           <span class="text-white font-medium" id="modalDueDate"></span>
         </div>
       </div>
       
       <div class="form-group">
-        <label class="label">Payment Date</label>
+        <label class="label" data-i18n-key="loans.view_page.payment_date">Payment Date</label>
         <input type="date" id="paymentDate" class="input" required />
       </div>
       
       <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-        <button id="confirmPayment" class="btn btn-primary" style="flex: 1;">Confirm Payment</button>
-        <button id="cancelPayment" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+        <button id="confirmPayment" class="btn btn-primary" style="flex: 1;" data-i18n-key="loans.view_page.confirm_payment">Confirm Payment</button>
+        <button id="cancelPayment" class="btn btn-secondary" style="flex: 1;" data-i18n-key="common.button.cancel">Cancel</button>
       </div>
     </div>
   </div>
@@ -230,6 +230,8 @@
       );
       initializeLanguageSwitcher();
       setActiveNav('loans');
+      window.i18n.translatePage();
+    }
     
     const loadingContainer = document.getElementById('loadingContainer');
     const loanContainer = document.getElementById('loanContainer');

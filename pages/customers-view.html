@@ -274,29 +274,47 @@
         customerData = await api.customers.getById(customerId);
         
         // Populate customer details
-        document.getElementById('customerAvatar').textContent = customerData.name.charAt(0).toUpperCase();
-        document.getElementById('customerName').textContent = customerData.name;
-        document.getElementById('customerId').textContent = customerData.customerId;
-        document.getElementById('nationalId').textContent = customerData.nationalId;
-        document.getElementById('phoneNumber').textContent = customerData.phoneNumber;
-        document.getElementById('institutionInfo').textContent = customerData.institutionName || '--';
-        document.getElementById('creatorInfo').textContent = customerData.createdByName || '--';
-        document.getElementById('createdAt').textContent = formatDateTime(customerData.createdAt);
-        document.getElementById('updatedAt').textContent = formatDateTime(customerData.updatedAt);
+        const customerAvatarEl = document.getElementById('customerAvatar');
+        const customerNameEl = document.getElementById('customerName');
+        const customerIdEl = document.getElementById('customerId');
+        const nationalIdEl = document.getElementById('nationalId');
+        const phoneNumberEl = document.getElementById('phoneNumber');
+        const institutionInfoEl = document.getElementById('institutionInfo');
+        const creatorInfoEl = document.getElementById('creatorInfo');
+        const createdAtEl = document.getElementById('createdAt');
+        const updatedAtEl = document.getElementById('updatedAt');
+        
+        if (customerAvatarEl) customerAvatarEl.textContent = customerData.name.charAt(0).toUpperCase();
+        if (customerNameEl) customerNameEl.textContent = customerData.name;
+        if (customerIdEl) customerIdEl.textContent = customerData.customerId;
+        if (nationalIdEl) nationalIdEl.textContent = customerData.nationalId;
+        if (phoneNumberEl) phoneNumberEl.textContent = customerData.phoneNumber;
+        if (institutionInfoEl) institutionInfoEl.textContent = customerData.institutionName || '--';
+        if (creatorInfoEl) creatorInfoEl.textContent = customerData.createdByName || '--';
+        if (createdAtEl) createdAtEl.textContent = formatDateTime(customerData.createdAt);
+        if (updatedAtEl) updatedAtEl.textContent = formatDateTime(customerData.updatedAt);
         
         // Display trust status badge
-        document.getElementById('trustStatusBadge').innerHTML = formatTrustStatusBadge(customerData.trustStatus);
+        const trustStatusBadgeEl = document.getElementById('trustStatusBadge');
+        if (trustStatusBadgeEl) {
+          trustStatusBadgeEl.innerHTML = formatTrustStatusBadge(customerData.trustStatus);
+        }
         
         // Show trust status management for Institution/Super Admin
         if (user.role === 'Institution' || user.role === 'Super Admin') {
-          document.getElementById('trustStatusSection').style.display = 'block';
-          document.getElementById('trustStatusSelect').value = customerData.trustStatus || 'Unverified';
+          const trustStatusSectionEl = document.getElementById('trustStatusSection');
+          const trustStatusSelectEl = document.getElementById('trustStatusSelect');
+          if (trustStatusSectionEl) trustStatusSectionEl.style.display = 'block';
+          if (trustStatusSelectEl) trustStatusSelectEl.value = customerData.trustStatus || 'Unverified';
         }
         
-        document.getElementById('editBtn').href = `customers-edit.html?id=${customerId}`;
+        const editBtnEl = document.getElementById('editBtn');
+        if (editBtnEl) editBtnEl.href = `customers-edit.html?id=${customerId}`;
         
-        loadingContainer.style.display = 'none';
-        customerContainer.style.display = 'block';
+        const loadingContainer = document.getElementById('loadingContainer');
+        const customerContainer = document.getElementById('customerContainer');
+        if (loadingContainer) loadingContainer.style.display = 'none';
+        if (customerContainer) customerContainer.style.display = 'block';
         
         // Load customer loans and notes
         loadLoans();

@@ -23,8 +23,8 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white">Branch Details</h1>
-          <p class="text-secondary">View branch information</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="branches.view_page.title">Branch Details</h1>
+          <p class="text-secondary" data-i18n-key="branches.view_page.subtitle">View branch information</p>
         </div>
       </div>
       
@@ -39,13 +39,13 @@
           <div class="flex items-center justify-between mb-6" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
             <div>
               <h2 id="branchName" class="text-2xl font-bold text-white mb-2"></h2>
-              <p class="text-muted">Branch ID: <span id="branchId"></span></p>
-              <p class="text-muted">Institution: <span id="institutionName"></span></p>
+              <p class="text-muted"><span data-i18n-key="branches.view_page.branch_id">Branch ID</span>: <span id="branchId"></span></p>
+              <p class="text-muted"><span data-i18n-key="branches.view_page.institution">Institution</span>: <span id="institutionName"></span></p>
             </div>
-            <div class="flex gap-2" style="display: flex; gap: 0.5rem;">
+            <div class="flex gap-2" style="display: flex; gap: 0.5rem; align-items: center;">
               <span id="statusBadge" class="badge"></span>
-              <a id="editBtn" class="btn btn-primary">Edit</a>
-              <button id="deleteBtn" class="btn btn-danger">Delete</button>
+              <a id="editBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; text-decoration: none;" data-i18n-key="common.button.edit">Edit</a>
+              <button id="deleteBtn" class="btn btn-danger" style="padding: 0.5rem 1rem;" data-i18n-key="common.button.delete">Delete</button>
             </div>
           </div>
           
@@ -54,19 +54,19 @@
           
           <div class="grid grid-cols-2 gap-6" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
             <div>
-              <p class="text-muted mb-1">Total Loans Amount</p>
+              <p class="text-muted mb-1" data-i18n-key="branches.view_page.total_loans_amount">Total Loans Amount</p>
               <p id="totalLoans" class="text-2xl font-bold text-white"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Maximum Loans Amount</p>
+              <p class="text-muted mb-1" data-i18n-key="branches.view_page.maximum_loans_amount">Maximum Loans Amount</p>
               <p id="maximumLoans" class="text-2xl font-bold text-white"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Created At</p>
+              <p class="text-muted mb-1" data-i18n-key="branches.view_page.created_at">Created At</p>
               <p id="createdAt" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Last Updated</p>
+              <p class="text-muted mb-1" data-i18n-key="branches.view_page.last_updated">Last Updated</p>
               <p id="updatedAt" class="text-white font-medium"></p>
             </div>
           </div>
@@ -74,7 +74,7 @@
         
         <!-- Statistics -->
         <div class="glass-card p-6 mb-6">
-          <h3 class="text-xl font-bold text-white mb-4">Statistics</h3>
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="branches.view_page.statistics">Statistics</h3>
           <div id="statsContainer">
             <div class="loading-container">
               <div class="spinner"></div>
@@ -84,7 +84,7 @@
         
         <!-- Recent Loans -->
         <div class="glass-card p-6">
-          <h3 class="text-xl font-bold text-white mb-4">Recent Loans</h3>
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="branches.view_page.recent_loans">Recent Loans</h3>
           <div id="loansContainer">
             <div class="loading-container">
               <div class="spinner"></div>
@@ -115,15 +115,19 @@
       );
       initializeLanguageSwitcher();
       setActiveNav('branches');
-    
-    const loadingContainer = document.getElementById('loadingContainer');
-    const branchContainer = document.getElementById('branchContainer');
+      window.i18n.translatePage();
+      
+      // Load branch data after initialization
+      loadBranch();
+    }
     
     // Get branch ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const branchId = urlParams.get('id');
     
-    if (!branchId) {
+    if (branchId) {
+      // Proceed with initialization
+    } else {
       window.location.href = 'branches.html';
     }
     
@@ -131,21 +135,34 @@
     
     // Load branch data
     async function loadBranch() {
+      const loadingContainer = document.getElementById('loadingContainer');
+      const branchContainer = document.getElementById('branchContainer');
+      
       try {
         branchData = await api.branches.getById(branchId);
         
         // Populate branch details
-        document.getElementById('branchName').textContent = branchData.name;
-        document.getElementById('branchId').textContent = branchData.branchId;
-        document.getElementById('institutionName').textContent = branchData.institution?.name || 'N/A';
-        document.getElementById('totalLoans').textContent = formatCurrency(branchData.totalLoans || 0);
-        document.getElementById('maximumLoans').textContent = branchData.maximumLoans ? formatCurrency(branchData.maximumLoans) : 'Unlimited';
-        document.getElementById('createdAt').textContent = formatDateTime(branchData.createdAt);
-        document.getElementById('updatedAt').textContent = formatDateTime(branchData.updatedAt);
+        const branchNameEl = document.getElementById('branchName');
+        const branchIdEl = document.getElementById('branchId');
+        const institutionNameEl = document.getElementById('institutionName');
+        const totalLoansEl = document.getElementById('totalLoans');
+        const maximumLoansEl = document.getElementById('maximumLoans');
+        const createdAtEl = document.getElementById('createdAt');
+        const updatedAtEl = document.getElementById('updatedAt');
+        
+        if (branchNameEl) branchNameEl.textContent = branchData.name;
+        if (branchIdEl) branchIdEl.textContent = branchData.branchId;
+        if (institutionNameEl) institutionNameEl.textContent = branchData.institution?.name || 'N/A';
+        if (totalLoansEl) totalLoansEl.textContent = formatCurrency(branchData.totalLoans || 0);
+        if (maximumLoansEl) maximumLoansEl.textContent = branchData.maximumLoans ? formatCurrency(branchData.maximumLoans) : 'Unlimited';
+        if (createdAtEl) createdAtEl.textContent = formatDateTime(branchData.createdAt);
+        if (updatedAtEl) updatedAtEl.textContent = formatDateTime(branchData.updatedAt);
         
         const statusBadge = document.getElementById('statusBadge');
-        statusBadge.textContent = branchData.isActive ? 'Active' : 'Inactive';
-        statusBadge.className = `badge ${branchData.isActive ? 'badge-success' : 'badge-danger'}`;
+        if (statusBadge) {
+          statusBadge.textContent = branchData.isActive ? 'Active' : 'Inactive';
+          statusBadge.className = `badge ${branchData.isActive ? 'badge-success' : 'badge-danger'}`;
+        }
         
         // Show capacity info if maximum loans is set
         if (branchData.maximumLoans) {
@@ -167,8 +184,8 @@
         
         document.getElementById('editBtn').href = `branches-edit.html?id=${branchId}`;
         
-        loadingContainer.style.display = 'none';
-        branchContainer.style.display = 'block';
+        if (loadingContainer) loadingContainer.style.display = 'none';
+        if (branchContainer) branchContainer.style.display = 'block';
         
         // Load statistics and loans
         loadStatistics();
@@ -249,9 +266,6 @@
         showToast(error.message || 'Failed to delete branch', 'error');
       }
     });
-    
-    loadBranch();
-    }
     
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initPage);
