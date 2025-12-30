@@ -147,6 +147,20 @@
       }
       
       const user = getCurrentUser();
+      
+      // Check if user has access to create branches
+      if (user.roleName === 'Institution' && user.canCreateBranches === false) {
+        showToast('You do not have permission to create branches', 'error');
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
+      // Branch users cannot access this page
+      if (user.roleName === 'Branch') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
       document.getElementById('sidebar').innerHTML = createSidebar(user);
       document.getElementById('header').innerHTML = createHeader(
         t('branches.add_branch'),

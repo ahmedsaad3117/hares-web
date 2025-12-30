@@ -60,6 +60,20 @@
       }
       
       const user = getCurrentUser();
+      
+      // Check if user has access to branches page
+      if (user.roleName === 'Institution' && user.canCreateBranches === false) {
+        showToast('You do not have permission to access branches', 'error');
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
+      // Branch users cannot access this page
+      if (user.roleName === 'Branch') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
       document.getElementById('sidebar').innerHTML = createSidebar(user);
       document.getElementById('header').innerHTML = createHeader(t('branches.title'), t('branches.branch_details'));
       initializeLanguageSwitcher();
