@@ -31,23 +31,38 @@
             <!-- Will be populated by JavaScript -->
           </div>
           
-          <!-- Status Filters -->
-          <div class="glass-card p-4 mb-6" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-            <button id="filter-all" onclick="filterByStatus('all')" class="btn" style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #fff;">
-              📋 <span data-i18n-key="installments.all_installments">All Installments</span>
-            </button>
-            <button id="filter-this-month" onclick="filterByStatus('this-month')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-              📅 <span data-i18n-key="installments.due_this_month">Due This Month</span>
-            </button>
-            <button id="filter-pending" onclick="filterByStatus('Pending')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-              ⏳ <span data-i18n-key="installments.pending">Pending</span>
-            </button>
-            <button id="filter-paid" onclick="filterByStatus('Paid')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-              ✅ <span data-i18n-key="installments.paid">Paid</span>
-            </button>
-            <button id="filter-overdue" onclick="filterByStatus('Overdue')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-              ⚠️ <span data-i18n-key="installments.overdue">Overdue</span>
-            </button>
+          <!-- Search and Filters -->
+          <div class="glass-card p-4 mb-6" style="padding: 1rem; margin-bottom: 1.5rem;">
+            <!-- Search Input -->
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <input 
+                type="text" 
+                id="searchInput" 
+                data-i18n-key="installments.search_placeholder"
+                placeholder="Search by customer name, phone, ID, or amount..." 
+                class="input"
+                style="width: 100%;"
+              />
+            </div>
+            
+            <!-- Status Filters -->
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button id="filter-all" onclick="filterByStatus('all')" class="btn" style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #fff;">
+                📋 <span data-i18n-key="installments.all_installments">All Installments</span>
+              </button>
+              <button id="filter-this-month" onclick="filterByStatus('this-month')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                📅 <span data-i18n-key="installments.due_this_month">Due This Month</span>
+              </button>
+              <button id="filter-pending" onclick="filterByStatus('Pending')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                ⏳ <span data-i18n-key="installments.pending">Pending</span>
+              </button>
+              <button id="filter-paid" onclick="filterByStatus('Paid')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                ✅ <span data-i18n-key="installments.paid">Paid</span>
+              </button>
+              <button id="filter-overdue" onclick="filterByStatus('Overdue')" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                ⚠️ <span data-i18n-key="installments.overdue">Overdue</span>
+              </button>
+            </div>
           </div>
           
           <!-- Installments Table -->
@@ -59,6 +74,7 @@
                     <th>#</th>
                     <th data-i18n-key="installments.loan">Loan</th>
                     <th data-i18n-key="installments.customer">Customer</th>
+                    <th data-i18n-key="customers.phone">Phone</th>
                     <th data-i18n-key="installments.branch">Branch</th>
                     <th data-i18n-key="installments.amount">Amount</th>
                     <th data-i18n-key="installments.due_date">Due Date</th>
@@ -69,7 +85,7 @@
                 </thead>
                 <tbody id="installmentsTableBody">
                   <tr>
-                    <td colspan="9" style="text-align: center; padding: 3rem;">
+                    <td colspan="10" style="text-align: center; padding: 3rem;">
                       <div class="spinner"></div>
                       <p class="text-muted mt-2" data-i18n-key="installments.loading">Loading installments...</p>
                     </td>
@@ -171,6 +187,7 @@
       
       // Initialize page
       loadInstallments();
+      setupSearch();
     }
     
     if (document.readyState === 'loading') {
@@ -184,6 +201,8 @@
     let totalPages = 1;
     let currentFilter = 'all';
     let allInstallments = [];
+    let searchTerm = '';
+    let searchTimeout = null;
     
     // Toast notification
     function showToast(message, type = 'success') {
@@ -191,6 +210,25 @@
       toast.textContent = message;
       toast.className = `toast show ${type === 'success' ? 'toast-success' : type === 'error' ? 'toast-error' : 'toast-info'}`;
       setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    // Setup search with debounce
+    function setupSearch() {
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', (e) => {
+        const value = e.target.value.trim();
+        
+        // Clear existing timeout
+        if (searchTimeout) {
+          clearTimeout(searchTimeout);
+        }
+        
+        // Set new timeout for 1 second
+        searchTimeout = setTimeout(() => {
+          searchTerm = value;
+          performSearch();
+        }, 1000);
+      });
     }
     
     // Date formatting
@@ -216,6 +254,40 @@
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       return dueDate < today;
+    }
+    
+    // Load installments from all loans OR from search
+    async function performSearch() {
+      if (searchTerm) {
+        // Show loading
+        document.getElementById('installmentsTableBody').innerHTML = 
+          '<tr><td colspan="10" style="text-align: center; padding: 3rem;"><div class="spinner"></div><p class="text-muted mt-2">Searching...</p></td></tr>';
+        
+        // Perform search via API
+        try {
+          const searchResults = await api.installments.search(searchTerm);
+          
+          // Normalize the structure - backend returns loan.customer and loan.branch
+          allInstallments = searchResults.map(inst => ({
+            ...inst,
+            customer: inst.loan.customer,
+            branch: inst.loan.branch
+          }));
+          
+          // Update summary cards with search results
+          updateSummaryCards();
+          
+          filterAndRenderInstallments();
+        } catch (error) {
+          console.error('Search failed:', error);
+          showToast('Search failed', 'error');
+          document.getElementById('installmentsTableBody').innerHTML = 
+            '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #ef4444;">Search failed</td></tr>';
+        }
+      } else {
+        // Load all installments
+        loadInstallments();
+      }
     }
     
     // Load installments from all loans
@@ -262,7 +334,7 @@
         console.error('Failed to load installments:', error);
         showToast('Failed to load installments', 'error');
         document.getElementById('installmentsTableBody').innerHTML = 
-          '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load installments</td></tr>';
+          '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load installments</td></tr>';
       }
     }
     
@@ -385,7 +457,7 @@
       const tbody = document.getElementById('installmentsTableBody');
       
       if (installments.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">No installments found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #94a3b8;">No installments found</td></tr>';
         return;
       }
       
@@ -427,6 +499,9 @@
                 <div class="text-white font-medium" style="font-size: 0.95rem; margin-bottom: 0.125rem;">${inst.customer.name}</div>
                 <div class="text-muted" style="font-size: 0.8rem;">ID: ${inst.customer.customerId}</div>
               </div>
+            </td>
+            <td style="padding: 1rem 0.75rem;">
+              <span class="text-secondary" style="font-size: 0.9rem;">${inst.customer.phoneNumber || '-'}</span>
             </td>
             <td style="padding: 1rem 0.75rem;">
               <span class="text-secondary" style="font-size: 0.9rem;">${inst.branch.name}</span>

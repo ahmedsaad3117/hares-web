@@ -88,6 +88,13 @@ const api = {
         body: JSON.stringify(credentials),
       }),
     
+    logout: () =>
+      apiRequest('/auth/logout', {
+        method: 'POST',
+      }),
+    
+    verifySession: () => apiRequest('/auth/verify-session'),
+    
     getProfile: () => apiRequest('/users/me'),
   },
   
@@ -233,6 +240,7 @@ const api = {
   
   // Installments
   installments: {
+    search: (searchTerm) => apiRequest(`/installments/search?q=${encodeURIComponent(searchTerm)}`),
     getById: (id) => apiRequest(`/installments/${id}`),
     payInstallment: (id, paymentDate) => apiRequest(`/installments/${id}/pay`, {
       method: 'PATCH',
@@ -247,8 +255,18 @@ const api = {
   
   // Search Logs
   searchLogs: {
-    getAll: (page = 1, limit = 10) => apiRequest(`/search-logs?page=${page}&limit=${limit}`),
-    getByCustomer: (customerId, page = 1, limit = 10) => apiRequest(`/search-logs/customer/${customerId}?page=${page}&limit=${limit}`),
+    getAll: (page = 1, limit = 10, searchType = '', search = '') => {
+      let url = `/search-logs?page=${page}&limit=${limit}`;
+      if (searchType) url += `&searchType=${encodeURIComponent(searchType)}`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+      return apiRequest(url);
+    },
+    getByCustomer: (customerId, page = 1, limit = 10, searchType = '') => {
+      const url = searchType
+        ? `/search-logs/customer/${customerId}?page=${page}&limit=${limit}&searchType=${encodeURIComponent(searchType)}`
+        : `/search-logs/customer/${customerId}?page=${page}&limit=${limit}`;
+      return apiRequest(url);
+    },
     getByUser: (userId, page = 1, limit = 10) => apiRequest(`/search-logs/user/${userId}?page=${page}&limit=${limit}`),
     delete: (id) => apiRequest(`/search-logs/${id}`, {
       method: 'DELETE',

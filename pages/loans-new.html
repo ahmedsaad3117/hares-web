@@ -263,14 +263,14 @@
       capacityNumbers.textContent = `${formatCurrency(available)} / ${formatCurrency(maximumLoans)} available`;
       
       if (available === 0) {
-        // At capacity - RED
+        // At capacity - RED (but still allow creation)
         capacityStatus.style.background = 'rgba(239, 68, 68, 0.1)';
         capacityStatus.style.borderColor = 'rgba(239, 68, 68, 0.2)';
-        capacityIcon.textContent = '🚫';
-        capacityText.textContent = 'Branch at capacity - Cannot create loan';
+        capacityIcon.textContent = '⚠️';
+        capacityText.textContent = 'Branch over capacity - Loan will exceed limit';
         capacityText.style.color = '#ef4444';
         capacityNumbers.style.color = '#ef4444';
-        submitButton.disabled = true;
+        submitButton.disabled = false; // Allow creation even at capacity
       } else if (utilizationPercent >= 90) {
         // Near capacity - YELLOW
         capacityStatus.style.background = 'rgba(245, 158, 11, 0.1)';

@@ -18,19 +18,19 @@
       </div>
 
       <form id="loginForm" style="display: flex; flex-direction: column; gap: 1rem;">
-        <!-- Email -->
+        <!-- Email or Phone -->
         <div class="form-group">
-          <label class="label" data-i18n-key="login.email_label">Email</label>
+          <label class="label" data-i18n-key="login.identifier_label">Email or Phone</label>
           <input 
-            type="email" 
-            id="email" 
-            name="email" 
+            type="text" 
+            id="identifier" 
+            name="identifier" 
             class="input" 
-            data-i18n-placeholder="login.email_placeholder"
-            placeholder="admin@example.com"
-            require
+            data-i18n-placeholder="login.identifier_placeholder"
+            placeholder="admin@example.com or phone number"
+            required
           />
-          <div id="emailError" class="error-text hidden"></div>
+          <div id="identifierError" class="error-text hidden"></div>
         </div>
 
         <!-- Password -->
@@ -91,18 +91,18 @@
       loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const email = document.getElementById('email').value;
+      const identifier = document.getElementById('identifier').value.trim();
       const password = document.getElementById('password').value;
       
       // Hide previous errors
       errorMessage.classList.add('hidden');
-      document.getElementById('emailError').classList.add('hidden');
+      document.getElementById('identifierError').classList.add('hidden');
       document.getElementById('passwordError').classList.add('hidden');
       
       // Validation
-      if (!email || !email.includes('@')) {
-        document.getElementById('emailError').textContent = t('login.errors.invalid_email');
-        document.getElementById('emailError').classList.remove('hidden');
+      if (!identifier) {
+        document.getElementById('identifierError').textContent = 'Email or phone is required';
+        document.getElementById('identifierError').classList.remove('hidden');
         return;
       }
       
@@ -120,7 +120,7 @@
       `;
       
       try {
-        const response = await api.auth.login({ email, password });
+        const response = await api.auth.login({ identifier, password });
         
         console.log('Login successful:', response);
         

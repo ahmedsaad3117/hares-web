@@ -409,17 +409,17 @@
             <div style="padding: 1rem; background: ${isCurrent ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255, 255, 255, 0.05)'}; border-radius: 8px; border: 1px solid ${isCurrent ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.1)'};">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                  <span class="font-semibold text-white">Installment #${inst.installmentNumber}</span>
-                  ${isCurrent ? '<span class="badge badge-info" style="margin-left: 0.5rem; font-size: 0.75rem;">Current</span>' : ''}
+                  <span class="font-semibold text-white">${t('installments.view_page.installment')} #${inst.installmentNumber}</span>
+                  ${isCurrent ? `<span class="badge badge-info" style="margin-left: 0.5rem; font-size: 0.75rem;">${t('installments.view_page.current')}</span>` : ''}
                 </div>
                 <div style="text-align: right;">
                   <div class="font-semibold text-white">${formatCurrency(inst.amount)}</div>
-                  <div class="text-sm" style="color: ${statusColor};">${inst.status === 'Paid' ? '✅ Paid' : overdue ? '⚠️ Overdue' : '⏳ Pending'}</div>
+                  <div class="text-sm" style="color: ${statusColor};">${inst.status === 'Paid' ? `✅ ${t('installments.paid')}` : overdue ? `⚠️ ${t('installments.overdue')}` : `⏳ ${t('installments.pending')}`}</div>
                 </div>
               </div>
               <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.875rem;">
-                <span class="text-muted">Due: ${formatDate(inst.dueDate)}</span>
-                <span class="text-muted">${inst.paymentDate ? `Paid: ${formatDate(inst.paymentDate)}` : 'Not paid'}</span>
+                <span class="text-muted">${t('installments.view_page.due_short')}: ${formatDate(inst.dueDate)}</span>
+                <span class="text-muted">${inst.paymentDate ? `${t('installments.view_page.paid_short')}: ${formatDate(inst.paymentDate)}` : t('installments.view_page.not_paid')}</span>
               </div>
             </div>
           `;

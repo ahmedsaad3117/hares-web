@@ -130,9 +130,10 @@
           
           // Render institution stats
           const statsHTML = `
-            <div class="glass-card stat-card">
+            <a href="branches.html" style="text-decoration: none; color: inherit;">
+            <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
               <div class="flex items-center justify-between mb-4">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
                   🏢
                 </div>
                 <span class="badge badge-info">${stats.totalBranches}</span>
@@ -140,10 +141,12 @@
               <div class="stat-card-value">${stats.totalBranches}</div>
               <div class="stat-card-label">${t('dashboard.stats.total_branches')}</div>
             </div>
+            </a>
             
-            <div class="glass-card stat-card">
+            <a href="customers.html" style="text-decoration: none; color: inherit;">
+            <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
               <div class="flex items-center justify-between mb-4">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
                   👥
                 </div>
                 <span class="badge badge-success">${stats.totalCustomers}</span>
@@ -151,10 +154,12 @@
               <div class="stat-card-value">${stats.totalCustomers}</div>
               <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
             </div>
+            </a>
             
-            <div class="glass-card stat-card">
+            <a href="loans.html" style="text-decoration: none; color: inherit;">
+            <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
               <div class="flex items-center justify-between mb-4">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
                   💰
                 </div>
                 <span class="badge badge-success">${stats.totalLoans}</span>
@@ -162,6 +167,7 @@
               <div class="stat-card-value">${stats.totalLoans}</div>
               <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
             </div>
+            </a>
             
             <div class="glass-card stat-card">
               <div class="flex items-center justify-between mb-4">
@@ -204,9 +210,10 @@
       // Render stats
       const statsHTML = `
         ${user.roleName === 'Super Admin' ? `
-        <div class="glass-card stat-card">
+        <a href="institutions.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
           <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(139, 92, 246, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(139, 92, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
               🏛️
             </div>
             <span class="badge badge-info">${institutions.length}</span>
@@ -214,12 +221,14 @@
           <div class="stat-card-value">${institutions.length}</div>
           <div class="stat-card-label">${t('dashboard.stats.total_institutions')}</div>
         </div>
+        </a>
         ` : ''}
         
         ${user.roleName !== 'Branch' ? `
-        <div class="glass-card stat-card">
+        <a href="branches.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
           <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
               🏢
             </div>
             <span class="badge badge-info">${branches.length}</span>
@@ -227,11 +236,13 @@
           <div class="stat-card-value">${branches.length}</div>
           <div class="stat-card-label">${t('dashboard.stats.total_branches')}</div>
         </div>
+        </a>
         ` : ''}
         
-        <div class="glass-card stat-card">
+        <a href="customers.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
           <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
               👥
             </div>
             <span class="badge badge-success">${customers.length}</span>
@@ -239,10 +250,12 @@
           <div class="stat-card-value">${customers.length}</div>
           <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
         </div>
+        </a>
         
-        <div class="glass-card stat-card">
+        <a href="loans.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
           <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
               💰
             </div>
             <span class="badge badge-success">${loanStats.byStatus.active || 0}</span>
@@ -250,10 +263,12 @@
           <div class="stat-card-value">${loanStats.total}</div>
           <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
         </div>
+        </a>
         
-        <div class="glass-card stat-card">
+        <a href="loans.html?filter=late" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
           <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
               ⚠️
             </div>
             <span class="badge badge-warning">${loanStats.byStatus.late || 0}</span>
@@ -261,6 +276,7 @@
           <div class="stat-card-value">${loanStats.byStatus.late || 0}</div>
           <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
         </div>
+        </a>
       `;
       
       document.getElementById('statsGrid').innerHTML = statsHTML;
@@ -282,9 +298,10 @@
       
       // Render branch-specific stats
       const statsHTML = `
-        <div class="glass-card stat-card">
+        <a href="customers.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
           <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
               👥
             </div>
             <span class="badge badge-success">${dashboardData.metrics.totalCustomers}</span>
@@ -292,10 +309,12 @@
           <div class="stat-card-value">${dashboardData.metrics.totalCustomers}</div>
           <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
         </div>
+        </a>
         
-        <div class="glass-card stat-card">
+        <a href="loans.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
           <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
               💰
             </div>
             <span class="badge badge-success">${dashboardData.metrics.activeLoans}</span>
@@ -303,10 +322,12 @@
           <div class="stat-card-value">${dashboardData.metrics.totalLoans}</div>
           <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
         </div>
+        </a>
         
-        <div class="glass-card stat-card">
+        <a href="loans.html?filter=late" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
           <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
               ⚠️
             </div>
             <span class="badge badge-warning">${dashboardData.metrics.lateLoans}</span>
@@ -314,6 +335,7 @@
           <div class="stat-card-value">${dashboardData.metrics.lateLoans}</div>
           <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
         </div>
+        </a>
         
         <div class="glass-card stat-card">
           <div class="flex items-center justify-between mb-4">

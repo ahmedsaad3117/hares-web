@@ -5,7 +5,9 @@ function createSidebar(user) {
   const sidebarHTML = `
     <div class="sidebar">
       <div class="sidebar-header" style="display: flex; justify-content: center; align-items: center; padding: 1.5rem 0;">
-        <img src="../logo.png" alt="Logo" style="height: 140px; width: auto; max-width: 90%;">
+        <a href="dashboard.html" style="display: block; cursor: pointer;">
+          <img src="../logo.png" alt="Logo" style="height: 140px; width: auto; max-width: 90%;">
+        </a>
       </div>
       
       <nav>
@@ -154,8 +156,16 @@ function setActiveNav(pageId) {
   }
 }
 
-function handleLogout() {
+async function handleLogout() {
   if (confirm('Are you sure you want to logout?')) {
+    try {
+      // Call logout endpoint to clear session in database
+      await api.auth.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Continue with logout even if API call fails
+    }
+    
     clearAuthData();
     window.location.href = '../index.html';
   }

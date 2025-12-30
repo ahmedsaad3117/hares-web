@@ -106,40 +106,39 @@
           </div>
         </div>
         
+        <!-- Customer Notes -->
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-4" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+            <h3 class="text-xl font-bold text-white" data-i18n-key="customers.view_page.notes_title">Customer Notes</h3>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button id="addNoteBtn" class="btn btn-primary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span data-i18n-key="customers.view_page.add_note">Add Note</span>
+              </button>
+              <button id="toggleNotesBtn" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
+                <span id="toggleNotesText" data-i18n-key="customers.view_page.show_notes">Show Notes</span> (<span id="notesCount">0</span>)
+              </button>
+            </div>
+          </div>
+          
+          <div id="notesSection" style="display: none;">
+            <div id="notesContainer" style="max-height: 400px; overflow-y: auto;">
+              <div class="loading-container">
+                <div class="spinner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Customer Loans -->
         <div class="glass-card p-6 mb-6">
           <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="customers.view_page.loans_title">Loans</h3>
           <div id="loansContainer">
             <div class="loading-container">
               <div class="spinner"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Customer Notes -->
-        <div class="glass-card p-6">
-          <div class="flex items-center justify-between mb-4" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h3 class="text-xl font-bold text-white" data-i18n-key="customers.view_page.notes_title">Customer Notes</h3>
-            <button id="toggleNotesBtn" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
-              <span id="toggleNotesText" data-i18n-key="customers.view_page.show_notes">Show Notes</span> (<span id="notesCount">0</span>)
-            </button>
-          </div>
-          
-          <div id="notesSection" style="display: none;">
-            <div class="mb-4" style="margin-bottom: 1rem;">
-              <button id="addNoteBtn" class="btn btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"/>
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                <span data-i18n-key="customers.view_page.add_note">Add Note</span>
-              </button>
-            </div>
-            
-            <div id="notesContainer">
-              <div class="loading-container">
-                <div class="spinner"></div>
-              </div>
             </div>
           </div>
         </div>
@@ -151,7 +150,7 @@
   <div id="noteModal" class="modal" style="display: none;">
     <div class="modal-content glass-card" style="max-width: 600px;">
       <div class="flex items-center justify-between mb-4" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-        <h3 id="noteModalTitle" class="text-xl font-bold text-white">Add Note</h3>
+        <h3 id="noteModalTitle" class="text-xl font-bold text-white" data-i18n-key="customers.view_page.add_note">Add Note</h3>
         <button id="closeNoteModal" class="btn btn-secondary" style="padding: 0.5rem;">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"/>
@@ -326,7 +325,7 @@
         }
       } catch (error) {
         console.error('Error loading customer:', error);
-        showToast('Failed to load customer', 'error');
+        showToast(t('customers.failed_to_load'), 'error');
         setTimeout(() => window.location.href = 'customers.html', 2000);
       }
     }
@@ -337,7 +336,7 @@
         const loansContainer = document.getElementById('loansContainer');
         
         if (loans.length === 0) {
-          loansContainer.innerHTML = '<p class="text-muted">No loans found for this customer</p>';
+          loansContainer.innerHTML = `<p class="text-muted" data-i18n-key="customers.view_page.no_loans_found">${t('customers.view_page.no_loans_found')}</p>`;
           return;
         }
         
@@ -365,11 +364,9 @@
             }).length;
             
             installmentsInfo = `
-              <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
-                <span class="badge badge-success" style="font-size: 0.75rem;">✅ ${paidCount} Paid</span>
-                ${pendingCount > 0 ? `<span class="badge badge-warning" style="font-size: 0.75rem;">⏳ ${pendingCount} Pending</span>` : ''}
-                ${overdueCount > 0 ? `<span class="badge badge-danger" style="font-size: 0.75rem;">⚠️ ${overdueCount} Overdue</span>` : ''}
-              </div>
+              <span class="badge badge-success" style="font-size: 0.75rem;">✅ ${paidCount}</span>
+              ${pendingCount > 0 ? `<span class="badge badge-warning" style="font-size: 0.75rem;">⏳ ${pendingCount}</span>` : ''}
+              ${overdueCount > 0 ? `<span class="badge badge-danger" style="font-size: 0.75rem;">⚠️ ${overdueCount}</span>` : ''}
             `;
           } catch (error) {
             console.error('Error loading installments for loan', loan.loanId, error);
@@ -382,69 +379,75 @@
             'badge-info';
           
           return `
-            <div class="glass-card p-4 mb-3" style="background: rgba(30, 41, 59, 0.5); cursor: pointer; transition: all 0.2s;" 
+            <div class="glass-card" style="background: rgba(30, 41, 59, 0.5); padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; border-left: 3px solid rgba(99, 102, 241, 0.5);" 
                  onmouseover="this.style.background='rgba(30, 41, 59, 0.7)'" 
                  onmouseout="this.style.background='rgba(30, 41, 59, 0.5)'"
                  onclick="window.location.href='loans-view.html?id=${loan.loanId}'">
-              <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.75rem;">
-                <div style="flex: 1;">
-                  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <a href="loans-view.html?id=${loan.loanId}" class="text-white font-semibold text-lg" style="text-decoration: none; hover: text-decoration: underline;" onclick="event.stopPropagation()">
-                      Loan #${loan.loanId}
-                    </a>
-                    <span class="badge ${statusBadge}">${loan.status}</span>
+              
+              <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 1rem; align-items: start;">
+                <!-- Left: Loan ID and Status -->
+                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                  <a href="loans-view.html?id=${loan.loanId}" class="text-white font-semibold" style="text-decoration: none; font-size: 1rem;" onclick="event.stopPropagation()">
+                    ${t('customers.view_page.loan_id')} #${loan.loanId}
+                  </a>
+                  <span class="badge ${statusBadge}" style="font-size: 0.75rem;">${loan.status}</span>
+                </div>
+                
+                <!-- Middle: Loan Details in Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; align-items: start;">
+                  <div>
+                    <p class="text-xs text-muted" style="margin: 0 0 0.125rem 0;">${t('customers.view_page.amount')}</p>
+                    <p class="text-white font-semibold" style="margin: 0; font-size: 1rem;">${formatCurrency(loan.principalAmount)}</p>
                   </div>
-                  <p class="text-white font-medium" style="font-size: 1.125rem; margin-bottom: 0.25rem;">${formatCurrency(loan.principalAmount)}</p>
-                  <p class="text-sm text-muted" style="margin-bottom: 0.5rem;">Product: ${productName}</p>
-                  
-                  <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                    <p class="text-xs text-muted">
-                      <span style="color: rgba(148, 163, 184, 0.8);">Branch:</span> 
-                      <span style="color: rgba(226, 232, 240, 0.9);">${branchName}</span>
-                    </p>
-                    <p class="text-xs text-muted">
-                      <span style="color: rgba(148, 163, 184, 0.8);">Institution:</span> 
-                      <span style="color: rgba(226, 232, 240, 0.9);">${institutionName}</span>
-                    </p>
-                    <p class="text-xs text-muted">
-                      <span style="color: rgba(148, 163, 184, 0.8);">Due Date:</span> 
-                      <span style="color: rgba(226, 232, 240, 0.9);">${loan.dueDate ? formatDate(loan.dueDate) : 'N/A'}</span>
-                    </p>
+                  <div>
+                    <p class="text-xs text-muted" style="margin: 0 0 0.125rem 0;">${t('customers.view_page.product')}</p>
+                    <p class="text-white" style="margin: 0; font-size: 0.875rem;">${productName}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-muted" style="margin: 0 0 0.125rem 0;">${t('customers.view_page.branch')}</p>
+                    <p class="text-white" style="margin: 0; font-size: 0.875rem;">${branchName}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-muted" style="margin: 0 0 0.125rem 0;">${t('customers.view_page.institution')}</p>
+                    <p class="text-white" style="margin: 0; font-size: 0.875rem;">${institutionName}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-muted" style="margin: 0 0 0.125rem 0;">${t('customers.view_page.due_date')}</p>
+                    <p class="text-white" style="margin: 0; font-size: 0.875rem;">${loan.dueDate ? formatDate(loan.dueDate) : 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-muted" style="margin: 0 0 0.125rem 0;">${t('customers.view_page.payment_plan_months')}</p>
+                    <p class="text-white" style="margin: 0; font-size: 0.875rem;">${paymentPlan} ${paymentPlan > 1 ? t('customers.view_page.months') : t('customers.view_page.month')}</p>
                   </div>
                 </div>
-                <div style="text-align: right;">
-                  <p class="text-xs text-muted" style="margin-bottom: 0.25rem;">Payment Plan</p>
-                  <p class="text-white font-medium">${paymentPlan} Month${paymentPlan > 1 ? 's' : ''}</p>
+                
+                <!-- Right: Actions -->
+                <div style="display: flex; gap: 0.25rem; flex-shrink: 0;">
+                  <a href="loans-view.html?id=${loan.loanId}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;" onclick="event.stopPropagation()">
+                    ${t('customers.view_page.view')}
+                  </a>
                 </div>
               </div>
               
               ${paymentPlan > 1 ? `
-                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <span class="text-xs text-muted">Payment Progress</span>
-                    <span class="text-xs text-white font-medium">${Math.min(progressPercent, 100).toFixed(1)}%</span>
+                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.1); display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center;">
+                  <!-- Progress bar -->
+                  <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                      <span class="text-xs text-muted">${t('customers.view_page.progress')}: ${formatCurrency(paidAmount)} / ${formatCurrency(loan.principalAmount)}</span>
+                      <span class="text-xs text-white font-medium">${Math.min(progressPercent, 100).toFixed(0)}%</span>
+                    </div>
+                    <div style="width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden;">
+                      <div style="height: 100%; background: ${progressColor}; width: ${Math.min(progressPercent, 100)}%; transition: width 0.3s;"></div>
+                    </div>
                   </div>
-                  <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden;">
-                    <div style="height: 100%; background: ${progressColor}; width: ${Math.min(progressPercent, 100)}%; transition: width 0.3s;"></div>
+                  
+                  <!-- Installment badges -->
+                  <div style="display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end;">
+                    ${installmentsInfo}
                   </div>
-                  <div style="display: flex; justify-content: space-between; margin-top: 0.25rem;">
-                    <span class="text-xs text-muted">Paid: ${formatCurrency(paidAmount)}</span>
-                    <span class="text-xs text-muted">Remaining: ${formatCurrency(loan.principalAmount - paidAmount)}</span>
-                  </div>
-                  ${installmentsInfo}
                 </div>
-              ` : '<div class="text-xs text-muted" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">Single payment loan</div>'}
-              
-              <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 0.5rem;">
-                <a href="loans-view.html?id=${loan.loanId}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;" onclick="event.stopPropagation()">
-                  View Details
-                </a>
-                ${paymentPlan > 1 ? `
-                  <a href="loans-view.html?id=${loan.loanId}#installments" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem; background: rgba(99, 102, 241, 0.8);" onclick="event.stopPropagation()">
-                    View Installments
-                  </a>
-                ` : ''}
-              </div>
+              ` : ''}
             </div>
           `;
         }));
@@ -452,13 +455,13 @@
         loansContainer.innerHTML = loansHTML.join('');
       } catch (error) {
         console.error('Error loading loans:', error);
-        document.getElementById('loansContainer').innerHTML = '<p class="text-muted">Failed to load loans</p>';
+        document.getElementById('loansContainer').innerHTML = `<p class="text-muted" data-i18n-key="customers.view_page.failed_to_load_loans">${t('customers.view_page.failed_to_load_loans')}</p>`;
       }
     }
     
     // Delete customer
     document.getElementById('deleteBtn').addEventListener('click', async () => {
-      if (!confirm('Are you sure you want to delete this customer?')) return;
+      if (!confirm(t('customers.view_page.delete_customer_confirm'))) return;
       
       try {
         await api.customers.delete(customerId);
@@ -466,7 +469,7 @@
         window.location.href = 'customers.html';
       } catch (error) {
         console.error('Error deleting customer:', error);
-        showToast(error.message || 'Failed to delete customer', 'error');
+        showToast(error.message || t('customers.delete_failed'), 'error');
       }
     });
 
@@ -479,7 +482,7 @@
         renderNotes();
       } catch (error) {
         console.error('Error loading notes:', error);
-        document.getElementById('notesContainer').innerHTML = '<p class="text-muted">Failed to load notes</p>';
+        document.getElementById('notesContainer').innerHTML = `<p class="text-muted" data-i18n-key="customers.view_page.failed_to_load_notes">${t('customers.view_page.failed_to_load_notes')}</p>`;
       }
     }
 
@@ -488,7 +491,7 @@
       const notesContainer = document.getElementById('notesContainer');
       
       if (notesData.length === 0) {
-        notesContainer.innerHTML = '<p class="text-muted">No notes found for this customer</p>';
+        notesContainer.innerHTML = `<p class="text-muted" style="padding: 1rem;" data-i18n-key="customers.view_page.no_notes_found">${t('customers.view_page.no_notes_found')}</p>`;
         return;
       }
       
@@ -502,31 +505,34 @@
         const branchName = note.branch?.name || 'No Branch';
         
         return `
-          <div class="glass-card p-4 mb-3" style="background: rgba(30, 41, 59, 0.5);">
-            <div class="note-header" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.75rem;">
-              <div style="flex: 1;">
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                  <span class="badge badge-${categoryClass}">${note.category}</span>
-                  ${note.last_edited_by ? '<span class="badge badge-secondary" style="font-size: 0.75rem;">Edited</span>' : ''}
-                </div>
-                <p class="text-sm text-muted">
-                  by ${userName} (${branchName}) • ${formatRelativeTime(note.created_at)}
-                </p>
-                ${note.last_edited_by ? `
-                  <p class="text-xs text-muted" style="margin-top: 0.25rem;">
-                    Last edited ${formatRelativeTime(note.edited_at)}
+          <div class="glass-card" style="background: rgba(30, 41, 59, 0.5); padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-left: 3px solid rgba(99, 102, 241, 0.5);">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+              <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0;">
+                <span class="badge badge-${categoryClass}" style="flex-shrink: 0;">${note.category}</span>
+                <div style="flex: 1; min-width: 0;">
+                  <p class="text-white" style="margin: 0; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${note.note_text}">${note.note_text}</p>
+                  <p class="text-xs text-muted" style="margin: 0.25rem 0 0 0;">
+                    ${userName} • ${branchName} • ${formatRelativeTime(note.created_at)}
+                    ${note.last_edited_by ? `• <span style="color: #f59e0b;">Edited ${formatRelativeTime(note.edited_at)}</span>` : ''}
                   </p>
-                ` : ''}
+                </div>
               </div>
               ${canEdit ? `
-                <div style="display: flex; gap: 0.5rem;">
-                  <button class="btn btn-secondary btn-edit-note" data-note-id="${note.id}" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">Edit</button>
-                  <button class="btn btn-danger btn-delete-note" data-note-id="${note.id}" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">Delete</button>
+                <div style="display: flex; gap: 0.25rem; flex-shrink: 0;">
+                  <button class="btn btn-secondary btn-edit-note" data-note-id="${note.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                  <button class="btn btn-danger btn-delete-note" data-note-id="${note.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
                 </div>
               ` : ''}
-            </div>
-            <div class="note-body">
-              <p class="text-white" style="white-space: pre-wrap;">${note.note_text}</p>
             </div>
           </div>
         `;
@@ -551,10 +557,10 @@
       
       if (notesSection.style.display === 'none') {
         notesSection.style.display = 'block';
-        toggleText.textContent = 'Hide Notes';
+        toggleText.textContent = t('customers.view_page.hide_notes');
       } else {
         notesSection.style.display = 'none';
-        toggleText.textContent = 'Show Notes';
+        toggleText.textContent = t('customers.view_page.show_notes');
       }
     });
 
@@ -579,8 +585,8 @@
     // Open add note modal
     document.getElementById('addNoteBtn').addEventListener('click', () => {
       editingNoteId = null;
-      document.getElementById('noteModalTitle').textContent = 'Add Note';
-      document.getElementById('submitBtnText').textContent = 'Save Note';
+      document.getElementById('noteModalTitle').textContent = t('customers.view_page.add_note');
+      document.getElementById('submitBtnText').textContent = t('customers.view_page.save_note');
       document.getElementById('noteForm').reset();
       document.getElementById('charCount').textContent = '0';
       document.getElementById('noteModal').style.display = 'flex';
@@ -592,8 +598,8 @@
       if (!note) return;
       
       editingNoteId = noteId;
-      document.getElementById('noteModalTitle').textContent = 'Edit Note';
-      document.getElementById('submitBtnText').textContent = 'Update Note';
+      document.getElementById('noteModalTitle').textContent = t('customers.view_page.edit_note');
+      document.getElementById('submitBtnText').textContent = t('customers.view_page.update_note');
       document.getElementById('noteText').value = note.note_text;
       document.getElementById('noteCategory').value = note.category;
       if (note.branch_id && document.getElementById('noteBranch')) {

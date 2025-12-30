@@ -18,6 +18,16 @@
       <div class="glass-card p-4 mb-6">
         <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
           <div style="flex: 1; min-width: 200px;">
+            <label class="form-label" data-i18n-key="search_logs.search_text">Search by Customer or User</label>
+            <input 
+              type="text" 
+              id="searchTextFilter"
+              data-i18n-placeholder="search_logs.search_text_placeholder"
+              placeholder="Enter customer or user name..." 
+              class="input"
+            />
+          </div>
+          <div style="flex: 1; min-width: 200px;">
             <label class="form-label" data-i18n-key="search_logs.filter_by_customer">Filter by Customer ID</label>
             <input 
               type="number" 
@@ -79,67 +89,56 @@
     </div>
   </div>
 
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
   <script src="../js/api.js"></script>
   <script src="../components/sidebar.js"></script>
   <script src="../components/header.js"></script>
   <script src="../components/pagination.js"></script>
   <script>
-    async function initPage() {
-      await waitForI18n();
-      
-      if (!isAuthenticated()) {
-        window.location.href = '../index.html';
-        return;
-      }
-      
-      const user = getCurrentUser();
-      
-      // Only Super Admin can access
-      if (user.roleName !== 'Super Admin') {
-        window.location.href = 'dashboard.html';
-        return;
-      }
-      
-      document.getElementById('sidebar').innerHTML = createSidebar(user);
-      document.getElementById('header').innerHTML = createHeader(
-        t('search_logs.title'),
-        t('search_logs.search_history')
-      );
-      initializeLanguageSwitcher();
-      setActiveNav('search-logs');
-      window.i18n.translatePage();
+    // Toast notification
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast show ${type === 'success' ? 'toast-success' : type === 'error' ? 'toast-error' : 'toast-info'}`;
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
     
     let currentPage = 1;
     let totalPages = 1;
     const pageSize = 20;
     let currentFilters = {
       customerId: null,
-      searchType: ''
+      searchType: '',
+      search: ''
     };
     
     // Load search logs with pagination
-    loadSearchLogs();
-    
     async function loadSearchLogs(page = 1) {
       try {
         let response;
         
         if (currentFilters.customerId) {
-          response = await api.searchLogs.getByCustomer(currentFilters.customerId, page, pageSize);
+          response = await api.searchLogs.getByCustomer(
+            currentFilters.customerId, 
+            page, 
+            pageSize,
+            currentFilters.searchType
+          );
         } else {
-          response = await api.searchLogs.getAll(page, pageSize);
+          response = await api.searchLogs.getAll(
+            page, 
+            pageSize,
+            currentFilters.searchType,
+            currentFilters.search
+          );
         }
         
         currentPage = response.meta.page;
         totalPages = response.meta.totalPages;
         
-        // Apply client-side type filter if needed
-        let logs = response.data;
-        if (currentFilters.searchType) {
-          logs = logs.filter(log => log.searchType === currentFilters.searchType);
-        }
-        
-        renderSearchLogs(logs);
+        renderSearchLogs(response.data);
       } catch (error) {
         console.error('Error loading search logs:', error);
         showToast(t('search_logs.failed_to_load'), 'error');
@@ -154,9 +153,11 @@
     }
     
     function applyFilters() {
+      const searchText = document.getElementById('searchTextFilter').value.trim();
       const customerId = document.getElementById('customerIdFilter').value;
       const searchType = document.getElementById('searchTypeFilter').value;
       
+      currentFilters.search = searchText;
       currentFilters.customerId = customerId ? parseInt(customerId) : null;
       currentFilters.searchType = searchType;
       
@@ -164,9 +165,10 @@
     }
     
     function clearFilters() {
+      document.getElementById('searchTextFilter').value = '';
       document.getElementById('customerIdFilter').value = '';
       document.getElementById('searchTypeFilter').value = '';
-      currentFilters = { customerId: null, searchType: '' };
+      currentFilters = { customerId: null, searchType: '', search: '' };
       loadSearchLogs(1);
     }
     
@@ -178,13 +180,14 @@
         return;
       }
       
+      const typeColors = {
+        view: '#3b82f6',
+        search: '#8b5cf6',
+        edit: '#f59e0b',
+        list: '#10b981'
+      };
+      
       const logsHTML = logs.map(log => {
-        const typeColors = {
-          view: '#3b82f6',
-          search: '#8b5cf6',
-          edit: '#f59e0b',
-          list: '#10b981'
-        };
         const typeColor = typeColors[log.searchType] || '#64748b';
         
         return `
@@ -277,6 +280,34 @@
         minute: '2-digit'
       });
     }
+    
+    async function initPage() {
+      await waitForI18n();
+      
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+      
+      const user = getCurrentUser();
+      
+      // Only Super Admin can access
+      if (user.roleName !== 'Super Admin') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('search_logs.title'),
+        t('search_logs.search_history')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('search-logs');
+      window.i18n.translatePage();
+    
+      // Load search logs with pagination
+      loadSearchLogs();
     }
     
     if (document.readyState === 'loading') {

@@ -23,8 +23,8 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white">Institution Details</h1>
-          <p class="text-secondary">View institution information</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="institutions.view_institution">Institution Details</h1>
+          <p class="text-secondary" data-i18n-key="institutions.view_institution_info">View institution information</p>
         </div>
       </div>
       
@@ -39,30 +39,30 @@
           <div class="flex items-center justify-between mb-6" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
             <div>
               <h2 id="institutionName" class="text-2xl font-bold text-white mb-2"></h2>
-              <p class="text-muted">Institution ID: <span id="institutionId"></span></p>
+              <p class="text-muted"><span data-i18n-key="institutions.view_page.institution_id">Institution ID</span>: <span id="institutionId"></span></p>
             </div>
             <div class="flex gap-2" style="display: flex; gap: 0.5rem;">
               <span id="statusBadge" class="badge"></span>
-              <a id="editBtn" class="btn btn-primary">Edit</a>
-              <button id="deleteBtn" class="btn btn-danger">Delete</button>
+              <a id="editBtn" class="btn btn-primary" data-i18n-key="common.button.edit">Edit</a>
+              <button id="deleteBtn" class="btn btn-danger" data-i18n-key="common.button.delete">Delete</button>
             </div>
           </div>
           
           <div class="grid grid-cols-2 gap-6" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
             <div>
-              <p class="text-muted mb-1">Max Users</p>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.max_users">Max Users</p>
               <p id="maxUsers" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Expiration Date</p>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.expiration_date">Expiration Date</p>
               <p id="expirationDate" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Created At</p>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.created_at">Created At</p>
               <p id="createdAt" class="text-white font-medium"></p>
             </div>
             <div>
-              <p class="text-muted mb-1">Last Updated</p>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.last_updated">Last Updated</p>
               <p id="updatedAt" class="text-white font-medium"></p>
             </div>
           </div>
@@ -70,7 +70,7 @@
         
         <!-- Statistics -->
         <div class="glass-card p-6 mb-6">
-          <h3 class="text-xl font-bold text-white mb-4">Statistics</h3>
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="institutions.view_page.statistics">Statistics</h3>
           <div id="statsContainer">
             <div class="loading-container">
               <div class="spinner"></div>
@@ -80,7 +80,7 @@
         
         <!-- Branches -->
         <div class="glass-card p-6">
-          <h3 class="text-xl font-bold text-white mb-4">Branches</h3>
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="institutions.view_page.branches">Branches</h3>
           <div id="branchesContainer">
             <div class="loading-container">
               <div class="spinner"></div>
@@ -135,12 +135,12 @@
         document.getElementById('institutionName').textContent = institutionData.name;
         document.getElementById('institutionId').textContent = institutionData.institutionId;
         document.getElementById('maxUsers').textContent = institutionData.maxUsers;
-        document.getElementById('expirationDate').textContent = institutionData.expirationDate ? formatDate(institutionData.expirationDate) : 'No expiration';
+        document.getElementById('expirationDate').textContent = institutionData.expirationDate ? formatDate(institutionData.expirationDate) : t('institutions.view_page.no_expiration');
         document.getElementById('createdAt').textContent = formatDateTime(institutionData.createdAt);
         document.getElementById('updatedAt').textContent = formatDateTime(institutionData.updatedAt);
         
         const statusBadge = document.getElementById('statusBadge');
-        statusBadge.textContent = institutionData.isActive ? 'Active' : 'Inactive';
+        statusBadge.textContent = institutionData.isActive ? t('institutions.view_page.active') : t('institutions.view_page.inactive');
         statusBadge.className = `badge ${institutionData.isActive ? 'badge-success' : 'badge-danger'}`;
         
         document.getElementById('editBtn').href = `institutions-edit.html?id=${institutionId}`;
@@ -166,26 +166,26 @@
         statsContainer.innerHTML = `
           <div class="grid grid-cols-4 gap-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
             <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
-              <p class="text-muted text-sm">Total Branches</p>
+              <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_branches">${t('institutions.view_page.total_branches')}</p>
               <p class="text-2xl font-bold text-white">${stats.totalBranches || 0}</p>
             </div>
             <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
-              <p class="text-muted text-sm">Active Users</p>
+              <p class="text-muted text-sm" data-i18n-key="institutions.view_page.active_users">${t('institutions.view_page.active_users')}</p>
               <p class="text-2xl font-bold text-white">${stats.activeUsers || 0}</p>
             </div>
             <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
-              <p class="text-muted text-sm">Total Customers</p>
+              <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_customers">${t('institutions.view_page.total_customers')}</p>
               <p class="text-2xl font-bold text-white">${stats.totalCustomers || 0}</p>
             </div>
             <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
-              <p class="text-muted text-sm">Total Loans</p>
+              <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_loans">${t('institutions.view_page.total_loans')}</p>
               <p class="text-2xl font-bold text-white">${stats.totalLoans || 0}</p>
             </div>
           </div>
         `;
       } catch (error) {
         console.error('Error loading statistics:', error);
-        document.getElementById('statsContainer').innerHTML = '<p class="text-muted">Failed to load statistics</p>';
+        document.getElementById('statsContainer').innerHTML = `<p class="text-muted" data-i18n-key="institutions.view_page.failed_to_load_statistics">${t('institutions.view_page.failed_to_load_statistics')}</p>`;
       }
     }
     
@@ -195,7 +195,7 @@
         const branchesContainer = document.getElementById('branchesContainer');
         
         if (branches.length === 0) {
-          branchesContainer.innerHTML = '<p class="text-muted">No branches found for this institution</p>';
+          branchesContainer.innerHTML = `<p class="text-muted" data-i18n-key="institutions.view_page.no_branches_found">${t('institutions.view_page.no_branches_found')}</p>`;
           return;
         }
         
@@ -204,9 +204,9 @@
             <div class="flex items-center justify-between" style="display: flex; align-items: center; justify-content: space-between;">
               <div>
                 <p class="text-white font-medium">${branch.name}</p>
-                <p class="text-sm text-muted">Branch #${branch.branchId}</p>
+                <p class="text-sm text-muted"><span data-i18n-key="institutions.view_page.branch_id">${t('institutions.view_page.branch_id')}</span> #${branch.branchId}</p>
               </div>
-              <span class="badge ${branch.isActive ? 'badge-success' : 'badge-danger'}">${branch.isActive ? 'Active' : 'Inactive'}</span>
+              <span class="badge ${branch.isActive ? 'badge-success' : 'badge-danger'}" data-i18n-key="institutions.view_page.${branch.isActive ? 'active' : 'inactive'}">${branch.isActive ? t('institutions.view_page.active') : t('institutions.view_page.inactive')}</span>
             </div>
           </div>
         `).join('');
@@ -214,13 +214,13 @@
         branchesContainer.innerHTML = branchesHTML;
       } catch (error) {
         console.error('Error loading branches:', error);
-        document.getElementById('branchesContainer').innerHTML = '<p class="text-muted">Failed to load branches</p>';
+        document.getElementById('branchesContainer').innerHTML = `<p class="text-muted" data-i18n-key="institutions.view_page.failed_to_load_branches">${t('institutions.view_page.failed_to_load_branches')}</p>`;
       }
     }
     
     // Delete institution
     document.getElementById('deleteBtn').addEventListener('click', async () => {
-      if (!confirm('Are you sure you want to delete this institution? This will also delete all associated branches and users.')) return;
+      if (!confirm(t('institutions.view_page.delete_confirmation'))) return;
       
       try {
         await api.institutions.delete(institutionId);

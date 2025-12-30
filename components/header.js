@@ -1,6 +1,29 @@
 // Header Component
 // Displays page title and user info
 
+// Session heartbeat - check every 30 seconds if session is still valid
+let sessionCheckInterval = null;
+
+function startSessionMonitoring() {
+  // Clear any existing interval
+  if (sessionCheckInterval) {
+    clearInterval(sessionCheckInterval);
+  }
+  
+  // Check session every 30 seconds
+  sessionCheckInterval = setInterval(async () => {
+    try {
+      await api.auth.verifySession();
+    } catch (error) {
+      // Session is invalid - user logged in elsewhere
+      clearInterval(sessionCheckInterval);
+      clearAuthData();
+      alert('Your session has expired. You have been logged in from another device.');
+      window.location.href = '../index.html';
+    }
+  }, 30000); // 30 seconds
+}
+
 async function loadUserContext() {
   const user = getCurrentUser();
   let contextInfo = user.roleName;
@@ -68,6 +91,9 @@ function initializeLanguageSwitcher() {
   const currentLangLabel = document.getElementById('currentLanguage');
   
   if (!switcher) return;
+  
+  // Start session monitoring when header is initialized
+  startSessionMonitoring();
   
   // Update label to show current language
   const updateLanguageLabel = () => {

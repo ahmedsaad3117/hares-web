@@ -99,6 +99,8 @@
     "email_placeholder": "admin@example.com",
     "password_label": "Password",
     "password_placeholder": "••••••••",
+    "identifier_label": "User Or Phone Number",
+    "identifier_placeholder": "Enter Email or Phone Number",
     "submit_button": "Sign In",
     "loading": "Signing in...",
     "errors": {
