@@ -143,20 +143,20 @@
           </div>
           
           <div class="flex items-center gap-2" style="display: flex; gap: 0.5rem;">
-            <a href="institutions-view.html?id=${institution.institutionId}" class="btn btn-secondary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem 1rem;">
+            <a href="institutions-view.html?id=${institution.institutionId}" class="btn btn-secondary" style="flex: 1; min-width: 110px; font-size: 0.875rem; padding: 0.5rem 1rem; text-align: center;">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                 <circle cx="12" cy="12" r="3"/>
               </svg>
-              ${t('institutions.view_stats')}
+              ${t('institutions.details')}
             </a>
-            <a href="institutions-edit.html?id=${institution.institutionId}" class="btn btn-secondary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem 1rem;">
+            <a href="institutions-edit.html?id=${institution.institutionId}" class="btn btn-secondary" style="flex: 1; min-width: 110px; font-size: 0.875rem; padding: 0.5rem 1rem; text-align: center;">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
               </svg>
               ${t('institutions.edit')}
             </a>
-            <button onclick="deleteInstitution(${institution.institutionId})" class="btn btn-danger" style="font-size: 0.875rem; padding: 0.5rem 0.75rem;">
+            <button onclick="deleteInstitution(${institution.institutionId})" class="btn btn-danger" style="flex: 1; min-width: 110px; font-size: 0.875rem; padding: 0.5rem 1rem; text-align: center;">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"/>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>

@@ -410,6 +410,7 @@
     "created": "Created",
     "view_stats": "View Stats",
     "edit": "Edit",
+    "details": "Details",
     "delete": "Delete",
     "no_institutions": "No institutions yet",
     "failed_to_load": "Failed to load institutions",
