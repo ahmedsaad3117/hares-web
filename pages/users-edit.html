@@ -65,6 +65,20 @@
             <div id="emailError" class="error-text hidden"></div>
           </div>
           
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label class="label">Phone Number *</label>
+            <input 
+              type="tel" 
+              id="phoneNumber" 
+              name="phoneNumber" 
+              class="input" 
+              placeholder="Enter phone number"
+              required
+            />
+            <div id="phoneNumberError" class="error-text hidden"></div>
+          </div>
+          
           <!-- Password (optional for edit) -->
           <div class="form-group">
             <label class="label">New Password (leave blank to keep current)</label>
@@ -156,6 +170,7 @@
         // Populate form
         document.getElementById('name').value = userData.name;
         document.getElementById('email').value = userData.email;
+        document.getElementById('phoneNumber').value = userData.phoneNumber || '';
         document.getElementById('isActive').checked = userData.isActive;
         
         loadingContainer.style.display = 'none';
@@ -179,6 +194,7 @@
       // Get form data
       const formData = {
         name: document.getElementById('name').value.trim(),
+        phoneNumber: document.getElementById('phoneNumber').value.trim(),
         isActive: document.getElementById('isActive').checked,
       };
       
@@ -197,6 +213,12 @@
       if (formData.name.length < 2) {
         document.getElementById('nameError').textContent = 'Name must be at least 2 characters';
         document.getElementById('nameError').classList.remove('hidden');
+        return;
+      }
+      
+      if (!formData.phoneNumber || formData.phoneNumber.length < 10) {
+        document.getElementById('phoneNumberError').textContent = 'Valid phone number is required (min 10 digits)';
+        document.getElementById('phoneNumberError').classList.remove('hidden');
         return;
       }
       

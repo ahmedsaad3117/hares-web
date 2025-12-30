@@ -61,6 +61,21 @@
             <div id="emailError" class="error-text hidden"></div>
           </div>
           
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="users.form.phone_label">Phone Number *</label>
+            <input 
+              type="tel" 
+              id="phoneNumber" 
+              name="phoneNumber" 
+              class="input" 
+              data-i18n-placeholder="users.form.phone_placeholder"
+              placeholder="Enter phone number"
+              required
+            />
+            <div id="phoneNumberError" class="error-text hidden"></div>
+          </div>
+          
           <!-- Password -->
           <div class="form-group">
             <label class="label" data-i18n-key="users.form.password">Password *</label>
@@ -282,6 +297,7 @@
       const formData = {
         name: document.getElementById('name').value.trim(),
         email: document.getElementById('email').value.trim(),
+        phoneNumber: document.getElementById('phoneNumber').value.trim(),
         password: document.getElementById('password').value,
         roleId: roleId,
         isActive: document.getElementById('isActive').checked,
@@ -307,6 +323,12 @@
       if (!formData.email.includes('@')) {
         document.getElementById('emailError').textContent = 'Valid email is required';
         document.getElementById('emailError').classList.remove('hidden');
+        hasError = true;
+      }
+      
+      if (!formData.phoneNumber || formData.phoneNumber.length < 10) {
+        document.getElementById('phoneNumberError').textContent = 'Valid phone number is required (min 10 digits)';
+        document.getElementById('phoneNumberError').classList.remove('hidden');
         hasError = true;
       }
       

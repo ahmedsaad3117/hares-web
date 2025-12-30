@@ -270,7 +270,7 @@
     "create_new_loan": "إصدار طلب قرض جديد",
     "update_loan_info": "تحديث معلومات القرض",
     "view_loan_info": "عرض معلومات القرض",
-    "search_placeholder": "البحث عن قروض...",
+    "search_placeholder": "البحث بالعميل، الرقم، الهاتف، الفرع، المنتج، أو المبلغ...",
     "table": {
       "customer": "العميل",
       "amount": "المبلغ",
@@ -592,6 +592,8 @@
       "full_name_placeholder": "أدخل الاسم الكامل",
       "email_label": "البريد الإلكتروني",
       "email_placeholder": "user@example.com",
+      "phone_label": "رقم الهاتف",
+      "phone_placeholder": "أدخل رقم الهاتف",
       "password": "كلمة المرور",
       "password_placeholder": "أدخل كلمة المرور (6 أحرف على الأقل)",
       "role_label": "الدور",

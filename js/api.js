@@ -219,6 +219,7 @@ const api = {
   loans: {
     getAll: (page = 1, limit = 10) => apiRequest(`/loans?page=${page}&limit=${limit}`),
     getStatistics: () => apiRequest('/loans/statistics'),
+    search: (searchTerm) => apiRequest(`/loans/search?q=${encodeURIComponent(searchTerm)}`),
     getByCustomer: (customerId) => apiRequest(`/loans/customer/${customerId}`),
     getByBranch: (branchId) => apiRequest(`/loans/branch/${branchId}`),
     getByStatus: (status) => apiRequest(`/loans/status/${status}`),
