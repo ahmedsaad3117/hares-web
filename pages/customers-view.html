@@ -350,8 +350,8 @@
         }
         
         const loansHTML = await Promise.all(loans.map(async loan => {
-          const branchName = loan.branch?.name || '--';
-          const institutionName = loan.branch?.institution?.name || '--';
+          const branchName = loan.branch?.name || loan.institution?.name || '--';
+          const institutionName = loan.branch?.institution?.name || loan.institution?.name || '--';
           const productName = loan.product?.name || '--';
           const paymentPlan = loan.paymentPlanMonths || 1;
           const paidAmount = loan.paidAmount || 0;

@@ -522,7 +522,7 @@
               <span class="text-secondary" style="font-size: 0.9rem;">${inst.customer.phoneNumber || '-'}</span>
             </td>
             <td style="padding: 1rem 0.75rem;">
-              <span class="text-secondary" style="font-size: 0.9rem;">${inst.branch.name}</span>
+              <span class="text-secondary" style="font-size: 0.9rem;">${inst.branch ? inst.branch.name : (inst.institution ? inst.institution.name : 'N/A')}</span>
             </td>
             <td style="padding: 1rem 0.75rem;">
               <span class="text-white font-semibold" style="font-size: 1rem;">${formatCurrency(inst.amount)}</span>

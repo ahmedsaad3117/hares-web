@@ -291,6 +291,9 @@
         const progressPercent = (paidAmount / loan.principalAmount) * 100;
         const progressColor = progressPercent >= 100 ? '#10b981' : progressPercent >= 50 ? '#3b82f6' : '#f59e0b';
         
+        // Determine branch/institution display
+        const locationName = loan.branch ? loan.branch.name : (loan.institution ? loan.institution.name : 'N/A');
+        
         return `
           <tr>
             <td><span class="font-semibold">#${loan.loanId}</span></td>
@@ -300,7 +303,7 @@
                 <div class="text-muted text-sm">ID: ${loan.customer.customerId}</div>
               </div>
             </td>
-            <td class="text-secondary">${loan.branch.name}</td>
+            <td class="text-secondary">${locationName}</td>
             <td class="text-secondary">${loan.product.name}</td>
             <td class="text-white font-semibold">${formatCurrency(loan.principalAmount)}</td>
             <td>

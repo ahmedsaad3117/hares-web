@@ -176,10 +176,12 @@
       setActiveNav('loans');
       window.i18n.translatePage();
     
+    // Declare variables first
+    let branchesData = [];
+    let institutionData = null;
+    
     // Load form data
     loadFormData();
-    
-    let branchesData = [];
     
     async function loadFormData() {
       try {
@@ -189,16 +191,23 @@
           api.products.getActive(),
         ];
         
-        // Only load branches if not a Branch user
-        if (user.roleName !== 'Branch') {
+        // For Institution users without canCreateBranches, hide branch field
+        if (user.roleName === 'Institution' && user.canCreateBranches === false) {
+          // This institution acts as a branch - no branch selector needed
+          institutionData = {
+            institutionId: user.institutionId,
+            name: user.institutionName
+          };
+        } else if (user.roleName !== 'Branch') {
+          // Load branches for users who can see them
           promises.splice(1, 0, api.branches.getAll(1, 100));
         }
         
         const responses = await Promise.all(promises);
         
         const customers = responses[0].data || [];
-        const products = user.roleName === 'Branch' ? responses[1] : responses[2];
-        const branches = user.roleName === 'Branch' ? [] : responses[1].data || [];
+        const products = user.roleName === 'Branch' || institutionData ? responses[1] : responses[2];
+        const branches = user.roleName === 'Branch' || institutionData ? [] : responses[1].data || [];
         
         branchesData = branches; // Store for capacity checks
         
@@ -213,6 +222,10 @@
         
         if (user.roleName === 'Branch' && user.branchId) {
           // Hide branch field for Branch users
+          branchField.style.display = 'none';
+          branchSelect.removeAttribute('required');
+        } else if (institutionData) {
+          // Hide branch field for institutions without canCreateBranches
           branchField.style.display = 'none';
           branchSelect.removeAttribute('required');
         } else {
@@ -330,15 +343,18 @@
         dueDate: document.getElementById('dueDate').value,
       };
       
-      // Add branchId based on user role
+      // Add branchId or institutionId based on user role
       if (user.roleName === 'Branch' && user.branchId) {
         formData.branchId = user.branchId;
+      } else if (institutionData) {
+        // Institution without canCreateBranches - use institutionId
+        formData.institutionId = institutionData.institutionId;
       } else {
         formData.branchId = parseInt(document.getElementById('branchId').value);
       }
       
       // Validation
-      if (!formData.customerId || !formData.branchId || !formData.productId || !formData.principalAmount || !formData.paymentPlanMonths || !formData.dueDate) {
+      if (!formData.customerId || (!formData.branchId && !formData.institutionId) || !formData.productId || !formData.principalAmount || !formData.paymentPlanMonths || !formData.dueDate) {
         errorMessage.querySelector('p').textContent = 'Please fill in all required fields';
         errorMessage.classList.remove('hidden');
         return;
