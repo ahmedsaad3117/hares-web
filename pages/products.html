@@ -209,7 +209,22 @@
         loadProducts(currentPage);
       } catch (error) {
         console.error('Error deleting product:', error);
-        showToast(t('products.delete_failed'), 'error');
+        
+        // Check if error is about product having loans
+        const backendMessage = error.response?.data?.message || error.message || '';
+        const loanCountMatch = backendMessage.match(/has (\d+) associated loan/i);
+        
+        let errorMessage;
+        if (loanCountMatch) {
+          // Extract loan count and use translated message
+          const count = loanCountMatch[1];
+          errorMessage = t('products.delete_has_loans').replace('{count}', count);
+        } else {
+          // Use generic error or backend message
+          errorMessage = t('products.delete_failed');
+        }
+        
+        showToast(errorMessage, 'error');
       }
     }
   </script>

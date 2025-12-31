@@ -41,7 +41,7 @@
               <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.total_due">Total Due</span>
             </div>
             <div class="text-white font-bold text-2xl" id="totalDueInstallments">0</div>
-            <div class="text-primary text-xl font-bold" id="totalDueAmount">$0.00</div>
+            <div class="text-primary text-xl font-bold" id="totalDueAmount">0.00 ر.س</div>
           </div>
           
           <div style="padding: 1.5rem; border-radius: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
@@ -50,7 +50,7 @@
               <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.paid">Paid</span>
             </div>
             <div class="text-white font-bold text-2xl" id="paidInstallments">0</div>
-            <div style="color: #10b981;" class="text-xl font-bold" id="paidAmount">$0.00</div>
+            <div style="color: #10b981;" class="text-xl font-bold" id="paidAmount">0.00 ر.س</div>
           </div>
           
           <div style="padding: 1.5rem; border-radius: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
@@ -59,7 +59,7 @@
               <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.pending">Pending</span>
             </div>
             <div class="text-white font-bold text-2xl" id="pendingInstallments">0</div>
-            <div style="color: #f59e0b;" class="text-xl font-bold" id="pendingAmount">$0.00</div>
+            <div style="color: #f59e0b;" class="text-xl font-bold" id="pendingAmount">0.00 ر.س</div>
           </div>
           
           <div style="padding: 1.5rem; border-radius: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
@@ -68,7 +68,7 @@
               <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.overdue">Overdue</span>
             </div>
             <div class="text-white font-bold text-2xl" id="overdueInstallments">0</div>
-            <div style="color: #ef4444;" class="text-xl font-bold" id="overdueAmount">$0.00</div>
+            <div style="color: #ef4444;" class="text-xl font-bold" id="overdueAmount">0.00 ر.س</div>
           </div>
         </div>
       </div>
@@ -230,9 +230,9 @@
                 <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
                   ⚠️
                 </div>
-                <span class="badge badge-warning">0</span>
+                <span class="badge badge-warning">${stats.lateLoans || 0}</span>
               </div>
-              <div class="stat-card-value">0</div>
+              <div class="stat-card-value">${stats.lateLoans || 0}</div>
               <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
             </div>
           `;

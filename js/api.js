@@ -323,9 +323,9 @@ function showToast(message, type = 'info') {
 
 // Format currency
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('ar-SA', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'SAR',
   }).format(amount);
 }
 

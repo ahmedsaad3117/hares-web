@@ -242,9 +242,9 @@
     
     // Currency formatting
     function formatCurrency(amount) {
-      return new Intl.NumberFormat('en-US', { 
+      return new Intl.NumberFormat('ar-SA', { 
         style: 'currency', 
-        currency: 'USD',
+        currency: 'SAR',
         minimumFractionDigits: 2
       }).format(amount || 0);
     }
@@ -658,7 +658,6 @@
     
     // Initialize with all filter
     document.getElementById('filter-all').click();
-    loadInstallments();
   </script>
 </body>
 </html>

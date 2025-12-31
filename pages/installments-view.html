@@ -262,9 +262,9 @@
     
     // Currency formatting
     function formatCurrency(amount) {
-      return new Intl.NumberFormat('en-US', { 
+      return new Intl.NumberFormat('ar-SA', { 
         style: 'currency', 
-        currency: 'USD',
+        currency: 'SAR',
         minimumFractionDigits: 2
       }).format(amount || 0);
     }
@@ -298,13 +298,13 @@
         const overdue = isOverdue(installmentData);
         const statusBadge = document.getElementById('statusBadge');
         if (installmentData.status === 'Paid') {
-          statusBadge.textContent = '✅ Paid';
+          statusBadge.textContent = `✅ ${t('installments.paid')}`;
           statusBadge.className = 'badge badge-success';
         } else if (overdue) {
-          statusBadge.textContent = '⚠️ Overdue';
+          statusBadge.textContent = `⚠️ ${t('installments.overdue')}`;
           statusBadge.className = 'badge badge-danger';
         } else {
-          statusBadge.textContent = '⏳ Pending';
+          statusBadge.textContent = `⏳ ${t('installments.pending')}`;
           statusBadge.className = 'badge badge-warning';
         }
         
@@ -338,7 +338,18 @@
         // Installment details
         document.getElementById('detailInstallmentNumber').textContent = `#${installmentData.installmentNumber}`;
         document.getElementById('detailAmount').textContent = formatCurrency(installmentData.amount);
-        document.getElementById('detailStatus').textContent = installmentData.status;
+        
+        // Translate status
+        let statusText = installmentData.status;
+        if (installmentData.status === 'Paid') {
+          statusText = t('installments.paid');
+        } else if (overdue) {
+          statusText = t('installments.overdue');
+        } else {
+          statusText = t('installments.pending');
+        }
+        document.getElementById('detailStatus').textContent = statusText;
+        
         document.getElementById('detailDueDate').textContent = formatDate(installmentData.dueDate);
         document.getElementById('detailPaymentDate').textContent = installmentData.paymentDate ? formatDate(installmentData.paymentDate) : t('installments.view_page.not_paid_yet');
         
@@ -374,8 +385,8 @@
         document.getElementById('customerLink').textContent = loanData.customer.name;
         document.getElementById('customerLink').href = `customers-view.html?id=${loanData.customer.customerId}`;
         document.getElementById('customerId').textContent = loanData.customer.customerId;
-        document.getElementById('customerPhone').textContent = loanData.customer.contactNumber || 'N/A';
-        document.getElementById('customerBranch').textContent = loanData.branch?.name || 'N/A';
+        document.getElementById('customerPhone').textContent = loanData.customer.phoneNumber || 'N/A';
+        document.getElementById('customerBranch').textContent = loanData.branch ? loanData.branch.name : (loanData.institution ? loanData.institution.name : 'N/A');
         document.getElementById('customerNationalId').textContent = loanData.customer.nationalId || 'N/A';
         document.getElementById('customerAddress').textContent = loanData.customer.address || 'N/A';
         

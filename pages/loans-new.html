@@ -328,8 +328,17 @@
     const submitButton = document.getElementById('submitButton');
     const errorMessage = document.getElementById('errorMessage');
     
+    let isSubmitting = false; // Prevent duplicate submissions
+    
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      // Prevent duplicate submissions
+      if (isSubmitting) {
+        return;
+      }
+      
+      isSubmitting = true;
       
       // Clear errors
       errorMessage.classList.add('hidden');
@@ -379,7 +388,8 @@
         errorMessage.querySelector('p').textContent = error.message || 'Failed to create loan';
         errorMessage.classList.remove('hidden');
         
-        // Re-enable button
+        // Re-enable button and reset flag
+        isSubmitting = false;
         submitButton.disabled = false;
         submitButton.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

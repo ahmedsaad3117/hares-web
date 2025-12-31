@@ -603,6 +603,7 @@
     "deleted_success": "تم حذف المنتج بنجاح",
     "update_failed": "فشل تحديث حالة المنتج",
     "delete_failed": "فشل في حذف المنتج",
+    "delete_has_loans": "لا يمكن حذف المنتج. يحتوي على {count} قرض مرتبط.",
     "form": {
       "institution_label": "المؤسسة",
       "all_institutions": "جميع المؤسسات (منتج عام)",
