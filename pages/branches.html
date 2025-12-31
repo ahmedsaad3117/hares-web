@@ -32,6 +32,20 @@
         </a>
       </div>
       
+      <!-- Search Bar -->
+      <div class="glass-card p-4 mb-6">
+        <div class="form-group" style="margin-bottom: 0;">
+          <input 
+            type="text" 
+            id="searchInput" 
+            data-i18n-placeholder="branches.search_placeholder"
+            placeholder="Search by name or phone number..." 
+            class="input"
+            style="width: 100%;"
+          />
+        </div>
+      </div>
+      
       <!-- Branches Grid -->
       <div id="branchesGrid" class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
         <div class="loading-container" style="grid-column: 1 / -1;">
@@ -79,6 +93,9 @@
       initializeLanguageSwitcher();
       setActiveNav('branches');
       
+      // Setup search
+      setupSearch();
+      
       // Load branches with pagination
       loadBranches();
     }
@@ -93,6 +110,49 @@
     let currentPage = 1;
     let totalPages = 1;
     const pageSize = 12;
+    let searchTerm = '';
+    let searchTimeout = null;
+    
+    // Setup search with debounce
+    function setupSearch() {
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', (e) => {
+        const value = e.target.value.trim();
+        
+        // Clear existing timeout
+        if (searchTimeout) {
+          clearTimeout(searchTimeout);
+        }
+        
+        // Set new timeout
+        searchTimeout = setTimeout(() => {
+          searchTerm = value;
+          performSearch();
+        }, 300);
+      });
+    }
+    
+    // Perform search
+    async function performSearch() {
+      if (searchTerm) {
+        const grid = document.getElementById('branchesGrid');
+        grid.innerHTML = '<div class="loading-container" style="grid-column: 1 / -1;"><div class="spinner"></div><p class="text-muted mt-2">Searching...</p></div>';
+        
+        try {
+          const searchResults = await api.branches.search(searchTerm);
+          renderBranches(searchResults);
+          
+          // Hide pagination during search
+          document.getElementById('paginationContainer').innerHTML = '';
+        } catch (error) {
+          console.error('Error searching branches:', error);
+          grid.innerHTML = `<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">${t('branches.failed_to_load')}</p>`;
+        }
+      } else {
+        // If search is cleared, reload normal list
+        loadBranches(1);
+      }
+    }
     
     async function loadBranches(page = 1) {
       try {
@@ -149,12 +209,12 @@
           
           <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; padding: 1rem 0; border-top: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
             <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
-              <span class="text-muted text-sm">${t('branches.branch_id')}</span>
-              <span class="text-white font-semibold">#${branch.branchId}</span>
+              <span class="text-muted text-sm">${t('branches.form.phone_label')}</span>
+              <span class="text-white font-semibold">${branch.phoneNumber || 'No phone'}</span>
             </div>
             <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
-              <span class="text-muted text-sm">${t('branches.institution_id')}</span>
-              <span class="text-secondary">#${branch.institutionId}</span>
+              <span class="text-muted text-sm">${t('branches.view_page.institution')}</span>
+              <span class="text-secondary">${branch.institution.name}</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
               <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">

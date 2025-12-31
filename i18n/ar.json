@@ -46,7 +46,9 @@
       "active": "نشط",
       "inactive": "غير نشط",
       "pending": "قيد الانتظار"
-    }
+    },
+    "required": "*",
+    "cancel": "إلغاء"
   },
   "navigation": {
     "dashboard": "لوحة التحكم",
@@ -132,6 +134,10 @@
     "edit_customer": "تعديل عميل",
     "view_customer": "عرض عميل",
     "customer_details": "إدارة ملفات العملاء",
+    "edit_page": {
+      "title": "تعديل عميل",
+      "subtitle": "تحديث ملف العميل"
+    },
     "create_new_customer": "إنشاء ملف عميل جديد",
     "update_customer_info": "تحديث معلومات العميل",
     "view_customer_info": "عرض ملف العميل",
@@ -259,6 +265,16 @@
     "edit_loan": "تعديل قرض",
     "view_loan": "عرض قرض",
     "loan_details": "إدارة طلبات القروض",
+    "edit_page": {
+      "title": "تعديل قرض",
+      "subtitle": "تحديث معلومات القرض",
+      "customer_readonly": "لا يمكن تغيير العميل بعد إنشاء القرض",
+      "branch_readonly": "لا يمكن تغيير الفرع بعد إنشاء القرض",
+      "product_readonly": "لا يمكن تغيير المنتج بعد إنشاء القرض",
+      "payment_plan_readonly": "لا يمكن تغيير خطة الدفع بعد إنشاء القرض",
+      "update_button": "تحديث القرض",
+      "updating": "جاري التحديث..."
+    },
     "new_loan": "قرض جديد",
     "all_loans": "كل القروض",
     "active": "نشط",
@@ -396,6 +412,15 @@
     "edit_branch": "تعديل فرع",
     "view_branch": "عرض فرع",
     "branch_details": "إدارة مواقع الفروع",
+    "search_placeholder": "البحث بالاسم أو رقم الهاتف...",
+    "edit_page": {
+      "title": "تعديل فرع",
+      "subtitle": "تحديث معلومات الفرع",
+      "branch_info": "معلومات الفرع",
+      "current_loans": "القروض النشطة الحالية:",
+      "available_capacity": "السعة المتاحة:",
+      "capacity_warning": "⚠️ تحذير: لا يمكن أن تكون السعة الجديدة أقل من القروض النشطة الحالية"
+    },
     "create_new_branch": "إنشاء موقع فرع جديد",
     "update_branch_info": "تحديث معلومات الفرع",
     "view_branch_info": "عرض معلومات الفرع",
@@ -463,6 +488,11 @@
     "edit_institution": "تعديل مؤسسة",
     "view_institution": "عرض مؤسسة",
     "institution_details": "إدارة المؤسسات المالية",
+    "search_placeholder": "البحث بالاسم أو رقم الهاتف...",
+    "edit_page": {
+      "title": "تعديل مؤسسة",
+      "subtitle": "تحديث معلومات المؤسسة"
+    },
     "create_new_institution": "إنشاء مؤسسة مالية جديدة",
     "update_institution_info": "تحديث معلومات المؤسسة",
     "view_institution_info": "عرض معلومات المؤسسة",
@@ -540,6 +570,10 @@
     "add_product": "إضافة منتج",
     "edit_product": "تعديل منتج",
     "product_details": "إدارة منتجات القروض",
+    "edit_page": {
+      "title": "تعديل منتج",
+      "product_id": "رقم المنتج"
+    },
     "create_new_product": "إنشاء منتج قرض جديد",
     "update_product_info": "تحديث معلومات المنتج",
     "id": "الرقم",
@@ -597,6 +631,18 @@
     "add_user": "إضافة مستخدم",
     "edit_user": "تعديل مستخدم",
     "user_details": "إدارة مستخدمي النظام",
+    "edit_page": {
+      "title": "تعديل مستخدم",
+      "subtitle": "تحديث حساب المستخدم",
+      "new_password": "كلمة مرور جديدة (اتركها فارغة للإبقاء على الحالية)",
+      "password_error": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+      "name_error": "يجب أن يتكون الاسم من حرفين على الأقل",
+      "phone_error": "رقم هاتف صحيح مطلوب (10 أرقام على الأقل)",
+      "updating": "جاري التحديث...",
+      "update_success": "تم تحديث المستخدم بنجاح",
+      "update_failed": "فشل تحديث المستخدم",
+      "load_error": "فشل تحميل المستخدم"
+    },
     "create_new_user": "إنشاء مستخدم نظام جديد",
     "update_user_info": "تحديث معلومات المستخدم",
     "id": "الرقم",

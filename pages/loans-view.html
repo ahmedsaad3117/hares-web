@@ -297,6 +297,7 @@
         document.getElementById('statusSelect').value = loanData.status;
         
         // Show/hide edit button based on permissions
+        const user = getCurrentUser();
         const canModify = user.roleName === 'Super Admin' || loanData.createdBy === user.userId;
         const editBtnEl = document.getElementById('editBtn');
         

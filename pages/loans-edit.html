@@ -23,8 +23,8 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white">Edit Loan</h1>
-          <p class="text-secondary">Update loan information</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="loans.edit_page.title">Edit Loan</h1>
+          <p class="text-secondary" data-i18n-key="loans.edit_page.subtitle">Update loan information</p>
         </div>
       </div>
       
@@ -39,7 +39,7 @@
           <form id="loanForm">
             <!-- Customer (Read-only) -->
             <div class="form-group">
-              <label class="label">Customer</label>
+              <label class="label" data-i18n-key="loans.form.customer_label">Customer</label>
               <input 
                 type="text" 
                 id="customerName" 
@@ -47,12 +47,12 @@
                 readonly
                 style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;"
               />
-              <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;">Customer cannot be changed after loan creation</p>
+              <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;" data-i18n-key="loans.edit_page.customer_readonly">Customer cannot be changed after loan creation</p>
             </div>
             
             <!-- Branch (Read-only) -->
             <div class="form-group">
-              <label class="label">Branch</label>
+              <label class="label" data-i18n-key="loans.form.branch_label">Branch</label>
               <input 
                 type="text" 
                 id="branchName" 
@@ -60,12 +60,12 @@
                 readonly
                 style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;"
               />
-              <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;">Branch cannot be changed after loan creation</p>
+              <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;" data-i18n-key="loans.edit_page.branch_readonly">Branch cannot be changed after loan creation</p>
             </div>
             
             <!-- Product (Read-only) -->
             <div class="form-group">
-              <label class="label">Product</label>
+              <label class="label" data-i18n-key="loans.form.product_label">Product</label>
               <input 
                 type="text" 
                 id="productName" 
@@ -73,17 +73,18 @@
                 readonly
                 style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;"
               />
-              <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;">Product cannot be changed after loan creation</p>
+              <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;" data-i18n-key="loans.edit_page.product_readonly">Product cannot be changed after loan creation</p>
             </div>
             
             <!-- Principal Amount -->
             <div class="form-group">
-              <label class="label">Principal Amount *</label>
+              <label class="label" data-i18n-key="loans.form.principal_amount">Principal Amount</label> <span data-i18n-key="common.required">*</span>
               <input 
                 type="number" 
                 id="principalAmount" 
                 name="principalAmount" 
                 class="input" 
+                data-i18n-placeholder="loans.form.principal_placeholder"
                 placeholder="5000.00"
                 step="0.01"
                 min="0"
@@ -94,7 +95,7 @@
             
             <!-- Payment Plan (Read-only) -->
             <div class="form-group">
-              <label class="label">Payment Plan (Months)</label>
+              <label class="label" data-i18n-key="loans.form.payment_plan">Payment Plan (Months)</label>
               <input 
                 type="text" 
                 id="paymentPlanMonths" 
@@ -102,12 +103,12 @@
                 readonly
                 style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;"
               />
-              <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;">Payment plan cannot be changed after loan creation</p>
+              <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;" data-i18n-key="loans.edit_page.payment_plan_readonly">Payment plan cannot be changed after loan creation</p>
             </div>
             
             <!-- Due Date -->
             <div class="form-group">
-              <label class="label">Due Date *</label>
+              <label class="label" data-i18n-key="loans.form.due_date_label">Due Date</label> <span data-i18n-key="common.required">*</span>
               <input 
                 type="date" 
                 id="dueDate" 
@@ -120,12 +121,12 @@
             
             <!-- Status -->
             <div class="form-group">
-              <label class="label">Status *</label>
+              <label class="label" data-i18n-key="common.label.status">Status</label> <span data-i18n-key="common.required">*</span>
               <select id="status" name="status" class="input" required>
-                <option value="Active">Active</option>
-                <option value="Late">Late</option>
-                <option value="Paid">Paid</option>
-                <option value="Finished">Finished</option>
+                <option value="Active" data-i18n-key="loans.status.active">Active</option>
+                <option value="Late" data-i18n-key="loans.status.late">Late</option>
+                <option value="Paid" data-i18n-key="loans.status.paid">Paid</option>
+                <option value="Finished" data-i18n-key="loans.status.finished">Finished</option>
               </select>
               <div id="statusError" class="error-text hidden"></div>
             </div>
@@ -137,8 +138,8 @@
             
             <!-- Form Actions -->
             <div class="flex gap-3" style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 2rem;">
-              <a href="loans.html" class="btn btn-secondary">Cancel</a>
-              <button type="submit" class="btn btn-primary" id="submitBtn">
+              <a href="loans.html" class="btn btn-secondary" data-i18n-key="common.button.cancel">Cancel</a>
+              <button type="submit" class="btn btn-primary" id="submitBtn" data-i18n-key="loans.edit_page.update_button">
                 Update Loan
               </button>
             </div>
@@ -171,6 +172,9 @@
       );
       initializeLanguageSwitcher();
       setActiveNav('loans');
+      
+      // Apply translations
+      i18n.translatePage();
     
     const loadingContainer = document.getElementById('loadingContainer');
     const formContainer = document.getElementById('formContainer');
@@ -252,7 +256,7 @@
       try {
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Updating...';
+        submitBtn.textContent = t('loans.edit_page.updating');
         
         await api.loans.update(loanId, formData);
         
@@ -273,7 +277,7 @@
         // Reset button
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Update Loan';
+        submitBtn.textContent = t('loans.edit_page.update_button');
         
         // Show specific field errors if available
         if (error.errors) {

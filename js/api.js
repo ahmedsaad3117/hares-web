@@ -123,6 +123,7 @@ const api = {
     getAll: (page = 1, limit = 10) => apiRequest(`/institutions?page=${page}&limit=${limit}`),
     getById: (id) => apiRequest(`/institutions/${id}`),
     getStatistics: (id) => apiRequest(`/institutions/${id}/statistics`),
+    search: (term) => apiRequest(`/institutions/search?q=${encodeURIComponent(term)}`),
     create: (data) => apiRequest('/institutions', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -153,6 +154,7 @@ const api = {
     getLoans: (id) => apiRequest(`/branches/${id}/loans`),
     getTeam: (id) => apiRequest(`/branches/${id}/team`),
     getActivities: (id) => apiRequest(`/branches/${id}/activities`),
+    search: (term) => apiRequest(`/branches/search?q=${encodeURIComponent(term)}`),
     create: (data) => apiRequest('/branches', {
       method: 'POST',
       body: JSON.stringify(data),

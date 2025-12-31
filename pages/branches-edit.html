@@ -23,15 +23,15 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white">Edit Branch</h1>
-          <p class="text-secondary">Update branch information</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="branches.edit_page.title">Edit Branch</h1>
+          <p class="text-secondary" data-i18n-key="branches.edit_page.subtitle">Update branch information</p>
         </div>
       </div>
       
       <!-- Loading -->
       <div id="loadingContainer" class="glass-card p-6" style="max-width: 800px; text-align: center;">
         <div class="spinner" style="margin: 2rem auto;"></div>
-        <p class="text-secondary">Loading branch details...</p>
+        <p class="text-secondary" data-i18n-key="branches.form.loading_details">Loading branch details...</p>
       </div>
       
       <!-- Form -->
@@ -94,11 +94,11 @@
               required
             />
             <div class="flex items-center justify-between mt-2" style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
-              <p class="text-xs text-secondary">Current active loans: <span id="currentLoans" class="text-white font-semibold">0</span></p>
-              <p class="text-xs text-secondary">Available capacity: <span id="availableCapacity" class="text-white font-semibold">0</span></p>
+              <p class="text-xs text-secondary"><span data-i18n-key="branches.edit_page.current_loans">Current active loans:</span> <span id="currentLoans" class="text-white font-semibold">0</span></p>
+              <p class="text-xs text-secondary"><span data-i18n-key="branches.edit_page.available_capacity">Available capacity:</span> <span id="availableCapacity" class="text-white font-semibold">0</span></p>
             </div>
             <div id="capacityWarning" class="hidden mt-2" style="padding: 0.5rem; border-radius: 6px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); margin-top: 0.5rem;">
-              <p class="text-xs" style="color: #f59e0b;">⚠️ Warning: New capacity cannot be less than current active loans</p>
+              <p class="text-xs" style="color: #f59e0b;" data-i18n-key="branches.edit_page.capacity_warning">⚠️ Warning: New capacity cannot be less than current active loans</p>
             </div>
             <div id="maximumLoansError" class="error-text hidden"></div>
           </div>
@@ -118,22 +118,22 @@
           
           <!-- Branch Info -->
           <div class="glass-card p-4 mb-4" style="background: rgba(255, 255, 255, 0.03); margin-bottom: 1rem;">
-            <h3 class="text-sm font-semibold text-white mb-2">Branch Information</h3>
+            <h3 class="text-sm font-semibold text-white mb-2" data-i18n-key="branches.edit_page.branch_info">Branch Information</h3>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
               <div>
-                <span class="text-muted">Branch ID:</span>
+                <span class="text-muted" data-i18n-key="branches.view_page.branch_id">Branch ID:</span>
                 <span class="text-white ml-2" id="branchId">-</span>
               </div>
               <div>
-                <span class="text-muted">Institution:</span>
+                <span class="text-muted" data-i18n-key="branches.view_page.institution">Institution:</span>
                 <span class="text-white ml-2" id="institutionName">-</span>
               </div>
               <div>
-                <span class="text-muted">Created:</span>
+                <span class="text-muted" data-i18n-key="branches.view_page.created_at">Created:</span>
                 <span class="text-white ml-2" id="createdAt">-</span>
               </div>
               <div>
-                <span class="text-muted">Last Updated:</span>
+                <span class="text-muted" data-i18n-key="branches.view_page.last_updated">Last Updated:</span>
                 <span class="text-white ml-2" id="updatedAt">-</span>
               </div>
             </div>
@@ -288,7 +288,7 @@
           <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        Updating...
+        ${t('branches.form.updating')}
       `;
       
       try {
@@ -324,7 +324,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"/>
           </svg>
-          Update Branch
+          ${t('branches.form.update_branch')}
         `;
       }
     });

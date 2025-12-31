@@ -23,8 +23,8 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white">Edit User</h1>
-          <p class="text-secondary">Update user account</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="users.edit_page.title">Edit User</h1>
+          <p class="text-secondary" data-i18n-key="users.edit_page.subtitle">Update user account</p>
         </div>
       </div>
       
@@ -38,12 +38,13 @@
         <form id="userForm">
           <!-- Name -->
           <div class="form-group">
-            <label class="label">Full Name *</label>
+            <label class="label"><span data-i18n-key="users.form.full_name">Full Name</span> <span data-i18n-key="common.required">*</span></label>
             <input 
               type="text" 
               id="name" 
               name="name" 
               class="input" 
+              data-i18n-placeholder="users.form.full_name_placeholder"
               placeholder="Enter full name"
               required
             />
@@ -52,12 +53,13 @@
           
           <!-- Email -->
           <div class="form-group">
-            <label class="label">Email *</label>
+            <label class="label"><span data-i18n-key="users.form.email_label">Email</span> <span data-i18n-key="common.required">*</span></label>
             <input 
               type="email" 
               id="email" 
               name="email" 
               class="input" 
+              data-i18n-placeholder="users.form.email_placeholder"
               placeholder="user@example.com"
               required
               disabled
@@ -67,12 +69,13 @@
           
           <!-- Phone Number -->
           <div class="form-group">
-            <label class="label">Phone Number *</label>
+            <label class="label"><span data-i18n-key="users.form.phone_label">Phone Number</span> <span data-i18n-key="common.required">*</span></label>
             <input 
               type="tel" 
               id="phoneNumber" 
               name="phoneNumber" 
               class="input" 
+              data-i18n-placeholder="users.form.phone_placeholder"
               placeholder="Enter phone number"
               required
             />
@@ -81,12 +84,13 @@
           
           <!-- Password (optional for edit) -->
           <div class="form-group">
-            <label class="label">New Password (leave blank to keep current)</label>
+            <label class="label" data-i18n-key="users.edit_page.new_password">New Password (leave blank to keep current)</label>
             <input 
               type="password" 
               id="password" 
               name="password" 
               class="input" 
+              data-i18n-placeholder="users.form.password_placeholder"
               placeholder="Enter new password (min 6 characters)"
             />
             <div id="passwordError" class="error-text hidden"></div>
@@ -96,7 +100,7 @@
           <div class="form-group">
             <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
               <input type="checkbox" id="isActive" name="isActive">
-              <span class="label" style="margin: 0;">Active</span>
+              <span class="label" style="margin: 0;" data-i18n-key="users.form.active_label">Active</span>
             </label>
           </div>
           
@@ -111,9 +115,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
-              Update User
+              <span data-i18n-key="users.form.update_user">Update User</span>
             </button>
-            <a href="users.html" class="btn btn-secondary">Cancel</a>
+            <a href="users.html" class="btn btn-secondary" data-i18n-key="common.cancel">Cancel</a>
           </div>
         </form>
       </div>
@@ -177,7 +181,7 @@
         formContainer.style.display = 'block';
       } catch (error) {
         console.error('Error loading user:', error);
-        showToast('Failed to load user', 'error');
+        showToast(t('users.edit_page.load_error'), 'error');
         setTimeout(() => window.location.href = 'users.html', 2000);
       }
     }
@@ -202,7 +206,7 @@
       const password = document.getElementById('password').value;
       if (password) {
         if (password.length < 6) {
-          document.getElementById('passwordError').textContent = 'Password must be at least 6 characters';
+          document.getElementById('passwordError').textContent = t('users.edit_page.password_error');
           document.getElementById('passwordError').classList.remove('hidden');
           return;
         }
@@ -211,28 +215,28 @@
       
       // Validation
       if (formData.name.length < 2) {
-        document.getElementById('nameError').textContent = 'Name must be at least 2 characters';
+        document.getElementById('nameError').textContent = t('users.edit_page.name_error');
         document.getElementById('nameError').classList.remove('hidden');
         return;
       }
       
       if (!formData.phoneNumber || formData.phoneNumber.length < 10) {
-        document.getElementById('phoneNumberError').textContent = 'Valid phone number is required (min 10 digits)';
+        document.getElementById('phoneNumberError').textContent = t('users.edit_page.phone_error');
         document.getElementById('phoneNumberError').classList.remove('hidden');
         return;
       }
       
       // Disable submit button
       submitButton.disabled = true;
-      submitButton.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Updating...';
+      submitButton.innerHTML = `<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> ${t('users.edit_page.updating')}`;
       
       try {
         await api.users.update(userId, formData);
-        showToast('User updated successfully', 'success');
+        showToast(t('users.edit_page.update_success'), 'success');
         window.location.href = 'users.html';
       } catch (error) {
         console.error('Error updating user:', error);
-        errorMessage.querySelector('p').textContent = error.message || 'Failed to update user';
+        errorMessage.querySelector('p').textContent = error.message || t('users.edit_page.update_failed');
         errorMessage.classList.remove('hidden');
         
         // Re-enable button
@@ -241,7 +245,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"/>
           </svg>
-          Update User
+          ${t('users.form.update_user')}
         `;
       }
     });

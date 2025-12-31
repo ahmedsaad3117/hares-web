@@ -23,7 +23,7 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white">Edit Product</h1>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="products.edit_page.title">Edit Product</h1>
           <p class="text-secondary" id="productId">Loading...</p>
         </div>
       </div>
@@ -167,7 +167,7 @@
         const product = await api.products.getById(productId);
         
         // Display product ID
-        document.getElementById('productId').textContent = `Product ID: ${product.productId}`;
+        document.getElementById('productId').textContent = `${t('products.edit_page.product_id')}: ${product.productId}`;
         
         // Populate form
         document.getElementById('name').value = product.name;
