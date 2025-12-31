@@ -199,8 +199,10 @@
     // State
     let currentPage = 1;
     let totalPages = 1;
+    const pageSize = 20;
     let currentFilter = 'all';
     let allInstallments = [];
+    let filteredInstallments = [];
     let searchTerm = '';
     let searchTimeout = null;
     
@@ -416,6 +418,13 @@
       filterAndRenderInstallments();
     }
     
+    // Change page
+    function changePage(page) {
+      currentPage = page;
+      renderInstallments();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
     // Filter and render installments
     function filterAndRenderInstallments() {
       let filtered = allInstallments;
@@ -449,19 +458,28 @@
       // Sort by due date (ascending - earliest first)
       filtered.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
       
-      renderInstallments(filtered);
+      filteredInstallments = filtered;
+      currentPage = 1;
+      renderInstallments();
     }
     
     // Render installments table
-    function renderInstallments(installments) {
+    function renderInstallments() {
       const tbody = document.getElementById('installmentsTableBody');
       
-      if (installments.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #94a3b8;">No installments found</td></tr>';
+      if (filteredInstallments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('installments.no_installments_found')}</td></tr>`;
+        document.getElementById('paginationContainer').innerHTML = '';
         return;
       }
       
-      const installmentsHTML = installments.map(inst => {
+      // Calculate pagination
+      totalPages = Math.ceil(filteredInstallments.length / pageSize);
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const pageInstallments = filteredInstallments.slice(startIndex, endIndex);
+      
+      const installmentsHTML = pageInstallments.map(inst => {
         const overdue = isOverdue(inst);
         const statusBadge = 
           inst.status === 'Paid' ? 'badge-success' :
@@ -539,6 +557,23 @@
       }).join('');
       
       tbody.innerHTML = installmentsHTML;
+      
+      // Render pagination
+      totalPages = Math.ceil(filteredInstallments.length / pageSize);
+      const paginationContainer = document.getElementById('paginationContainer');
+      if (paginationContainer && totalPages > 1) {
+        paginationContainer.innerHTML = createPagination(currentPage, totalPages, changePage);
+      } else if (paginationContainer) {
+        paginationContainer.innerHTML = '';
+      }
+    }
+    
+    // Change page
+    function changePage(page) {
+      if (page < 1 || page > Math.ceil(filteredInstallments.length / pageSize)) return;
+      currentPage = page;
+      renderInstallments();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
     // Payment modal

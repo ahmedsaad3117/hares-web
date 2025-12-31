@@ -177,6 +177,11 @@
         document.getElementById('phoneNumber').value = userData.phoneNumber || '';
         document.getElementById('isActive').checked = userData.isActive;
         
+        // Disable Active checkbox if editing own account
+        if (parseInt(userId) === user.userId) {
+          document.getElementById('isActive').disabled = true;
+        }
+        
         loadingContainer.style.display = 'none';
         formContainer.style.display = 'block';
       } catch (error) {

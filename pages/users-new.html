@@ -370,11 +370,24 @@
       
       try {
         await api.users.create(formData);
-        showToast('User created successfully', 'success');
+        showToast(t('users.form.create_success'), 'success');
         window.location.href = 'users.html';
       } catch (error) {
         console.error('Error creating user:', error);
-        errorMessage.querySelector('p').textContent = error.message || 'Failed to create user';
+        
+        // Check for specific error messages and translate them
+        let errorText = t('users.form.create_failed');
+        if (error.message) {
+          if (error.message.includes('Email already exists')) {
+            errorText = t('users.form.email_exists');
+          } else if (error.message.includes('Phone number already exists')) {
+            errorText = t('users.form.phone_exists');
+          } else {
+            errorText = error.message;
+          }
+        }
+        
+        errorMessage.querySelector('p').textContent = errorText;
         errorMessage.classList.remove('hidden');
         
         // Re-enable button

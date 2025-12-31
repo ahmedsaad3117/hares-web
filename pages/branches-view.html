@@ -230,7 +230,7 @@
         const loansContainer = document.getElementById('loansContainer');
         
         if (loans.length === 0) {
-          loansContainer.innerHTML = '<p class="text-muted">No loans found for this branch</p>';
+          loansContainer.innerHTML = `<p class="text-muted">${t('branches.view_page.no_loans_found')}</p>`;
           return;
         }
         

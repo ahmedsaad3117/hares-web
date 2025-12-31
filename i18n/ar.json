@@ -479,7 +479,8 @@
       "created_at": "تاريخ الإنشاء",
       "last_updated": "آخر تحديث",
       "statistics": "الإحصائيات",
-      "recent_loans": "القروض الأخيرة"
+      "recent_loans": "القروض الأخيرة",
+      "no_loans_found": "لم يتم العثور على قروض لهـذا الفرع"
     }
   },
   "institutions": {
@@ -693,7 +694,11 @@
       "create_user": "إنشاء مستخدم",
       "update_user": "تحديث المستخدم",
       "cancel": "إلغاء",
-      "back": "رجوع"
+      "back": "رجوع",
+      "email_exists": "البريد الإلكتروني موجود مسبقاً",
+      "phone_exists": "رقم الهاتف موجود مسبقاً",
+      "create_success": "تم إنشاء المستخدم بنجاح",
+      "create_failed": "فشل إنشاء المستخدم"
     }
   },
   "installments": {
@@ -729,6 +734,7 @@
     "payment_failed": "فشلت معالجة الدفع",
     "view": "عرض",
     "pay": "دفع",
+    "no_installments_found": "لم يتم العثور على أقساط",
     "view_page": {
       "loading": "جاري تحميل تفاصيل القسط...",
       "title": "القسط",

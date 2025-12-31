@@ -454,7 +454,8 @@
       "created_at": "Created At",
       "last_updated": "Last Updated",
       "statistics": "Statistics",
-      "recent_loans": "Recent Loans"
+      "recent_loans": "Recent Loans",
+      "no_loans_found": "No loans found for this branch"
     }
   },
   "institutions": {
@@ -669,7 +670,11 @@
       "create_user": "Create User",
       "update_user": "Update User",
       "cancel": "Cancel",
-      "back": "Back"
+      "back": "Back",
+      "email_exists": "Email already exists",
+      "phone_exists": "Phone number already exists",
+      "create_success": "User created successfully",
+      "create_failed": "Failed to create user"
     }
   },
   "installments": {
@@ -705,6 +710,7 @@
     "payment_failed": "Failed to process payment",
     "view": "View",
     "pay": "Pay",
+    "no_installments_found": "No installments found",
     "view_page": {
       "loading": "Loading installment details...",
       "title": "Installment",

@@ -25,7 +25,7 @@ function createPagination(currentPage, totalPages, onPageChange) {
         onclick="changePage(${currentPage - 1})"
         ${currentPage === 1 ? 'disabled' : ''}
       >
-        ‹ Prev
+        ‹ ${t('common.button.previous')}
       </button>
       
       ${startPage > 1 ? `
@@ -54,12 +54,12 @@ function createPagination(currentPage, totalPages, onPageChange) {
         onclick="changePage(${currentPage + 1})"
         ${currentPage === totalPages ? 'disabled' : ''}
       >
-        Next ›
+        ${t('common.button.next')} ›
       </button>
     </div>
     
     <div style="text-align: center; margin-top: 1rem; color: #94a3b8; font-size: 0.875rem;">
-      Page ${currentPage} of ${totalPages}
+      ${t('common.label.page')} ${currentPage} ${t('common.label.of')} ${totalPages}
     </div>
   `;
   
