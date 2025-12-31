@@ -117,7 +117,7 @@
         return;
       }
       
-      const user = getCurrentUser();
+      user = getCurrentUser(); // Set global user variable
       document.getElementById('sidebar').innerHTML = createSidebar(user);
       document.getElementById('header').innerHTML = createHeader(
         t('loans.title'),
@@ -198,6 +198,7 @@
       initPage();
     }
     
+    let user = null; // Global user variable
     let currentPage = 1;
     let totalPages = 1;
     const pageSize = 10;
@@ -322,8 +323,11 @@
                 <a href="loans-view.html?id=${loan.loanId}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
                   ${t('loans.view')}
                 </a>
-                <a href="loans-edit.html?id=${loan.loanId}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
-                  ${t('loans.edit')}</a>
+                ${user.roleName === 'Super Admin' || loan.createdBy === user.userId ? `
+                  <a href="loans-edit.html?id=${loan.loanId}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
+                    ${t('loans.edit')}
+                  </a>
+                ` : ''}
               </div>
             </td>
           </tr>

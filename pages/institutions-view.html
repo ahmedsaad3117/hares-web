@@ -48,22 +48,38 @@
             </div>
           </div>
           
-          <div class="grid grid-cols-2 gap-6" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+          <div class="grid grid-cols-3 gap-6" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.tax_id">Tax ID</p>
+              <p id="taxId" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.phone_number">Phone Number</p>
+              <p id="phoneNumber" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.email">Email</p>
+              <p id="email" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
             <div>
               <p class="text-muted mb-1" data-i18n-key="institutions.view_page.max_users">Max Users</p>
-              <p id="maxUsers" class="text-white font-medium"></p>
+              <p id="maxUsers" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.can_create_branches">Can Create Branches</p>
+              <p id="canCreateBranches" class="text-white font-medium" style="color: #fff;"></p>
             </div>
             <div>
               <p class="text-muted mb-1" data-i18n-key="institutions.view_page.expiration_date">Expiration Date</p>
-              <p id="expirationDate" class="text-white font-medium"></p>
+              <p id="expirationDate" class="text-white font-medium" style="color: #fff;"></p>
             </div>
             <div>
               <p class="text-muted mb-1" data-i18n-key="institutions.view_page.created_at">Created At</p>
-              <p id="createdAt" class="text-white font-medium"></p>
+              <p id="createdAt" class="text-white font-medium" style="color: #fff;"></p>
             </div>
             <div>
               <p class="text-muted mb-1" data-i18n-key="institutions.view_page.last_updated">Last Updated</p>
-              <p id="updatedAt" class="text-white font-medium"></p>
+              <p id="updatedAt" class="text-white font-medium" style="color: #fff;"></p>
             </div>
           </div>
         </div>
@@ -134,7 +150,13 @@
         // Populate institution details
         document.getElementById('institutionName').textContent = institutionData.name;
         document.getElementById('institutionId').textContent = institutionData.institutionId;
+        document.getElementById('taxId').textContent = institutionData.taxId || '--';
+        document.getElementById('phoneNumber').textContent = institutionData.phoneNumber || '--';
+        document.getElementById('email').textContent = institutionData.email || '--';
         document.getElementById('maxUsers').textContent = institutionData.maxUsers;
+        document.getElementById('canCreateBranches').innerHTML = institutionData.canCreateBranches 
+          ? `<span class="badge badge-success">✓ ${t('institutions.view_page.yes')}</span>` 
+          : `<span class="badge badge-danger">✗ ${t('institutions.view_page.no')}</span>`;
         document.getElementById('expirationDate').textContent = institutionData.expirationDate ? formatDate(institutionData.expirationDate) : t('institutions.view_page.no_expiration');
         document.getElementById('createdAt').textContent = formatDateTime(institutionData.createdAt);
         document.getElementById('updatedAt').textContent = formatDateTime(institutionData.updatedAt);
@@ -165,21 +187,33 @@
         
         statsContainer.innerHTML = `
           <div class="grid grid-cols-4 gap-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
-            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
-              <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_branches">${t('institutions.view_page.total_branches')}</p>
-              <p class="text-2xl font-bold text-white">${stats.totalBranches || 0}</p>
+            <div style="padding: 1.5rem; border-radius: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="font-size: 1.5rem;">🏢</div>
+                <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_branches">${t('institutions.view_page.total_branches')}</p>
+              </div>
+              <p class="text-2xl font-bold text-white" style="color: #fff;">${stats.totalBranches || 0}</p>
             </div>
-            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
-              <p class="text-muted text-sm" data-i18n-key="institutions.view_page.active_users">${t('institutions.view_page.active_users')}</p>
-              <p class="text-2xl font-bold text-white">${stats.activeUsers || 0}</p>
+            <div style="padding: 1.5rem; border-radius: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="font-size: 1.5rem;">👥</div>
+                <p class="text-muted text-sm" data-i18n-key="institutions.view_page.active_users">${t('institutions.view_page.active_users')}</p>
+              </div>
+              <p class="text-2xl font-bold text-white" style="color: #fff;">${stats.activeUsers || 0}</p>
             </div>
-            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
-              <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_customers">${t('institutions.view_page.total_customers')}</p>
-              <p class="text-2xl font-bold text-white">${stats.totalCustomers || 0}</p>
+            <div style="padding: 1.5rem; border-radius: 12px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="font-size: 1.5rem;">👤</div>
+                <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_customers">${t('institutions.view_page.total_customers')}</p>
+              </div>
+              <p class="text-2xl font-bold text-white" style="color: #fff;">${stats.totalCustomers || 0}</p>
             </div>
-            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
-              <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_loans">${t('institutions.view_page.total_loans')}</p>
-              <p class="text-2xl font-bold text-white">${stats.totalLoans || 0}</p>
+            <div style="padding: 1.5rem; border-radius: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="font-size: 1.5rem;">💰</div>
+                <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_loans">${t('institutions.view_page.total_loans')}</p>
+              </div>
+              <p class="text-2xl font-bold text-white" style="color: #fff;">${stats.totalLoans || 0}</p>
             </div>
           </div>
         `;
@@ -200,13 +234,13 @@
         }
         
         const branchesHTML = branches.map(branch => `
-          <div class="glass-card p-4 mb-3" style="background: rgba(30, 41, 59, 0.5);">
+          <div style="padding: 1rem; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 0.75rem;">
             <div class="flex items-center justify-between" style="display: flex; align-items: center; justify-content: space-between;">
               <div>
-                <p class="text-white font-medium">${branch.name}</p>
-                <p class="text-sm text-muted"><span data-i18n-key="institutions.view_page.branch_id">${t('institutions.view_page.branch_id')}</span> #${branch.branchId}</p>
+                <a href="branches-view.html?id=${branch.branchId}" class="text-white font-medium" style="color: #fff; text-decoration: underline; font-size: 1rem;">${branch.name}</a>
+                <p class="text-sm text-muted" style="margin-top: 0.25rem;"><span data-i18n-key="institutions.view_page.branch_id">${t('institutions.view_page.branch_id')}</span>: #${branch.branchId}</p>
               </div>
-              <span class="badge ${branch.isActive ? 'badge-success' : 'badge-danger'}" data-i18n-key="institutions.view_page.${branch.isActive ? 'active' : 'inactive'}">${branch.isActive ? t('institutions.view_page.active') : t('institutions.view_page.inactive')}</span>
+              <span class="badge ${branch.isActive ? 'badge-success' : 'badge-danger'}">${branch.isActive ? t('institutions.view_page.active') : t('institutions.view_page.inactive')}</span>
             </div>
           </div>
         `).join('');

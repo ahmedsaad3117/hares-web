@@ -307,8 +307,17 @@
           if (trustStatusSelectEl) trustStatusSelectEl.value = customerData.trustStatus || 'Unverified';
         }
         
+        // Show/hide edit and delete buttons based on permissions
+        const canModify = user.roleName === 'Super Admin' || customerData.createdBy === user.userId;
         const editBtnEl = document.getElementById('editBtn');
-        if (editBtnEl) editBtnEl.href = `customers-edit.html?id=${customerId}`;
+        const deleteBtnEl = document.getElementById('deleteBtn');
+        
+        if (canModify) {
+          if (editBtnEl) editBtnEl.href = `customers-edit.html?id=${customerId}`;
+        } else {
+          if (editBtnEl) editBtnEl.style.display = 'none';
+          if (deleteBtnEl) deleteBtnEl.style.display = 'none';
+        }
         
         const loadingContainer = document.getElementById('loadingContainer');
         const customerContainer = document.getElementById('customerContainer');
@@ -378,6 +387,20 @@
             loan.status === 'Paid' ? 'badge-info' :
             'badge-info';
           
+          const translateStatus = (status) => {
+            const statusMap = {
+              'Pending': 'loans.status.pending',
+              'Active': 'loans.status.active',
+              'Completed': 'loans.status.completed',
+              'Rejected': 'loans.status.rejected',
+              'Overdue': 'loans.status.overdue',
+              'Late': 'loans.status.late',
+              'Paid': 'loans.status.paid',
+              'Finished': 'loans.status.finished'
+            };
+            return t(statusMap[status] || status);
+          };
+          
           return `
             <div class="glass-card" style="background: rgba(30, 41, 59, 0.5); padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; border-left: 3px solid rgba(99, 102, 241, 0.5);" 
                  onmouseover="this.style.background='rgba(30, 41, 59, 0.7)'" 
@@ -390,7 +413,7 @@
                   <a href="loans-view.html?id=${loan.loanId}" class="text-white font-semibold" style="text-decoration: none; font-size: 1rem;" onclick="event.stopPropagation()">
                     ${t('customers.view_page.loan_id')} #${loan.loanId}
                   </a>
-                  <span class="badge ${statusBadge}" style="font-size: 0.75rem;">${loan.status}</span>
+                  <span class="badge ${statusBadge}" style="font-size: 0.75rem;">${translateStatus(loan.status)}</span>
                 </div>
                 
                 <!-- Middle: Loan Details in Grid -->

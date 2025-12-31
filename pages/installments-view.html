@@ -84,7 +84,7 @@
               <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
                 <div>
                   <p class="text-muted mb-1" data-i18n-key="installments.view_page.loan_id">Loan ID</p>
-                  <a id="loanIdLink" href="#" class="text-white font-medium text-lg" style="text-decoration: underline;"></a>
+                  <a id="loanIdLink" href="#" class="text-white font-medium text-lg" style="color: #fff; text-decoration: underline;"></a>
                 </div>
                 <div>
                   <p class="text-muted mb-1" data-i18n-key="installments.view_page.principal_amount">Principal Amount</p>
@@ -115,7 +115,7 @@
               <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
                 <div>
                   <p class="text-muted mb-1" data-i18n-key="installments.view_page.customer_name">Customer Name</p>
-                  <a id="customerLink" href="#" class="text-white font-medium text-lg" style="text-decoration: underline;"></a>
+                  <a id="customerLink" href="#" class="text-white font-medium text-lg" style="color: #fff; text-decoration: underline;"></a>
                 </div>
                 <div>
                   <p class="text-muted mb-1" data-i18n-key="installments.view_page.customer_id">Customer ID</p>
@@ -340,7 +340,7 @@
         document.getElementById('detailAmount').textContent = formatCurrency(installmentData.amount);
         document.getElementById('detailStatus').textContent = installmentData.status;
         document.getElementById('detailDueDate').textContent = formatDate(installmentData.dueDate);
-        document.getElementById('detailPaymentDate').textContent = installmentData.paymentDate ? formatDate(installmentData.paymentDate) : 'Not paid yet';
+        document.getElementById('detailPaymentDate').textContent = installmentData.paymentDate ? formatDate(installmentData.paymentDate) : t('installments.view_page.not_paid_yet');
         
         // Days status
         const today = new Date();
@@ -349,23 +349,23 @@
           const paidDate = new Date(installmentData.paymentDate);
           const daysDiff = getDaysDifference(dueDate, paidDate);
           if (paidDate <= dueDate) {
-            document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #10b981;">Paid ${daysDiff} days early</span>`;
+            document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #10b981;">${t('installments.view_page.paid_days_early', { days: daysDiff })}</span>`;
           } else {
-            document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #f59e0b;">Paid ${daysDiff} days late</span>`;
+            document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #f59e0b;">${t('installments.view_page.paid_days_late', { days: daysDiff })}</span>`;
           }
         } else if (overdue) {
           const daysDiff = getDaysDifference(dueDate, today);
-          document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #ef4444;">${daysDiff} days overdue</span>`;
+          document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #ef4444;">${t('installments.view_page.days_overdue', { days: daysDiff })}</span>`;
         } else {
           const daysDiff = getDaysDifference(today, dueDate);
-          document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #3b82f6;">${daysDiff} days remaining</span>`;
+          document.getElementById('detailDaysStatus').innerHTML = `<span style="color: #3b82f6;">${t('installments.view_page.days_remaining', { days: daysDiff })}</span>`;
         }
         
         // Loan details
         document.getElementById('loanIdLink').textContent = `#${loanData.loanId}`;
         document.getElementById('loanIdLink').href = `loans-view.html?id=${loanData.loanId}`;
         document.getElementById('loanPrincipal').textContent = formatCurrency(loanData.principalAmount);
-        document.getElementById('loanPaymentPlan').textContent = `${loanData.paymentPlanMonths} Month${loanData.paymentPlanMonths > 1 ? 's' : ''}`;
+        document.getElementById('loanPaymentPlan').textContent = `${loanData.paymentPlanMonths} ${loanData.paymentPlanMonths > 1 ? t('installments.view_page.months') : t('installments.view_page.month')}`;
         document.getElementById('loanProduct').textContent = loanData.product?.name || 'N/A';
         document.getElementById('loanStatus').textContent = loanData.status;
         document.getElementById('loanPaidAmount').textContent = formatCurrency(loanData.paidAmount);

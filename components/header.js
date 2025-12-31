@@ -1,6 +1,15 @@
 // Header Component
 // Displays page title and user info
 
+function translateRole(roleName) {
+  const roleMap = {
+    'Super Admin': 'users.roles.super_admin',
+    'Institution': 'users.roles.institution',
+    'Branch': 'users.roles.branch'
+  };
+  return t(roleMap[roleName] || roleName);
+}
+
 // Session heartbeat - check every 30 seconds if session is still valid
 let sessionCheckInterval = null;
 
@@ -26,22 +35,22 @@ function startSessionMonitoring() {
 
 async function loadUserContext() {
   const user = getCurrentUser();
-  let contextInfo = user.roleName;
+  let contextInfo = translateRole(user.roleName);
   
   try {
     // Load institution name if user has one
     if (user.institutionId) {
       const institution = await api.institutions.getById(user.institutionId);
-      contextInfo = `${user.roleName} - ${institution.name}`;
+      contextInfo = `${translateRole(user.roleName)} - ${institution.name}`;
     }
     
     // Load branch name if user has one
     if (user.branchId) {
       const branch = await api.branches.getById(user.branchId);
       if (user.institutionId) {
-        contextInfo = `${user.roleName} - ${branch.name} & ${branch.institution?.name || 'Institution'}`;
+        contextInfo = `${translateRole(user.roleName)} - ${branch.name} & ${branch.institution?.name || 'Institution'}`;
       } else {
-        contextInfo = `${user.roleName} - ${branch.name}`;
+        contextInfo = `${translateRole(user.roleName)} - ${branch.name}`;
       }
     }
   } catch (error) {
@@ -73,7 +82,7 @@ function createHeader(title, subtitle = '') {
         
         <div class="text-right">
           <div class="text-white font-semibold text-sm">${user.name}</div>
-          <div id="userContext" class="text-muted text-sm">${user.roleName}</div>
+          <div id="userContext" class="text-muted text-sm">${translateRole(user.roleName)}</div>
         </div>
         <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #4f46e5); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px;">
           ${user.name.charAt(0).toUpperCase()}

@@ -17,6 +17,62 @@
       <!-- Stats Grid -->
       <div id="statsGrid" class="stats-grid mb-8"></div>
       
+      <!-- Installments Report Card -->
+      <div class="glass-card p-6 mb-8">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2 class="text-xl font-bold text-white" data-i18n-key="dashboard.installments_report.title">Installments Report</h2>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.from_date">From Date</label>
+              <input type="date" id="fromDate" class="input" style="padding: 0.5rem; font-size: 0.875rem; min-width: 140px;" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.to_date">To Date</label>
+              <input type="date" id="toDate" class="input" style="padding: 0.5rem; font-size: 0.875rem; min-width: 140px;" />
+            </div>
+            <button id="filterInstallments" class="btn btn-primary" style="margin-top: 1.25rem; padding: 0.5rem 1rem;" data-i18n-key="dashboard.installments_report.filter">Filter</button>
+          </div>
+        </div>
+        
+        <div id="installmentsStats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
+          <div style="padding: 1.5rem; border-radius: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <div style="font-size: 1.5rem;">📅</div>
+              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.total_due">Total Due</span>
+            </div>
+            <div class="text-white font-bold text-2xl" id="totalDueInstallments">0</div>
+            <div class="text-primary text-xl font-bold" id="totalDueAmount">$0.00</div>
+          </div>
+          
+          <div style="padding: 1.5rem; border-radius: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <div style="font-size: 1.5rem;">✅</div>
+              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.paid">Paid</span>
+            </div>
+            <div class="text-white font-bold text-2xl" id="paidInstallments">0</div>
+            <div style="color: #10b981;" class="text-xl font-bold" id="paidAmount">$0.00</div>
+          </div>
+          
+          <div style="padding: 1.5rem; border-radius: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <div style="font-size: 1.5rem;">⏳</div>
+              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.pending">Pending</span>
+            </div>
+            <div class="text-white font-bold text-2xl" id="pendingInstallments">0</div>
+            <div style="color: #f59e0b;" class="text-xl font-bold" id="pendingAmount">$0.00</div>
+          </div>
+          
+          <div style="padding: 1.5rem; border-radius: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <div style="font-size: 1.5rem;">⚠️</div>
+              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.overdue">Overdue</span>
+            </div>
+            <div class="text-white font-bold text-2xl" id="overdueInstallments">0</div>
+            <div style="color: #ef4444;" class="text-xl font-bold" id="overdueAmount">$0.00</div>
+          </div>
+        </div>
+      </div>
+      
       <!-- Quick Actions and Recent Activity -->
       <div class="grid grid-cols-2 gap-4 mb-8" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
         <!-- Quick Actions -->
@@ -287,6 +343,9 @@
       // Load recent activity
       await loadRecentActivity();
       
+      // Load installments report
+      await loadInstallmentsReport();
+      
       } catch (error) {
         console.error('Error loading global dashboard:', error);
         showToast('Failed to load dashboard data', 'error');
@@ -355,6 +414,9 @@
       
       // Render recent activity
       renderRecentActivity(dashboardData.recentActivities || []);
+      
+      // Load installments report
+      await loadInstallmentsReport();
     }
     
     function renderQuickActions() {
@@ -399,7 +461,7 @@
         recentLoans.forEach(loan => {
           activities.push({
             type: 'loan_created',
-            description: `Loan of ${formatCurrency(loan.principalAmount)} created for ${loan.customerName || 'customer'}`,
+            description: t('dashboard.activity.loan_created', { amount: formatCurrency(loan.principalAmount), customer: loan.customerName || t('dashboard.activity.customer_generic') }),
             timestamp: loan.createdAt
           });
         });
@@ -407,7 +469,7 @@
         recentCustomers.forEach(customer => {
           activities.push({
             type: 'customer_added',
-            description: `New customer "${customer.name}" added`,
+            description: t('dashboard.activity.customer_added', { name: customer.name }),
             timestamp: customer.createdAt
           });
         });
@@ -427,7 +489,7 @@
     
     function renderRecentActivity(activities) {
       if (!activities || activities.length === 0) {
-        document.getElementById('recentActivity').innerHTML = '<p class="text-muted text-sm">No recent activity</p>';
+        document.getElementById('recentActivity').innerHTML = `<p class="text-muted text-sm">${t('dashboard.activity.no_activity')}</p>`;
         return;
       }
       
@@ -449,6 +511,102 @@
       
       document.getElementById('recentActivity').innerHTML = activityHTML;
     }
+    
+    // Load installments report
+    async function loadInstallmentsReport(fromDate = null, toDate = null) {
+      try {
+        // Set default dates if not provided
+        if (!fromDate) {
+          const today = new Date();
+          const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+          fromDate = firstDay.toISOString().split('T')[0];
+          document.getElementById('fromDate').value = fromDate;
+        }
+        
+        if (!toDate) {
+          const today = new Date();
+          toDate = today.toISOString().split('T')[0];
+          document.getElementById('toDate').value = toDate;
+        }
+        
+        // Fetch all loans with installments
+        const loansResponse = await api.loans.getAll(1, 1000);
+        const loans = loansResponse.data || [];
+        
+        let allInstallments = [];
+        
+        // Fetch installments for each loan
+        for (const loan of loans) {
+          try {
+            const installments = await api.loans.getInstallments(loan.loanId);
+            allInstallments = allInstallments.concat(installments);
+          } catch (error) {
+            console.error(`Error fetching installments for loan ${loan.loanId}:`, error);
+          }
+        }
+        
+        // Filter installments by date range
+        const fromDateObj = new Date(fromDate);
+        const toDateObj = new Date(toDate);
+        toDateObj.setHours(23, 59, 59, 999); // Include the entire end date
+        
+        const filteredInstallments = allInstallments.filter(inst => {
+          const dueDate = new Date(inst.dueDate);
+          return dueDate >= fromDateObj && dueDate <= toDateObj;
+        });
+        
+        // Calculate statistics
+        const totalDue = filteredInstallments.length;
+        const paid = filteredInstallments.filter(i => i.status === 'Paid');
+        const pending = filteredInstallments.filter(i => i.status === 'Pending');
+        const overdue = filteredInstallments.filter(i => i.status === 'Overdue');
+        
+        const totalDueAmount = filteredInstallments.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+        const paidAmount = paid.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+        const pendingAmount = pending.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+        const overdueAmount = overdue.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+        
+        // Update UI
+        document.getElementById('totalDueInstallments').textContent = totalDue;
+        document.getElementById('totalDueAmount').textContent = formatCurrency(totalDueAmount);
+        
+        document.getElementById('paidInstallments').textContent = paid.length;
+        document.getElementById('paidAmount').textContent = formatCurrency(paidAmount);
+        
+        document.getElementById('pendingInstallments').textContent = pending.length;
+        document.getElementById('pendingAmount').textContent = formatCurrency(pendingAmount);
+        
+        document.getElementById('overdueInstallments').textContent = overdue.length;
+        document.getElementById('overdueAmount').textContent = formatCurrency(overdueAmount);
+        
+      } catch (error) {
+        console.error('Error loading installments report:', error);
+        showToast(t('dashboard.installments_report.load_error'), 'error');
+      }
+    }
+    
+    // Setup filter button
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterBtn = document.getElementById('filterInstallments');
+      if (filterBtn) {
+        filterBtn.addEventListener('click', () => {
+          const fromDate = document.getElementById('fromDate').value;
+          const toDate = document.getElementById('toDate').value;
+          
+          if (!fromDate || !toDate) {
+            showToast(t('dashboard.installments_report.select_dates'), 'error');
+            return;
+          }
+          
+          if (new Date(fromDate) > new Date(toDate)) {
+            showToast(t('dashboard.installments_report.invalid_date_range'), 'error');
+            return;
+          }
+          
+          loadInstallmentsReport(fromDate, toDate);
+        });
+      }
+    });
   </script>
 </body>
 </html>

@@ -1,6 +1,15 @@
 // Sidebar Component
 // Dynamically generates navigation based on user role
 
+function translateRole(roleName) {
+  const roleMap = {
+    'Super Admin': 'users.roles.super_admin',
+    'Institution': 'users.roles.institution',
+    'Branch': 'users.roles.branch'
+  };
+  return t(roleMap[roleName] || roleName);
+}
+
 function createSidebar(user) {
   const sidebarHTML = `
     <div class="sidebar">
@@ -90,7 +99,7 @@ function createSidebar(user) {
             </a>
           </li>
           
-          ${user.roleName === 'Super Admin' || user.roleName === 'Institution' ? `
+          ${user.roleName === 'Super Admin' || (user.roleName === 'Institution' && user.canCreateBranches !== false) ? `
           <li class="sidebar-nav-item">
             <a href="users.html" class="sidebar-nav-link" id="nav-users">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -129,7 +138,7 @@ function createSidebar(user) {
               ${user.name}
             </div>
             <div id="sidebarUserContext" style="font-size: 0.75rem; color: #94a3b8;">
-              ${user.roleName}
+              ${translateRole(user.roleName)}
             </div>
           </div>
         </div>

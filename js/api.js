@@ -366,7 +366,7 @@ function formatRelativeTime(dateString) {
 
 // Format trust status badge
 function formatTrustStatusBadge(trustStatus) {
-  if (!trustStatus) trustStatus = 'Unverified';
+  if (!trustStatus || trustStatus === 'Unverified') return '';
   
   const statusClass = `trust-status-${trustStatus.toLowerCase()}`;
   return `<span class="trust-status-badge ${statusClass}">${trustStatus}</span>`;

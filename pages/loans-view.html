@@ -53,7 +53,7 @@
             <div>
               <p class="text-muted mb-1" data-i18n-key="loans.view_page.customer">Customer</p>
               <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <a id="customerLink" href="#" class="text-white font-medium hover:text-primary" style="text-decoration: none; transition: color 0.2s;">
+                <a id="customerLink" href="#" class="text-white font-medium hover:text-primary" style="color: #fff; text-decoration: none; transition: color 0.2s;">
                   <span id="customerName"></span>
                 </a>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: rgba(148, 163, 184, 0.6);">
@@ -233,6 +233,21 @@
       window.i18n.translatePage();
     }
     
+    // Helper function to translate status
+    function translateStatus(status) {
+      const statusMap = {
+        'Active': 'active',
+        'Pending': 'pending',
+        'Late': 'late',
+        'Paid': 'paid',
+        'Finished': 'finished',
+        'Completed': 'completed',
+        'Rejected': 'rejected',
+        'Overdue': 'overdue'
+      };
+      return t(`loans.status.${statusMap[status] || status.toLowerCase()}`);
+    }
+    
     const loadingContainer = document.getElementById('loadingContainer');
     const loanContainer = document.getElementById('loanContainer');
     
@@ -252,7 +267,7 @@
         loanData = await api.loans.getById(loanId);
         
         // Populate loan details
-        document.getElementById('loanId').textContent = `Loan #${loanData.loanId}`;
+        document.getElementById('loanId').textContent = `${t('loans.view_page.loan_number')} #${loanData.loanId}`;
         
         // Customer link
         const customerLink = document.getElementById('customerLink');
@@ -264,7 +279,7 @@
         document.getElementById('productName').textContent = loanData.product?.name || '--';
         document.getElementById('principalAmount').textContent = formatCurrency(loanData.principalAmount);
         document.getElementById('dueDate').textContent = formatDate(loanData.dueDate);
-        document.getElementById('status').textContent = loanData.status;
+        document.getElementById('status').textContent = translateStatus(loanData.status);
         document.getElementById('givenBy').textContent = loanData.createdByName || '--';
         document.getElementById('createdAt').textContent = formatDateTime(loanData.createdAt);
         document.getElementById('updatedAt').textContent = formatDateTime(loanData.updatedAt);
@@ -276,12 +291,20 @@
           loanData.status === 'Late' ? 'badge-warning' :
           loanData.status === 'Paid' || loanData.status === 'Finished' ? 'badge-info' :
           'badge-secondary';
-        statusBadge.innerHTML = `<span class="badge ${statusClass}">${loanData.status}</span>`;
+        statusBadge.innerHTML = `<span class="badge ${statusClass}">${translateStatus(loanData.status)}</span>`;
         
         // Set status select
         document.getElementById('statusSelect').value = loanData.status;
         
-        document.getElementById('editBtn').href = `loans-edit.html?id=${loanId}`;
+        // Show/hide edit button based on permissions
+        const canModify = user.roleName === 'Super Admin' || loanData.createdBy === user.userId;
+        const editBtnEl = document.getElementById('editBtn');
+        
+        if (canModify) {
+          editBtnEl.href = `loans-edit.html?id=${loanId}`;
+        } else {
+          editBtnEl.style.display = 'none';
+        }
         
         // Load installments if payment plan exists
         if (loanData.paymentPlanMonths && loanData.paymentPlanMonths > 1) {
@@ -293,7 +316,7 @@
         loanContainer.style.display = 'block';
       } catch (error) {
         console.error('Error loading loan:', error);
-        showToast('Failed to load loan', 'error');
+        showToast(t('loans.view_page.load_failed'), 'error');
         setTimeout(() => window.location.href = 'loans.html', 2000);
       }
     }
@@ -307,7 +330,7 @@
         const monthlyAmount = loanData.principalAmount / loanData.paymentPlanMonths;
         const progressPercent = (loanData.paidAmount / loanData.principalAmount) * 100;
         
-        document.getElementById('paymentPlan').textContent = `${loanData.paymentPlanMonths} Months`;
+        document.getElementById('paymentPlan').textContent = `${loanData.paymentPlanMonths} ${t('loans.view_page.months')}`;
         document.getElementById('monthlyInstallment').textContent = formatCurrency(monthlyAmount);
         document.getElementById('totalPaid').textContent = formatCurrency(loanData.paidAmount);
         document.getElementById('progressPercentage').textContent = `${Math.round(progressPercent)}%`;
@@ -331,7 +354,7 @@
         installmentsCard.style.display = 'block';
         
         const paidCount = installmentsData.filter(i => i.status === 'Paid').length;
-        document.getElementById('installmentsSummary').textContent = `${paidCount} of ${installmentsData.length} paid`;
+        document.getElementById('installmentsSummary').textContent = `${paidCount} ${t('loans.view_page.of')} ${installmentsData.length} ${t('loans.view_page.paid')}`;
         
         renderInstallments();
       } catch (error) {
@@ -344,7 +367,7 @@
       const container = document.getElementById('installmentsContainer');
       
       if (installmentsData.length === 0) {
-        container.innerHTML = '<p class=\"text-muted\">No installments found</p>';
+        container.innerHTML = `<p class="text-muted">${t('loans.view_page.no_installments')}</p>`;
         return;
       }
       
@@ -387,22 +410,22 @@
               <div style=\"flex: 1;\">
                 <div style=\"display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;\">
                   <span style=\"width: 24px; height: 24px; border-radius: 50%; background: ${statusColor}; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: bold;\">${statusIcon}</span>
-                  <span class=\"text-white font-medium\">Installment #${installment.installmentNumber}</span>
-                  <span class=\"badge\" style=\"background: ${statusBg}; color: ${statusColor}; border: 1px solid ${statusBorder};\">${installment.status}</span>
-                  ${!canPay && !isPaid ? '<span class=\"badge badge-warning\" style=\"font-size: 0.75rem;\">🔒 Pay previous first</span>' : ''}
+                  <span class="text-white font-medium" style="color: #fff;">${t('loans.view_page.installment')} #${installment.installmentNumber}</span>
+                  <span class="badge" style="background: ${statusBg}; color: ${statusColor}; border: 1px solid ${statusBorder};">${translateStatus(installment.status)}</span>
+                  ${!canPay && !isPaid ? `<span class="badge badge-warning" style="font-size: 0.75rem;">🔒 ${t('loans.view_page.pay_previous_first')}</span>` : ''}
                 </div>
                 <div style=\"display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 0.75rem;\">
                   <div>
-                    <p class=\"text-muted\" style=\"font-size: 0.75rem;\">Amount</p>
-                    <p class=\"text-white font-medium\">${formatCurrency(installment.amount)}</p>
+                    <p class="text-muted" style="font-size: 0.75rem;">${t('loans.view_page.amount')}</p>
+                    <p class="text-white font-medium" style="color: #fff;">${formatCurrency(installment.amount)}</p>
                   </div>
                   <div>
-                    <p class=\"text-muted\" style=\"font-size: 0.75rem;\">Due Date</p>
-                    <p class=\"text-white font-medium\">${formatDate(installment.dueDate)}</p>
+                    <p class="text-muted" style="font-size: 0.75rem;">${t('loans.view_page.due_date')}</p>
+                    <p class="text-white font-medium" style="color: #fff;">${formatDate(installment.dueDate)}</p>
                   </div>
                   <div>
-                    <p class=\"text-muted\" style=\"font-size: 0.75rem;\">${isPaid ? 'Paid On' : 'Payment Date'}</p>
-                    <p class=\"text-white font-medium\">${isPaid ? formatDate(installment.paymentDate) : '--'}</p>
+                    <p class="text-muted" style="font-size: 0.75rem;">${isPaid ? t('loans.view_page.paid_on') : t('loans.view_page.payment_date')}</p>
+                    <p class="text-white font-medium" style="color: #fff;">${isPaid ? formatDate(installment.paymentDate) : '--'}</p>
                   </div>
                 </div>
               </div>
@@ -411,9 +434,9 @@
                   onclick=\"openPaymentModal(${installment.id}, ${installment.installmentNumber}, ${installment.amount}, '${installment.dueDate}')\"
                   class=\"btn btn-primary\" 
                   style=\"padding: 0.5rem 1rem; margin-left: 1rem; ${!canPay ? 'opacity: 0.5; cursor: not-allowed;' : ''}\"
-                  ${!canPay ? 'disabled title=\"Please pay previous installments first\"' : ''}
+                  ${!canPay ? `disabled title="${t('loans.view_page.pay_previous_first_tooltip')}"` : ''}
                 >
-                  Pay Now
+                  ${t('loans.view_page.pay_now')}
                 </button>
               ` : ''}
             </div>
@@ -451,19 +474,19 @@
       const paymentDate = document.getElementById('paymentDate').value;
       
       if (!paymentDate) {
-        showToast('Please select a payment date', 'error');
+        showToast(t('loans.view_page.select_payment_date'), 'error');
         return;
       }
       
       try {
         const confirmBtn = document.getElementById('confirmPayment');
         confirmBtn.disabled = true;
-        confirmBtn.textContent = 'Processing...';
+        confirmBtn.textContent = t('loans.view_page.processing');
         
         await api.installments.payInstallment(currentInstallmentId, paymentDate);
         
         closePaymentModal();
-        showToast('Payment recorded successfully', 'success');
+        showToast(t('loans.view_page.payment_recorded_success'), 'success');
         
         // Reload loan and installments data
         loanData = await api.loans.getById(loanId);
@@ -475,7 +498,7 @@
         confirmBtn.textContent = 'Confirm Payment';
       } catch (error) {
         console.error('Error recording payment:', error);
-        showToast(error.message || 'Failed to record payment', 'error');
+        showToast(error.message || t('loans.view_page.payment_record_failed'), 'error');
         
         const confirmBtn = document.getElementById('confirmPayment');
         confirmBtn.disabled = false;
@@ -488,22 +511,22 @@
       const newStatus = document.getElementById('statusSelect').value;
       
       if (newStatus === loanData.status) {
-        showToast('Status is already set to ' + newStatus, 'info');
+        showToast(t('loans.view_page.status_already_set', { status: newStatus }), 'info');
         return;
       }
       
-      if (!confirm(`Are you sure you want to change the loan status to "${newStatus}"?`)) {
+      if (!confirm(t('loans.view_page.confirm_status_change', { status: newStatus }))) {
         return;
       }
       
       try {
         const updateBtn = document.getElementById('updateStatusBtn');
         updateBtn.disabled = true;
-        updateBtn.textContent = 'Updating...';
+        updateBtn.textContent = t('loans.view_page.updating');
         
         await api.loans.updateStatus(loanId, newStatus);
         
-        showToast('Loan status updated successfully', 'success');
+        showToast(t('loans.view_page.status_updated_success'), 'success');
         
         // Reload the loan data
         setTimeout(() => {
@@ -511,7 +534,7 @@
         }, 1000);
       } catch (error) {
         console.error('Error updating loan status:', error);
-        showToast(error.message || 'Failed to update loan status', 'error');
+        showToast(error.message || t('loans.view_page.status_update_failed'), 'error');
         
         const updateBtn = document.getElementById('updateStatusBtn');
         updateBtn.disabled = false;
