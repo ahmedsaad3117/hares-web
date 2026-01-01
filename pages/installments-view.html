@@ -378,7 +378,12 @@
         document.getElementById('loanPrincipal').textContent = formatCurrency(loanData.principalAmount);
         document.getElementById('loanPaymentPlan').textContent = `${loanData.paymentPlanMonths} ${loanData.paymentPlanMonths > 1 ? t('installments.view_page.months') : t('installments.view_page.month')}`;
         document.getElementById('loanProduct').textContent = loanData.product?.name || 'N/A';
-        document.getElementById('loanStatus').textContent = loanData.status;
+        
+        // Translate loan status
+        const loanStatusKey = loanData.status.toLowerCase();
+        const translatedLoanStatus = t(`loans.status.${loanStatusKey}`) || loanData.status;
+        document.getElementById('loanStatus').textContent = translatedLoanStatus;
+        
         document.getElementById('loanPaidAmount').textContent = formatCurrency(loanData.paidAmount);
         
         // Customer details
