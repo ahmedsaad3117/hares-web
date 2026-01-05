@@ -72,6 +72,28 @@
           </div>
         </div>
         
+        <!-- Wallet Summary -->
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-4" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h3 class="text-xl font-bold text-white" data-i18n-key="wallet.summary_title">Wallet Summary</h3>
+            <span class="text-sm text-muted" id="walletUpdatedAt"></span>
+          </div>
+          <div id="walletSummary" class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+            <div class="loading-container"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+        <!-- Wallet Transactions -->
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-4" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h3 class="text-xl font-bold text-white" data-i18n-key="wallet.transactions_title">Wallet Transactions</h3>
+            <span class="text-sm text-muted" data-i18n-key="wallet.transactions_recent">Recent activity</span>
+          </div>
+          <div id="walletTransactionsContainer">
+            <div class="loading-container"><div class="spinner"></div></div>
+          </div>
+        </div>
+
         <!-- Statistics -->
         <div class="glass-card p-6 mb-6">
           <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="branches.view_page.statistics">Statistics</h3>
@@ -187,7 +209,9 @@
         if (loadingContainer) loadingContainer.style.display = 'none';
         if (branchContainer) branchContainer.style.display = 'block';
         
-        // Load statistics and loans
+        // Load wallet data, statistics, and loans
+        loadBranchWallet();
+        loadWalletTransactions();
         loadStatistics();
         loadLoans();
       } catch (error) {
@@ -195,6 +219,96 @@
         showToast('Failed to load branch', 'error');
         setTimeout(() => window.location.href = 'branches.html', 2000);
       }
+    }
+
+    async function loadBranchWallet() {
+      const summaryEl = document.getElementById('walletSummary');
+      const updatedAtEl = document.getElementById('walletUpdatedAt');
+
+      try {
+        const response = await api.wallets.getBranchWallet(branchId);
+        const wallet = response?.wallet || {};
+
+        if (updatedAtEl) {
+          updatedAtEl.textContent = wallet.updatedAt
+            ? `${t('wallet.last_updated')} ${formatDateTime(wallet.updatedAt)}`
+            : '';
+        }
+
+        summaryEl.innerHTML = `
+          <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+            <p class="text-sm text-muted" data-i18n-key="wallet.original_balance">${t('wallet.original_balance')}</p>
+            <p class="text-2xl font-bold text-white">${formatCurrency(wallet.originalBalance || 0)}</p>
+          </div>
+          <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+            <p class="text-sm text-muted" data-i18n-key="wallet.profit_balance">${t('wallet.profit_balance')}</p>
+            <p class="text-2xl font-bold text-white">${formatCurrency(wallet.profitBalance || 0)}</p>
+          </div>
+          <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+            <p class="text-sm text-muted" data-i18n-key="wallet.total_balance">${t('wallet.total_balance')}</p>
+            <p class="text-2xl font-bold text-white">${formatCurrency(wallet.totalBalance || 0)}</p>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error loading wallet summary:', error);
+        summaryEl.innerHTML = `<p class="text-muted">${t('wallet.failed_to_load')}</p>`;
+      }
+    }
+
+    async function loadWalletTransactions() {
+      const container = document.getElementById('walletTransactionsContainer');
+      try {
+        const result = await api.walletTransactions.getBranchTransactions(branchId, { limit: 6 });
+        if (!result.data.length) {
+          container.innerHTML = `<p class="text-muted">${t('wallet.transactions.empty')}</p>`;
+          return;
+        }
+
+        const rows = result.data.map((tx) => `
+          <tr>
+            <td>${formatTransactionType(tx.transactionType)}</td>
+            <td>${formatDeltaValue(tx.originalDelta)}</td>
+            <td>${formatDeltaValue(tx.profitDelta)}</td>
+            <td>${formatDeltaValue(tx.totalDelta)}</td>
+            <td>${tx.description || '—'}</td>
+            <td>${formatDateTime(tx.createdAt)}</td>
+          </tr>
+        `).join('');
+
+        container.innerHTML = `
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>${t('wallet.transactions.type')}</th>
+                  <th>${t('wallet.transactions.original')}</th>
+                  <th>${t('wallet.transactions.profit')}</th>
+                  <th>${t('wallet.transactions.total')}</th>
+                  <th>${t('wallet.transactions.description')}</th>
+                  <th>${t('wallet.transactions.created_at')}</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error loading wallet transactions:', error);
+        container.innerHTML = `<p class="text-muted">${t('wallet.transactions.failed_to_load')}</p>`;
+      }
+    }
+
+    function formatTransactionType(txType) {
+      if (!txType) return t('wallet.transaction_types.manual_adjustment');
+      const key = `wallet.transaction_types.${txType}`;
+      return t(key) || txType;
+    }
+
+    function formatDeltaValue(value) {
+      const numeric = Number(value || 0);
+      const formatted = formatCurrency(Math.abs(numeric));
+      const prefix = numeric >= 0 ? '+' : '-';
+      return `<span class="${numeric >= 0 ? 'text-success' : 'text-danger'}">${prefix} ${formatted}</span>`;
     }
     
     async function loadStatistics() {
@@ -239,7 +353,7 @@
             <div class="flex items-center justify-between" style="display: flex; align-items: center; justify-content: space-between;">
               <div>
                 <p class="text-white font-medium">Loan #${loan.loanId}</p>
-                <p class="text-sm text-muted">${loan.customer?.name || 'N/A'} - ${formatCurrency(loan.principalAmount)}</p>
+                <p class="text-sm text-muted">${loan.customer?.name || 'N/A'} - ${formatCurrency(loan.totalAmount || ((loan.originalAmount || 0) + (loan.profitAmount || 0)))}</p>
               </div>
               <span class="badge ${loan.status === 'active' ? 'badge-success' : loan.status === 'pending' ? 'badge-warning' : 'badge-danger'}">${loan.status}</span>
             </div>

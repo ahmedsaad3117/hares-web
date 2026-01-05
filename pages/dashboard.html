@@ -459,9 +459,10 @@
         
         // Build activity feed from recent items
         recentLoans.forEach(loan => {
+          const totalAmount = loan.totalAmount || ((loan.originalAmount || 0) + (loan.profitAmount || 0));
           activities.push({
             type: 'loan_created',
-            description: t('dashboard.activity.loan_created', { amount: formatCurrency(loan.principalAmount), customer: loan.customerName || t('dashboard.activity.customer_generic') }),
+            description: t('dashboard.activity.loan_created', { amount: formatCurrency(totalAmount), customer: loan.customerName || t('dashboard.activity.customer_generic') }),
             timestamp: loan.createdAt
           });
         });

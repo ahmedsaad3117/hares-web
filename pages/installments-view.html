@@ -81,14 +81,22 @@
             <!-- Loan Details Card -->
             <div class="glass-card p-6 mb-6">
               <h2 class="text-xl font-bold text-white mb-4" data-i18n-key="installments.view_page.related_loan">Related Loan</h2>
-              <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+              <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                 <div>
                   <p class="text-muted mb-1" data-i18n-key="installments.view_page.loan_id">Loan ID</p>
                   <a id="loanIdLink" href="#" class="text-white font-medium text-lg" style="color: #fff; text-decoration: underline;"></a>
                 </div>
                 <div>
-                  <p class="text-muted mb-1" data-i18n-key="installments.view_page.principal_amount">Principal Amount</p>
-                  <p id="loanPrincipal" class="text-white font-semibold"></p>
+                  <p class="text-muted mb-1" data-i18n-key="installments.view_page.original_amount">Original Amount</p>
+                  <p id="loanOriginal" class="text-white font-semibold"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1" data-i18n-key="installments.view_page.profit_amount">Profit Amount</p>
+                  <p id="loanProfit" class="text-white font-semibold"></p>
+                </div>
+                <div>
+                  <p class="text-muted mb-1" data-i18n-key="installments.view_page.total_amount">Total Amount</p>
+                  <p id="loanTotal" class="text-white font-semibold"></p>
                 </div>
                 <div>
                   <p class="text-muted mb-1" data-i18n-key="installments.view_page.payment_plan">Payment Plan</p>
@@ -375,7 +383,12 @@
         // Loan details
         document.getElementById('loanIdLink').textContent = `#${loanData.loanId}`;
         document.getElementById('loanIdLink').href = `loans-view.html?id=${loanData.loanId}`;
-        document.getElementById('loanPrincipal').textContent = formatCurrency(loanData.principalAmount);
+        const baseAmount = loanData.originalAmount ?? 0;
+        const profitAmount = loanData.profitAmount ?? 0;
+        const totalLoanAmount = loanData.totalAmount || (baseAmount + profitAmount);
+        document.getElementById('loanOriginal').textContent = formatCurrency(baseAmount);
+        document.getElementById('loanProfit').textContent = formatCurrency(profitAmount);
+        document.getElementById('loanTotal').textContent = formatCurrency(totalLoanAmount);
         document.getElementById('loanPaymentPlan').textContent = `${loanData.paymentPlanMonths} ${loanData.paymentPlanMonths > 1 ? t('installments.view_page.months') : t('installments.view_page.month')}`;
         document.getElementById('loanProduct').textContent = loanData.product?.name || 'N/A';
         

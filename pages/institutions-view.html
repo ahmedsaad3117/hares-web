@@ -83,6 +83,59 @@
             </div>
           </div>
         </div>
+
+        <!-- Wallet Overview -->
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-4" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h3 class="text-xl font-bold text-white" data-i18n-key="wallet.summary_title">Wallet Summary</h3>
+            <span class="text-sm text-muted" id="institutionWalletUpdatedAt"></span>
+          </div>
+          <div id="institutionWalletSummary" class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+            <div class="loading-container"><div class="spinner"></div></div>
+          </div>
+          <div id="walletActionsContainer" class="wallet-actions" style="margin-top: 1.5rem; display: none;">
+            <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+              <div>
+                <label class="text-sm text-muted" data-i18n-key="wallet.original_amount">Original Amount</label>
+                <input type="number" id="walletOriginalInput" min="0" step="0.01" class="form-input" placeholder="10000" />
+              </div>
+              <div>
+                <label class="text-sm text-muted" data-i18n-key="wallet.profit_amount">Profit Amount</label>
+                <input type="number" id="walletProfitInput" min="0" step="0.01" class="form-input" placeholder="1500" />
+              </div>
+              <div>
+                <label class="text-sm text-muted" data-i18n-key="wallet.notes_placeholder">Optional note</label>
+                <input type="text" id="walletNoteInput" class="form-input" placeholder="e.g. Quarterly funding" />
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+              <button id="fundWalletBtn" class="btn btn-primary" data-i18n-key="wallet.fund_wallet">Fund Wallet</button>
+              <button id="defundWalletBtn" class="btn btn-warning" data-i18n-key="wallet.defund_wallet">Defund Wallet</button>
+              <button id="adjustWalletBtn" class="btn btn-secondary" data-i18n-key="wallet.adjust_wallet">Manual Adjustment</button>
+            </div>
+            <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+              <div>
+                <label class="text-sm text-muted" data-i18n-key="wallet.manual_original_delta">Manual Original Delta</label>
+                <input type="number" id="manualOriginalInput" step="0.01" class="form-input" placeholder="5000 or -5000" />
+              </div>
+              <div>
+                <label class="text-sm text-muted" data-i18n-key="wallet.manual_profit_delta">Manual Profit Delta</label>
+                <input type="number" id="manualProfitInput" step="0.01" class="form-input" placeholder="250 or -250" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wallet Transactions -->
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-4" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h3 class="text-xl font-bold text-white" data-i18n-key="wallet.transactions_title">Wallet Transactions</h3>
+            <span class="text-sm text-muted" data-i18n-key="wallet.transactions_recent">Recent activity</span>
+          </div>
+          <div id="institutionWalletTransactions">
+            <div class="loading-container"><div class="spinner"></div></div>
+          </div>
+        </div>
         
         <!-- Statistics -->
         <div class="glass-card p-6 mb-6">
@@ -94,7 +147,7 @@
           </div>
         </div>
         
-        <!-- Branches -->
+        <!-- Branch Wallets -->
         <div class="glass-card p-6">
           <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="institutions.view_page.branches">Branches</h3>
           <div id="branchesContainer">
@@ -111,6 +164,9 @@
   <script src="../components/sidebar.js"></script>
   <script src="../components/header.js"></script>
   <script>
+    let currentUser = null;
+    let canManageWallet = false;
+
     async function initPage() {
       await waitForI18n();
       
@@ -119,8 +175,8 @@
         return;
       }
       
-      const user = getCurrentUser();
-      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      currentUser = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(currentUser);
       document.getElementById('header').innerHTML = createHeader(
         t('institutions.institution_details'),
         t('institutions.view_institution_info')
@@ -170,13 +226,95 @@
         loadingContainer.style.display = 'none';
         institutionContainer.style.display = 'block';
         
-        // Load statistics and branches
+        canManageWallet = canManageInstitutionWallet(currentUser, institutionData.institutionId);
+        toggleWalletActions();
+
+        // Load wallet + dependent data
+        loadInstitutionWallet();
+        loadInstitutionWalletTransactions();
         loadStatistics();
-        loadBranches();
+        loadBranchWallets();
       } catch (error) {
         console.error('Error loading institution:', error);
         showToast('Failed to load institution', 'error');
         setTimeout(() => window.location.href = 'institutions.html', 2000);
+      }
+    }
+
+    async function loadInstitutionWallet() {
+      const summaryEl = document.getElementById('institutionWalletSummary');
+      const updatedAtEl = document.getElementById('institutionWalletUpdatedAt');
+
+      try {
+        const response = await api.wallets.getInstitutionWallet(institutionId);
+        const wallet = response?.wallet || {};
+
+        if (updatedAtEl) {
+          updatedAtEl.textContent = wallet.updatedAt
+            ? `${t('wallet.last_updated')} ${formatDateTime(wallet.updatedAt)}`
+            : '';
+        }
+
+        summaryEl.innerHTML = `
+          <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+            <p class="text-sm text-muted">${t('wallet.original_balance')}</p>
+            <p class="text-2xl font-bold text-white">${formatCurrency(wallet.originalBalance || 0)}</p>
+          </div>
+          <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+            <p class="text-sm text-muted">${t('wallet.profit_balance')}</p>
+            <p class="text-2xl font-bold text-white">${formatCurrency(wallet.profitBalance || 0)}</p>
+          </div>
+          <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+            <p class="text-sm text-muted">${t('wallet.total_balance')}</p>
+            <p class="text-2xl font-bold text-white">${formatCurrency(wallet.totalBalance || 0)}</p>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error loading institution wallet:', error);
+        summaryEl.innerHTML = `<p class="text-muted">${t('wallet.failed_to_load')}</p>`;
+      }
+    }
+
+    async function loadInstitutionWalletTransactions() {
+      const container = document.getElementById('institutionWalletTransactions');
+      try {
+        const result = await api.walletTransactions.getInstitutionTransactions(institutionId, { limit: 8 });
+        if (!result.data.length) {
+          container.innerHTML = `<p class="text-muted">${t('wallet.transactions.empty')}</p>`;
+          return;
+        }
+
+        const rows = result.data.map((tx) => `
+          <tr>
+            <td>${formatTransactionType(tx.transactionType)}</td>
+            <td>${formatDeltaValue(tx.originalDelta)}</td>
+            <td>${formatDeltaValue(tx.profitDelta)}</td>
+            <td>${formatDeltaValue(tx.totalDelta)}</td>
+            <td>${tx.description || '—'}</td>
+            <td>${formatDateTime(tx.createdAt)}</td>
+          </tr>
+        `).join('');
+
+        container.innerHTML = `
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>${t('wallet.transactions.type')}</th>
+                  <th>${t('wallet.transactions.original')}</th>
+                  <th>${t('wallet.transactions.profit')}</th>
+                  <th>${t('wallet.transactions.total')}</th>
+                  <th>${t('wallet.transactions.description')}</th>
+                  <th>${t('wallet.transactions.created_at')}</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error loading wallet transactions:', error);
+        container.innerHTML = `<p class="text-muted">${t('wallet.transactions.failed_to_load')}</p>`;
       }
     }
     
@@ -223,33 +361,160 @@
       }
     }
     
-    async function loadBranches() {
+    async function loadBranchWallets() {
+      const branchesContainer = document.getElementById('branchesContainer');
       try {
-        const branches = await api.branches.getAll(institutionId);
-        const branchesContainer = document.getElementById('branchesContainer');
-        
-        if (branches.length === 0) {
+        const summaries = await api.wallets.getInstitutionBranchSummaries(institutionId);
+        if (!summaries.length) {
           branchesContainer.innerHTML = `<p class="text-muted" data-i18n-key="institutions.view_page.no_branches_found">${t('institutions.view_page.no_branches_found')}</p>`;
           return;
         }
-        
-        const branchesHTML = branches.map(branch => `
-          <div style="padding: 1rem; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 0.75rem;">
-            <div class="flex items-center justify-between" style="display: flex; align-items: center; justify-content: space-between;">
-              <div>
-                <a href="branches-view.html?id=${branch.branchId}" class="text-white font-medium" style="color: #fff; text-decoration: underline; font-size: 1rem;">${branch.name}</a>
-                <p class="text-sm text-muted" style="margin-top: 0.25rem;"><span data-i18n-key="institutions.view_page.branch_id">${t('institutions.view_page.branch_id')}</span>: #${branch.branchId}</p>
-              </div>
-              <span class="badge ${branch.isActive ? 'badge-success' : 'badge-danger'}">${branch.isActive ? t('institutions.view_page.active') : t('institutions.view_page.inactive')}</span>
-            </div>
-          </div>
+
+        const rows = summaries.map((summary) => `
+          <tr>
+            <td><a href="branches-view.html?id=${summary.branchId}" class="text-white underline">${summary.branchName}</a></td>
+            <td>${formatCurrency(summary.wallet?.originalBalance || 0)}</td>
+            <td>${formatCurrency(summary.wallet?.profitBalance || 0)}</td>
+            <td>${formatCurrency(summary.wallet?.totalBalance || 0)}</td>
+            <td><span class="badge ${summary.isActive ? 'badge-success' : 'badge-danger'}">${summary.isActive ? t('institutions.view_page.active') : t('institutions.view_page.inactive')}</span></td>
+          </tr>
         `).join('');
-        
-        branchesContainer.innerHTML = branchesHTML;
+
+        branchesContainer.innerHTML = `
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>${t('institutions.view_page.branch_name')}</th>
+                  <th>${t('wallet.original_balance')}</th>
+                  <th>${t('wallet.profit_balance')}</th>
+                  <th>${t('wallet.total_balance')}</th>
+                  <th>${t('institutions.view_page.status')}</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        `;
       } catch (error) {
-        console.error('Error loading branches:', error);
-        document.getElementById('branchesContainer').innerHTML = `<p class="text-muted" data-i18n-key="institutions.view_page.failed_to_load_branches">${t('institutions.view_page.failed_to_load_branches')}</p>`;
+        console.error('Error loading branch wallets:', error);
+        branchesContainer.innerHTML = `<p class="text-muted" data-i18n-key="institutions.view_page.failed_to_load_branches">${t('institutions.view_page.failed_to_load_branches')}</p>`;
       }
+    }
+
+    function formatTransactionType(txType) {
+      if (!txType) return t('wallet.transaction_types.manual_adjustment');
+      const key = `wallet.transaction_types.${txType}`;
+      return t(key) || txType;
+    }
+
+    function formatDeltaValue(value) {
+      const numeric = Number(value || 0);
+      const formatted = formatCurrency(Math.abs(numeric));
+      const prefix = numeric >= 0 ? '+' : '-';
+      return `<span class="${numeric >= 0 ? 'text-success' : 'text-danger'}">${prefix} ${formatted}</span>`;
+    }
+
+    function toggleWalletActions() {
+      const actions = document.getElementById('walletActionsContainer');
+      if (!actions) return;
+      actions.style.display = canManageWallet ? 'block' : 'none';
+    }
+
+    async function handleFundWallet() {
+      if (!canManageWallet) return;
+      const payload = buildManagePayload();
+      if (!payload) return;
+
+      try {
+        await api.wallets.fundInstitution(institutionId, payload);
+        showToast(t('wallet.fund_success') || 'Wallet funded', 'success');
+        resetWalletInputs();
+        loadInstitutionWallet();
+        loadInstitutionWalletTransactions();
+      } catch (error) {
+        console.error('Error funding wallet:', error);
+        showToast(error.message || 'Failed to fund wallet', 'error');
+      }
+    }
+
+    async function handleDefundWallet() {
+      if (!canManageWallet) return;
+      const payload = buildManagePayload();
+      if (!payload) return;
+
+      try {
+        await api.wallets.defundInstitution(institutionId, payload);
+        showToast(t('wallet.defund_success') || 'Wallet defunded', 'success');
+        resetWalletInputs();
+        loadInstitutionWallet();
+        loadInstitutionWalletTransactions();
+      } catch (error) {
+        console.error('Error defunding wallet:', error);
+        showToast(error.message || 'Failed to defund wallet', 'error');
+      }
+    }
+
+    async function handleManualAdjust() {
+      if (!canManageWallet) return;
+      const manualOriginal = parseFloat(document.getElementById('manualOriginalInput').value || '0');
+      const manualProfit = parseFloat(document.getElementById('manualProfitInput').value || '0');
+      if (manualOriginal === 0 && manualProfit === 0) {
+        showToast(t('wallet.provide_amount'), 'error');
+        return;
+      }
+
+      try {
+        await api.wallets.adjustInstitution(institutionId, {
+          originalDelta: manualOriginal,
+          profitDelta: manualProfit,
+          note: getWalletNote(),
+        });
+        showToast(t('wallet.adjust_success') || 'Wallet adjusted', 'success');
+        resetWalletInputs();
+        document.getElementById('manualOriginalInput').value = '';
+        document.getElementById('manualProfitInput').value = '';
+        loadInstitutionWallet();
+        loadInstitutionWalletTransactions();
+      } catch (error) {
+        console.error('Error adjusting wallet:', error);
+        showToast(error.message || 'Failed to adjust wallet', 'error');
+      }
+    }
+
+    function buildManagePayload() {
+      const originalInput = document.getElementById('walletOriginalInput');
+      const profitInput = document.getElementById('walletProfitInput');
+      const originalAmount = parseFloat(originalInput.value || '0');
+      const profitAmount = parseFloat(profitInput.value || '0');
+      if (originalAmount <= 0 && profitAmount <= 0) {
+        showToast(t('wallet.provide_amount'), 'error');
+        return null;
+      }
+      return {
+        originalAmount,
+        profitAmount,
+        note: getWalletNote(),
+      };
+    }
+
+    function resetWalletInputs() {
+      document.getElementById('walletOriginalInput').value = '';
+      document.getElementById('walletProfitInput').value = '';
+      document.getElementById('walletNoteInput').value = '';
+    }
+
+    function getWalletNote() {
+      const noteInput = document.getElementById('walletNoteInput');
+      return noteInput ? noteInput.value : undefined;
+    }
+
+    function canManageInstitutionWallet(user, targetInstitutionId) {
+      if (!user) return false;
+      const roleName = typeof user.role === 'string' ? user.role : user.role?.roleName;
+      if (roleName === 'Super Admin') return true;
+      if (roleName === 'Institution' && user.institutionId === targetInstitutionId) return true;
+      return false;
     }
     
     // Delete institution
@@ -266,6 +531,10 @@
       }
     });
     
+    document.getElementById('fundWalletBtn')?.addEventListener('click', handleFundWallet);
+    document.getElementById('defundWalletBtn')?.addEventListener('click', handleDefundWallet);
+    document.getElementById('adjustWalletBtn')?.addEventListener('click', handleManualAdjust);
+
     loadInstitution();
   </script>
 </body>

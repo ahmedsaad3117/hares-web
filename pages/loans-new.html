@@ -68,21 +68,46 @@
             <div id="productIdError" class="error-text hidden"></div>
           </div>
           
-          <!-- Principal Amount -->
+          <!-- Original Amount -->
           <div class="form-group">
-            <label class="label" data-i18n-key="loans.form.principal_amount">Principal Amount *</label>
+            <label class="label" data-i18n-key="loans.form.original_amount">Original Amount *</label>
             <input 
               type="number" 
-              id="principalAmount" 
-              name="principalAmount" 
+              id="originalAmount" 
+              name="originalAmount" 
               class="input" 
-              data-i18n-placeholder="loans.form.principal_placeholder"
-              placeholder="5000.00"
+              data-i18n-placeholder="loans.form.original_placeholder"
+              placeholder="10000.00"
               step="0.01"
               min="0"
               required
             />
-            <div id="principalAmountError" class="error-text hidden"></div>
+            <div id="originalAmountError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Profit Amount -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="loans.form.profit_amount">Profit Amount *</label>
+            <input 
+              type="number" 
+              id="profitAmount" 
+              name="profitAmount" 
+              class="input" 
+              data-i18n-placeholder="loans.form.profit_placeholder"
+              placeholder="1500.00"
+              step="0.01"
+              min="0"
+              value="0"
+              required
+            />
+            <div id="profitAmountError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Total Amount Summary -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="loans.form.total_amount_label">Total Amount</label>
+            <div id="totalAmountDisplay" class="text-white font-semibold" style="padding: 0.75rem; border-radius: 8px; background: rgba(15, 118, 110, 0.15); border: 1px solid rgba(16, 185, 129, 0.2);">--</div>
+            <p class="text-muted text-sm" style="margin-top: 0.25rem;" data-i18n-key="loans.form.total_amount_help">Original amount + profit will determine the schedule.</p>
           </div>
           
           <!-- Payment Plan -->
@@ -305,13 +330,26 @@
       }
     }
     
+    function getAmountValue(fieldId) {
+      return parseFloat(document.getElementById(fieldId).value) || 0;
+    }
+
+    function updateAmountSummaries() {
+      const originalAmount = getAmountValue('originalAmount');
+      const profitAmount = getAmountValue('profitAmount');
+      const totalAmount = originalAmount + profitAmount;
+      const totalDisplay = document.getElementById('totalAmountDisplay');
+      totalDisplay.textContent = totalAmount > 0 ? formatCurrency(totalAmount) : '--';
+      return { originalAmount, profitAmount, totalAmount };
+    }
+
     // Installment preview calculation
     function updateInstallmentPreview() {
-      const principalAmount = parseFloat(document.getElementById('principalAmount').value);
+      const { totalAmount } = updateAmountSummaries();
       const paymentPlanMonths = parseInt(document.getElementById('paymentPlanMonths').value);
       
-      if (principalAmount && paymentPlanMonths && principalAmount > 0) {
-        const monthlyPayment = principalAmount / paymentPlanMonths;
+      if (totalAmount && paymentPlanMonths && totalAmount > 0) {
+        const monthlyPayment = totalAmount / paymentPlanMonths;
         document.getElementById('monthlyPayment').textContent = formatCurrency(monthlyPayment);
         document.getElementById('installmentCount').textContent = paymentPlanMonths;
         document.getElementById('installmentPreview').classList.remove('hidden');
@@ -321,8 +359,10 @@
     }
     
     // Add event listeners for installment preview
-    document.getElementById('principalAmount').addEventListener('input', updateInstallmentPreview);
+    document.getElementById('originalAmount').addEventListener('input', updateInstallmentPreview);
+    document.getElementById('profitAmount').addEventListener('input', updateInstallmentPreview);
     document.getElementById('paymentPlanMonths').addEventListener('change', updateInstallmentPreview);
+    updateInstallmentPreview();
     
     const form = document.getElementById('loanForm');
     const submitButton = document.getElementById('submitButton');
@@ -344,10 +384,12 @@
       errorMessage.classList.add('hidden');
       
       // Get form data
+      const amountSnapshot = updateAmountSummaries();
       const formData = {
         customerId: parseInt(document.getElementById('customerId').value),
         productId: parseInt(document.getElementById('productId').value),
-        principalAmount: parseFloat(document.getElementById('principalAmount').value),
+        originalAmount: amountSnapshot.originalAmount,
+        profitAmount: amountSnapshot.profitAmount,
         paymentPlanMonths: parseInt(document.getElementById('paymentPlanMonths').value),
         dueDate: document.getElementById('dueDate').value,
       };
@@ -363,15 +405,31 @@
       }
       
       // Validation
-      if (!formData.customerId || (!formData.branchId && !formData.institutionId) || !formData.productId || !formData.principalAmount || !formData.paymentPlanMonths || !formData.dueDate) {
+      if (
+        !formData.customerId ||
+        (!formData.branchId && !formData.institutionId) ||
+        !formData.productId ||
+        !formData.originalAmount ||
+        formData.paymentPlanMonths <= 0 ||
+        !formData.dueDate
+      ) {
         errorMessage.querySelector('p').textContent = 'Please fill in all required fields';
         errorMessage.classList.remove('hidden');
+        isSubmitting = false;
         return;
       }
       
-      if (formData.principalAmount <= 0) {
-        errorMessage.querySelector('p').textContent = 'Principal amount must be greater than 0';
+      if (formData.originalAmount <= 0) {
+        errorMessage.querySelector('p').textContent = 'Original amount must be greater than 0';
         errorMessage.classList.remove('hidden');
+        isSubmitting = false;
+        return;
+      }
+
+      if (formData.profitAmount < 0) {
+        errorMessage.querySelector('p').textContent = 'Profit amount cannot be negative';
+        errorMessage.classList.remove('hidden');
+        isSubmitting = false;
         return;
       }
       

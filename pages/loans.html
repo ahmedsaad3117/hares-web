@@ -288,7 +288,10 @@
         // Calculate payment progress
         const paymentPlan = loan.paymentPlanMonths || 1;
         const paidAmount = loan.paidAmount || 0;
-        const progressPercent = (paidAmount / loan.principalAmount) * 100;
+        const originalAmount = loan.originalAmount ?? 0;
+        const profitAmount = loan.profitAmount ?? 0;
+        const totalAmount = loan.totalAmount || (originalAmount + profitAmount);
+        const progressPercent = totalAmount > 0 ? (paidAmount / totalAmount) * 100 : 0;
         const progressColor = progressPercent >= 100 ? '#10b981' : progressPercent >= 50 ? '#3b82f6' : '#f59e0b';
         
         // Determine branch/institution display
@@ -305,7 +308,10 @@
             </td>
             <td class="text-secondary">${locationName}</td>
             <td class="text-secondary">${loan.product.name}</td>
-            <td class="text-white font-semibold">${formatCurrency(loan.principalAmount)}</td>
+            <td class="text-white font-semibold">
+              ${formatCurrency(totalAmount)}
+              <div class="text-xs text-muted">${formatCurrency(originalAmount)} + ${formatCurrency(profitAmount)}</div>
+            </td>
             <td>
               <div style="min-width: 120px;">
                 <div class="text-white font-medium">${paymentPlan} ${paymentPlan > 1 ? t('loans.months') : t('loans.month')}</div>
@@ -314,7 +320,7 @@
                     <div style="width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden;">
                       <div style="height: 100%; background: ${progressColor}; width: ${Math.min(progressPercent, 100)}%;"></div>
                     </div>
-                    <div class="text-muted text-sm" style="margin-top: 0.125rem;">${formatCurrency(paidAmount)} ${t('loans.paid_amount')}</div>
+                    <div class="text-muted text-sm" style="margin-top: 0.125rem;">${formatCurrency(paidAmount)} / ${formatCurrency(totalAmount)}</div>
                   </div>
                 ` : `<div class="text-muted text-sm">${t('loans.single_payment')}</div>`}
               </div>

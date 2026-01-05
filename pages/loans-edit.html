@@ -76,21 +76,44 @@
               <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;" data-i18n-key="loans.edit_page.product_readonly">Product cannot be changed after loan creation</p>
             </div>
             
-            <!-- Principal Amount -->
+            <!-- Original Amount -->
             <div class="form-group">
-              <label class="label" data-i18n-key="loans.form.principal_amount">Principal Amount</label> <span data-i18n-key="common.required">*</span>
+              <label class="label" data-i18n-key="loans.form.original_amount">Original Amount</label> <span data-i18n-key="common.required">*</span>
               <input 
                 type="number" 
-                id="principalAmount" 
-                name="principalAmount" 
+                id="originalAmount" 
+                name="originalAmount" 
                 class="input" 
-                data-i18n-placeholder="loans.form.principal_placeholder"
-                placeholder="5000.00"
+                data-i18n-placeholder="loans.form.original_placeholder"
+                placeholder="10000.00"
                 step="0.01"
                 min="0"
                 required
               />
-              <div id="principalAmountError" class="error-text hidden"></div>
+              <div id="originalAmountError" class="error-text hidden"></div>
+            </div>
+
+            <!-- Profit Amount -->
+            <div class="form-group">
+              <label class="label" data-i18n-key="loans.form.profit_amount">Profit Amount</label> <span data-i18n-key="common.required">*</span>
+              <input 
+                type="number" 
+                id="profitAmount" 
+                name="profitAmount" 
+                class="input" 
+                data-i18n-placeholder="loans.form.profit_placeholder"
+                placeholder="1500.00"
+                step="0.01"
+                min="0"
+                required
+              />
+              <div id="profitAmountError" class="error-text hidden"></div>
+            </div>
+
+            <!-- Total Amount Display -->
+            <div class="form-group">
+              <label class="label" data-i18n-key="loans.form.total_amount_label">Total Amount</label>
+              <div id="editTotalAmountDisplay" class="text-white font-semibold" style="padding: 0.75rem; border-radius: 8px; background: rgba(15, 118, 110, 0.15); border: 1px solid rgba(16, 185, 129, 0.2);">--</div>
             </div>
             
             <!-- Payment Plan (Read-only) -->
@@ -188,6 +211,17 @@
     }
     
     let loanData = null;
+
+    function getAmountValue(fieldId) {
+      return parseFloat(document.getElementById(fieldId).value) || 0;
+    }
+
+    function updateEditTotalAmount() {
+      const total = getAmountValue('originalAmount') + getAmountValue('profitAmount');
+      const target = document.getElementById('editTotalAmountDisplay');
+      target.textContent = total > 0 ? formatCurrency(total) : '--';
+      return total;
+    }
     
     // Load loan data
     async function loadLoan() {
@@ -198,7 +232,9 @@
         document.getElementById('customerName').value = loanData.customer.name;
         document.getElementById('branchName').value = loanData.branch?.name || '--';
         document.getElementById('productName').value = loanData.product?.name || '--';
-        document.getElementById('principalAmount').value = loanData.principalAmount;
+        document.getElementById('originalAmount').value = loanData.originalAmount ?? 0;
+        document.getElementById('profitAmount').value = loanData.profitAmount ?? 0;
+        updateEditTotalAmount();
         document.getElementById('paymentPlanMonths').value = `${loanData.paymentPlanMonths || 1} Month${(loanData.paymentPlanMonths || 1) > 1 ? 's' : ''}`;
         document.getElementById('dueDate').value = loanData.dueDate.split('T')[0];
         document.getElementById('status').value = loanData.status;
@@ -212,6 +248,9 @@
       }
     }
     
+    document.getElementById('originalAmount').addEventListener('input', updateEditTotalAmount);
+    document.getElementById('profitAmount').addEventListener('input', updateEditTotalAmount);
+
     // Form submission
     document.getElementById('loanForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -222,7 +261,8 @@
       
       // Get form data
       const formData = {
-        principalAmount: parseFloat(document.getElementById('principalAmount').value),
+        originalAmount: getAmountValue('originalAmount'),
+        profitAmount: getAmountValue('profitAmount'),
         dueDate: document.getElementById('dueDate').value,
         status: document.getElementById('status').value
       };
@@ -230,9 +270,15 @@
       // Validate
       let hasError = false;
       
-      if (!formData.principalAmount || formData.principalAmount <= 0) {
-        document.getElementById('principalAmountError').textContent = 'Principal amount must be greater than 0';
-        document.getElementById('principalAmountError').classList.remove('hidden');
+      if (!formData.originalAmount || formData.originalAmount <= 0) {
+        document.getElementById('originalAmountError').textContent = 'Original amount must be greater than 0';
+        document.getElementById('originalAmountError').classList.remove('hidden');
+        hasError = true;
+      }
+
+      if (formData.profitAmount < 0) {
+        document.getElementById('profitAmountError').textContent = 'Profit amount cannot be negative';
+        document.getElementById('profitAmountError').classList.remove('hidden');
         hasError = true;
       }
       

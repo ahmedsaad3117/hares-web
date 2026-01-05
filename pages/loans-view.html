@@ -77,10 +77,18 @@
             </div>
           </div>
           
-          <div class="grid grid-cols-2 gap-6" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+          <div class="grid grid-cols-3 gap-6" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
             <div>
-              <p class="text-muted mb-1" data-i18n-key="loans.view_page.principal_amount">Principal Amount</p>
-              <p id="principalAmount" class="text-white font-medium text-lg"></p>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.original_amount">Original Amount</p>
+              <p id="originalAmount" class="text-white font-medium text-lg"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.profit_amount">Profit Amount</p>
+              <p id="profitAmount" class="text-white font-medium text-lg"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.total_amount">Total Amount</p>
+              <p id="totalAmount" class="text-white font-bold text-lg"></p>
             </div>
             <div>
               <p class="text-muted mb-1" data-i18n-key="loans.view_page.due_date">Due Date</p>
@@ -277,7 +285,12 @@
         document.getElementById('branchName').textContent = loanData.branch?.name || '--';
         document.getElementById('institutionName').textContent = loanData.branch?.institution?.name || '--';
         document.getElementById('productName').textContent = loanData.product?.name || '--';
-        document.getElementById('principalAmount').textContent = formatCurrency(loanData.principalAmount);
+        const originalAmount = loanData.originalAmount ?? 0;
+        const profitAmount = loanData.profitAmount ?? 0;
+        const totalAmount = loanData.totalAmount || (originalAmount + profitAmount);
+        document.getElementById('originalAmount').textContent = formatCurrency(originalAmount);
+        document.getElementById('profitAmount').textContent = formatCurrency(profitAmount);
+        document.getElementById('totalAmount').textContent = formatCurrency(totalAmount);
         document.getElementById('dueDate').textContent = formatDate(loanData.dueDate);
         document.getElementById('status').textContent = translateStatus(loanData.status);
         document.getElementById('givenBy').textContent = loanData.createdByName || '--';
@@ -328,8 +341,11 @@
         const paymentProgressCard = document.getElementById('paymentProgressCard');
         paymentProgressCard.style.display = 'block';
         
-        const monthlyAmount = loanData.principalAmount / loanData.paymentPlanMonths;
-        const progressPercent = (loanData.paidAmount / loanData.principalAmount) * 100;
+        const baseAmount = loanData.originalAmount ?? 0;
+        const profit = loanData.profitAmount ?? 0;
+        const totalAmount = loanData.totalAmount || (baseAmount + profit);
+        const monthlyAmount = totalAmount / loanData.paymentPlanMonths;
+        const progressPercent = totalAmount > 0 ? (loanData.paidAmount / totalAmount) * 100 : 0;
         
         document.getElementById('paymentPlan').textContent = `${loanData.paymentPlanMonths} ${t('loans.view_page.months')}`;
         document.getElementById('monthlyInstallment').textContent = formatCurrency(monthlyAmount);

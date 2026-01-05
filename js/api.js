@@ -255,6 +255,62 @@ const api = {
       body: JSON.stringify(data),
     }),
   },
+
+  // Wallets
+  wallets: {
+    getBranchWallet: (branchId) => apiRequest(`/wallets/branch/${branchId}`),
+    getInstitutionWallet: (institutionId) => apiRequest(`/wallets/institution/${institutionId}`),
+    getInstitutionBranchSummaries: (institutionId) => apiRequest(`/wallets/institution/${institutionId}/branches`),
+    fundInstitution: (institutionId, data) => apiRequest(`/wallets/institution/${institutionId}/fund`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    defundInstitution: (institutionId, data) => apiRequest(`/wallets/institution/${institutionId}/defund`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    adjustInstitution: (institutionId, data) => apiRequest(`/wallets/institution/${institutionId}/adjust`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    fundBranch: (branchId, data) => apiRequest(`/wallets/branch/${branchId}/fund`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    defundBranch: (branchId, data) => apiRequest(`/wallets/branch/${branchId}/defund`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    adjustBranch: (branchId, data) => apiRequest(`/wallets/branch/${branchId}/adjust`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  },
+
+  walletTransactions: {
+    getBranchTransactions: (branchId, params = {}) => {
+      const searchParams = new URLSearchParams();
+      if (params.page) searchParams.set('page', params.page);
+      if (params.limit) searchParams.set('limit', params.limit);
+      if (params.transactionType) searchParams.set('transactionType', params.transactionType);
+      if (params.fromDate) searchParams.set('fromDate', params.fromDate);
+      if (params.toDate) searchParams.set('toDate', params.toDate);
+      const query = searchParams.toString();
+      const suffix = query ? `?${query}` : '';
+      return apiRequest(`/wallet-transactions/branch/${branchId}${suffix}`);
+    },
+    getInstitutionTransactions: (institutionId, params = {}) => {
+      const searchParams = new URLSearchParams();
+      if (params.page) searchParams.set('page', params.page);
+      if (params.limit) searchParams.set('limit', params.limit);
+      if (params.transactionType) searchParams.set('transactionType', params.transactionType);
+      if (params.fromDate) searchParams.set('fromDate', params.fromDate);
+      if (params.toDate) searchParams.set('toDate', params.toDate);
+      const query = searchParams.toString();
+      const suffix = query ? `?${query}` : '';
+      return apiRequest(`/wallet-transactions/institution/${institutionId}${suffix}`);
+    },
+  },
   
   // Search Logs
   searchLogs: {
