@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallet Center - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+<body>
+  <div id="sidebar"></div>
+  <div class="main-content">
+    <div id="header"></div>
+    <div class="page-content">
+      <div id="walletContent" class="space-y-6">
+        <div class="loading-container"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    let currentUser = null;
+    let walletContent = null;
+    let allWalletsData = [];
+    let currentView = null;
+
+    const TRANSACTION_DESCRIPTION_PATTERNS = [
+      { regex: /loan\s+#?(\d+)\s+disbursement/i, transform: (match) => `صرف قرض رقم ${match[1]}` },
+      { regex: /loan\s+#?(\d+)\s+repayment/i, transform: (match) => `سداد قرض رقم ${match[1]}` },
+      { regex: /installment\s+#?(\d+)\s+payment/i, transform: (match) => `سداد قسط رقم ${match[1]}` },
+      { regex: /manual\s+adjustment/i, transform: () => 'تعديل يدوي' },
+      { regex: /wallet\s+transfer/i, transform: () => 'تحويل المحفظة' },
+    ];
+
+    const TRANSACTION_DESCRIPTION_DICTIONARY = {
+      loan: 'قرض',
+      installment: 'قسط',
+      payment: 'دفعة',
+      disbursement: 'صرف',
+      transfer: 'تحويل',
+      branch: 'فرع',
+      institution: 'مؤسسة',
+      wallet: 'محفظة',
+      manual: 'يدوي',
+      adjustment: 'تعديل',
+      refund: 'استرداد',
+      deposit: 'إيداع',
+    };
+
+    window.addEventListener('localeChanged', () => {
+      if (!currentUser || !currentView) return;
+      if (currentView === 'branch') {
+        renderBranchView();
+      } else if (currentView === 'institution') {
+        renderInstitutionView();
+      } else if (currentView === 'superAdmin') {
+        renderSuperAdminView();
+      }
+    });
+
+    async function initPage() {
+      await waitForI18n();
+
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      currentUser = getCurrentUser();
+      walletContent = document.getElementById('walletContent');
+
+      document.getElementById('sidebar').innerHTML = createSidebar(currentUser);
+      document.getElementById('header').innerHTML = createHeader(
+        t('wallet.center_title'),
+        t('wallet.center_subtitle')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('wallets');
+      window.i18n.translatePage();
+
+      if (currentUser.roleName === 'Branch') {
+        renderBranchView();
+      } else if (currentUser.roleName === 'Institution') {
+        renderInstitutionView();
+      } else {
+        renderSuperAdminView();
+      }
+    }
+
+    function renderLoadingState(message) {
+      walletContent.innerHTML = `
+        <div class="glass-card p-6">
+          <div class="loading-container" style="min-height: 120px;">
+            <div class="spinner"></div>
+            ${message ? `<p class="text-muted mt-4">${message}</p>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMessageCard(text, tone = 'info') {
+      const toneColor = tone === 'error' ? 'rgba(239,68,68,0.15)' : 'rgba(59,130,246,0.12)';
+      walletContent.innerHTML = `
+        <div class="glass-card p-6" style="background: ${toneColor}; border: 1px solid rgba(255,255,255,0.08);">
+          <p class="text-white">${text}</p>
+        </div>
+      `;
+    }
+
+    async function renderBranchView() {
+      currentView = 'branch';
+      if (!currentUser.branchId) {
+        renderMessageCard(t('wallet.missing_branch_message'), 'error');
+        return;
+      }
+
+      renderLoadingState();
+      try {
+        const response = await api.wallets.getBranchWallet(currentUser.branchId);
+        const { branch, wallet } = response;
+
+        walletContent.innerHTML = `
+          <div class="glass-card p-6 mb-6">
+            <div class="flex items-center justify-between mb-4" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+              <div>
+                <p class="text-sm text-muted uppercase tracking-wide">${t('wallet.branch_section_title')}</p>
+                <h2 class="text-2xl font-bold text-white">${branch?.name || '—'}</h2>
+                <p class="text-muted">${branch?.institutionName || ''}</p>
+              </div>
+              <span class="badge">${t('wallet.owner_types.branch')}</span>
+            </div>
+            ${createSummaryGrid(wallet)}
+          </div>
+
+          <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+              <h3 class="text-xl font-bold text-white">${t('wallet.transactions_title')}</h3>
+              <span class="text-muted text-sm">${t('wallet.transactions_recent')}</span>
+            </div>
+            <div id="branchTransactions" class="table-responsive">
+              <div class="loading-container"><div class="spinner"></div></div>
+            </div>
+          </div>
+        `;
+
+        loadBranchTransactions(currentUser.branchId);
+      } catch (error) {
+        console.error('Failed to load branch wallet', error);
+        renderMessageCard(t('wallet.failed_to_load'), 'error');
+      }
+    }
+
+    async function loadBranchTransactions(branchId) {
+      const container = document.getElementById('branchTransactions');
+      if (!container) return;
+      container.innerHTML = `<div class="loading-container"><div class="spinner"></div></div>`;
+
+      try {
+        const result = await api.walletTransactions.getBranchTransactions(branchId, { limit: 10 });
+        container.innerHTML = renderTransactionsTable(result?.data || []);
+      } catch (error) {
+        console.error('Failed to load branch transactions', error);
+        container.innerHTML = `<p class="text-muted">${t('wallet.transactions.failed_to_load')}</p>`;
+      }
+    }
+
+    async function renderInstitutionView() {
+      currentView = 'institution';
+      if (!currentUser.institutionId) {
+        renderMessageCard(t('wallet.missing_institution_message'), 'error');
+        return;
+      }
+
+      renderLoadingState();
+      try {
+        const [walletResponse, branchSummaries] = await Promise.all([
+          api.wallets.getInstitutionWallet(currentUser.institutionId),
+          currentUser.canCreateBranches === false
+            ? Promise.resolve([])
+            : api.wallets.getInstitutionBranchSummaries(currentUser.institutionId),
+        ]);
+        const wallet = walletResponse?.wallet;
+
+        let branchSectionHtml = '';
+        if (currentUser.canCreateBranches === false) {
+          branchSectionHtml = `
+            <div class="glass-card p-6" style="background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2);">
+              <p class="text-sm text-white">${t('wallet.limited_institution_message')}</p>
+            </div>
+          `;
+        } else {
+          branchSectionHtml = `
+            <div class="glass-card p-6">
+              <div class="flex items-center justify-between mb-4" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+                <h3 class="text-xl font-bold text-white">${t('institutions.view_page.branches')}</h3>
+                <span class="text-muted text-sm">${branchSummaries.length || 0} ${t('institutions.view_page.branches')}</span>
+              </div>
+              <div id="institutionBranchWallets"></div>
+            </div>
+          `;
+        }
+
+        walletContent.innerHTML = `
+          <div class="glass-card p-6 mb-6">
+            <div class="flex items-center justify-between mb-4" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+              <div>
+                <p class="text-sm text-muted uppercase tracking-wide">${t('wallet.institution_section_title')}</p>
+                <h2 class="text-2xl font-bold text-white">${walletResponse?.institutionName || t('wallet.owner_types.institution')}</h2>
+              </div>
+              <span class="badge">${t('wallet.owner_types.institution')}</span>
+            </div>
+            ${createSummaryGrid(wallet)}
+          </div>
+
+          <div class="glass-card p-6 mb-6">
+            <div class="flex items-center justify-between mb-4" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+              <h3 class="text-xl font-bold text-white">${t('wallet.transactions_title')}</h3>
+              <span class="text-muted text-sm">${t('wallet.transactions_recent')}</span>
+            </div>
+            <div id="institutionTransactions" class="table-responsive">
+              <div class="loading-container"><div class="spinner"></div></div>
+            </div>
+          </div>
+
+          ${branchSectionHtml}
+        `;
+
+        if (currentUser.canCreateBranches !== false) {
+          renderBranchSummaries(branchSummaries);
+        }
+
+        loadInstitutionTransactions(currentUser.institutionId);
+      } catch (error) {
+        console.error('Failed to load institution wallet', error);
+        renderMessageCard(t('wallet.failed_to_load'), 'error');
+      }
+    }
+
+    function renderBranchSummaries(summaries = []) {
+      const container = document.getElementById('institutionBranchWallets');
+      if (!container) return;
+
+      if (!summaries.length) {
+        container.innerHTML = `<p class="text-muted">${t('institutions.view_page.no_branches_found')}</p>`;
+        return;
+      }
+
+      const rows = summaries.map((summary) => {
+        const expectedProfit = summary.wallet?.expectedProfitBalance ?? summary.wallet?.profitBalance ?? 0;
+        return `
+          <tr>
+            <td><a href="branches-view.html?id=${summary.branchId}" class="text-white underline">${summary.branchName}</a></td>
+            <td>${formatCurrency(summary.wallet?.originalBalance || 0)}</td>
+            <td>${formatCurrency(expectedProfit)}</td>
+            <td>${formatCurrency(summary.wallet?.totalBalance || 0)}</td>
+            <td>
+              <span class="badge ${summary.isActive ? 'badge-success' : 'badge-danger'}">
+                ${summary.isActive ? t('institutions.view_page.active') : t('institutions.view_page.inactive')}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>${t('institutions.view_page.branch_name')}</th>
+                <th>${t('wallet.original_balance')}</th>
+                <th>${t('wallet.expected_profit_balance')}</th>
+                <th>${t('wallet.total_balance')}</th>
+                <th>${t('institutions.view_page.status')}</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function loadInstitutionTransactions(institutionId) {
+      const container = document.getElementById('institutionTransactions');
+      if (!container) return;
+      container.innerHTML = `<div class="loading-container"><div class="spinner"></div></div>`;
+
+      try {
+        const result = await api.walletTransactions.getInstitutionTransactions(institutionId, { limit: 12 });
+        container.innerHTML = renderTransactionsTable(result?.data || []);
+      } catch (error) {
+        console.error('Failed to load institution transactions', error);
+        container.innerHTML = `<p class="text-muted">${t('wallet.transactions.failed_to_load')}</p>`;
+      }
+    }
+
+    async function renderSuperAdminView() {
+      currentView = 'superAdmin';
+      renderLoadingState();
+      try {
+        allWalletsData = await api.wallets.getAll();
+        allWalletsData = Array.isArray(allWalletsData) ? allWalletsData : [];
+
+        walletContent.innerHTML = `
+          <div class="glass-card p-6 mb-6">
+            <div class="flex items-center justify-between mb-4" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+              <h2 class="text-2xl font-bold text-white">${t('wallet.super_admin_title')}</h2>
+            </div>
+            ${renderWalletStats(allWalletsData)}
+          </div>
+
+          <div class="glass-card p-6">
+            <div class="flex flex-wrap items-center gap-4 mb-4" style="display:flex; flex-wrap:wrap; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+              <div>
+                <label class="text-sm text-muted" for="walletOwnerFilter">${t('wallet.filter_label')}</label>
+                <select id="walletOwnerFilter" class="input" style="min-width:180px;">
+                  <option value="all">${t('wallet.filter_all')}</option>
+                  <option value="institution">${t('wallet.owner_types.institution')}</option>
+                  <option value="branch">${t('wallet.owner_types.branch')}</option>
+                </select>
+              </div>
+              <div style="flex:1; min-width:220px;">
+                <label class="text-sm text-muted" for="walletSearchInput">${t('common.label.search')}</label>
+                <input id="walletSearchInput" type="text" class="input" placeholder="${t('wallet.search_placeholder')}">
+              </div>
+            </div>
+            <div id="walletsTableContainer"></div>
+          </div>
+        `;
+
+        document.getElementById('walletOwnerFilter').addEventListener('change', applyWalletFilters);
+        document.getElementById('walletSearchInput').addEventListener('input', applyWalletFilters);
+
+        renderWalletsTable(allWalletsData);
+      } catch (error) {
+        console.error('Failed to load wallets overview', error);
+        renderMessageCard(t('wallet.failed_to_load'), 'error');
+      }
+    }
+
+    function renderWalletStats(data) {
+      const totalWallets = data.length;
+      const institutionWallets = data.filter((item) => item.ownerType === 'institution').length;
+      const branchWallets = totalWallets - institutionWallets;
+      const totalBalance = data.reduce((sum, item) => sum + toNumber(item.wallet?.totalBalance), 0);
+      const totalExpectedProfit = data.reduce(
+        (sum, item) => sum + toNumber(item.wallet?.expectedProfitBalance ?? item.wallet?.profitBalance),
+        0,
+      );
+
+      return `
+        <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem;">
+          ${createStatCard(t('wallet.total_wallets'), totalWallets.toLocaleString())}
+          ${createStatCard(t('wallet.institution_wallets'), institutionWallets.toLocaleString())}
+          ${createStatCard(t('wallet.branch_wallets'), branchWallets.toLocaleString())}
+          ${createStatCard(t('wallet.total_balance'), formatCurrency(totalBalance))}
+          ${createStatCard(t('wallet.expected_profit_balance'), formatCurrency(totalExpectedProfit))}
+        </div>
+      `;
+    }
+
+    function createStatCard(label, value) {
+      return `
+        <div class="glass-card p-4" style="background: rgba(15,23,42,0.6);">
+          <p class="text-sm text-muted">${label}</p>
+          <p class="text-2xl font-bold text-white">${value}</p>
+        </div>
+      `;
+    }
+
+    function applyWalletFilters() {
+      const typeFilter = document.getElementById('walletOwnerFilter').value;
+      const searchValue = document.getElementById('walletSearchInput').value.trim().toLowerCase();
+
+      let filtered = [...allWalletsData];
+      if (typeFilter !== 'all') {
+        filtered = filtered.filter((item) => item.ownerType === typeFilter);
+      }
+
+      if (searchValue) {
+        filtered = filtered.filter((item) => {
+          const ownerName = (item.ownerType === 'branch' ? item.branch?.name : item.institution?.name) || '';
+          const institutionName = item.branch?.institutionName || item.institution?.name || '';
+          return (
+            ownerName.toLowerCase().includes(searchValue) ||
+            institutionName.toLowerCase().includes(searchValue)
+          );
+        });
+      }
+
+      renderWalletsTable(filtered);
+    }
+
+    function renderWalletsTable(rows) {
+      const container = document.getElementById('walletsTableContainer');
+      if (!container) return;
+
+      if (!rows.length) {
+        container.innerHTML = `<p class="text-muted">${t('wallet.no_wallets')}</p>`;
+        return;
+      }
+
+      const tableRows = rows.map((item) => {
+        const ownerLabel = t(`wallet.owner_types.${item.ownerType}`) || item.ownerType;
+        const ownerName = item.ownerType === 'branch' ? (item.branch?.name || '—') : (item.institution?.name || '—');
+        const institutionName = item.ownerType === 'branch'
+          ? (item.branch?.institutionName || '—')
+          : (item.institution?.name || '—');
+        const updatedAt = item.wallet?.updatedAt ? formatDateTime(item.wallet.updatedAt) : '—';
+        const detailLink = item.ownerType === 'branch'
+          ? (item.branch?.branchId ? `branches-view.html?id=${item.branch.branchId}` : '#')
+          : (item.institution?.institutionId ? `institutions-view.html?id=${item.institution.institutionId}` : '#');
+        const button = detailLink === '#'
+          ? `<button class="btn btn-secondary" disabled>${t('wallet.view_details')}</button>`
+          : `<a href="${detailLink}" class="btn btn-secondary">${t('wallet.view_details')}</a>`;
+        const expectedProfit = toNumber(item.wallet?.expectedProfitBalance ?? item.wallet?.profitBalance ?? 0);
+
+        return `
+          <tr>
+            <td>${ownerLabel}</td>
+            <td>${ownerName}</td>
+            <td>${institutionName}</td>
+            <td>${formatCurrency(item.wallet?.originalBalance || 0)}</td>
+            <td>${formatCurrency(expectedProfit)}</td>
+            <td>${formatCurrency(item.wallet?.totalBalance || 0)}</td>
+            <td>${updatedAt}</td>
+            <td>${button}</td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>${t('wallet.owner_type')}</th>
+                <th>${t('wallet.owner_name')}</th>
+                <th>${t('wallet.institution_name')}</th>
+                <th>${t('wallet.original_balance')}</th>
+                <th>${t('wallet.expected_profit_balance')}</th>
+                <th>${t('wallet.total_balance')}</th>
+                <th>${t('wallet.updated_at')}</th>
+                <th>${t('common.label.actions')}</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function createSummaryGrid(wallet = {}) {
+      const expectedProfit = wallet?.expectedProfitBalance ?? wallet?.profitBalance ?? 0;
+      return `
+        <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem;">
+          <div class="glass-card p-4" style="background: rgba(30,41,59,0.6);">
+            <p class="text-sm text-muted">${t('wallet.original_balance')}</p>
+            <p class="text-2xl font-bold text-white">${formatCurrency(wallet.originalBalance || 0)}</p>
+          </div>
+          <div class="glass-card p-4" style="background: rgba(30,41,59,0.6);">
+            <p class="text-sm text-muted">${t('wallet.expected_profit_balance')}</p>
+            <p class="text-2xl font-bold text-white">${formatCurrency(expectedProfit)}</p>
+          </div>
+          <div class="glass-card p-4" style="background: rgba(30,41,59,0.6);">
+            <p class="text-sm text-muted">${t('wallet.total_balance')}</p>
+            <p class="text-2xl font-bold text-white">${formatCurrency(wallet.totalBalance || 0)}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTransactionsTable(rows) {
+      if (!rows.length) {
+        return `<p class="text-muted">${t('wallet.transactions.empty')}</p>`;
+      }
+
+      const tableRows = rows.map((tx) => `
+        <tr>
+          <td>${formatTransactionType(tx.transactionType)}</td>
+          <td>${formatDeltaValue(tx.originalDelta)}</td>
+          <td>${formatDeltaValue(tx.profitDelta)}</td>
+          <td>${formatDeltaValue(tx.totalDelta)}</td>
+          <td>${translateTransactionDescription(tx.description)}</td>
+          <td>${formatDateTime(tx.createdAt)}</td>
+        </tr>
+      `).join('');
+
+      return `
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>${t('wallet.transactions.type')}</th>
+                <th>${t('wallet.transactions.original')}</th>
+                <th>${t('wallet.transactions.profit')}</th>
+                <th>${t('wallet.transactions.total')}</th>
+                <th>${t('wallet.transactions.description')}</th>
+                <th>${t('wallet.transactions.created_at')}</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function formatTransactionType(type) {
+      if (!type) return t('wallet.transaction_types.manual_adjustment');
+      const key = `wallet.transaction_types.${type.toLowerCase()}`;
+      return t(key) || type;
+    }
+
+    function formatDeltaValue(value) {
+      const amount = toNumber(value);
+      const formatted = formatCurrency(Math.abs(amount));
+      const prefix = amount >= 0 ? '+' : '-';
+      return `<span class="${amount >= 0 ? 'text-success' : 'text-danger'}">${prefix} ${formatted}</span>`;
+    }
+
+    function toNumber(value) {
+      const numeric = Number(value);
+      return Number.isNaN(numeric) ? 0 : numeric;
+    }
+
+    function translateTransactionDescription(description) {
+      if (!description) return '—';
+      const sanitized = escapeHtml(description);
+      const locale = window.i18n?.getCurrentLocale?.() || 'en';
+      if (locale !== 'ar') {
+        return sanitized;
+      }
+
+      for (const pattern of TRANSACTION_DESCRIPTION_PATTERNS) {
+        const match = sanitized.match(pattern.regex);
+        if (match) {
+          return pattern.transform(match);
+        }
+      }
+
+      let translated = sanitized;
+      Object.entries(TRANSACTION_DESCRIPTION_DICTIONARY).forEach(([english, arabic]) => {
+        const regex = new RegExp(`\\b${escapeRegExp(english)}\\b`, 'gi');
+        translated = translated.replace(regex, arabic);
+      });
+      return translated;
+    }
+
+    function escapeHtml(unsafeText) {
+      return unsafeText.replace(/[&<>"']/g, (char) => {
+        switch (char) {
+          case '&': return '&amp;';
+          case '<': return '&lt;';
+          case '>': return '&gt;';
+          case '"': return '&quot;';
+          case '\'': return '&#39;';
+          default: return char;
+        }
+      });
+    }
+
+    function escapeRegExp(text) {
+      return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+  </script>
+</body>
+</html>

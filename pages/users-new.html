@@ -188,6 +188,39 @@
     
     let institutions = [];
     let branches = [];
+
+    function applyRoleVisibility(roleId) {
+      if (roleId === 1) {
+        institutionGroup.style.display = 'none';
+        branchGroup.style.display = 'none';
+        institutionSelect.value = '';
+        branchSelect.value = '';
+      } else if (roleId === 2) {
+        institutionGroup.style.display = 'block';
+        branchGroup.style.display = 'none';
+        branchSelect.value = '';
+      } else if (roleId === 3) {
+        institutionGroup.style.display = 'block';
+        branchGroup.style.display = 'block';
+      } else {
+        institutionGroup.style.display = 'none';
+        branchGroup.style.display = 'none';
+      }
+    }
+
+    function populateBranchesForInstitution(institutionId) {
+      if (!institutionId) {
+        branchSelect.innerHTML = `<option value="">${t('users.form.branch_placeholder')}</option>`;
+        branchSelect.value = '';
+        return;
+      }
+
+      const filteredBranches = branches.filter(b => b.institutionId === Number(institutionId));
+      branchSelect.innerHTML = `<option value="">${t('users.form.branch_placeholder')}</option>`;
+      filteredBranches.forEach(branch => {
+        branchSelect.innerHTML += `<option value="${branch.branchId}">${branch.name}</option>`;
+      });
+    }
     
     // Populate role dropdown based on user role
     if (user.roleName === 'Super Admin') {
@@ -203,8 +236,12 @@
         <option value="">${t('users.form.role_placeholder')}</option>
         <option value="3">${t('users.roles.branch')}</option>
       `;
-      roleSelect.value = '3'; // Pre-select Branch role
+      roleSelect.value = '3';
+      roleSelect.disabled = true;
     }
+
+    const initialRoleId = parseInt(roleSelect.value, 10);
+    applyRoleVisibility(Number.isNaN(initialRoleId) ? 0 : initialRoleId);
     
     // Load institutions and branches
     async function loadData() {
@@ -236,6 +273,8 @@
           institutionSelect.value = user.institutionId;
           institutionSelect.disabled = true;
           institutionGroup.style.display = 'block';
+          populateBranchesForInstitution(user.institutionId);
+          branchGroup.style.display = 'block';
         }
       } catch (error) {
         console.error('Error loading data:', error);
@@ -246,39 +285,18 @@
     
     // Handle role change
     roleSelect.addEventListener('change', (e) => {
-      const roleId = parseInt(e.target.value);
-      
-      // Role 1 = Super Admin (no institution/branch)
-      // Role 2 = Institution (needs institution)
-      // Role 3 = Branch (needs institution and branch)
-      
-      if (roleId === 1) {
-        institutionGroup.style.display = 'none';
-        branchGroup.style.display = 'none';
-        institutionSelect.value = '';
-        branchSelect.value = '';
-      } else if (roleId === 2) {
-        institutionGroup.style.display = 'block';
-        branchGroup.style.display = 'none';
-        branchSelect.value = '';
-      } else if (roleId === 3) {
-        institutionGroup.style.display = 'block';
-        branchGroup.style.display = 'block';
+      const roleId = parseInt(e.target.value, 10);
+      applyRoleVisibility(roleId);
+      if (roleId === 3) {
+        populateBranchesForInstitution(institutionSelect.value);
       }
     });
     
     // Handle institution change (for Branch role)
     institutionSelect.addEventListener('change', (e) => {
-      const institutionId = parseInt(e.target.value);
-      const roleId = parseInt(roleSelect.value);
-      
-      if (roleId === 3 && institutionId) {
-        // Filter branches by institution
-        const filteredBranches = branches.filter(b => b.institutionId === institutionId);
-        branchSelect.innerHTML = `<option value="">${t('users.form.branch_placeholder')}</option>`;
-        filteredBranches.forEach(branch => {
-          branchSelect.innerHTML += `<option value="${branch.branchId}">${branch.name}</option>`;
-        });
+      const roleId = parseInt(roleSelect.value, 10);
+      if (roleId === 3) {
+        populateBranchesForInstitution(e.target.value);
       }
     });
     

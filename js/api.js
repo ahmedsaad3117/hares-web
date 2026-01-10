@@ -258,6 +258,7 @@ const api = {
 
   // Wallets
   wallets: {
+    getAll: () => apiRequest('/wallets'),
     getBranchWallet: (branchId) => apiRequest(`/wallets/branch/${branchId}`),
     getInstitutionWallet: (institutionId) => apiRequest(`/wallets/institution/${institutionId}`),
     getInstitutionBranchSummaries: (institutionId) => apiRequest(`/wallets/institution/${institutionId}/branches`),

@@ -319,22 +319,22 @@
         statsContainer.innerHTML = `
           <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
             <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
-              <p class="text-muted text-sm">Total Customers</p>
+              <p class="text-muted text-sm">${t('branches.view_page.total_customers')}</p>
               <p class="text-2xl font-bold text-white">${stats.totalCustomers || 0}</p>
             </div>
             <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
-              <p class="text-muted text-sm">Active Loans Count</p>
+              <p class="text-muted text-sm">${t('branches.view_page.active_loans_count')}</p>
               <p class="text-2xl font-bold text-white">${stats.activeLoans || 0}</p>
             </div>
             <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
-              <p class="text-muted text-sm">Total Loan Amount</p>
+              <p class="text-muted text-sm">${t('branches.view_page.total_loan_amount')}</p>
               <p class="text-2xl font-bold text-white">${formatCurrency(stats.totalLoanAmount || 0)}</p>
             </div>
           </div>
         `;
       } catch (error) {
         console.error('Error loading statistics:', error);
-        document.getElementById('statsContainer').innerHTML = '<p class="text-muted">Failed to load statistics</p>';
+        document.getElementById('statsContainer').innerHTML = `<p class="text-muted">${t('branches.view_page.failed_to_load_statistics')}</p>`;
       }
     }
     

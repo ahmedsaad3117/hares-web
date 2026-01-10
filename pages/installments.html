@@ -257,6 +257,24 @@
       today.setHours(0, 0, 0, 0);
       return dueDate < today;
     }
+
+    function sortInstallmentsByNewest(list) {
+      return list.sort((a, b) => {
+        const dueDiff = new Date(b.dueDate) - new Date(a.dueDate);
+        if (dueDiff !== 0) return dueDiff;
+
+        const loanA = a.loan?.loanId || 0;
+        const loanB = b.loan?.loanId || 0;
+        if (loanA !== loanB) return loanB - loanA;
+
+        const installmentDiff = (b.installmentNumber || 0) - (a.installmentNumber || 0);
+        if (installmentDiff !== 0) return installmentDiff;
+
+        const idA = a.id || a.installmentId || 0;
+        const idB = b.id || b.installmentId || 0;
+        return idB - idA;
+      });
+    }
     
     // Load installments from all loans OR from search
     async function performSearch() {
@@ -275,6 +293,8 @@
             customer: inst.loan.customer,
             branch: inst.loan.branch
           }));
+
+          sortInstallmentsByNewest(allInstallments);
           
           // Update summary cards with search results
           updateSummaryCards();
@@ -325,8 +345,8 @@
           });
         }
         
-        // Sort by due date
-        allInstallments.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+        // Sort by due date (newest first)
+        sortInstallmentsByNewest(allInstallments);
         
         // Update summary cards
         updateSummaryCards();
@@ -455,8 +475,7 @@
         filtered = allInstallments.filter(inst => inst.status === currentFilter);
       }
       
-      // Sort by due date (ascending - earliest first)
-      filtered.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      filtered = sortInstallmentsByNewest(filtered.slice());
       
       filteredInstallments = filtered;
       currentPage = 1;
