@@ -83,21 +83,70 @@
             <div id="emailError" class="error-text hidden"></div>
           </div>
           
-          <!-- Maximum Loans -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="branches.form.max_loans_label">Maximum Loan Capacity</label> <span data-i18n-key="branches.form.max_loans_required">*</span>
-            <input 
-              type="number" 
-              id="maximumLoans" 
-              name="maximumLoans" 
-              class="input" 
-              data-i18n-placeholder="branches.form.max_loans_placeholder"
-              placeholder="Enter maximum number of loans"
-              min="0"
-              required
-            />
-            <p class="text-xs text-secondary mt-1" data-i18n-key="branches.form.max_loans_help">Set the maximum number of active loans this branch can handle</p>
-            <div id="maximumLoansError" class="error-text hidden"></div>
+          <!-- Wallet capacity guidance -->
+          <div class="glass-card p-4 mb-6" style="background: rgba(255, 255, 255, 0.03);">
+            <h3 class="text-sm font-semibold text-white mb-2" data-i18n-key="branches.form.wallet_capacity_label">Wallet Capacity</h3>
+            <p class="text-sm text-secondary" data-i18n-key="branches.form.wallet_capacity_help">
+              A branch's lending capacity now matches its wallet balance. Fund the wallet immediately after creation from the Wallet Center.
+            </p>
+            <p class="text-xs text-secondary mt-2" data-i18n-key="branches.form.wallet_capacity_hint">
+              Only Super Admins and Institution Admins can deposit funds for new branches.
+            </p>
+          </div>
+
+          <!-- Initial Funding -->
+          <div class="glass-card p-4 mb-6" style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2);">
+            <div class="flex items-start justify-between gap-3" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;">
+              <div>
+                <h3 class="text-sm font-semibold text-white mb-1" data-i18n-key="branches.form.initial_funding_title">Fund the wallet during setup</h3>
+                <p class="text-sm text-secondary" data-i18n-key="branches.form.initial_funding_description">
+                  Optionally deposit principal and profit into the new branch wallet right now.
+                </p>
+              </div>
+              <span class="badge" style="background: rgba(255, 255, 255, 0.1);" data-i18n-key="branches.form.initial_funding_badge">Optional</span>
+            </div>
+            <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="label" data-i18n-key="branches.form.initial_original_label">Original amount</label>
+                <input 
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  id="initialOriginalAmount"
+                  class="input"
+                  data-i18n-placeholder="branches.form.initial_original_placeholder"
+                  placeholder="0.00"
+                />
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="label" data-i18n-key="branches.form.initial_profit_label">Profit amount</label>
+                <input 
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  id="initialProfitAmount"
+                  class="input"
+                  data-i18n-placeholder="branches.form.initial_profit_placeholder"
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+            <div class="form-group" style="margin-top: 1rem;">
+              <label class="label" data-i18n-key="branches.form.initial_note_label">Funding note</label>
+              <textarea 
+                id="initialFundingNote"
+                class="input"
+                rows="2"
+                data-i18n-placeholder="branches.form.initial_note_placeholder"
+                placeholder="Add a note (optional)"
+                style="min-height: 80px;"
+              ></textarea>
+              <p class="text-xs text-secondary mt-2" data-i18n-key="branches.form.initial_funding_hint">
+                Funds are added immediately after this branch is created.
+              </p>
+            </div>
           </div>
           
           <!-- Active Status -->
@@ -224,7 +273,6 @@
       try {
         const formData = {
           name: document.getElementById('name').value.trim(),
-          maximumLoans: parseInt(document.getElementById('maximumLoans').value),
           isActive: document.getElementById('isActive').checked
         };
         
@@ -234,6 +282,21 @@
         
         const email = document.getElementById('email').value.trim();
         if (email) formData.email = email;
+
+        const initialOriginalAmount = parseFloat(document.getElementById('initialOriginalAmount').value);
+        if (!Number.isNaN(initialOriginalAmount) && initialOriginalAmount > 0) {
+          formData.initialOriginalAmount = Number(initialOriginalAmount.toFixed(2));
+        }
+
+        const initialProfitAmount = parseFloat(document.getElementById('initialProfitAmount').value);
+        if (!Number.isNaN(initialProfitAmount) && initialProfitAmount > 0) {
+          formData.initialProfitAmount = Number(initialProfitAmount.toFixed(2));
+        }
+
+        const initialFundingNote = document.getElementById('initialFundingNote').value.trim();
+        if (initialFundingNote) {
+          formData.initialFundingNote = initialFundingNote;
+        }
         
         // Add institutionId based on user role
         if (user.roleName === 'Institution' && user.institutionId) {

@@ -285,10 +285,10 @@
     });
     
     function updateBranchCapacityDisplay(branch) {
-      const totalLoans = branch.totalLoans || 0;
-      const maximumLoans = branch.maximumLoans || 0;
-      const available = Math.max(0, maximumLoans - totalLoans);
-      const utilizationPercent = maximumLoans > 0 ? (totalLoans / maximumLoans) * 100 : 0;
+      const exposure = Number(branch.unpaidInstallmentAmount ?? 0);
+      const maximumLoans = Number(branch.maximumLoans ?? 0);
+      const available = Math.max(0, maximumLoans - exposure);
+      const utilizationPercent = maximumLoans > 0 ? (exposure / maximumLoans) * 100 : 0;
       
       const capacityInfo = document.getElementById('capacityInfo');
       const capacityStatus = document.getElementById('capacityStatus');

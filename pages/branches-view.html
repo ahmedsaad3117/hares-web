@@ -54,11 +54,11 @@
           
           <div class="grid grid-cols-2 gap-6" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
             <div>
-              <p class="text-muted mb-1" data-i18n-key="branches.view_page.total_loans_amount">Total Loans Amount</p>
+              <p class="text-muted mb-1" data-i18n-key="branches.unpaid_installments_amount">Unpaid Installments Amount</p>
               <p id="totalLoans" class="text-2xl font-bold text-white"></p>
             </div>
             <div>
-              <p class="text-muted mb-1" data-i18n-key="branches.view_page.maximum_loans_amount">Maximum Loans Amount</p>
+              <p class="text-muted mb-1" data-i18n-key="branches.form.wallet_capacity_label">Wallet Capacity</p>
               <p id="maximumLoans" class="text-2xl font-bold text-white"></p>
             </div>
             <div>
@@ -175,8 +175,9 @@
         if (branchNameEl) branchNameEl.textContent = branchData.name;
         if (branchIdEl) branchIdEl.textContent = branchData.branchId;
         if (institutionNameEl) institutionNameEl.textContent = branchData.institution?.name || 'N/A';
-        if (totalLoansEl) totalLoansEl.textContent = formatCurrency(branchData.totalLoans || 0);
-        if (maximumLoansEl) maximumLoansEl.textContent = branchData.maximumLoans ? formatCurrency(branchData.maximumLoans) : 'Unlimited';
+        const unpaidAmount = Number(branchData.unpaidInstallmentAmount ?? 0);
+        if (totalLoansEl) totalLoansEl.textContent = formatCurrency(unpaidAmount);
+        if (maximumLoansEl) maximumLoansEl.textContent = formatCurrency(branchData.maximumLoans || 0);
         if (createdAtEl) createdAtEl.textContent = formatDateTime(branchData.createdAt);
         if (updatedAtEl) updatedAtEl.textContent = formatDateTime(branchData.updatedAt);
         
@@ -187,19 +188,21 @@
         }
         
         // Show capacity info if maximum loans is set
-        if (branchData.maximumLoans) {
-          const utilizationPercent = (branchData.totalLoans / branchData.maximumLoans) * 100;
+        const walletCapacity = Number(branchData.maximumLoans ?? 0);
+        if (walletCapacity > 0) {
+          const utilizationPercent = walletCapacity > 0 ? (unpaidAmount / walletCapacity) * 100 : 0;
           const capacityColor = utilizationPercent >= 90 ? '#ef4444' : utilizationPercent >= 70 ? '#f59e0b' : '#10b981';
-          
+          const utilizationText = utilizationPercent.toFixed(1);
           document.getElementById('capacityInfo').innerHTML = `
             <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
               <div class="flex items-center justify-between mb-2" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                <p class="text-sm text-muted">Capacity Utilization</p>
-                <p class="text-sm font-medium" style="color: ${capacityColor};">${utilizationPercent.toFixed(1)}%</p>
+                <p class="text-sm text-muted">${t('branches.unpaid_installments_amount')}</p>
+                <p class="text-sm font-medium" style="color: ${capacityColor};">${formatCurrency(unpaidAmount)} / ${formatCurrency(walletCapacity)}</p>
               </div>
               <div style="width: 100%; height: 8px; background: rgba(30, 41, 59, 0.8); border-radius: 9999px; overflow: hidden;">
                 <div style="width: ${Math.min(utilizationPercent, 100)}%; height: 100%; background: ${capacityColor}; transition: width 0.3s;"></div>
               </div>
+              <p class="text-xs text-secondary mt-2" style="color: ${capacityColor};">${utilizationText}% ${t('branches.view_page.capacity_utilization_label') || 'utilized'}</p>
             </div>
           `;
         }

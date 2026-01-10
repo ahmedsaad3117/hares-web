@@ -26,6 +26,16 @@
     let walletContent = null;
     let allWalletsData = [];
     let currentView = null;
+    const transactionFilters = {
+      branch: { fromDate: '', toDate: '' },
+      institution: { fromDate: '', toDate: '' },
+    };
+    const transactionTotals = {
+      branch: null,
+      institution: null,
+    };
+    let branchWalletSnapshot = null;
+    let institutionWalletSnapshot = null;
 
     const TRANSACTION_DESCRIPTION_PATTERNS = [
       { regex: /loan\s+#?(\d+)\s+disbursement/i, transform: (match) => `صرف قرض رقم ${match[1]}` },
@@ -49,6 +59,132 @@
       refund: 'استرداد',
       deposit: 'إيداع',
     };
+
+    function createTransactionFilterBlock(context) {
+      const scope = context === 'institution' ? 'institution' : 'branch';
+      const filters = transactionFilters[scope] || {};
+      const applyHandler = scope === 'institution' ? 'applyInstitutionTransactionFilters' : 'applyBranchTransactionFilters';
+      const resetHandler = scope === 'institution' ? 'resetInstitutionTransactionFilters' : 'resetBranchTransactionFilters';
+
+      return `
+        <div class="transactions-filter-card">
+          <div id="${scope}-filter-summary">
+            ${renderFilterSummary(scope)}
+          </div>
+          <div class="transactions-filter-panel">
+            <div class="filter-field">
+              <label class="text-sm text-muted" for="${scope}FromDate">${t('wallet.transactions.from_date')}</label>
+              <div class="input-affix">
+                ${renderCalendarIcon()}
+                <input type="date" id="${scope}FromDate" class="input filter-input" value="${filters.fromDate || ''}">
+              </div>
+            </div>
+            <div class="filter-field">
+              <label class="text-sm text-muted" for="${scope}ToDate">${t('wallet.transactions.to_date')}</label>
+              <div class="input-affix">
+                ${renderCalendarIcon()}
+                <input type="date" id="${scope}ToDate" class="input filter-input" value="${filters.toDate || ''}">
+              </div>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn-secondary" onclick="${resetHandler}()">${t('wallet.transactions.reset_filters')}</button>
+              <button class="btn btn-primary" onclick="${applyHandler}()">${t('wallet.transactions.apply_filters')}</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFilterSummary(context) {
+      const scope = context === 'institution' ? 'institution' : 'branch';
+      const filters = transactionFilters[scope] || {};
+      const chips = [];
+
+      if (filters.fromDate) {
+        chips.push(`
+          <span class="transactions-filter-chip">
+            <span class="chip-label">${t('wallet.transactions.from_chip_label')}</span>
+            ${formatFilterDate(filters.fromDate)}
+          </span>
+        `);
+      }
+
+      if (filters.toDate) {
+        chips.push(`
+          <span class="transactions-filter-chip">
+            <span class="chip-label">${t('wallet.transactions.to_chip_label')}</span>
+            ${formatFilterDate(filters.toDate)}
+          </span>
+        `);
+      }
+
+      const hasFilters = chips.length > 0;
+      const summaryText = hasFilters
+        ? t('wallet.transactions.filter_summary_active')
+        : t('wallet.transactions.filter_summary_default');
+      const chipMarkup = hasFilters
+        ? chips.join('')
+        : `<span class="transactions-filter-chip chip-muted">${t('wallet.transactions.filter_summary_none_chip')}</span>`;
+
+      return `
+        <div class="transactions-filter-summary">
+          <div>
+            <p class="summary-title">${t('wallet.transactions.filter_panel_title')}</p>
+            <p class="summary-description">${summaryText}</p>
+          </div>
+          <div class="transactions-filter-chips">
+            ${chipMarkup}
+          </div>
+        </div>
+      `;
+    }
+
+    function updateTransactionFilterSummary(context) {
+      const scope = context === 'institution' ? 'institution' : 'branch';
+      const target = document.getElementById(`${scope}-filter-summary`);
+      if (target) {
+        target.innerHTML = renderFilterSummary(scope);
+      }
+    }
+
+    function renderCalendarIcon() {
+      return `
+        <span class="affix-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </span>
+      `;
+    }
+
+    function formatFilterDate(value) {
+      if (!value) return '—';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+      const locale = window.i18n?.getCurrentLocale?.() === 'ar' ? 'ar-EG' : 'en-GB';
+      return date.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function renderFundingShortcut() {
+      if (!currentUser || !['Super Admin', 'Institution'].includes(currentUser.roleName)) {
+        return '';
+      }
+
+      return `
+        <div class="glass-card p-4 mb-6" style="display:flex; align-items:center; justify-content:space-between; gap:1rem; background: rgba(15,23,42,0.7);">
+          <div>
+            <p class="text-sm text-muted uppercase tracking-wide">${t('wallet.fund_shortcut_title')}</p>
+            <p class="text-white text-lg font-semibold">${t('wallet.fund_shortcut_description')}</p>
+          </div>
+          <a href="wallet-fund.html" class="btn btn-primary">${t('wallet.fund_shortcut_cta')}</a>
+        </div>
+      `;
+    }
 
     window.addEventListener('localeChanged', () => {
       if (!currentUser || !currentView) return;
@@ -121,8 +257,10 @@
       try {
         const response = await api.wallets.getBranchWallet(currentUser.branchId);
         const { branch, wallet } = response;
+        const shortcut = renderFundingShortcut();
 
         walletContent.innerHTML = `
+          ${shortcut}
           <div class="glass-card p-6 mb-6">
             <div class="flex items-center justify-between mb-4" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
               <div>
@@ -130,9 +268,13 @@
                 <h2 class="text-2xl font-bold text-white">${branch?.name || '—'}</h2>
                 <p class="text-muted">${branch?.institutionName || ''}</p>
               </div>
-              <span class="badge">${t('wallet.owner_types.branch')}</span>
+              <div class="flex items-center gap-2" style="display:flex; align-items:center; gap:0.5rem;">
+                <span class="badge">${t('wallet.owner_types.branch')}</span>
+                <span class="badge badge-info" id="branch-summary-filter" style="display:none;">${t('wallet.filter_active_badge')}</span>
+              </div>
             </div>
-            ${createSummaryGrid(wallet)}
+            <p class="text-xs text-muted" id="branch-summary-note" style="min-height:16px; margin-bottom:0.5rem;"></p>
+            ${createSummaryGrid(wallet, 'branch')}
           </div>
 
           <div class="glass-card p-6">
@@ -140,13 +282,19 @@
               <h3 class="text-xl font-bold text-white">${t('wallet.transactions_title')}</h3>
               <span class="text-muted text-sm">${t('wallet.transactions_recent')}</span>
             </div>
+            ${createTransactionFilterBlock('branch')}
             <div id="branchTransactions" class="table-responsive">
               <div class="loading-container"><div class="spinner"></div></div>
             </div>
           </div>
         `;
 
-        loadBranchTransactions(currentUser.branchId);
+        branchWalletSnapshot = wallet;
+        updateSummaryDelta('branch', null, false);
+        const branchTotals = await loadBranchTransactions(currentUser.branchId);
+        const branchFilterActive = isBranchFilterActive();
+        transactionTotals.branch = branchFilterActive ? branchTotals : null;
+        updateSummaryDelta('branch', transactionTotals.branch, branchFilterActive);
       } catch (error) {
         console.error('Failed to load branch wallet', error);
         renderMessageCard(t('wallet.failed_to_load'), 'error');
@@ -159,12 +307,49 @@
       container.innerHTML = `<div class="loading-container"><div class="spinner"></div></div>`;
 
       try {
-        const result = await api.walletTransactions.getBranchTransactions(branchId, { limit: 10 });
-        container.innerHTML = renderTransactionsTable(result?.data || []);
+        const params = { limit: 10 };
+        const { fromDate, toDate } = transactionFilters.branch;
+        if (fromDate) params.fromDate = fromDate;
+        if (toDate) params.toDate = toDate;
+        const result = await api.walletTransactions.getBranchTransactions(branchId, params);
+        const transactions = result?.data || [];
+        const totals = calculateTransactionTotals(transactions);
+        container.innerHTML = renderTransactionsTable(transactions, totals);
+        return totals;
       } catch (error) {
         console.error('Failed to load branch transactions', error);
         container.innerHTML = `<p class="text-muted">${t('wallet.transactions.failed_to_load')}</p>`;
+        return null;
       }
+    }
+
+    async function applyBranchTransactionFilters() {
+      const fromInput = document.getElementById('branchFromDate');
+      const toInput = document.getElementById('branchToDate');
+      transactionFilters.branch.fromDate = fromInput?.value || '';
+      transactionFilters.branch.toDate = toInput?.value || '';
+      if (currentUser?.branchId) {
+        const totals = await loadBranchTransactions(currentUser.branchId);
+        const active = isBranchFilterActive();
+        transactionTotals.branch = active ? totals : null;
+        updateSummaryDelta('branch', transactionTotals.branch, active);
+      }
+      updateTransactionFilterSummary('branch');
+    }
+
+    async function resetBranchTransactionFilters() {
+      const fromInput = document.getElementById('branchFromDate');
+      const toInput = document.getElementById('branchToDate');
+      if (fromInput) fromInput.value = '';
+      if (toInput) toInput.value = '';
+      transactionFilters.branch.fromDate = '';
+      transactionFilters.branch.toDate = '';
+      if (currentUser?.branchId) {
+        await loadBranchTransactions(currentUser.branchId);
+      }
+      transactionTotals.branch = null;
+      updateSummaryDelta('branch', null, false);
+      updateTransactionFilterSummary('branch');
     }
 
     async function renderInstitutionView() {
@@ -183,6 +368,7 @@
             : api.wallets.getInstitutionBranchSummaries(currentUser.institutionId),
         ]);
         const wallet = walletResponse?.wallet;
+        const shortcut = renderFundingShortcut();
 
         let branchSectionHtml = '';
         if (currentUser.canCreateBranches === false) {
@@ -204,15 +390,20 @@
         }
 
         walletContent.innerHTML = `
+          ${shortcut}
           <div class="glass-card p-6 mb-6">
             <div class="flex items-center justify-between mb-4" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
               <div>
                 <p class="text-sm text-muted uppercase tracking-wide">${t('wallet.institution_section_title')}</p>
                 <h2 class="text-2xl font-bold text-white">${walletResponse?.institutionName || t('wallet.owner_types.institution')}</h2>
               </div>
-              <span class="badge">${t('wallet.owner_types.institution')}</span>
+              <div class="flex items-center gap-2" style="display:flex; align-items:center; gap:0.5rem;">
+                <span class="badge">${t('wallet.owner_types.institution')}</span>
+                <span class="badge badge-info" id="institution-summary-filter" style="display:none;">${t('wallet.filter_active_badge')}</span>
+              </div>
             </div>
-            ${createSummaryGrid(wallet)}
+            <p class="text-xs text-muted" id="institution-summary-note" style="min-height:16px; margin-bottom:0.5rem;"></p>
+            ${createSummaryGrid(wallet, 'institution')}
           </div>
 
           <div class="glass-card p-6 mb-6">
@@ -220,6 +411,7 @@
               <h3 class="text-xl font-bold text-white">${t('wallet.transactions_title')}</h3>
               <span class="text-muted text-sm">${t('wallet.transactions_recent')}</span>
             </div>
+            ${createTransactionFilterBlock('institution')}
             <div id="institutionTransactions" class="table-responsive">
               <div class="loading-container"><div class="spinner"></div></div>
             </div>
@@ -232,7 +424,12 @@
           renderBranchSummaries(branchSummaries);
         }
 
-        loadInstitutionTransactions(currentUser.institutionId);
+        institutionWalletSnapshot = wallet;
+        updateSummaryDelta('institution', null, false);
+        const institutionTotals = await loadInstitutionTransactions(currentUser.institutionId);
+        const institutionFilterActive = isInstitutionFilterActive();
+        transactionTotals.institution = institutionFilterActive ? institutionTotals : null;
+        updateSummaryDelta('institution', transactionTotals.institution, institutionFilterActive);
       } catch (error) {
         console.error('Failed to load institution wallet', error);
         renderMessageCard(t('wallet.failed_to_load'), 'error');
@@ -250,10 +447,12 @@
 
       const rows = summaries.map((summary) => {
         const expectedProfit = summary.wallet?.expectedProfitBalance ?? summary.wallet?.profitBalance ?? 0;
+        const currentProfit = summary.wallet?.profitBalance ?? 0;
         return `
           <tr>
             <td><a href="branches-view.html?id=${summary.branchId}" class="text-white underline">${summary.branchName}</a></td>
             <td>${formatCurrency(summary.wallet?.originalBalance || 0)}</td>
+            <td>${formatCurrency(currentProfit)}</td>
             <td>${formatCurrency(expectedProfit)}</td>
             <td>${formatCurrency(summary.wallet?.totalBalance || 0)}</td>
             <td>
@@ -272,6 +471,7 @@
               <tr>
                 <th>${t('institutions.view_page.branch_name')}</th>
                 <th>${t('wallet.original_balance')}</th>
+                <th>${t('wallet.current_profit_balance')}</th>
                 <th>${t('wallet.expected_profit_balance')}</th>
                 <th>${t('wallet.total_balance')}</th>
                 <th>${t('institutions.view_page.status')}</th>
@@ -289,12 +489,49 @@
       container.innerHTML = `<div class="loading-container"><div class="spinner"></div></div>`;
 
       try {
-        const result = await api.walletTransactions.getInstitutionTransactions(institutionId, { limit: 12 });
-        container.innerHTML = renderTransactionsTable(result?.data || []);
+        const params = { limit: 12 };
+        const { fromDate, toDate } = transactionFilters.institution;
+        if (fromDate) params.fromDate = fromDate;
+        if (toDate) params.toDate = toDate;
+        const result = await api.walletTransactions.getInstitutionTransactions(institutionId, params);
+        const transactions = result?.data || [];
+        const totals = calculateTransactionTotals(transactions);
+        container.innerHTML = renderTransactionsTable(transactions, totals);
+        return totals;
       } catch (error) {
         console.error('Failed to load institution transactions', error);
         container.innerHTML = `<p class="text-muted">${t('wallet.transactions.failed_to_load')}</p>`;
+        return null;
       }
+    }
+
+    async function applyInstitutionTransactionFilters() {
+      const fromInput = document.getElementById('institutionFromDate');
+      const toInput = document.getElementById('institutionToDate');
+      transactionFilters.institution.fromDate = fromInput?.value || '';
+      transactionFilters.institution.toDate = toInput?.value || '';
+      if (currentUser?.institutionId) {
+        const totals = await loadInstitutionTransactions(currentUser.institutionId);
+        const active = isInstitutionFilterActive();
+        transactionTotals.institution = active ? totals : null;
+        updateSummaryDelta('institution', transactionTotals.institution, active);
+      }
+      updateTransactionFilterSummary('institution');
+    }
+
+    async function resetInstitutionTransactionFilters() {
+      const fromInput = document.getElementById('institutionFromDate');
+      const toInput = document.getElementById('institutionToDate');
+      if (fromInput) fromInput.value = '';
+      if (toInput) toInput.value = '';
+      transactionFilters.institution.fromDate = '';
+      transactionFilters.institution.toDate = '';
+      if (currentUser?.institutionId) {
+        await loadInstitutionTransactions(currentUser.institutionId);
+      }
+      transactionTotals.institution = null;
+      updateSummaryDelta('institution', null, false);
+      updateTransactionFilterSummary('institution');
     }
 
     async function renderSuperAdminView() {
@@ -303,8 +540,10 @@
       try {
         allWalletsData = await api.wallets.getAll();
         allWalletsData = Array.isArray(allWalletsData) ? allWalletsData : [];
+        const shortcut = renderFundingShortcut();
 
         walletContent.innerHTML = `
+          ${shortcut}
           <div class="glass-card p-6 mb-6">
             <div class="flex items-center justify-between mb-4" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
               <h2 class="text-2xl font-bold text-white">${t('wallet.super_admin_title')}</h2>
@@ -346,6 +585,7 @@
       const institutionWallets = data.filter((item) => item.ownerType === 'institution').length;
       const branchWallets = totalWallets - institutionWallets;
       const totalBalance = data.reduce((sum, item) => sum + toNumber(item.wallet?.totalBalance), 0);
+      const totalCurrentProfit = data.reduce((sum, item) => sum + toNumber(item.wallet?.profitBalance), 0);
       const totalExpectedProfit = data.reduce(
         (sum, item) => sum + toNumber(item.wallet?.expectedProfitBalance ?? item.wallet?.profitBalance),
         0,
@@ -357,6 +597,7 @@
           ${createStatCard(t('wallet.institution_wallets'), institutionWallets.toLocaleString())}
           ${createStatCard(t('wallet.branch_wallets'), branchWallets.toLocaleString())}
           ${createStatCard(t('wallet.total_balance'), formatCurrency(totalBalance))}
+          ${createStatCard(t('wallet.current_profit_balance'), formatCurrency(totalCurrentProfit))}
           ${createStatCard(t('wallet.expected_profit_balance'), formatCurrency(totalExpectedProfit))}
         </div>
       `;
@@ -394,6 +635,14 @@
       renderWalletsTable(filtered);
     }
 
+    function isBranchFilterActive() {
+      return Boolean(transactionFilters.branch.fromDate || transactionFilters.branch.toDate);
+    }
+
+    function isInstitutionFilterActive() {
+      return Boolean(transactionFilters.institution.fromDate || transactionFilters.institution.toDate);
+    }
+
     function renderWalletsTable(rows) {
       const container = document.getElementById('walletsTableContainer');
       if (!container) return;
@@ -416,6 +665,7 @@
         const button = detailLink === '#'
           ? `<button class="btn btn-secondary" disabled>${t('wallet.view_details')}</button>`
           : `<a href="${detailLink}" class="btn btn-secondary">${t('wallet.view_details')}</a>`;
+        const currentProfit = toNumber(item.wallet?.profitBalance ?? 0);
         const expectedProfit = toNumber(item.wallet?.expectedProfitBalance ?? item.wallet?.profitBalance ?? 0);
 
         return `
@@ -424,6 +674,7 @@
             <td>${ownerName}</td>
             <td>${institutionName}</td>
             <td>${formatCurrency(item.wallet?.originalBalance || 0)}</td>
+            <td>${formatCurrency(currentProfit)}</td>
             <td>${formatCurrency(expectedProfit)}</td>
             <td>${formatCurrency(item.wallet?.totalBalance || 0)}</td>
             <td>${updatedAt}</td>
@@ -441,6 +692,7 @@
                 <th>${t('wallet.owner_name')}</th>
                 <th>${t('wallet.institution_name')}</th>
                 <th>${t('wallet.original_balance')}</th>
+                <th>${t('wallet.current_profit_balance')}</th>
                 <th>${t('wallet.expected_profit_balance')}</th>
                 <th>${t('wallet.total_balance')}</th>
                 <th>${t('wallet.updated_at')}</th>
@@ -453,32 +705,107 @@
       `;
     }
 
-    function createSummaryGrid(wallet = {}) {
+    function createSummaryGrid(wallet = {}, context = 'branch') {
       const expectedProfit = wallet?.expectedProfitBalance ?? wallet?.profitBalance ?? 0;
+      const currentProfit = wallet?.profitBalance ?? 0;
+      const prefix = context === 'institution' ? 'institution' : 'branch';
       return `
         <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem;">
           <div class="glass-card p-4" style="background: rgba(30,41,59,0.6);">
             <p class="text-sm text-muted">${t('wallet.original_balance')}</p>
-            <p class="text-2xl font-bold text-white">${formatCurrency(wallet.originalBalance || 0)}</p>
+            <p class="text-2xl font-bold text-white" id="${prefix}-original-balance">${formatCurrency(wallet.originalBalance || 0)}</p>
+            <div class="text-sm" id="${prefix}-original-delta" style="min-height:18px;"></div>
+          </div>
+          <div class="glass-card p-4" style="background: rgba(30,41,59,0.6);">
+            <p class="text-sm text-muted">${t('wallet.current_profit_balance')}</p>
+            <p class="text-2xl font-bold text-white" id="${prefix}-profit-balance">${formatCurrency(currentProfit)}</p>
+            <div class="text-sm" id="${prefix}-profit-delta" style="min-height:18px;"></div>
           </div>
           <div class="glass-card p-4" style="background: rgba(30,41,59,0.6);">
             <p class="text-sm text-muted">${t('wallet.expected_profit_balance')}</p>
-            <p class="text-2xl font-bold text-white">${formatCurrency(expectedProfit)}</p>
+            <p class="text-2xl font-bold text-white" id="${prefix}-expected-profit">${formatCurrency(expectedProfit)}</p>
+            <div class="text-sm" id="${prefix}-expected-delta" style="min-height:18px;"></div>
           </div>
           <div class="glass-card p-4" style="background: rgba(30,41,59,0.6);">
             <p class="text-sm text-muted">${t('wallet.total_balance')}</p>
-            <p class="text-2xl font-bold text-white">${formatCurrency(wallet.totalBalance || 0)}</p>
+            <p class="text-2xl font-bold text-white" id="${prefix}-total-balance">${formatCurrency(wallet.totalBalance || 0)}</p>
+            <div class="text-sm" id="${prefix}-total-delta" style="min-height:18px;"></div>
           </div>
         </div>
       `;
     }
 
-    function renderTransactionsTable(rows) {
-      if (!rows.length) {
-        return `<p class="text-muted">${t('wallet.transactions.empty')}</p>`;
+    function updateSummaryDelta(context, totals, isFiltered) {
+      const prefix = context === 'institution' ? 'institution' : 'branch';
+      const filterBadge = document.getElementById(`${prefix}-summary-filter`);
+      const filterNote = document.getElementById(`${prefix}-summary-note`);
+      const originalDelta = document.getElementById(`${prefix}-original-delta`);
+      const profitDelta = document.getElementById(`${prefix}-profit-delta`);
+      const totalDelta = document.getElementById(`${prefix}-total-delta`);
+      const expectedDelta = document.getElementById(`${prefix}-expected-delta`);
+
+      const active = Boolean(isFiltered && totals);
+
+      if (filterBadge) {
+        filterBadge.style.display = active ? 'inline-flex' : 'none';
+      }
+      if (filterNote) {
+        filterNote.textContent = active ? t('wallet.summary_filtered_note') : '';
       }
 
-      const tableRows = rows.map((tx) => `
+      if (originalDelta) {
+        originalDelta.innerHTML = active ? formatDeltaValue(totals.original) : '';
+      }
+      if (profitDelta) {
+        profitDelta.innerHTML = active ? formatDeltaValue(totals.profit) : '';
+      }
+      if (totalDelta) {
+        totalDelta.innerHTML = active ? formatDeltaValue(totals.total) : '';
+      }
+      if (expectedDelta) {
+        expectedDelta.innerHTML = active ? formatDeltaValue(totals.profit) : '';
+      }
+    }
+
+    function calculateTransactionTotals(rows = []) {
+      return rows.reduce((acc, tx) => {
+        acc.original += toNumber(tx.originalDelta);
+        acc.profit += toNumber(tx.profitDelta);
+        acc.total += toNumber(tx.totalDelta);
+        return acc;
+      }, { original: 0, profit: 0, total: 0 });
+    }
+
+    function renderTransactionsTable(rows, totals) {
+      const safeRows = Array.isArray(rows) ? rows : [];
+      const hasRows = safeRows.length > 0;
+      const showTotals = Boolean(totals);
+      const totalsSection = showTotals ? `
+        <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+          <div class="glass-card p-4" style="background: rgba(30,41,59,0.5);">
+            <p class="text-sm text-muted">${t('wallet.transactions.original_total')}</p>
+            <p class="text-xl font-semibold">${formatDeltaValue(totals.original)}</p>
+          </div>
+          <div class="glass-card p-4" style="background: rgba(30,41,59,0.5);">
+            <p class="text-sm text-muted">${t('wallet.transactions.profit_total')}</p>
+            <p class="text-xl font-semibold">${formatDeltaValue(totals.profit)}</p>
+          </div>
+          <div class="glass-card p-4" style="background: rgba(30,41,59,0.5);">
+            <p class="text-sm text-muted">${t('wallet.transactions.net_total')}</p>
+            <p class="text-xl font-semibold">${formatDeltaValue(totals.total)}</p>
+          </div>
+        </div>
+      ` : '';
+
+      if (!hasRows) {
+        return `
+          ${showTotals ? `<p class="text-muted" style="margin-bottom:0.5rem;">${t('wallet.transactions.filtered_totals')}</p>` : ''}
+          ${totalsSection}
+          <p class="text-muted">${t('wallet.transactions.empty')}</p>
+        `;
+      }
+
+      const tableRows = safeRows.map((tx) => `
         <tr>
           <td>${formatTransactionType(tx.transactionType)}</td>
           <td>${formatDeltaValue(tx.originalDelta)}</td>
@@ -490,6 +817,8 @@
       `).join('');
 
       return `
+        ${showTotals ? `<p class="text-muted" style="margin-bottom:0.5rem;">${t('wallet.transactions.filtered_totals')}</p>` : ''}
+        ${totalsSection}
         <div class="table-responsive">
           <table class="data-table">
             <thead>

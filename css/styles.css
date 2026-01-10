@@ -200,6 +200,139 @@ select.input option {
   margin-bottom: 0.5rem;
 }
 
+/* Wallet transactions filter styling */
+.transactions-filter-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(14, 165, 233, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+}
+
+.transactions-filter-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.transactions-filter-summary .summary-title {
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 0.15rem;
+}
+
+.transactions-filter-summary .summary-description {
+  color: rgba(226, 232, 240, 0.9);
+  font-size: 0.95rem;
+}
+
+.transactions-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.transactions-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+  font-size: 0.8rem;
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.transactions-filter-chip .chip-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.transactions-filter-chip.chip-muted {
+  border-style: dashed;
+  color: #94a3b8;
+}
+
+.transactions-filter-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.transactions-filter-panel .filter-field label {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.input-affix {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  padding: 0 0.85rem;
+  height: 48px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-affix:focus-within {
+  border-color: rgba(59, 130, 246, 0.8);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.transactions-filter-panel .filter-input {
+  background: transparent;
+  border: none;
+  padding: 0;
+  height: 100%;
+  color: #f8fafc;
+}
+
+.transactions-filter-panel .filter-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.affix-icon {
+  display: inline-flex;
+  color: #94a3b8;
+}
+
+.affix-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.filter-actions .btn {
+  min-width: 140px;
+  height: 44px;
+}
+
+@media (min-width: 768px) {
+  .transactions-filter-summary {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
 .sidebar-nav-link {
   display: flex;
   align-items: center;

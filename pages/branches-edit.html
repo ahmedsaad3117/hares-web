@@ -80,27 +80,13 @@
             <div id="emailError" class="error-text hidden"></div>
           </div>
           
-          <!-- Maximum Loans -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="branches.form.max_loans_label">Maximum Loan Capacity</label> <span data-i18n-key="branches.form.max_loans_required">*</span>
-            <input 
-              type="number" 
-              id="maximumLoans" 
-              name="maximumLoans" 
-              class="input" 
-              data-i18n-placeholder="branches.form.max_loans_placeholder"
-              placeholder="Enter maximum number of loans"
-              min="0"
-              required
-            />
-            <div class="flex items-center justify-between mt-2" style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
-              <p class="text-xs text-secondary"><span data-i18n-key="branches.edit_page.current_loans">Current active loans:</span> <span id="currentLoans" class="text-white font-semibold">0</span></p>
-              <p class="text-xs text-secondary"><span data-i18n-key="branches.edit_page.available_capacity">Available capacity:</span> <span id="availableCapacity" class="text-white font-semibold">0</span></p>
-            </div>
-            <div id="capacityWarning" class="hidden mt-2" style="padding: 0.5rem; border-radius: 6px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); margin-top: 0.5rem;">
-              <p class="text-xs" style="color: #f59e0b;" data-i18n-key="branches.edit_page.capacity_warning">⚠️ Warning: New capacity cannot be less than current active loans</p>
-            </div>
-            <div id="maximumLoansError" class="error-text hidden"></div>
+          <!-- Wallet capacity insight -->
+          <div class="glass-card p-4 mb-4" style="background: rgba(255, 255, 255, 0.03);">
+            <p class="text-sm text-secondary" data-i18n-key="branches.form.wallet_capacity_label">Wallet Capacity</p>
+            <p id="walletCapacityValue" class="text-3xl font-bold text-white" style="margin: 0.25rem 0 0.5rem;">--</p>
+            <p class="text-xs text-secondary" data-i18n-key="branches.edit_page.wallet_capacity_help">
+              Adjust this amount by funding or defunding the branch wallet from the Wallet Center.
+            </p>
           </div>
           
           <!-- Active Status -->
@@ -217,8 +203,11 @@
         document.getElementById('name').value = branchData.name;
         document.getElementById('phoneNumber').value = branchData.phoneNumber || '';
         document.getElementById('email').value = branchData.email || '';
-        document.getElementById('maximumLoans').value = branchData.maximumLoans || 0;
         document.getElementById('isActive').checked = branchData.isActive;
+        const walletCapacityValue = document.getElementById('walletCapacityValue');
+        if (walletCapacityValue) {
+          walletCapacityValue.textContent = formatCurrency(branchData.maximumLoans || 0);
+        }
         
         // Update info displays
         document.getElementById('branchId').textContent = `#${branchData.branchId}`;
@@ -226,8 +215,6 @@
         document.getElementById('createdAt').textContent = formatDate(branchData.createdAt);
         document.getElementById('updatedAt').textContent = formatDate(branchData.updatedAt);
         document.getElementById('currentLoans').textContent = branchData.totalLoans || 0;
-        
-        updateCapacityDisplay();
         
         // Show form, hide loading
         document.getElementById('loadingContainer').classList.add('hidden');
@@ -242,25 +229,6 @@
       }
     }
     
-    // Update capacity display
-    function updateCapacityDisplay() {
-      const maximumLoans = parseInt(document.getElementById('maximumLoans').value) || 0;
-      const totalLoans = branchData?.totalLoans || 0;
-      const available = Math.max(0, maximumLoans - totalLoans);
-      
-      document.getElementById('availableCapacity').textContent = available;
-      
-      const warning = document.getElementById('capacityWarning');
-      if (maximumLoans < totalLoans) {
-        warning.classList.remove('hidden');
-      } else {
-        warning.classList.add('hidden');
-      }
-    }
-    
-    // Listen for capacity changes
-    document.getElementById('maximumLoans').addEventListener('input', updateCapacityDisplay);
-    
     // Form submission
     document.getElementById('branchForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -270,16 +238,6 @@
       
       // Clear previous errors
       errorMessage.classList.add('hidden');
-      
-      const maximumLoans = parseInt(document.getElementById('maximumLoans').value);
-      const totalLoans = branchData?.totalLoans || 0;
-      
-      // Validate capacity
-      if (maximumLoans < totalLoans) {
-        errorMessage.classList.remove('hidden');
-        errorMessage.querySelector('p').textContent = `Maximum capacity (${maximumLoans}) cannot be less than current active loans (${totalLoans})`;
-        return;
-      }
       
       // Disable submit button
       submitButton.disabled = true;
@@ -294,7 +252,6 @@
       try {
         const formData = {
           name: document.getElementById('name').value.trim(),
-          maximumLoans: maximumLoans,
           isActive: document.getElementById('isActive').checked
         };
         

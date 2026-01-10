@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallet Funding Workspace - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+<body>
+  <div id="sidebar"></div>
+  <div class="main-content">
+    <div id="header"></div>
+    <div class="page-content">
+      <div class="glass-card p-4 mb-6" style="background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2);">
+        <div class="flex items-center justify-between" style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+          <div>
+            <p class="text-sm text-muted uppercase tracking-wide" data-i18n-key="wallet.fund_amount_hint">Provide at least one positive amount before submitting.</p>
+            <h2 class="text-white text-xl font-semibold" data-i18n-key="wallet.fund_page_title">Wallet Funding Workspace</h2>
+            <p class="text-secondary" data-i18n-key="wallet.fund_page_subtitle">Deposit principal and profit into institution or branch wallets in a single step.</p>
+          </div>
+          <div style="font-size:2rem;">💸</div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6" style="max-width: 960px;">
+        <form id="fundWalletForm" class="space-y-6">
+          <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1rem;">
+            <div class="form-group">
+              <label class="label" data-i18n-key="wallet.fund_owner_type_label">Wallet Type</label>
+              <select id="walletType" class="input"></select>
+            </div>
+            <div class="form-group" id="institutionField">
+              <label class="label" data-i18n-key="wallet.fund_institution_label">Institution</label>
+              <select id="institutionId" class="input">
+                <option value="" data-i18n-key="wallet.fund_select_institution">Select institution</option>
+              </select>
+            </div>
+            <div class="form-group" id="branchField" style="display:none;">
+              <label class="label" data-i18n-key="wallet.fund_branch_label">Branch</label>
+              <select id="branchId" class="input">
+                <option value="" data-i18n-key="wallet.fund_select_branch">Select branch</option>
+              </select>
+              <p id="branchHelper" class="text-xs text-secondary" style="margin-top:0.5rem;"></p>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="label" data-i18n-key="wallet.fund_original_label">Original amount</label>
+            <input type="number" id="originalAmount" min="0" step="0.01" inputmode="decimal" class="input" placeholder="0.00">
+          </div>
+
+          <div class="form-group">
+            <label class="label" data-i18n-key="wallet.fund_notes_label">Internal note</label>
+            <textarea id="fundingNote" class="input" rows="3" placeholder="Add a short note" data-i18n-placeholder="wallet.fund_notes_placeholder"></textarea>
+          </div>
+
+          <div id="formError" class="hidden" style="padding:0.75rem; border-radius:8px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3);">
+            <p class="text-sm" style="color:#f87171;"></p>
+          </div>
+
+          <div class="flex items-center gap-3" style="display:flex; align-items:center; gap:0.75rem;">
+            <button type="submit" id="submitButton" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span data-i18n-key="wallet.fund_submit">Fund Wallet</span>
+            </button>
+            <a href="wallets.html" class="btn btn-secondary" data-i18n-key="common.button.cancel">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    let currentUser = null;
+    let institutions = [];
+    let branches = [];
+
+    async function initPage() {
+      await waitForI18n();
+
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      currentUser = getCurrentUser();
+      if (!currentUser || !['Super Admin', 'Institution'].includes(currentUser.roleName)) {
+        showToast(t('wallet.fund_permission_denied'), 'error');
+        window.location.href = 'wallets.html';
+        return;
+      }
+
+      document.getElementById('sidebar').innerHTML = createSidebar(currentUser);
+      document.getElementById('header').innerHTML = createHeader(
+        t('wallet.fund_page_title'),
+        t('wallet.fund_page_subtitle')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('wallets');
+      window.i18n.translatePage();
+
+      await loadFundingOptions();
+      setupOwnerTypeControl();
+      setupFormHandlers();
+    }
+
+    async function loadFundingOptions() {
+      try {
+        if (currentUser.roleName === 'Super Admin') {
+          const [institutionsResponse, branchesResponse] = await Promise.all([
+            api.institutions.getAll(1, 200),
+            api.branches.getAll(1, 200),
+          ]);
+          institutions = institutionsResponse?.data || [];
+          branches = branchesResponse?.data || [];
+        } else if (currentUser.institutionId) {
+          const institution = await api.institutions.getById(currentUser.institutionId);
+          institutions = institution ? [institution] : [];
+          const branchResponse = await api.branches.getAll(1, 200, currentUser.institutionId);
+          branches = branchResponse?.data || [];
+        }
+
+        renderInstitutionOptions();
+        renderBranchOptions();
+      } catch (error) {
+        console.error('Failed to load funding options', error);
+        showToast(t('wallet.failed_to_load'), 'error');
+      }
+    }
+
+    function setupOwnerTypeControl() {
+      const walletTypeSelect = document.getElementById('walletType');
+      walletTypeSelect.innerHTML = '';
+
+      const allowedTypes = currentUser.roleName === 'Super Admin'
+        ? ['institution', 'branch']
+        : ['branch', 'institution'];
+
+      allowedTypes.forEach((type) => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type === 'institution'
+          ? t('wallet.owner_types.institution')
+          : t('wallet.owner_types.branch');
+        walletTypeSelect.appendChild(option);
+      });
+
+      walletTypeSelect.value = currentUser.roleName === 'Institution' ? 'branch' : 'institution';
+      walletTypeSelect.addEventListener('change', () => {
+        toggleOwnerFields();
+      });
+
+      toggleOwnerFields();
+    }
+
+    function renderInstitutionOptions() {
+      const wrapper = document.getElementById('institutionField');
+      const select = document.getElementById('institutionId');
+      if (!select || !wrapper) return;
+
+      select.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = t('wallet.fund_select_institution');
+      select.appendChild(placeholder);
+
+      institutions.forEach((institution) => {
+        const option = document.createElement('option');
+        option.value = institution.institutionId;
+        option.textContent = institution.name;
+        select.appendChild(option);
+      });
+
+      if (currentUser.roleName === 'Institution' && institutions.length === 1) {
+        select.value = institutions[0].institutionId;
+        wrapper.style.display = 'none';
+      } else {
+        wrapper.style.display = 'block';
+      }
+
+      select.addEventListener('change', () => {
+        renderBranchOptions();
+        toggleOwnerFields();
+      });
+    }
+
+    function renderBranchOptions() {
+      const wrapper = document.getElementById('branchField');
+      const select = document.getElementById('branchId');
+      const helper = document.getElementById('branchHelper');
+      if (!wrapper || !select) return;
+
+      const institutionId = getSelectedInstitutionId();
+      const filtered = institutionId
+        ? branches.filter((branch) => branch.institutionId === institutionId)
+        : branches;
+
+      select.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = t('wallet.fund_select_branch');
+      select.appendChild(placeholder);
+
+      filtered.forEach((branch) => {
+        const option = document.createElement('option');
+        option.value = branch.branchId;
+        const institutionName = branch.institution?.name || institutions.find((inst) => inst.institutionId === branch.institutionId)?.name;
+        option.textContent = institutionName ? `${branch.name} • ${institutionName}` : branch.name;
+        select.appendChild(option);
+      });
+
+      if (helper) {
+        helper.textContent = filtered.length ? '' : t('wallet.fund_empty_branches');
+      }
+    }
+
+    function getSelectedInstitutionId() {
+      if (currentUser.roleName === 'Institution' && currentUser.institutionId) {
+        return currentUser.institutionId;
+      }
+      const select = document.getElementById('institutionId');
+      if (!select) return undefined;
+      const value = parseInt(select.value, 10);
+      return Number.isNaN(value) ? undefined : value;
+    }
+
+    function toggleOwnerFields() {
+      const walletType = document.getElementById('walletType').value;
+      const institutionField = document.getElementById('institutionField');
+      const branchField = document.getElementById('branchField');
+
+      if (walletType === 'institution') {
+        branchField.style.display = 'none';
+        if (currentUser.roleName === 'Super Admin') {
+          institutionField.style.display = 'block';
+        }
+      } else {
+        branchField.style.display = 'block';
+        if (currentUser.roleName === 'Super Admin') {
+          institutionField.style.display = 'block';
+        }
+      }
+    }
+
+    function setupFormHandlers() {
+      const form = document.getElementById('fundWalletForm');
+      const submitButton = document.getElementById('submitButton');
+      const formError = document.getElementById('formError');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        formError.classList.add('hidden');
+        formError.querySelector('p').textContent = '';
+
+        const walletType = document.getElementById('walletType').value;
+        const institutionId = getSelectedInstitutionId();
+        const branchIdValue = parseInt(document.getElementById('branchId').value, 10);
+
+        if (walletType === 'institution' && !institutionId) {
+          displayFormError(t('wallet.fund_select_institution'));
+          return;
+        }
+
+        if (walletType === 'branch' && (Number.isNaN(branchIdValue) || branchIdValue <= 0)) {
+          displayFormError(t('wallet.fund_select_branch'));
+          return;
+        }
+
+        const originalAmount = parseFloat(document.getElementById('originalAmount').value);
+        const sanitizedOriginal = !Number.isNaN(originalAmount) ? Number(originalAmount.toFixed(2)) : 0;
+
+        if (sanitizedOriginal <= 0 || Number.isNaN(sanitizedOriginal)) {
+          displayFormError(t('wallet.fund_requires_amount'));
+          return;
+        }
+
+        const note = document.getElementById('fundingNote').value.trim();
+        const payload = {
+          originalAmount: sanitizedOriginal,
+          profitAmount: 0,
+        };
+        if (note) {
+          payload.note = note;
+        }
+
+        const originalButtonContent = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = `
+          <svg class="spinner" style="width: 20px; height: 20px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          ${t('wallet.fund_submit')}
+        `;
+
+        try {
+          if (walletType === 'institution') {
+            await api.wallets.fundInstitution(institutionId, payload);
+          } else {
+            await api.wallets.fundBranch(branchIdValue, payload);
+          }
+
+          showToast(t('wallet.fund_success'), 'success');
+          form.reset();
+          if (currentUser.roleName === 'Institution') {
+            document.getElementById('walletType').value = 'branch';
+          }
+          toggleOwnerFields();
+        } catch (error) {
+          console.error('Failed to fund wallet', error);
+          displayFormError(error.response?.data?.message || error.message || t('wallet.fund_form_error'));
+        } finally {
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalButtonContent;
+        }
+      });
+
+      form.addEventListener('reset', () => {
+        setTimeout(() => {
+          toggleOwnerFields();
+          renderBranchOptions();
+        }, 0);
+      });
+
+      function displayFormError(message) {
+        formError.classList.remove('hidden');
+        formError.querySelector('p').textContent = message;
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+  </script>
+</body>
+</html>
