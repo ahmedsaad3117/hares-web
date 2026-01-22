@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit User - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8"
+        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="users.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="users.edit_page.title">Edit User</h1>
+          <p class="text-secondary" data-i18n-key="users.edit_page.subtitle">Update user account</p>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div id="loadingContainer" class="loading-container">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Form -->
+      <div id="formContainer" class="glass-card p-6" style="max-width: 800px; display: none;">
+        <form id="userForm">
+          <!-- Name -->
+          <div class="form-group">
+            <label class="label"><span data-i18n-key="users.form.full_name">Full Name</span> <span
+                data-i18n-key="common.required">*</span></label>
+            <input type="text" id="name" name="name" class="input"
+              data-i18n-placeholder="users.form.full_name_placeholder" placeholder="Enter full name" required />
+            <div id="nameError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label class="label"><span data-i18n-key="users.form.email_label">Email</span> <span
+                data-i18n-key="common.required">*</span></label>
+            <input type="email" id="email" name="email" class="input"
+              data-i18n-placeholder="users.form.email_placeholder" placeholder="user@example.com" required disabled />
+            <div id="emailError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label class="label"><span data-i18n-key="users.form.phone_label">Phone Number</span> <span
+                data-i18n-key="common.required">*</span></label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" class="input"
+              data-i18n-placeholder="users.form.phone_placeholder" placeholder="Enter phone number" required />
+            <div id="phoneNumberError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Password Section (Adaptive) -->
+          <div id="passwordSection">
+            <!-- Old Password (Only for Master Admin) -->
+            <div class="form-group" id="oldPasswordGroup" style="display: none;">
+              <label class="label"><span data-i18n-key="users.form.old_password">Old Password</span> <span
+                  data-i18n-key="common.required">*</span></label>
+              <div style="position: relative;">
+                <input type="password" id="oldPassword" class="input"
+                  data-i18n-placeholder="users.form.old_password_placeholder" placeholder="Enter current password"
+                  style="padding-inline-end: 2.5rem;" />
+                <button type="button" id="toggleOldPassword"
+                  style="position: absolute; inset-inline-end: 0; top: 0; height: 100%; padding: 0 0.75rem; background: none; border: none; cursor: pointer; color: #a5b4fc; display: flex; align-items: center; justify-content: center; transition: color 0.2s;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="eye-icon">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="eye-off-icon hidden" style="display: none;">
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                    </path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- New Password -->
+            <div class="form-group">
+              <label class="label" id="newPasswordLabel" data-i18n-key="users.edit_page.new_password">New
+                Password</label>
+              <div style="position: relative;">
+                <input type="password" id="password" name="password" class="input"
+                  data-i18n-placeholder="users.form.password_placeholder"
+                  placeholder="Enter new password (min 6 characters)" style="padding-inline-end: 2.5rem;" />
+                <!-- Toggle Button reused -->
+                <button type="button" id="togglePassword"
+                  style="position: absolute; inset-inline-end: 0; top: 0; height: 100%; padding: 0 0.75rem; background: none; border: none; cursor: pointer; color: #a5b4fc; display: flex; align-items: center; justify-content: center; transition: color 0.2s;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="eye-icon">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="eye-off-icon hidden" style="display: none;">
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                    </path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+              <div id="passwordError" class="error-text hidden"></div>
+            </div>
+
+            <!-- Confirm New Password (Only for Master Admin) -->
+            <div class="form-group" id="confirmPasswordGroup" style="display: none;">
+              <label class="label"><span data-i18n-key="users.form.confirm_password">Confirm New Password</span> <span
+                  data-i18n-key="common.required">*</span></label>
+              <div style="position: relative;">
+                <input type="password" id="confirmPassword" class="input"
+                  data-i18n-placeholder="users.form.confirm_password_placeholder" placeholder="Confirm new password"
+                  style="padding-inline-end: 2.5rem;" />
+                <button type="button" id="toggleConfirmPassword"
+                  style="position: absolute; inset-inline-end: 0; top: 0; height: 100%; padding: 0 0.75rem; background: none; border: none; cursor: pointer; color: #a5b4fc; display: flex; align-items: center; justify-content: center; transition: color 0.2s;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="eye-icon">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="eye-off-icon hidden" style="display: none;">
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                    </path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+              <div id="confirmPasswordError" class="error-text hidden"></div>
+            </div>
+          </div>
+
+          <!-- Active Status -->
+          <div class="form-group">
+            <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="isActive" name="isActive">
+              <span class="label" style="margin: 0;" data-i18n-key="users.form.active_label">Active</span>
+            </label>
+          </div>
+
+          <!-- Error Message -->
+          <div id="errorMessage" class="hidden mb-4"
+            style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
+            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+            <button type="submit" id="submitButton" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span data-i18n-key="users.form.update_user">Update User</span>
+            </button>
+            <a href="users.html" class="btn btn-secondary" data-i18n-key="common.cancel">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/ui-utils.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    async function initPage() {
+      await waitForI18n();
+
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const user = getCurrentUser();
+
+      // Only Super Admin and Institution can access
+      if (user.roleName !== 'Super Admin' && user.roleName !== 'Institution') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('users.edit_user'),
+        t('users.update_user_info')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('users');
+
+      const form = document.getElementById('userForm');
+      const submitButton = document.getElementById('submitButton');
+      const errorMessage = document.getElementById('errorMessage');
+      const loadingContainer = document.getElementById('loadingContainer');
+      const formContainer = document.getElementById('formContainer');
+
+      // Get user ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('id');
+
+      if (!userId) {
+        window.location.href = 'users.html';
+      }
+
+      // Load user data
+      async function loadUser() {
+        try {
+          const userData = await api.users.getById(userId);
+
+          // Populate form
+          document.getElementById('name').value = userData.name;
+          document.getElementById('email').value = userData.email;
+          document.getElementById('phoneNumber').value = userData.phoneNumber || '';
+          document.getElementById('isActive').checked = userData.isActive;
+
+          // Disable Active checkbox if editing own account
+          if (parseInt(userId) === user.userId) {
+            document.getElementById('isActive').disabled = true;
+          }
+
+          // Prevent changing password for Super Admins unless Master Admin
+          // Role ID 1 is typically Super Admin.
+          if (userData.roleId === 1) {
+            const isMasterAdmin = user.email === 'admin@q1key.com';
+
+            if (!isMasterAdmin) {
+              const passwordInput = document.getElementById('password');
+              const formGroup = passwordInput.closest('.form-group');
+              if (formGroup) {
+                formGroup.style.display = 'none';
+              }
+              // Optional: Add an info message elsewhere or just hide it silently as requested "No one else can see"
+            }
+          }
+
+          // SPECIAL RULE: If we are editing the Master Admin itself (admin@q1key.com)
+          // The user requested "only edit to edit the password only".
+          // SPECIAL RULE: If we are editing the Master Admin itself (admin@q1key.com)
+          // The user requested "only edit to edit the password only".
+          if (userData.email === 'admin@q1key.com') {
+            // Hide other fields entirely as requested
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phoneNumber');
+            const isActiveInput = document.getElementById('isActive');
+
+            nameInput.closest('.form-group').style.display = 'none';
+            nameInput.removeAttribute('required');
+
+            emailInput.closest('.form-group').style.display = 'none';
+            // emailInput.removeAttribute('required'); // Email is special, keep logic but it's hidden. 
+            // Actually better to remove required to avoid browser blocking.
+            emailInput.removeAttribute('required');
+
+            phoneInput.closest('.form-group').style.display = 'none';
+            phoneInput.removeAttribute('required');
+
+            isActiveInput.closest('.form-group').style.display = 'none';
+
+            // Show Password Fields
+            document.getElementById('oldPasswordGroup').style.display = 'block';
+            document.getElementById('confirmPasswordGroup').style.display = 'block';
+
+            // Update labels
+            const pageTitle = document.querySelector('h1[data-i18n-key="users.edit_page.title"]');
+            if (pageTitle) pageTitle.textContent = t('users.change_password') || "تغيير كلمة المرور";
+          }
+
+          loadingContainer.style.display = 'none';
+          formContainer.style.display = 'block';
+        } catch (error) {
+          console.error('Error loading user:', error);
+          showToast(t('users.edit_page.load_error'), 'error');
+          setTimeout(() => window.location.href = 'users.html', 2000);
+        }
+      }
+
+      loadUser();
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Clear errors
+        errorMessage.classList.add('hidden');
+        document.querySelectorAll('.error-text').forEach(el => el.classList.add('hidden'));
+
+        // Special logic for Master Admin
+        const userEmail = document.getElementById('email').value;
+        const isMasterAdmin = userEmail === 'admin@q1key.com';
+
+        // Get form data
+        const formData = {};
+
+        if (isMasterAdmin) {
+          // STRICT VALIDATION FOR MASTER ADMIN
+          const oldPassword = document.getElementById('oldPassword').value;
+          const password = document.getElementById('password').value;
+          const confirmPassword = document.getElementById('confirmPassword').value;
+
+          if (!oldPassword) {
+            document.getElementById('passwordError').textContent = t('users.form.old_password_required') || "يجب إدخال كلمة المرور القديمة";
+            document.getElementById('passwordError').classList.remove('hidden');
+            return;
+          }
+
+          if (!password || password.length < 6) {
+            document.getElementById('passwordError').textContent = t('users.edit_page.password_error');
+            document.getElementById('passwordError').classList.remove('hidden');
+            return;
+          }
+
+          if (password !== confirmPassword) {
+            document.getElementById('confirmPasswordError').textContent = t('users.form.password_mismatch') || "كلمة المرور غير متطابقة";
+            document.getElementById('confirmPasswordError').classList.remove('hidden');
+            return;
+          }
+
+          formData.oldPassword = oldPassword;
+          formData.password = password;
+          // Name/Phone not sent or needed for this specific update
+        } else {
+          // Standard User Update
+          formData.name = document.getElementById('name').value.trim();
+          formData.phoneNumber = document.getElementById('phoneNumber').value.trim();
+          formData.isActive = document.getElementById('isActive').checked;
+
+          // Only include password if provided
+          const password = document.getElementById('password').value;
+          if (password) {
+            if (password.length < 6) {
+              document.getElementById('passwordError').textContent = t('users.edit_page.password_error');
+              document.getElementById('passwordError').classList.remove('hidden');
+              return;
+            }
+            formData.password = password;
+          }
+
+          // Validation
+          if (formData.name.length < 2) {
+            document.getElementById('nameError').textContent = t('users.edit_page.name_error');
+            document.getElementById('nameError').classList.remove('hidden');
+            return;
+          }
+
+          if (!formData.phoneNumber || formData.phoneNumber.length < 10) {
+            document.getElementById('phoneNumberError').textContent = t('users.edit_page.phone_error');
+            document.getElementById('phoneNumberError').classList.remove('hidden');
+            return;
+          }
+        }
+
+        // Confirm Update
+        showConfirmModal({
+          title: t('users.edit_page.update_confirm_title') || t('users.edit_page.title'),
+          message: t('users.edit_page.update_confirm_msg') || t('common.save_changes_confirm') || "Are you sure you want to save these changes?",
+          confirmText: t('users.form.update_user'),
+          confirmContext: 'primary',
+          onConfirm: async () => {
+            // Disable submit button
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> ${t('users.edit_page.updating')}`;
+
+            try {
+              await api.users.update(userId, formData);
+              showToast(t('users.edit_page.update_success'), 'success');
+
+              setTimeout(() => {
+                window.location.href = 'users.html';
+              }, 500);
+            } catch (error) {
+              console.error('Error updating user:', error);
+
+              let errorText = error.message || t('users.edit_page.update_failed');
+              if (error.message && error.message.includes('Invalid old password')) {
+                errorText = t('users.form.invalid_old_password');
+              } else if (error.message && error.message.includes('Old password is required')) {
+                errorText = t('users.form.old_password_required');
+              }
+
+              errorMessage.querySelector('p').textContent = errorText;
+              errorMessage.classList.remove('hidden');
+
+              // Re-enable button
+              submitButton.disabled = false;
+              submitButton.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              ${t('users.form.update_user')}
+            `;
+            }
+          }
+        });
+      });
+
+      // Toggle Password Visibility Logic
+      // Function to setup toggle behavior
+      function setupPasswordToggle(btnId, inputId) {
+        const toggleBtn = document.getElementById(btnId);
+        const input = document.getElementById(inputId);
+
+        if (toggleBtn && input) {
+          toggleBtn.addEventListener('click', () => {
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+
+            const eyeIcon = toggleBtn.querySelector('.eye-icon');
+            const eyeOffIcon = toggleBtn.querySelector('.eye-off-icon');
+
+            if (type === 'password') {
+              eyeIcon.style.display = 'block';
+              eyeOffIcon.style.display = 'none';
+              toggleBtn.style.color = '#a5b4fc';
+            } else {
+              eyeIcon.style.display = 'none';
+              eyeOffIcon.style.display = 'block';
+              toggleBtn.style.color = '#fff';
+            }
+          });
+        }
+      }
+
+      setupPasswordToggle('togglePassword', 'password');
+      setupPasswordToggle('toggleOldPassword', 'oldPassword');
+      setupPasswordToggle('toggleConfirmPassword', 'confirmPassword');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+  </script>
+</body>
+
+</html>

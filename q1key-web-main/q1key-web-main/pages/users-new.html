@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add User - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8"
+        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="users.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="users.add_user">Add User</h1>
+          <p class="text-secondary" data-i18n-key="users.create_new_user">Create a new user account</p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="glass-card p-6" style="max-width: 800px;">
+        <form id="userForm">
+          <!-- Name -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="users.form.full_name">Full Name *</label>
+            <input type="text" id="name" name="name" class="input"
+              data-i18n-placeholder="users.form.full_name_placeholder" placeholder="Enter full name" required />
+            <div id="nameError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="users.form.email_label">Email *</label>
+            <input type="email" id="email" name="email" class="input"
+              data-i18n-placeholder="users.form.email_placeholder" placeholder="user@example.com" required />
+            <div id="emailError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="users.form.phone_label">Phone Number *</label>
+            <input type="tel" id="phoneNumber" name="phoneNumber" class="input"
+              data-i18n-placeholder="users.form.phone_placeholder" placeholder="Enter phone number" required />
+            <div id="phoneNumberError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="users.form.password">Password *</label>
+            <div style="position: relative;">
+              <input type="password" id="password" name="password" class="input"
+                data-i18n-placeholder="users.form.password_placeholder" placeholder="Enter password (min 6 characters)"
+                required style="padding-inline-end: 2.5rem;" />
+              <button type="button" id="togglePassword"
+                style="position: absolute; inset-inline-end: 0; top: 0; height: 100%; padding: 0 0.75rem; background: none; border: none; cursor: pointer; color: #a5b4fc; display: flex; align-items: center; justify-content: center; transition: color 0.2s;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="eye-icon">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="eye-off-icon hidden" style="display: none;">
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                  </path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+            <div id="passwordError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Role -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="users.form.role_label">Role *</label>
+            <select id="roleId" name="roleId" class="input" required>
+              <option value="" data-i18n-key="users.form.role_placeholder">Select role...</option>
+            </select>
+            <div id="roleIdError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Institution (conditional) -->
+          <div class="form-group" id="institutionGroup" style="display: none;">
+            <label class="label" data-i18n-key="users.form.institution_label">Institution *</label>
+            <select id="institutionId" name="institutionId" class="input">
+              <option value="" data-i18n-key="users.form.institution_placeholder">Select institution...</option>
+            </select>
+            <div id="institutionIdError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Branch (conditional) -->
+          <div class="form-group" id="branchGroup" style="display: none;">
+            <label class="label" data-i18n-key="users.form.branch_label">Branch *</label>
+            <select id="branchId" name="branchId" class="input">
+              <option value="" data-i18n-key="users.form.branch_placeholder">Select branch...</option>
+            </select>
+            <div id="branchIdError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Active Status -->
+          <div class="form-group">
+            <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="isActive" name="isActive" checked>
+              <span class="label" style="margin: 0;" data-i18n-key="users.form.active_label">Active</span>
+            </label>
+          </div>
+
+          <!-- Error Message -->
+          <div id="errorMessage" class="hidden mb-4"
+            style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
+            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+            <button type="submit" id="submitButton" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span data-i18n-key="users.form.create_user">Create User</span>
+            </button>
+            <a href="users.html" class="btn btn-secondary" data-i18n-key="users.form.cancel">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    async function initPage() {
+      await waitForI18n();
+
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const user = getCurrentUser();
+
+      // Only Super Admin and Institution can access
+      if (user.roleName !== 'Super Admin' && user.roleName !== 'Institution') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('users.add_user'),
+        t('users.create_new_user')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('users');
+
+      // Translate all static content with data-i18n-key attributes
+      window.i18n.translatePage();
+
+      const form = document.getElementById('userForm');
+      const submitButton = document.getElementById('submitButton');
+      const errorMessage = document.getElementById('errorMessage');
+      const roleSelect = document.getElementById('roleId');
+      const institutionGroup = document.getElementById('institutionGroup');
+      const branchGroup = document.getElementById('branchGroup');
+      const institutionSelect = document.getElementById('institutionId');
+      const branchSelect = document.getElementById('branchId');
+
+      let institutions = [];
+      let branches = [];
+
+      // Populate role dropdown based on user role
+      if (user.roleName === 'Super Admin') {
+        roleSelect.innerHTML = `
+        <option value="">${t('users.form.role_placeholder')}</option>
+        <option value="1">${t('users.roles.super_admin')}</option>
+        <option value="2">${t('users.roles.institution')}</option>
+        <option value="3">${t('users.roles.branch')}</option>
+      `;
+      } else if (user.roleName === 'Institution') {
+        // Institution users can only create Branch users
+        roleSelect.innerHTML = `
+        <option value="">${t('users.form.role_placeholder')}</option>
+        <option value="3">${t('users.roles.branch')}</option>
+      `;
+        roleSelect.value = '3'; // Pre-select Branch role
+      }
+
+      // Load institutions and branches
+      async function loadData() {
+        try {
+          const [institutionsResponse, branchesResponse] = await Promise.all([
+            api.institutions.getAll(1, 100),
+            api.branches.getAll(1, 100)
+          ]);
+
+          institutions = institutionsResponse.data || [];
+          branches = branchesResponse.data || [];
+
+          // If user is Institution role, pre-select and lock their institution
+          if (user.roleName === 'Institution' && user.institutionId) {
+            // Filter to show only their institution
+            institutions = institutions.filter(inst => inst.institutionId === user.institutionId);
+            // Filter branches to only their institution's branches
+            branches = branches.filter(b => b.institutionId === user.institutionId);
+          }
+
+          // Populate institutions dropdown
+          institutionSelect.innerHTML = `<option value="">${t('users.form.institution_placeholder')}</option>`;
+          institutions.forEach(inst => {
+            institutionSelect.innerHTML += `<option value="${inst.institutionId}">${inst.name}</option>`;
+          });
+
+          // If Institution user, auto-select their institution and hide dropdown
+          if (user.roleName === 'Institution' && user.institutionId) {
+            institutionSelect.value = user.institutionId;
+            institutionSelect.disabled = true;
+            institutionGroup.style.display = 'block';
+          }
+        } catch (error) {
+          console.error('Error loading data:', error);
+        }
+      }
+
+      loadData();
+
+      // Handle role change
+      roleSelect.addEventListener('change', (e) => {
+        const roleId = parseInt(e.target.value);
+
+        // Role 1 = Super Admin (no institution/branch)
+        // Role 2 = Institution (needs institution)
+        // Role 3 = Branch (needs institution and branch)
+
+        if (roleId === 1) {
+          institutionGroup.style.display = 'none';
+          branchGroup.style.display = 'none';
+          institutionSelect.value = '';
+          branchSelect.value = '';
+        } else if (roleId === 2) {
+          institutionGroup.style.display = 'block';
+          branchGroup.style.display = 'none';
+          branchSelect.value = '';
+        } else if (roleId === 3) {
+          institutionGroup.style.display = 'block';
+          branchGroup.style.display = 'block';
+        }
+      });
+
+      // Handle institution change (for Branch role)
+      institutionSelect.addEventListener('change', (e) => {
+        const institutionId = parseInt(e.target.value);
+        const roleId = parseInt(roleSelect.value);
+
+        if (roleId === 3 && institutionId) {
+          // Filter branches by institution
+          const filteredBranches = branches.filter(b => b.institutionId === institutionId);
+          branchSelect.innerHTML = `<option value="">${t('users.form.branch_placeholder')}</option>`;
+          filteredBranches.forEach(branch => {
+            branchSelect.innerHTML += `<option value="${branch.branchId}">${branch.name}</option>`;
+          });
+        }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Clear errors
+        errorMessage.classList.add('hidden');
+        document.querySelectorAll('.error-text').forEach(el => el.classList.add('hidden'));
+
+        // Get form data
+        const roleId = parseInt(document.getElementById('roleId').value);
+        const institutionId = document.getElementById('institutionId').value;
+        const branchId = document.getElementById('branchId').value;
+
+        const formData = {
+          name: document.getElementById('name').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          phoneNumber: document.getElementById('phoneNumber').value.trim(),
+          password: document.getElementById('password').value,
+          roleId: roleId,
+          isActive: document.getElementById('isActive').checked,
+        };
+
+        // Add institution/branch based on role
+        if (roleId === 2 && institutionId) {
+          formData.institutionId = parseInt(institutionId);
+        } else if (roleId === 3 && institutionId && branchId) {
+          formData.institutionId = parseInt(institutionId);
+          formData.branchId = parseInt(branchId);
+        }
+
+        // Validation
+        let hasError = false;
+
+        if (formData.name.length < 2) {
+          document.getElementById('nameError').textContent = t('users.edit_page.name_error');
+          document.getElementById('nameError').classList.remove('hidden');
+          hasError = true;
+        }
+
+        if (!formData.email.includes('@')) {
+          document.getElementById('emailError').textContent = t('users.form.email_error') || 'Valid email is required';
+          document.getElementById('emailError').classList.remove('hidden');
+          hasError = true;
+        }
+
+        if (!formData.phoneNumber || formData.phoneNumber.length < 10) {
+          document.getElementById('phoneNumberError').textContent = t('users.edit_page.phone_error');
+          document.getElementById('phoneNumberError').classList.remove('hidden');
+          hasError = true;
+        }
+
+        if (formData.password.length < 6) {
+          document.getElementById('passwordError').textContent = t('users.edit_page.password_error');
+          document.getElementById('passwordError').classList.remove('hidden');
+          hasError = true;
+        }
+
+        if (!formData.roleId) {
+          document.getElementById('roleIdError').textContent = t('users.form.role_required') || 'Role is required';
+          document.getElementById('roleIdError').classList.remove('hidden');
+          hasError = true;
+        }
+
+        if (roleId === 2 && !institutionId) {
+          document.getElementById('institutionIdError').textContent = 'Institution is required for Institution role';
+          document.getElementById('institutionIdError').classList.remove('hidden');
+          hasError = true;
+        }
+
+        if (roleId === 3 && (!institutionId || !branchId)) {
+          if (!institutionId) {
+            document.getElementById('institutionIdError').textContent = 'Institution is required for Branch role';
+            document.getElementById('institutionIdError').classList.remove('hidden');
+          }
+          if (!branchId) {
+            document.getElementById('branchIdError').textContent = 'Branch is required for Branch role';
+            document.getElementById('branchIdError').classList.remove('hidden');
+          }
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        // Disable submit button
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Creating...';
+
+        try {
+          await api.users.create(formData);
+          showToast(t('users.form.create_success'), 'success');
+          window.location.href = 'users.html';
+        } catch (error) {
+          console.error('Error creating user:', error);
+
+          // Check for specific error messages and translate them
+          let errorText = t('users.form.create_failed');
+          if (error.message) {
+            if (error.message.includes('Email already exists')) {
+              errorText = t('users.form.email_exists');
+            } else if (error.message.includes('Phone number already exists')) {
+              errorText = t('users.form.phone_exists');
+            } else {
+              errorText = error.message;
+            }
+          }
+
+          errorMessage.querySelector('p').textContent = errorText;
+          errorMessage.classList.remove('hidden');
+
+          // Re-enable button
+          submitButton.disabled = false;
+          submitButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Create User
+        `;
+        }
+      });
+      // Toggle Password Visibility Logic
+      const togglePasswordBtn = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+
+      if (togglePasswordBtn && passwordInput) {
+        togglePasswordBtn.addEventListener('click', () => {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+
+          const eyeIcon = togglePasswordBtn.querySelector('.eye-icon');
+          const eyeOffIcon = togglePasswordBtn.querySelector('.eye-off-icon');
+
+          if (type === 'password') {
+            eyeIcon.style.display = 'block';
+            eyeOffIcon.style.display = 'none';
+            togglePasswordBtn.style.color = '#a5b4fc';
+          } else {
+            eyeIcon.style.display = 'none';
+            eyeOffIcon.style.display = 'block';
+            togglePasswordBtn.style.color = '#fff';
+          }
+        });
+      }
+    } // End of initPage
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+  </script>
+</body>
+
+</html>

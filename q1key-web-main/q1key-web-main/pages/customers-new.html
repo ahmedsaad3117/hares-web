@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Customer - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8"
+        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="customers.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="customers.add_customer">Add Customer</h1>
+          <p class="text-secondary" data-i18n-key="customers.create_new_customer">Create a new customer profile</p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="glass-card p-6" style="max-width: 800px;">
+        <form id="customerForm">
+          <!-- Name -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="customers.form.name_label">Customer Name</label> <span
+              data-i18n-key="customers.form.name_required">*</span>
+            <input type="text" id="name" name="name" class="input"
+              data-i18n-placeholder="customers.form.name_placeholder" placeholder="Enter customer name" required />
+            <div id="nameError" class="error-text hidden"></div>
+          </div>
+
+          <!-- National ID -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="customers.form.national_id_label">National ID</label> <span
+              data-i18n-key="customers.form.national_id_required">*</span>
+            <input type="text" id="nationalId" name="nationalId" class="input"
+              data-i18n-placeholder="customers.form.national_id_placeholder" placeholder="Enter national ID" required />
+            <div id="nationalIdError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label class="label" data-i18n-key="customers.form.phone_label">Phone Number</label> <span
+              data-i18n-key="customers.form.phone_required">*</span>
+            <input type="tel" id="phoneNumber" name="phoneNumber" class="input"
+              data-i18n-placeholder="customers.form.phone_placeholder" placeholder="+1234567890" required />
+            <div id="phoneNumberError" class="error-text hidden"></div>
+          </div>
+
+          <!-- Error Message -->
+          <div id="errorMessage" class="hidden mb-4"
+            style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
+            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+            <button type="submit" id="submitButton" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span data-i18n-key="customers.form.create_customer">Create Customer</span>
+            </button>
+            <a href="customers.html" class="btn btn-secondary" data-i18n-key="customers.form.cancel">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js?v=2"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script src="../js/ui-utils.js?v=8"></script>
+  <script>
+    async function initPage() {
+      await waitForI18n();
+
+      // Check authentication
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('customers.add_customer'),
+        t('customers.create_new_customer')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('customers');
+      window.i18n.translatePage();
+
+      // Auto-fill from URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const nationalIdParam = urlParams.get('nationalId');
+      const phoneParam = urlParams.get('phoneNumber');
+
+      if (nationalIdParam) {
+        document.getElementById('nationalId').value = nationalIdParam;
+      }
+      if (phoneParam) {
+        document.getElementById('phoneNumber').value = phoneParam;
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+
+    const form = document.getElementById('customerForm');
+    const submitButton = document.getElementById('submitButton');
+    const errorMessage = document.getElementById('errorMessage');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Clear errors
+      errorMessage.classList.add('hidden');
+      document.getElementById('nameError').classList.add('hidden');
+      document.getElementById('nationalIdError').classList.add('hidden');
+      document.getElementById('phoneNumberError').classList.add('hidden');
+
+      // Get form data
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        nationalId: document.getElementById('nationalId').value.trim(),
+        phoneNumber: document.getElementById('phoneNumber').value.trim(),
+      };
+
+      // Validation
+      let hasError = false;
+
+      if (formData.name.length < 2) {
+        document.getElementById('nameError').textContent = t('customers.form.name_error');
+        document.getElementById('nameError').classList.remove('hidden');
+        hasError = true;
+      }
+
+      if (formData.nationalId.length < 3) {
+        document.getElementById('nationalIdError').textContent = t('customers.form.national_id_error');
+        document.getElementById('nationalIdError').classList.remove('hidden');
+        hasError = true;
+      }
+
+      if (formData.phoneNumber.length < 10) {
+        document.getElementById('phoneNumberError').textContent = t('customers.form.phone_error');
+        document.getElementById('phoneNumberError').classList.remove('hidden');
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      // Show confirmation modal
+      showConfirmModal({
+        title: t('customers.form.confirm_title') || 'Create Customer',
+        message: t('customers.form.confirm_message') || 'Are you sure you want to create this customer?',
+        confirmText: t('customers.form.create_customer'),
+        icon: '👤',
+        onConfirm: async () => {
+          try {
+            // Disable submit button inside confirm callback (visual feedback only as modal blocks)
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> ${t('customers.form.creating')}`;
+
+            await api.customers.create(formData);
+            showToast('Customer created successfully', 'success');
+            window.location.href = 'customers.html';
+          } catch (error) {
+            console.error('Error creating customer:', error);
+            console.log('Error Code:', error.code);
+            console.log('Error Data:', error);
+
+            // Case 1: Already linked to this branch/institution
+            if (error.code === 'CUSTOMER_EXISTS_LOCAL') {
+              showToast(error.message || t('customers.already_linked') || 'Customer already linked to your scope', 'warning');
+              resetButton();
+              return;
+            }
+
+            // Case 2: Exists globally, needs linking
+            // Check matches code OR if we have customer data implying a global existence conflict
+            const isGlobalConflict = error.code === 'CUSTOMER_EXISTS_GLOBAL' || (error.status === 409 && error.customer);
+
+            if (isGlobalConflict && error.customer) {
+              // Ask user if they want to link
+              setTimeout(() => {
+                showConfirmModal({
+                  title: t('customers.link_customer_title') || 'Link Existing Customer',
+                  message: t('customers.exists_link_confirm', { name: error.customer.name }),
+                  confirmText: t('common.button.link') || 'Link',
+                  icon: '🔗',
+                  onConfirm: async () => {
+                    try {
+                      console.log('🔗 Link confirmed for customer:', error.customer.customerId);
+                      // alert('Starting link process for ID: ' + error.customer.customerId); // Debugging
+
+                      // Attempt to link
+                      const response = await api.customers.link(error.customer.customerId);
+                      console.log('✅ Link successful', response);
+
+                      showToast(t('common.message.success'), 'success');
+
+                      // Force reload
+                      setTimeout(() => {
+                        window.location.href = 'customers.html';
+                      }, 1000);
+                    } catch (linkError) {
+                      console.error('❌ Link Error:', linkError);
+                      const msg = linkError.message || t('customers.form.link_failed') || 'Failed to link customer';
+                      alert('Link Failed: ' + msg); // SCREAM THE ERROR
+                      resetButton();
+                    }
+                  },
+                  onCancel: resetButton
+                });
+              }, 500); // Increased delay to 500ms to ensure previous modal clears
+              return;
+            }
+
+            errorMessage.querySelector('p').textContent = error.message || 'Failed to create customer';
+            errorMessage.classList.remove('hidden');
+            resetButton();
+          }
+        },
+        onCancel: () => {
+          // Re-enable validation/submit if they cancel the initial confirmation
+          // No api called yet
+        }
+      });
+
+      function resetButton() {
+        submitButton.disabled = false;
+        submitButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span data-i18n-key="customers.form.create_customer">${t('customers.form.create_customer')}</span>
+        `;
+      }
+    });
+  </script>
+</body>
+
+</html>

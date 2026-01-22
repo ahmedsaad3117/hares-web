@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <script>
+        (function () {
+            var lang = localStorage.getItem('locale') || 'ar';
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            if (lang === 'ar') document.documentElement.classList.add('rtl');
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الطلبات - Q1KEY Platform</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        .stat-card.pending .stat-value {
+            color: #f59e0b;
+        }
+
+        .stat-card.approved .stat-value {
+            color: #10b981;
+        }
+
+        .stat-card.rejected .stat-value {
+            color: #ef4444;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .filter-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-tab.active {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: #6366f1;
+            color: #818cf8;
+        }
+
+        .filter-tab .count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+        }
+
+        .filter-tab.active .count {
+            background: rgba(99, 102, 241, 0.5);
+        }
+
+        /* Request Cards */
+        .requests-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .request-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .request-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .request-card.pending {
+            border-right: 4px solid #f59e0b;
+        }
+
+        .request-card.approved {
+            border-right: 4px solid #10b981;
+        }
+
+        .request-card.rejected {
+            border-right: 4px solid #ef4444;
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .request-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .request-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .request-details h3 {
+            color: white;
+            font-size: 1.1rem;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .request-details p {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .request-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .request-status.pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        .request-status.approved {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .request-status.rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .request-status.cancelled {
+            background: rgba(100, 116, 139, 0.2);
+            color: #64748b;
+        }
+
+        .request-body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            padding: 1rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .request-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .request-field .label {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .request-field .value {
+            color: white;
+            font-weight: 500;
+        }
+
+        .request-field .value.amount {
+            color: #10b981;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .action-btn.approve {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .action-btn.approve:hover {
+            background: #10b981;
+            color: white;
+        }
+
+        .action-btn.reject {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .action-btn.reject:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .action-btn.free {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #818cf8;
+        }
+
+        .action-btn.free:hover {
+            background: #6366f1;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #94a3b8;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Process Modal */
+        .process-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .process-modal.active {
+            display: flex;
+        }
+
+        .process-modal-content {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .process-modal h3 {
+            color: white;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        .free-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .free-toggle label {
+            color: white;
+            margin: 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(100, 116, 139, 0.5);
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.toggle-slider {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+
+        input:checked+.toggle-slider:before {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+        <div id="sidebar"></div>
+
+        <div class="main-content">
+            <div id="header"></div>
+
+            <div class="page-container">
+                <!-- Stats -->
+                <div class="stats-row">
+                    <div class="stat-card pending">
+                        <div class="stat-value" id="pendingCount">-</div>
+                        <div class="stat-label" data-i18n-key="requests.stats.pending">Pending</div>
+                    </div>
+                    <div class="stat-card approved">
+                        <div class="stat-value" id="approvedCount">-</div>
+                        <div class="stat-label" data-i18n-key="requests.stats.approved">Approved</div>
+                    </div>
+                    <div class="stat-card rejected">
+                        <div class="stat-value" id="rejectedCount">-</div>
+                        <div class="stat-label" data-i18n-key="requests.stats.rejected">Rejected</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalCount">-</div>
+                        <div class="stat-label" data-i18n-key="requests.stats.total">Total Requests</div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <!-- Filter Tabs -->
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-status="" onclick="filterRequests('')"
+                            data-i18n-key="requests.tabs.all">
+                            All
+                        </button>
+                        <button class="filter-tab" data-status="Pending" onclick="filterRequests('Pending')">
+                            <span class="count" id="pendingBadge">0</span>
+                            <span data-i18n-key="requests.tabs.pending">Pending</span>
+                        </button>
+                        <button class="filter-tab" data-status="Approved" onclick="filterRequests('Approved')"
+                            data-i18n-key="requests.tabs.approved">
+                            Approved
+                        </button>
+                        <button class="filter-tab" data-status="Rejected" onclick="filterRequests('Rejected')"
+                            data-i18n-key="requests.tabs.rejected">
+                            Rejected
+                        </button>
+                    </div>
+
+                    <!-- Requests List -->
+                    <div class="requests-list" id="requestsList">
+                        <div class="empty-state">
+                            <div class="spinner"></div>
+                            <p data-i18n-key="requests.list.loading">Loading Requests...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Modal -->
+    <div id="processModal" class="process-modal">
+        <div class="process-modal-content">
+            <h3 id="modalTitle">✅ Confirm Subscription</h3>
+
+            <div id="requestSummary"
+                style="background: rgba(0,0,0,0.2); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+                <!-- Will be populated dynamically -->
+            </div>
+
+            <div class="free-toggle" id="freeToggleSection">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="isFreeCheckbox" onchange="toggleFreeReason()">
+                    <span class="toggle-slider"></span>
+                </label>
+                <label data-i18n-key="requests.process_modal.free_subscription">Free Subscription (Compensatory)</label>
+            </div>
+
+            <div class="form-group" id="freeReasonGroup" style="display: none;">
+                <label data-i18n-key="requests.process_modal.free_reason_label">Reason for Free Subscription</label>
+                <input type="text" id="freeReason" data-i18n-attr="placeholder"
+                    data-i18n-key="requests.process_modal.free_reason_placeholder"
+                    placeholder="e.g., Compensation for technical issue">
+            </div>
+
+            <div class="form-group">
+                <label data-i18n-key="requests.process_modal.admin_notes">Admin Notes</label>
+                <textarea id="adminNotes" data-i18n-attr="placeholder"
+                    data-i18n-key="requests.process_modal.admin_notes_placeholder"
+                    placeholder="Additional notes (optional)..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeProcessModal()"
+                    data-i18n-key="requests.process_modal.cancel">Cancel</button>
+                <button class="btn btn-primary" id="confirmProcessBtn" onclick="confirmProcess()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal - Comprehensive View -->
+    <div id="detailsModal" class="process-modal">
+        <div class="process-modal-content"
+            style="max-width: 900px; max-height: 95vh; overflow-y: auto; padding: 1.5rem;">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                📄 تفاصيل الطلب
+            </h3>
+
+            <div id="detailsContent"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                <!-- Will be populated dynamically -->
+            </div>
+
+            <div class="modal-actions"
+                style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <button class="btn btn-secondary" onclick="closeDetailsModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal - For confirmation dialogs -->
+    <div id="confirmModal" class="process-modal" style="z-index: 10001;">
+        <div class="process-modal-content" style="max-width: 450px; text-align: center;">
+            <div id="confirmIcon" style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+            <h3 id="confirmTitle" style="margin-bottom: 1rem; color: white;">تأكيد العملية</h3>
+            <p id="confirmMessage" style="color: #94a3b8; margin-bottom: 1.5rem;">هل أنت متأكد من إتمام هذه العملية؟</p>
+
+            <div class="modal-actions" style="justify-content: center; gap: 1rem;">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">إلغاء</button>
+                <button id="confirmActionBtn" class="btn btn-primary" onclick="executeConfirmedAction()">تأكيد</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal - Full Form Like institutions-new.html -->
+    <div id="editModal" class="process-modal">
+        <div class="process-modal-content"
+            style="max-width: 1000px; max-height: 95vh; overflow-y: auto; padding: 1.5rem;">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                ✏️ تعديل بيانات الطلب
+            </h3>
+
+            <!-- Request Type Info -->
+            <div id="editRequestTypeInfo"
+                style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem;">
+                <!-- Will show request type dynamically -->
+            </div>
+
+            <!-- Main Grid Layout -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+
+                <!-- Right Column: Institution Details + Notes -->
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Institution Info -->
+                    <div
+                        style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                        <h4
+                            style="color: #818cf8; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            🏢 معلومات المؤسسة
+                        </h4>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <!-- Name -->
+                            <div class="form-group">
+                                <label style="font-size: 0.85rem; color: #94a3b8;">اسم المؤسسة <span
+                                        style="color: #ef4444;">*</span></label>
+                                <input type="text" id="editInstName" class="input" placeholder="أدخل اسم المؤسسة">
+                            </div>
+
+                            <!-- Tax ID -->
+                            <div class="form-group">
+                                <label style="font-size: 0.85rem; color: #94a3b8;">رقم السجل التجاري <span
+                                        style="color: #ef4444;">*</span></label>
+                                <input type="text" id="editInstTaxId" class="input"
+                                    placeholder="أدخل رقم السجل التجاري">
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <!-- Phone -->
+                                <div class="form-group">
+                                    <label style="font-size: 0.85rem; color: #94a3b8;">رقم الهاتف <span
+                                            style="color: #ef4444;">*</span></label>
+                                    <input type="tel" id="editInstPhone" class="input" placeholder="05xxxxxxxx">
+                                </div>
+                                <!-- Email -->
+                                <div class="form-group">
+                                    <label style="font-size: 0.85rem; color: #94a3b8;">البريد الإلكتروني <span
+                                            style="color: #ef4444;">*</span></label>
+                                    <input type="email" id="editInstEmail" class="input"
+                                        placeholder="email@example.com">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <!-- Max Users -->
+                                <div class="form-group">
+                                    <label style="font-size: 0.85rem; color: #94a3b8;">الحد الأقصى للمستخدمين</label>
+                                    <input type="number" id="editInstMaxUsers" class="input" min="1" value="1">
+                                </div>
+                                <!-- Expiration Date -->
+                                <div class="form-group">
+                                    <label style="font-size: 0.85rem; color: #94a3b8;">تاريخ الانتهاء</label>
+                                    <input type="date" id="editInstExpiration" class="input">
+                                </div>
+                            </div>
+
+                            <!-- Toggles -->
+                            <div
+                                style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 8px; display: flex; flex-direction: column; gap: 0.5rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" id="editInstCanCreateBranches" checked
+                                        style="width: 16px; height: 16px; accent-color: #6366f1;">
+                                    <div>
+                                        <span style="color: white; font-size: 0.85rem;">السماح بإنشاء الفروع</span>
+                                        <p style="margin: 0; font-size: 0.75rem; color: #64748b;">السماح لهذه المؤسسة
+                                            بإنشاء وإدارة الفروع</p>
+                                    </div>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" id="editInstIsActive" checked
+                                        style="width: 16px; height: 16px; accent-color: #10b981;">
+                                    <span style="color: white; font-size: 0.85rem;">نشط</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes Section (moved here under Institution Info) -->
+                    <div
+                        style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                        <h4
+                            style="color: #64748b; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            📝 الملاحظات
+                        </h4>
+                        <div class="form-group" style="margin-bottom: 0.75rem;">
+                            <label style="font-size: 0.85rem; color: #94a3b8;">ملاحظات العميل</label>
+                            <textarea id="editNotes" class="input" rows="2"
+                                placeholder="ملاحظات من صاحب الطلب..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem; color: #94a3b8;">ملاحظات المشرف</label>
+                            <textarea id="editAdminNotes" class="input" rows="2"
+                                placeholder="ملاحظات خاصة بالمشرف..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Left Column: Subscription & Admin -->
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+
+                    <!-- Subscription Plan -->
+                    <div
+                        style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                        <h4
+                            style="color: #a855f7; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            💎 باقة الاشتراك
+                        </h4>
+                        <div id="editPlansContainer" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            <div class="spinner"></div>
+                        </div>
+                        <input type="hidden" id="editSelectedPlanId">
+
+                        <!-- Amount Override -->
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label style="font-size: 0.85rem; color: #94a3b8;">المبلغ (يمكن تعديله)</label>
+                            <input type="number" id="editAmount" class="input" step="0.01" placeholder="المبلغ">
+                        </div>
+                    </div>
+
+                    <!-- Manager Account -->
+                    <div
+                        style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                        <h4
+                            style="color: #f59e0b; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            👤 بيانات حساب المدير
+                        </h4>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div class="form-group">
+                                <label style="font-size: 0.85rem; color: #94a3b8;">الاسم الكامل <span
+                                        style="color: #ef4444;">*</span></label>
+                                <input type="text" id="editAdminName" class="input" placeholder="أدخل الاسم الكامل">
+                            </div>
+
+                            <div class="form-group">
+                                <label style="font-size: 0.85rem; color: #94a3b8;">البريد الإلكتروني <span
+                                        style="color: #ef4444;">*</span></label>
+                                <input type="email" id="editAdminEmail" class="input" placeholder="admin@example.com">
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <div class="form-group">
+                                    <label style="font-size: 0.85rem; color: #94a3b8;">رقم الهاتف</label>
+                                    <input type="tel" id="editAdminPhone" class="input" placeholder="Phone">
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-size: 0.85rem; color: #94a3b8;">كلمة المرور</label>
+                                    <input type="password" id="editAdminPassword" class="input"
+                                        placeholder="كلمة مرور جديدة (اختياري)">
+                                </div>
+                            </div>
+
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="editAdminIsActive" checked
+                                    style="width: 16px; height: 16px; accent-color: #10b981;">
+                                <span style="color: white; font-size: 0.85rem;">حساب المدير نشط</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="modal-actions"
+                style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <button class="btn btn-secondary" onclick="closeEditModal()">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveEditRequest()">💾 حفظ التغييرات</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/ui-utils.js"></script>
+    <script src="../components/sidebar.js?v=5"></script>
+    <script src="../components/header.js"></script>
+    <script>
+        let allRequests = [];
+        let currentFilter = '';
+        let processingRequest = null;
+        let processAction = 'Approved';
+        let editingRequest = null;
+        let availablePlans = [];
+
+        function translateNote(note) {
+            if (!note) return '-';
+            if (localStorage.getItem('locale') !== 'ar') return note;
+
+            // Replace "Initial subscription request for Branch: "
+            let translated = note.replace(/Initial subscription request for Branch: /g, 'طلب اشتراك أولي للفرع: ');
+            // Replace "Initial subscription request for " (Institutions)
+            translated = translated.replace(/Initial subscription request for /g, 'طلب اشتراك أولي للمؤسسة: ');
+
+            return translated;
+        }
+
+        async function loadPlans() {
+            try {
+                const response = await api.subscriptions.getPlans();
+                availablePlans = Array.isArray(response) ? response : (response.data || []);
+            } catch (error) {
+                console.error('Error loading plans:', error);
+            }
+        }
+
+        async function openEditModal(requestId) {
+            const request = allRequests.find(r => r.id === requestId);
+            if (!request) return;
+
+            editingRequest = request;
+
+            // Load plans if not already loaded
+            if (availablePlans.length === 0) {
+                await loadPlans();
+            }
+
+            // Show request type info
+            const typeInfo = document.getElementById('editRequestTypeInfo');
+            const isInstitution = request.requesterType === 'Institution';
+            const entityName = request.institution?.name || request.branch?.name || 'طلب تسجيل جديد';
+            typeInfo.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.5rem;">${isInstitution ? '🏛️' : '🏪'}</span>
+                    <div>
+                        <strong style="color: white;">${entityName}</strong>
+                        <p style="margin: 0; color: #94a3b8; font-size: 0.85rem;">
+                            ${isInstitution ? 'مؤسسة' : 'فرع'} • طلب #${request.id} • 
+                            <span style="color: ${request.status === 'Pending' ? '#fbbf24' : request.status === 'Approved' ? '#10b981' : '#ef4444'};">
+                                ${request.status === 'Pending' ? 'تحت المعالجة' : request.status === 'Approved' ? 'تم التأكيد' : 'مرفوض'}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            // Parse pending data if exists
+            let pendingData = {};
+            if (request.pendingData) {
+                try {
+                    pendingData = JSON.parse(request.pendingData);
+                } catch (e) {
+                    console.error('Error parsing pendingData:', e);
+                }
+            }
+
+            // Fill Institution Info
+            document.getElementById('editInstName').value = pendingData.name || request.institution?.name || '';
+            document.getElementById('editInstTaxId').value = pendingData.taxId || request.institution?.taxId || '';
+            document.getElementById('editInstPhone').value = pendingData.phoneNumber || request.institution?.phoneNumber || '';
+            document.getElementById('editInstEmail').value = pendingData.email || request.institution?.email || '';
+            // Fix: For new requests (pendingData), default to 1. For existing, use institution value or 1
+            if (request.pendingData) {
+                // New registration request - use pendingData value or default to 1
+                document.getElementById('editInstMaxUsers').value = pendingData.maxUsers || 1;
+            } else {
+                // Existing institution/branch - use their current value or default to 1
+                document.getElementById('editInstMaxUsers').value = 1;
+            }
+            document.getElementById('editInstCanCreateBranches').checked = pendingData.canCreateBranches !== false;
+            document.getElementById('editInstIsActive').checked = pendingData.isActive !== false;
+
+            // Render plans as cards - store durationMonths in data attribute
+            const plansContainer = document.getElementById('editPlansContainer');
+            plansContainer.innerHTML = availablePlans.map(plan => `
+                <div class="plan-card" onclick="selectEditPlan(this, ${plan.id}, ${plan.price}, ${plan.durationMonths})"
+                     data-duration="${plan.durationMonths}"
+                     style="border: 1px solid ${request.planId === plan.id ? '#6366f1' : 'rgba(255,255,255,0.1)'}; 
+                            background: ${request.planId === plan.id ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.05)'};
+                            border-radius: 10px; padding: 0.75rem; text-align: center; min-width: 100px; cursor: pointer; flex: 1;">
+                    <h5 style="color: white; margin: 0 0 0.25rem 0; font-size: 0.85rem;">${i18n.isRTL() ? plan.name : (plan.nameEn || plan.name)}</h5>
+                    <div style="color: #a855f7; font-weight: bold; font-size: 1rem;">${plan.price} ${t('my_subscription.currency')}</div>
+                    <div style="color: #64748b; font-size: 0.75rem;">${plan.durationMonths} ${plan.durationMonths > 1 ? t('my_subscription.months') : t('my_subscription.month')}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('editSelectedPlanId').value = request.planId || '';
+
+            // Fix: Set amount based on selected plan, not from request
+            const selectedPlan = availablePlans.find(p => p.id === request.planId);
+            if (selectedPlan) {
+                document.getElementById('editAmount').value = selectedPlan.price;
+                // Fix: Calculate expiration date from TODAY + plan duration
+                const today = new Date();
+                const expirationDate = new Date(today);
+                expirationDate.setMonth(expirationDate.getMonth() + selectedPlan.durationMonths);
+                document.getElementById('editInstExpiration').value = expirationDate.toISOString().split('T')[0];
+            } else {
+                document.getElementById('editAmount').value = request.amount || '';
+                // If no plan, use requested end date
+                if (request.requestedEndDate) {
+                    const endDate = new Date(request.requestedEndDate);
+                    document.getElementById('editInstExpiration').value = endDate.toISOString().split('T')[0];
+                } else {
+                    document.getElementById('editInstExpiration').value = '';
+                }
+            }
+
+            // Fill Admin Info - Make sure to use correct field names from pendingData
+            document.getElementById('editAdminName').value = pendingData.adminName || '';
+            document.getElementById('editAdminEmail').value = pendingData.adminEmail || '';
+            document.getElementById('editAdminPhone').value = pendingData.adminPhoneNumber || pendingData.adminPhone || '';
+            document.getElementById('editAdminPassword').value = ''; // Always empty for security
+            document.getElementById('editAdminIsActive').checked = pendingData.adminIsActive !== false;
+
+            // Fill notes
+            document.getElementById('editNotes').value = request.notes || '';
+            document.getElementById('editAdminNotes').value = request.adminNotes || '';
+
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        // Select plan in edit modal - now also calculates expiration date
+        window.selectEditPlan = function (element, planId, price, durationMonths) {
+            // Remove active class from all
+            document.querySelectorAll('#editPlansContainer .plan-card').forEach(card => {
+                card.style.borderColor = 'rgba(255,255,255,0.1)';
+                card.style.background = 'rgba(255,255,255,0.05)';
+            });
+
+            // Add active style to selected
+            element.style.borderColor = '#6366f1';
+            element.style.background = 'rgba(99, 102, 241, 0.1)';
+
+            // Set plan ID and amount
+            document.getElementById('editSelectedPlanId').value = planId;
+            document.getElementById('editAmount').value = price;
+
+            // Calculate expiration date from TODAY + plan duration
+            const today = new Date();
+            const expirationDate = new Date(today);
+            expirationDate.setMonth(expirationDate.getMonth() + durationMonths);
+            document.getElementById('editInstExpiration').value = expirationDate.toISOString().split('T')[0];
+        };
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            editingRequest = null;
+        }
+
+        async function saveEditRequest() {
+            if (!editingRequest) return;
+
+            // Show confirmation modal
+            const entityName = document.getElementById('editInstName').value || 'هذا الطلب';
+            showConfirmModal({
+                icon: '💾',
+                title: 'حفظ التغييرات',
+                message: `هل تريد حفظ التغييرات على طلب "${entityName}"؟`,
+                confirmText: 'حفظ',
+                confirmClass: 'btn btn-primary',
+                onConfirm: async () => {
+                    await executeSaveEditRequest();
+                }
+            });
+        }
+
+        async function executeSaveEditRequest() {
+            if (!editingRequest) return;
+
+            // Get data from the new form fields
+            const planId = parseInt(document.getElementById('editSelectedPlanId').value);
+            const amount = parseFloat(document.getElementById('editAmount').value);
+            const requestedEndDate = document.getElementById('editInstExpiration').value;
+            const notes = document.getElementById('editNotes').value;
+            const adminNotes = document.getElementById('editAdminNotes').value;
+
+            if (!planId || isNaN(planId)) {
+                showToast(t('institutions.form.plan_required') || 'يرجى اختيار باقة اشتراك', 'error');
+                return;
+            }
+
+            // Build update payload
+            const updateData = {
+                planId: planId,
+                amount: amount,
+                notes: notes,
+                adminNotes: adminNotes
+            };
+
+            // Add end date if provided
+            if (requestedEndDate) {
+                updateData.requestedEndDate = requestedEndDate;
+            }
+
+            // Build pending data from the form (for new institution requests)
+            const pendingData = {
+                // Institution info
+                name: document.getElementById('editInstName').value,
+                taxId: document.getElementById('editInstTaxId').value,
+                phoneNumber: document.getElementById('editInstPhone').value,
+                email: document.getElementById('editInstEmail').value,
+                maxUsers: parseInt(document.getElementById('editInstMaxUsers').value) || 5,
+                canCreateBranches: document.getElementById('editInstCanCreateBranches').checked,
+                isActive: document.getElementById('editInstIsActive').checked,
+                // Admin info
+                adminName: document.getElementById('editAdminName').value,
+                adminEmail: document.getElementById('editAdminEmail').value,
+                adminPhoneNumber: document.getElementById('editAdminPhone').value,
+                adminIsActive: document.getElementById('editAdminIsActive').checked,
+            };
+
+            // Only update password if a new one was entered
+            const newPassword = document.getElementById('editAdminPassword').value;
+            if (newPassword && newPassword.trim() !== '') {
+                pendingData.adminPassword = newPassword;
+            } else if (editingRequest.pendingData) {
+                // Keep original password if not changed
+                try {
+                    const originalData = JSON.parse(editingRequest.pendingData);
+                    if (originalData.adminPassword) {
+                        pendingData.adminPassword = originalData.adminPassword;
+                    }
+                } catch (e) { }
+            }
+
+            updateData.pendingData = pendingData;
+
+            try {
+                await api.subscriptions.updateRequest(editingRequest.id, updateData);
+
+                showToast(t('requests.messages.success_update') || 'تم تحديث الطلب بنجاح', 'success');
+                closeEditModal();
+                loadRequests();
+            } catch (error) {
+                console.error('Error updating request:', error);
+                showToast(error.message || t('requests.messages.update_error') || 'فشل تحديث الطلب', 'error');
+            }
+        }
+
+        async function initPage() {
+            await waitForI18n();
+
+            if (!isAuthenticated()) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            const user = getCurrentUser();
+
+            // Only Super Admin can access this page
+            if (user.roleName !== 'Super Admin') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            document.getElementById('sidebar').innerHTML = createSidebar(user);
+            document.getElementById('header').innerHTML = createHeader(t('requests.title'), t('requests.subtitle'));
+            if (typeof initializeLanguageSwitcher === 'function') initializeLanguageSwitcher();
+            setActiveNav('requests');
+
+            await loadRequests();
+        }
+
+        async function loadRequests() {
+            try {
+                const response = await api.subscriptions.getRequests(currentFilter, 1, 100);
+                allRequests = response.data || [];
+
+                updateStats();
+                renderRequests();
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                showToast(t('requests.messages.load_error') || 'Failed to load requests', 'error');
+            }
+        }
+
+        function updateStats() {
+            const pending = allRequests.filter(r => r.status === 'Pending').length;
+            const approved = allRequests.filter(r => r.status === 'Approved').length;
+            const rejected = allRequests.filter(r => r.status === 'Rejected').length;
+
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('approvedCount').textContent = approved;
+            document.getElementById('rejectedCount').textContent = rejected;
+            document.getElementById('totalCount').textContent = allRequests.length;
+            document.getElementById('pendingBadge').textContent = pending;
+        }
+
+        function filterRequests(status) {
+            currentFilter = status;
+
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.status === status);
+            });
+
+            loadRequests();
+        }
+
+        function renderRequests() {
+            const container = document.getElementById('requestsList');
+
+            if (!allRequests || allRequests.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                        <h3>${t('requests.list.empty_title')}</h3>
+                        <p>${t('requests.list.empty_desc')}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = allRequests.map(request => {
+                const isInstitution = request.requesterType === 'Institution';
+                let entityName = request.institution?.name || request.branch?.name;
+
+                if (!entityName && request.pendingData) {
+                    try {
+                        const pData = JSON.parse(request.pendingData);
+                        entityName = pData.name;
+                    } catch (e) { }
+                }
+                entityName = entityName || 'غير معروف';
+                const planName = request.plan?.name || `${request.customDurationMonths} شهر`;
+                const statusClass = request.status.toLowerCase();
+
+                return `
+                    <div class="request-card ${statusClass}">
+                        <div class="request-header">
+                            <div class="request-info">
+                                <div class="request-icon">${isInstitution ? '🏛️' : '🏪'}</div>
+                                <div class="request-details">
+                                    <h3>${entityName}</h3>
+                                    <p>${isInstitution ? t('requests.list.entity_institution') : t('requests.list.entity_branch')} • ${t('requests.list.request_num')}${request.id}</p>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-inline-start: auto; display: flex; gap: 0.5rem; margin-inline-end: 1rem;">
+                                ${request.status === 'Pending' ? `
+                                <button class="action-btn" onclick="openEditModal(${request.id})" style="border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; padding: 0.5rem 1rem; cursor: pointer;">
+                                    ✏️ ${t('requests.actions.edit') || 'Edit'}
+                                </button>
+                                ` : ''}
+                                <button class="action-btn" onclick="openDetailsModal(${request.id})" style="border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; padding: 0.5rem 1rem; cursor: pointer;">
+                                    📄 ${t('requests.actions.details') || 'Details'}
+                                </button>
+                            </div>
+
+                            <div class="request-status ${statusClass}">
+                                ${getStatusIcon(request.status)} ${getStatusLabel(request.status)}
+                            </div>
+                        </div>
+
+                        <div class="request-body">
+                            <div class="request-field">
+                                <span class="label">${t('requests.list.plan_label')}</span>
+                                <span class="value">${planName}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">${t('requests.list.amount_label')}</span>
+                                <span class="value amount">${request.isFree ? t('requests.list.free') : request.amount + ' ' + t('my_subscription.currency')}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">${t('requests.list.date_label')}</span>
+                                <span class="value">${formatDate(request.createdAt)}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">${t('requests.list.end_date_label')}</span>
+                                <span class="value">${formatDate(request.requestedEndDate)}</span>
+                            </div>
+                        </div>
+
+                        ${request.status === 'Pending' ? `
+                            <div class="request-actions">
+                                <button class="action-btn approve" onclick="openProcessModal(${request.id}, 'Approved')">
+                                    ✅ ${t('requests.actions.confirm_subscription')}
+                                </button>
+                                <button class="action-btn reject" onclick="openProcessModal(${request.id}, 'Rejected')">
+                                    ❌ ${t('requests.actions.reject')}
+                                </button>
+                            </div>
+                        ` : `
+                            ${request.processedAt ? `
+                                <div style="margin-top: 1rem; font-size: 0.85rem; color: #64748b;">
+                                    ${t('requests.list.processed_at')} ${formatDate(request.processedAt)}
+                                    ${request.processor ? `${t('requests.list.by')} ${request.processor.name}` : ''}
+                                    ${request.adminNotes ? `<br>${t('requests.list.notes')}: ${request.adminNotes}` : ''}
+                                </div>
+                            ` : ''}
+                        `}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'Pending': return '🕐';
+                case 'Approved': return '✅';
+                case 'Rejected': return '❌';
+                case 'Cancelled': return '⭕';
+                default: return '';
+            }
+        }
+
+        function getStatusLabel(status) {
+            switch (status) {
+                case 'Pending': return t('requests.status.pending');
+                case 'Approved': return t('requests.status.approved');
+                case 'Rejected': return t('requests.status.rejected');
+                case 'Cancelled': return t('requests.status.cancelled');
+                default: return status;
+            }
+        }
+
+        function openProcessModal(requestId, action) {
+            processingRequest = allRequests.find(r => r.id === requestId);
+            processAction = action;
+
+            if (!processingRequest) return;
+
+            const entityName = processingRequest.institution?.name || processingRequest.branch?.name || 'غير معروف';
+            const planName = processingRequest.plan?.name || `${processingRequest.customDurationMonths} شهر`;
+
+            document.getElementById('modalTitle').innerHTML = action === 'Approved'
+                ? `✅ ${t('requests.process_modal.title_approve')}`
+                : `❌ ${t('requests.process_modal.title_reject')}`;
+
+            document.getElementById('requestSummary').innerHTML = `
+                <p style="display: flex; justify-content: space-between; margin: 0.5rem 0; color: #e2e8f0;">
+                    <span>${t('requests.process_modal.client')}:</span> <strong>${entityName}</strong>
+                </p>
+                <p style="display: flex; justify-content: space-between; margin: 0.5rem 0; color: #e2e8f0;">
+                    <span>${t('requests.process_modal.plan')}:</span> <strong>${planName}</strong>
+                </p>
+                <p style="display: flex; justify-content: space-between; margin: 0.5rem 0; color: #e2e8f0;">
+                    <span>${t('requests.process_modal.amount')}:</span> <strong style="color: #10b981;">${processingRequest.amount} ${t('my_subscription.currency')}</strong>
+                </p>
+            `;
+
+            // Show/hide free toggle based on action
+            document.getElementById('freeToggleSection').style.display = action === 'Approved' ? 'flex' : 'none';
+            document.getElementById('freeReasonGroup').style.display = 'none';
+            document.getElementById('isFreeCheckbox').checked = false;
+
+            document.getElementById('confirmProcessBtn').textContent = action === 'Approved' ? t('requests.actions.approve_confirm') : t('requests.actions.reject_confirm');
+            document.getElementById('confirmProcessBtn').className = action === 'Approved' ? 'btn btn-primary' : 'btn btn-danger';
+
+            document.getElementById('processModal').classList.add('active');
+        }
+
+        function closeProcessModal() {
+            document.getElementById('processModal').classList.remove('active');
+            processingRequest = null;
+            document.getElementById('adminNotes').value = '';
+            document.getElementById('freeReason').value = '';
+        }
+
+        function toggleFreeReason() {
+            const isFree = document.getElementById('isFreeCheckbox').checked;
+            document.getElementById('freeReasonGroup').style.display = isFree ? 'block' : 'none';
+        }
+
+        function openDetailsModal(requestId) {
+            const request = allRequests.find(r => r.id === requestId);
+            if (!request) return;
+
+            const content = document.getElementById('detailsContent');
+            const isInstitution = request.requesterType === 'Institution';
+            let entity = isInstitution ? request.institution : request.branch;
+            let manager = null;
+            let pendingData = {};
+
+            // Handle Pending Data for New Registrations
+            if (request.pendingData) {
+                try {
+                    pendingData = JSON.parse(request.pendingData);
+                    if (!entity) {
+                        entity = {
+                            name: pendingData.name,
+                            taxId: pendingData.taxId,
+                            phoneNumber: pendingData.phoneNumber,
+                            email: pendingData.email,
+                            maxUsers: pendingData.maxUsers || 1,
+                            canCreateBranches: pendingData.canCreateBranches,
+                            isActive: pendingData.isActive,
+                            isPendingRegistration: true
+                        };
+                    }
+                    manager = {
+                        name: pendingData.adminName,
+                        email: pendingData.adminEmail,
+                        phoneNumber: pendingData.adminPhoneNumber,
+                        isActive: pendingData.adminIsActive
+                    };
+                } catch (e) { console.error('Error parsing pending data', e); }
+            } else if (isInstitution && entity && entity.users && entity.users.length > 0) {
+                manager = entity.users.find(u => u.roleId === 2) || entity.users[0];
+            }
+
+            // Get plan details
+            const plan = request.plan || availablePlans.find(p => p.id === request.planId);
+            const planName = plan ? (i18n.isRTL() ? plan.name : (plan.nameEn || plan.name)) : (request.customDurationMonths + ' شهر');
+            const planDuration = plan ? plan.durationMonths : request.customDurationMonths;
+
+            // Calculate correct end date (from today + plan duration)
+            const today = new Date();
+            const calculatedEndDate = new Date(today);
+            calculatedEndDate.setMonth(calculatedEndDate.getMonth() + (planDuration || 0));
+
+            content.innerHTML = `
+                <!-- Right Column: Entity Info + Notes -->
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Entity Info -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                        <h4 style="color: #818cf8; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            ${isInstitution ? '🏛️ معلومات المؤسسة' : '🏪 معلومات الفرع'}
+                            ${entity?.isPendingRegistration ? '<span style="background: #fbbf24; color: black; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px;">تسجيل جديد</span>' : ''}
+                        </h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div class="request-field">
+                                <span class="label">الاسم</span>
+                                <span class="value">${entity?.name || '-'}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">رقم السجل التجاري</span>
+                                <span class="value">${entity?.taxId || '-'}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">رقم الهاتف</span>
+                                <span class="value">${entity?.phoneNumber || pendingData.phoneNumber || '-'}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">البريد الإلكتروني</span>
+                                <span class="value">${entity?.email || pendingData.email || '-'}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">الحد الأقصى للمستخدمين</span>
+                                <span class="value">${pendingData.maxUsers || entity?.maxUsers || 1}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">تاريخ الانتهاء</span>
+                                <span class="value">${formatDate(calculatedEndDate)}</span>
+                            </div>
+                            ${isInstitution ? `
+                            <div class="request-field">
+                                <span class="label">السماح بإنشاء الفروع</span>
+                                <span class="value">${(pendingData.canCreateBranches !== false && entity?.canCreateBranches !== false) ? '✅ نعم' : '❌ لا'}</span>
+                            </div>
+                            ` : ''}
+                            <div class="request-field">
+                                <span class="label">الحالة</span>
+                                <span class="value">${(pendingData.isActive !== false && entity?.isActive !== false) ? '<span style="color: #10b981;">✅ نشط</span>' : '<span style="color: #ef4444;">❌ غير نشط</span>'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                        <h4 style="color: #64748b; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            📝 الملاحظات
+                        </h4>
+                        <div class="request-field" style="margin-bottom: 0.5rem;">
+                            <span class="label">ملاحظات العميل</span>
+                            <span class="value" style="color: #fbbf24;">${request.notes ? translateNote(request.notes) : '-'}</span>
+                        </div>
+                        <div class="request-field">
+                            <span class="label">ملاحظات المشرف</span>
+                            <span class="value">${request.adminNotes || '-'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Left Column: Subscription + Admin -->
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Subscription Info -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                        <h4 style="color: #a855f7; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            💎 بيانات الاشتراك
+                        </h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div class="request-field">
+                                <span class="label">الباقة</span>
+                                <span class="value" style="color: #a855f7;">${planName}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">المدة</span>
+                                <span class="value">${planDuration} ${planDuration > 1 ? 'أشهر' : 'شهر'}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">المبلغ</span>
+                                <span class="value" style="color: #10b981; font-weight: bold; font-size: 1.1rem;">
+                                    ${request.isFree ? '<span style="background: #6366f1; padding: 2px 8px; border-radius: 5px;">مجاني</span>' : (plan?.price || request.amount) + ' ' + t('my_subscription.currency')}
+                                </span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">تاريخ الطلب</span>
+                                <span class="value">${formatDate(request.createdAt)}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">حالة الطلب</span>
+                                <span class="value">
+                                    <span style="background: ${request.status === 'Pending' ? 'rgba(251, 191, 36, 0.2)' : request.status === 'Approved' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}; 
+                                                  color: ${request.status === 'Pending' ? '#fbbf24' : request.status === 'Approved' ? '#10b981' : '#ef4444'}; 
+                                                  padding: 3px 10px; border-radius: 10px;">
+                                        ${getStatusIcon(request.status)} ${getStatusLabel(request.status)}
+                                    </span>
+                                </span>
+                            </div>
+                            ${request.isFree && request.freeReason ? `
+                            <div class="request-field" style="grid-column: span 2;">
+                                <span class="label">سبب الاشتراك المجاني</span>
+                                <span class="value" style="color: #6366f1;">${request.freeReason}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Manager Info -->
+                    ${manager ? `
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                        <h4 style="color: #f59e0b; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            👤 بيانات حساب المدير
+                        </h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div class="request-field">
+                                <span class="label">الاسم</span>
+                                <span class="value">${manager.name || '-'}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">البريد الإلكتروني</span>
+                                <span class="value">${manager.email || '-'}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">رقم الهاتف</span>
+                                <span class="value">${manager.phoneNumber || '-'}</span>
+                            </div>
+                            <div class="request-field">
+                                <span class="label">الحالة</span>
+                                <span class="value">${manager.isActive !== false ? '<span style="color: #10b981;">✅ نشط</span>' : '<span style="color: #ef4444;">❌ غير نشط</span>'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <!-- Processing Info (if processed) -->
+                    ${request.status !== 'Pending' && request.processedAt ? `
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                        <h4 style="color: #94a3b8; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            📋 معلومات المعالجة
+                        </h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div class="request-field">
+                                <span class="label">تاريخ المعالجة</span>
+                                <span class="value">${formatDate(request.processedAt)}</span>
+                            </div>
+                            ${request.processor ? `
+                            <div class="request-field">
+                                <span class="label">تمت المعالجة بواسطة</span>
+                                <span class="value">${request.processor.name}</span>
+                            </div>
+                            ` : ''}
+                            ${request.cashBoxTransactionId ? `
+                            <div class="request-field">
+                                <span class="label">رقم الحركة المالية</span>
+                                <span class="value" style="font-family: monospace;">#${request.cashBoxTransactionId}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+
+            document.getElementById('detailsModal').classList.add('active');
+        }
+
+        function closeDetailsModal() {
+            document.getElementById('detailsModal').classList.remove('active');
+        }
+
+        // Confirm Modal Functions
+        let pendingConfirmAction = null;
+
+        function showConfirmModal(options) {
+            document.getElementById('confirmIcon').textContent = options.icon || '⚠️';
+            document.getElementById('confirmTitle').textContent = options.title || 'تأكيد العملية';
+            document.getElementById('confirmMessage').textContent = options.message || 'هل أنت متأكد من إتمام هذه العملية؟';
+
+            const confirmBtn = document.getElementById('confirmActionBtn');
+            confirmBtn.textContent = options.confirmText || 'تأكيد';
+            confirmBtn.className = options.confirmClass || 'btn btn-primary';
+
+            pendingConfirmAction = options.onConfirm;
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            pendingConfirmAction = null;
+        }
+
+        function executeConfirmedAction() {
+            if (pendingConfirmAction && typeof pendingConfirmAction === 'function') {
+                pendingConfirmAction();
+            }
+            closeConfirmModal();
+        }
+
+        async function confirmProcess() {
+            if (!processingRequest) return;
+
+            const entityName = processingRequest.institution?.name || processingRequest.branch?.name || 'هذا الطلب';
+            const isApproval = processAction === 'Approved';
+
+            showConfirmModal({
+                icon: isApproval ? '✅' : '❌',
+                title: isApproval ? 'تأكيد الموافقة على الاشتراك' : 'تأكيد رفض الطلب',
+                message: isApproval
+                    ? `هل تريد الموافقة على طلب اشتراك "${entityName}"؟ سيتم تفعيل الاشتراك فوراً.`
+                    : `هل تريد رفض طلب اشتراك "${entityName}"؟ هذا الإجراء لا يمكن التراجع عنه.`,
+                confirmText: isApproval ? 'موافقة' : 'رفض',
+                confirmClass: isApproval ? 'btn btn-primary' : 'btn btn-danger',
+                onConfirm: async () => {
+                    await executeConfirmProcess();
+                }
+            });
+        }
+
+        async function executeConfirmProcess() {
+            if (!processingRequest) return;
+
+            const adminNotes = document.getElementById('adminNotes').value.trim();
+            const isFree = document.getElementById('isFreeCheckbox').checked;
+            const freeReason = document.getElementById('freeReason').value.trim();
+
+            try {
+                await api.subscriptions.processRequest(processingRequest.id, {
+                    status: processAction,
+                    adminNotes,
+                    isFree: processAction === 'Approved' ? isFree : false,
+                    freeReason: isFree ? freeReason : null,
+                });
+
+                closeProcessModal();
+                showToast(
+                    processAction === 'Approved' ? t('requests.messages.success_approve') : t('requests.messages.success_reject'),
+                    processAction === 'Approved' ? 'success' : 'info'
+                );
+                await loadRequests();
+            } catch (error) {
+                console.error('Error processing request:', error);
+                showToast(error.message || t('requests.messages.process_error'), 'error');
+            }
+        }
+
+        // Initialize
+        initPage();
+    </script>
+</body>
+
+</html>

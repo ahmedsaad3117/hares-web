@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Institutions - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center justify-between mb-8"
+        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+        <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: 2rem;">🏛️</div>
+          <div>
+            <h1 class="text-3xl font-bold text-white" data-i18n-key="institutions.title">${t('institutions.title')}</h1>
+            <p class="text-secondary" data-i18n-key="institutions.institution_details">
+              ${t('institutions.institution_details')}</p>
+          </div>
+        </div>
+        <a href="institutions-new.html" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span data-i18n-key="institutions.add_institution">${t('institutions.add_institution')}</span>
+        </a>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="glass-card p-4 mb-6">
+        <div class="form-group" style="margin-bottom: 0;">
+          <input type="text" id="searchInput" data-i18n-placeholder="institutions.search_placeholder"
+            placeholder="Search by name or phone number..." class="input" style="width: 100%;" />
+        </div>
+      </div>
+
+      <!-- Institutions Grid -->
+      <div id="institutionsGrid" class="grid grid-cols-2 gap-4"
+        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 1.5rem;">
+        <div class="loading-container" style="grid-column: 1 / -1;">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div id="paginationContainer" class="flex justify-center"
+        style="display: flex; justify-content: center; margin-top: 2rem;"></div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/ui-utils.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script src="../components/pagination.js"></script>
+  <script>
+    async function initPage() {
+      await waitForI18n();
+
+      // Check authentication
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const user = getCurrentUser();
+
+      // Only Super Admin can access
+      if (user.roleName !== 'Super Admin') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('institutions.title'),
+        t('institutions.institution_details')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('institutions');
+
+      // Setup search
+      setupSearch();
+
+      // Load institutions with pagination
+      loadInstitutions();
+
+      // Enable auto-refresh (every 15 seconds)
+      if (window.setupAutoRefresh) {
+        window.setupAutoRefresh(() => loadInstitutions(currentPage), 15000);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+
+    let currentPage = 1;
+    let totalPages = 1;
+    const pageSize = 12;
+    let searchTerm = '';
+    let searchTimeout = null;
+
+    // Setup search with debounce
+    function setupSearch() {
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', (e) => {
+        const value = e.target.value.trim();
+
+        // Clear existing timeout
+        if (searchTimeout) {
+          clearTimeout(searchTimeout);
+        }
+
+        // Set new timeout
+        searchTimeout = setTimeout(() => {
+          searchTerm = value;
+          performSearch();
+        }, 300);
+      });
+    }
+
+    // Perform search
+    async function performSearch() {
+      if (searchTerm) {
+        const grid = document.getElementById('institutionsGrid');
+        grid.innerHTML = '<div class="loading-container" style="grid-column: 1 / -1;"><div class="spinner"></div><p class="text-muted mt-2">Searching...</p></div>';
+
+        try {
+          const searchResults = await api.institutions.search(searchTerm);
+          renderInstitutions(searchResults);
+
+          // Hide pagination during search
+          document.getElementById('paginationContainer').innerHTML = '';
+        } catch (error) {
+          console.error('Error searching institutions:', error);
+          grid.innerHTML = `<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">${t('institutions.failed_to_load')}</p>`;
+        }
+      } else {
+        // If search is cleared, reload normal list
+        loadInstitutions(1);
+      }
+    }
+
+    async function loadInstitutions(page = 1) {
+      try {
+        const response = await api.institutions.getAll(page, pageSize);
+        currentPage = response.meta.page;
+        totalPages = response.meta.totalPages;
+        renderInstitutions(response.data);
+      } catch (error) {
+        console.error('Error loading institutions:', error);
+        showToast(t('institutions.failed_to_load'), 'error');
+        document.getElementById('institutionsGrid').innerHTML = `<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">${t('institutions.failed_to_load')}</p>`;
+      }
+    }
+
+    function changePage(page) {
+      if (page < 1 || page > totalPages || page === currentPage) return;
+      loadInstitutions(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderInstitutions(institutions) {
+      const grid = document.getElementById('institutionsGrid');
+
+      if (institutions.length === 0) {
+        grid.innerHTML = `
+          <div class="glass-card p-6" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <svg style="width: 64px; height: 64px; margin: 0 auto 1rem; color: #475569;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            <p class="text-muted">${t('institutions.no_institutions')}</p>
+          </div>
+        `;
+        return;
+      }
+
+      const institutionsHTML = institutions.map(institution => `
+        <div class="glass-card p-6">
+          <div class="flex items-center justify-between mb-4" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem;">
+            <div>
+              <h3 class="text-xl font-bold text-white mb-1">${institution.name}</h3>
+              <p class="text-sm text-muted">${institution.phoneNumber || 'No phone'}</p>
+            </div>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; padding: 1rem 0; border-top: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
+              <span class="text-muted">${t('institutions.max_users')}</span>
+              <span class="text-white font-semibold">${institution.maxUsers}</span>
+            </div>
+            <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
+              <span class="text-muted">${t('institutions.created')}</span>
+              <span class="text-secondary text-sm">${formatDate(institution.createdAt)}</span>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2" style="display: flex; gap: 0.5rem; margin-top: auto;">
+            <a href="institutions-edit.html?id=${institution.institutionId}" class="btn btn-secondary" style="flex: 1; min-width: 110px; font-size: 0.875rem; padding: 0.5rem 1rem; text-align: center;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+              </svg>
+              ${t('institutions.edit')}
+            </a>
+            <a href="institutions-view.html?id=${institution.institutionId}" class="btn btn-secondary" style="flex: 1; min-width: 110px; font-size: 0.875rem; padding: 0.5rem 1rem; text-align: center;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              ${t('institutions.details')}
+            </a>
+            ${createWhatsappLink(institution.phoneNumber) ? `
+              <button onclick="openWhatsapp('${institution.phoneNumber}')" class="btn-whatsapp" style="flex: 0 0 auto;" title="WhatsApp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+              </button>
+            `: ''}
+          </div>
+        </div>
+      `).join('');
+
+      grid.innerHTML = institutionsHTML;
+
+      // Render pagination
+      const paginationContainer = document.getElementById('paginationContainer');
+      if (paginationContainer) {
+        paginationContainer.innerHTML = createPagination(currentPage, totalPages, changePage);
+      }
+    }
+  </script>
+</body>
+
+</html>

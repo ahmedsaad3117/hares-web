@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأدوات - Q1KEY Platform</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Tools Tabs */
+        .tools-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tool-tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tool-tab:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tool-tab.active {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .tool-tab-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #818cf8;
+            flex-shrink: 0;
+        }
+
+        .tool-tab h3 {
+            color: white;
+            font-size: 1.1rem;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .tool-tab p {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .tool-tab.active h3 {
+            color: #a5b4fc;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+        /* Subscription Plans Section */
+        .plans-section {
+            margin-top: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            color: white;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .plans-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .plans-table th {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 1rem;
+            text-align: right;
+            font-weight: 600;
+            color: #e2e8f0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .plans-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #cbd5e1;
+        }
+
+        .plans-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .price-input {
+            width: 120px;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(100, 116, 139, 0.5);
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.toggle-slider {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+
+        input:checked+.toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .status-badge.inactive {
+            background: rgba(100, 116, 139, 0.2);
+            color: #64748b;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: #6366f1;
+            color: #818cf8;
+        }
+
+        .btn-icon.danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        /* Add Plan Form */
+        .add-plan-form {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .add-plan-form.active {
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Settings Card */
+        .settings-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .settings-row:last-child {
+            border-bottom: none;
+        }
+
+        .settings-label {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .settings-label span {
+            color: white;
+            font-weight: 500;
+        }
+
+        .settings-label small {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+
+        .currency-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .loading-overlay {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        /* Announcements Section */
+        .announcements-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .announcement-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .announcement-item:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .announcement-preview {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .announcement-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 120px;
+        }
+
+        .announcement-info small {
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+
+        /* Color Picker */
+        .color-picker-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+
+        .color-presets {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .color-preset {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .color-preset:hover,
+        .color-preset.selected {
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        /* Announcement Modal */
+        .announcement-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .announcement-modal.active {
+            display: flex;
+        }
+
+        .announcement-modal-content {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .announcement-modal h3 {
+            color: white;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        .preview-banner {
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+        <div id="sidebar"></div>
+
+        <div class="main-content">
+            <div id="header"></div>
+
+            <div class="page-container">
+                <!-- Tools Tabs -->
+                <div class="tools-tabs">
+                    <div class="tool-tab active" id="tab-announcements" onclick="switchTab('announcements')">
+                        <div class="tool-tab-icon"
+                            style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.2)); color: #fbbf24;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 data-i18n-key="tools.tabs.announcements">Announcements</h3>
+                            <p data-i18n-key="tools.tabs.announcements_desc">Create alert messages for customers</p>
+                        </div>
+                    </div>
+
+                    <div class="tool-tab" id="tab-subscriptions" onclick="switchTab('subscriptions')">
+                        <div class="tool-tab-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                                <path d="M12 14v4" />
+                                <path d="M10 16h4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 data-i18n-key="tools.tabs.plans">Subscription Plans</h3>
+                            <p data-i18n-key="tools.tabs.plans_desc">Manage plans and pricing</p>
+                        </div>
+                    </div>
+
+                    <div class="tool-tab" id="tab-homepage" onclick="switchTab('homepage')">
+                        <div class="tool-tab-icon"
+                            style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.2)); color: #34d399;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                <polyline points="9 22 9 12 15 12 15 22" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 data-i18n-key="tools.tabs.homepage">إدارة الصفحة الرئيسية</h3>
+                            <p data-i18n-key="tools.tabs.homepage_desc">تخصيص الصفحة الرئيسية العامة</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Announcements Section (Default Active) -->
+                <div class="tab-content active" id="content-announcements">
+                    <div class="glass-card" id="announcementsSection">
+                        <div class="section-header">
+                            <h2>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                                </svg>
+                                <span data-i18n-key="tools.announcements.title">Announcements & Alerts</span>
+                            </h2>
+                            <button class="btn btn-primary" onclick="openAnnouncementModal()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                                <span data-i18n-key="tools.announcements.create">Create New Announcement</span>
+                            </button>
+                        </div>
+
+                        <p style="color: #94a3b8; margin-bottom: 1rem;" data-i18n-key="tools.announcements.description">
+                            Announcements appear as a banner at the top of all pages for all users. Only one
+                            announcement can
+                            be active at a time.
+                        </p>
+
+                        <div class="announcements-list" id="announcementsList">
+                            <div class="loading-overlay">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subscription Plans Section -->
+                <div class="tab-content" id="content-subscriptions">
+                    <div class="glass-card" id="subscriptionPlans">
+                        <div class="section-header">
+                            <h2>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23" />
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                                <span data-i18n-key="tools.plans.title">Subscription Plans & Pricing</span>
+                            </h2>
+                            <button class="btn btn-primary" onclick="toggleAddPlanForm()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                                <span data-i18n-key="tools.plans.create">Add New Plan</span>
+                            </button>
+                        </div>
+
+                        <!-- Settings Card -->
+                        <div class="settings-card">
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <span data-i18n-key="tools.plans.currency">💰 Currency Used</span>
+                                    <small data-i18n-key="tools.plans.currency_desc">Subscription and payment
+                                        currency</small>
+                                </div>
+                                <div class="currency-badge" data-i18n-key="tools.plans.currency_sar">
+                                    🇸🇦 Saudi Riyal (SAR)
+                                </div>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <span data-i18n-key="tools.plans.free_trial">🎁 Free Month for New
+                                        Subscribers</span>
+                                    <small data-i18n-key="tools.plans.free_trial_desc">Enable free month offer for
+                                        first-time subscription</small>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="freeTrialToggle" onchange="toggleFreeTrial()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Add Plan Form -->
+                        <div class="add-plan-form" id="addPlanForm">
+                            <h3 style="color: white; margin-bottom: 1rem;" data-i18n-key="tools.plans.add_title">➕ Add
+                                New Plan</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label data-i18n-key="tools.plans.name_ar">Plan Name (Arabic)</label>
+                                    <input type="text" id="newPlanName" placeholder="مثال: 3 أشهر">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n-key="tools.plans.name_en">Plan Name (English)</label>
+                                    <input type="text" id="newPlanNameEn" placeholder="e.g., 3 Months">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n-key="tools.plans.duration">Duration (Months)</label>
+                                    <input type="number" id="newPlanDuration" min="1" placeholder="3">
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n-key="tools.plans.price">Price (SAR)</label>
+                                    <input type="number" id="newPlanPrice" min="0" step="0.01" placeholder="250">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn btn-primary" onclick="savePlan()"><span
+                                        data-i18n-key="tools.plans.save">💾 Save Plan</span></button>
+                                <button class="btn btn-secondary" onclick="toggleAddPlanForm()"
+                                    data-i18n-key="tools.plans.cancel">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- Plans Table -->
+                        <div class="table-container">
+                            <table class="plans-table">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n-key="tools.plans.table.name">الباقة</th>
+                                        <th data-i18n-key="tools.plans.table.duration">المدة</th>
+                                        <th data-i18n-key="tools.plans.table.price">السعر (ر.س)</th>
+                                        <th data-i18n-key="tools.plans.table.status">الحالة</th>
+                                        <th data-i18n-key="tools.plans.table.actions">الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="plansTableBody">
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="loading-overlay">
+                                                <div class="spinner"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; text-align: center;">
+                            <button class="btn btn-primary" onclick="saveAllPrices()" id="saveAllBtn"
+                                style="display: none;">
+                                💾 حفظ جميع التغييرات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Homepage Management Section -->
+                <div class="tab-content" id="content-homepage">
+                    <div class="glass-card" id="homepageSection">
+                        <div class="section-header">
+                            <h2>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                    <polyline points="9 22 9 12 15 12 15 22" />
+                                </svg>
+                                <span data-i18n-key="tools.homepage.title">إدارة الصفحة الرئيسية</span>
+                            </h2>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="../home.html" target="_blank" class="btn btn-secondary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                        <polyline points="15 3 21 3 21 9" />
+                                        <line x1="10" y1="14" x2="21" y2="3" />
+                                    </svg>
+                                    معاينة
+                                </a>
+                                <button class="btn btn-primary" onclick="saveHomepageSettings()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                        <polyline points="17 21 17 13 7 13 7 21" />
+                                        <polyline points="7 3 7 8 15 8" />
+                                    </svg>
+                                    حفظ التغييرات
+                                </button>
+                            </div>
+                        </div>
+
+                        <p style="color: #94a3b8; margin-bottom: 1.5rem;">
+                            قم بتخصيص محتوى الصفحة الرئيسية العامة للموقع. التغييرات تظهر فوراً بعد الحفظ.
+                        </p>
+
+                        <!-- Hero Section Settings -->
+                        <div class="settings-card" style="margin-bottom: 1.5rem;">
+                            <h4
+                                style="color: white; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                ✨ قسم الهيرو (البداية)
+                            </h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>العنوان الرئيسي (عربي)</label>
+                                    <input type="text" id="hp_heroTitleAr" class="input"
+                                        placeholder="منصة Q1Key لإدارة القروض">
+                                </div>
+                                <div class="form-group">
+                                    <label>العنوان الرئيسي (إنجليزي)</label>
+                                    <input type="text" id="hp_heroTitleEn" class="input"
+                                        placeholder="Q1Key Loan Management Platform">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>العنوان الفرعي (عربي)</label>
+                                    <textarea id="hp_heroSubtitleAr" rows="2" class="input"
+                                        placeholder="الحل الأمثل لإدارة مؤسستك المالية"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>العنوان الفرعي (إنجليزي)</label>
+                                    <textarea id="hp_heroSubtitleEn" rows="2" class="input"
+                                        placeholder="The Ultimate Solution"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons Settings -->
+                        <div class="settings-card" style="margin-bottom: 1.5rem;">
+                            <h4
+                                style="color: white; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                🔘 أزرار الصفحة
+                            </h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>زر تسجيل الدخول (عربي)</label>
+                                    <input type="text" id="hp_loginButtonTextAr" class="input"
+                                        placeholder="تسجيل الدخول">
+                                </div>
+                                <div class="form-group">
+                                    <label>زر تسجيل الدخول (إنجليزي)</label>
+                                    <input type="text" id="hp_loginButtonTextEn" class="input" placeholder="Login">
+                                </div>
+                                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="hp_loginButtonVisible" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span style="color: #94a3b8;">إظهار الزر</span>
+                                </div>
+                            </div>
+                            <div class="form-row" style="margin-top: 1rem;">
+                                <div class="form-group">
+                                    <label>زر الاشتراك (عربي)</label>
+                                    <input type="text" id="hp_registerButtonTextAr" class="input"
+                                        placeholder="اشترك معنا">
+                                </div>
+                                <div class="form-group">
+                                    <label>زر الاشتراك (إنجليزي)</label>
+                                    <input type="text" id="hp_registerButtonTextEn" class="input"
+                                        placeholder="Subscribe Now">
+                                </div>
+                                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="hp_registerButtonVisible" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span style="color: #94a3b8;">إظهار الزر</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sections Visibility -->
+                        <div class="settings-card" style="margin-bottom: 1.5rem;">
+                            <h4
+                                style="color: white; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                📑 إظهار/إخفاء الأقسام
+                            </h4>
+                            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; color: #94a3b8;">
+                                    <input type="checkbox" id="hp_featuresSectionVisible" checked
+                                        style="width: 18px; height: 18px;">
+                                    قسم المميزات
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; color: #94a3b8;">
+                                    <input type="checkbox" id="hp_plansSectionVisible" checked
+                                        style="width: 18px; height: 18px;">
+                                    قسم الباقات
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; color: #94a3b8;">
+                                    <input type="checkbox" id="hp_aboutSectionVisible" checked
+                                        style="width: 18px; height: 18px;">
+                                    قسم من نحن
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; color: #94a3b8;">
+                                    <input type="checkbox" id="hp_contactSectionVisible" checked
+                                        style="width: 18px; height: 18px;">
+                                    قسم التواصل
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Features Section Settings -->
+                        <div class="settings-card" style="margin-bottom: 1.5rem;">
+                            <h4
+                                style="color: white; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                ⭐ قسم المميزات
+                            </h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>عنوان القسم (عربي)</label>
+                                    <input type="text" id="hp_featuresTitleAr" class="input"
+                                        placeholder="مميزات المنصة">
+                                </div>
+                                <div class="form-group">
+                                    <label>عنوان القسم (إنجليزي)</label>
+                                    <input type="text" id="hp_featuresTitleEn" class="input"
+                                        placeholder="Platform Features">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- About Section Settings -->
+                        <div class="settings-card" style="margin-bottom: 1.5rem;">
+                            <h4
+                                style="color: white; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                ℹ️ قسم من نحن
+                            </h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>عنوان القسم (عربي)</label>
+                                    <input type="text" id="hp_aboutTitleAr" class="input" placeholder="من نحن">
+                                </div>
+                                <div class="form-group">
+                                    <label>عنوان القسم (إنجليزي)</label>
+                                    <input type="text" id="hp_aboutTitleEn" class="input" placeholder="About Us">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>المحتوى (عربي)</label>
+                                    <textarea id="hp_aboutContentAr" rows="3" class="input"
+                                        placeholder="نحن منصة رائدة في مجال إدارة القروض..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>المحتوى (إنجليزي)</label>
+                                    <textarea id="hp_aboutContentEn" rows="3" class="input"
+                                        placeholder="We are a leading platform..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Settings -->
+                        <div class="settings-card">
+                            <h4
+                                style="color: white; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                📄 الفوتر
+                            </h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>نص الفوتر (عربي)</label>
+                                    <input type="text" id="hp_footerTextAr" class="input"
+                                        placeholder="© 2024 Q1Key - جميع الحقوق محفوظة">
+                                </div>
+                                <div class="form-group">
+                                    <label>نص الفوتر (إنجليزي)</label>
+                                    <input type="text" id="hp_footerTextEn" class="input"
+                                        placeholder="© 2024 Q1Key - All Rights Reserved">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Announcement Modal -->
+    <div id="announcementModal" class="announcement-modal">
+        <div class="announcement-modal-content">
+            <h3 id="announcementModalTitle">📢 إنشاء إعلان جديد</h3>
+
+            <!-- Preview Banner -->
+            <div class="preview-banner" id="previewBanner" style="background: #3b82f6; color: #ffffff;">
+                <span>📢</span> <span id="previewText">معاينة الإعلان...</span>
+            </div>
+
+            <div class="form-group">
+                <label>النص بالعربية *</label>
+                <textarea id="announcementTextAr" rows="2" placeholder="مثال: نعلن عن صيانة مجدولة يوم الخميس"
+                    oninput="updatePreview()"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>النص بالإنجليزية *</label>
+                <textarea id="announcementTextEn" rows="2" placeholder="e.g., Scheduled maintenance on Thursday"
+                    oninput="updatePreview()"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>لون الخلفية</label>
+                    <div class="color-picker-group">
+                        <input type="color" class="color-picker" id="bgColor" value="#3b82f6"
+                            onchange="updatePreview()">
+                        <div class="color-presets" id="bgColorPresets">
+                            <div class="color-preset" style="background: #3b82f6;" onclick="setBgColor('#3b82f6')"
+                                title="أزرق"></div>
+                            <div class="color-preset" style="background: #10b981;" onclick="setBgColor('#10b981')"
+                                title="أخضر"></div>
+                            <div class="color-preset" style="background: #f59e0b;" onclick="setBgColor('#f59e0b')"
+                                title="برتقالي"></div>
+                            <div class="color-preset" style="background: #ef4444;" onclick="setBgColor('#ef4444')"
+                                title="أحمر"></div>
+                            <div class="color-preset" style="background: #8b5cf6;" onclick="setBgColor('#8b5cf6')"
+                                title="بنفسجي"></div>
+                            <div class="color-preset" style="background: #1e293b;" onclick="setBgColor('#1e293b')"
+                                title="داكن"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>لون الخط</label>
+                    <div class="color-picker-group">
+                        <input type="color" class="color-picker" id="textColor" value="#ffffff"
+                            onchange="updatePreview()">
+                        <div class="color-presets" id="textColorPresets">
+                            <div class="color-preset" style="background: #ffffff; border: 1px solid #ccc;"
+                                onclick="setTextColor('#ffffff')" title="أبيض"></div>
+                            <div class="color-preset" style="background: #1e293b;" onclick="setTextColor('#1e293b')"
+                                title="داكن"></div>
+                            <div class="color-preset" style="background: #fbbf24;" onclick="setTextColor('#fbbf24')"
+                                title="ذهبي"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="announcementIsActive">
+                    <span class="toggle-slider"></span>
+                </label>
+                <label style="color: white; margin: 0;" data-i18n-key="tools.announcements.activate_now">تفعيل الإعلان
+                    فوراً</label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeAnnouncementModal()"
+                    data-i18n-key="tools.announcements.cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAnnouncement()"><span
+                        data-i18n-key="tools.announcements.save">💾 Save Announcement</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+
+    <script src="../js/config.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/ui-utils.js"></script>
+    <script src="../components/sidebar.js?v=5"></script>
+    <script src="../components/header.js"></script>
+    <script>
+        let plans = [];
+        let announcements = [];
+        let originalPrices = {};
+        let editingAnnouncementId = null;
+
+        // ==================== TAB SWITCHING ====================
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tool-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`content-${tabName}`).classList.add('active');
+        }
+
+        async function initPage() {
+            await waitForI18n();
+
+            if (!isAuthenticated()) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            const user = getCurrentUser();
+
+            // Only Super Admin can access this page
+            if (user.roleName !== 'Super Admin') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            document.getElementById('sidebar').innerHTML = createSidebar(user);
+            document.getElementById('header').innerHTML = createHeader(t('tools.title'), t('tools.subtitle'));
+            if (typeof initializeLanguageSwitcher === 'function') initializeLanguageSwitcher();
+            setActiveNav('tools');
+
+            await Promise.all([loadPlans(), loadAnnouncements(), loadHomepageSettings()]);
+        }
+
+        // Add event listener for language changes to re-render dynamic content
+        window.addEventListener('localeChanged', () => {
+            renderPlansTable();
+            renderAnnouncements();
+            updatePreview();
+        });
+
+        // ==================== HOMEPAGE SETTINGS ====================
+        let homepageSettings = null;
+
+        async function loadHomepageSettings() {
+            try {
+                homepageSettings = await api.homepage.getSettings();
+                populateHomepageForm(homepageSettings);
+            } catch (error) {
+                console.error('Error loading homepage settings:', error);
+            }
+        }
+
+        function populateHomepageForm(settings) {
+            if (!settings) return;
+
+            // Hero
+            document.getElementById('hp_heroTitleAr').value = settings.heroTitleAr || '';
+            document.getElementById('hp_heroTitleEn').value = settings.heroTitleEn || '';
+            document.getElementById('hp_heroSubtitleAr').value = settings.heroSubtitleAr || '';
+            document.getElementById('hp_heroSubtitleEn').value = settings.heroSubtitleEn || '';
+
+            // Buttons
+            document.getElementById('hp_loginButtonTextAr').value = settings.loginButtonTextAr || '';
+            document.getElementById('hp_loginButtonTextEn').value = settings.loginButtonTextEn || '';
+            document.getElementById('hp_loginButtonVisible').checked = settings.loginButtonVisible !== false;
+
+            document.getElementById('hp_registerButtonTextAr').value = settings.registerButtonTextAr || '';
+            document.getElementById('hp_registerButtonTextEn').value = settings.registerButtonTextEn || '';
+            document.getElementById('hp_registerButtonVisible').checked = settings.registerButtonVisible !== false;
+
+            // Sections Visibility
+            document.getElementById('hp_featuresSectionVisible').checked = settings.featuresSectionVisible !== false;
+            document.getElementById('hp_plansSectionVisible').checked = settings.plansSectionVisible !== false;
+            document.getElementById('hp_aboutSectionVisible').checked = settings.aboutSectionVisible !== false;
+            document.getElementById('hp_contactSectionVisible').checked = settings.contactSectionVisible !== false;
+
+            // Features
+            document.getElementById('hp_featuresTitleAr').value = settings.featuresTitleAr || '';
+            document.getElementById('hp_featuresTitleEn').value = settings.featuresTitleEn || '';
+
+            // About
+            document.getElementById('hp_aboutTitleAr').value = settings.aboutTitleAr || '';
+            document.getElementById('hp_aboutTitleEn').value = settings.aboutTitleEn || '';
+            document.getElementById('hp_aboutContentAr').value = settings.aboutContentAr || '';
+            document.getElementById('hp_aboutContentEn').value = settings.aboutContentEn || '';
+
+            // Footer
+            document.getElementById('hp_footerTextAr').value = settings.footerTextAr || '';
+            document.getElementById('hp_footerTextEn').value = settings.footerTextEn || '';
+        }
+
+        async function saveHomepageSettings() {
+            const updateData = {
+                heroTitleAr: document.getElementById('hp_heroTitleAr').value,
+                heroTitleEn: document.getElementById('hp_heroTitleEn').value,
+                heroSubtitleAr: document.getElementById('hp_heroSubtitleAr').value,
+                heroSubtitleEn: document.getElementById('hp_heroSubtitleEn').value,
+
+                loginButtonTextAr: document.getElementById('hp_loginButtonTextAr').value,
+                loginButtonTextEn: document.getElementById('hp_loginButtonTextEn').value,
+                loginButtonVisible: document.getElementById('hp_loginButtonVisible').checked,
+
+                registerButtonTextAr: document.getElementById('hp_registerButtonTextAr').value,
+                registerButtonTextEn: document.getElementById('hp_registerButtonTextEn').value,
+                registerButtonVisible: document.getElementById('hp_registerButtonVisible').checked,
+
+                featuresSectionVisible: document.getElementById('hp_featuresSectionVisible').checked,
+                plansSectionVisible: document.getElementById('hp_plansSectionVisible').checked,
+                aboutSectionVisible: document.getElementById('hp_aboutSectionVisible').checked,
+                contactSectionVisible: document.getElementById('hp_contactSectionVisible').checked,
+
+                featuresTitleAr: document.getElementById('hp_featuresTitleAr').value,
+                featuresTitleEn: document.getElementById('hp_featuresTitleEn').value,
+
+                aboutTitleAr: document.getElementById('hp_aboutTitleAr').value,
+                aboutTitleEn: document.getElementById('hp_aboutTitleEn').value,
+                aboutContentAr: document.getElementById('hp_aboutContentAr').value,
+                aboutContentEn: document.getElementById('hp_aboutContentEn').value,
+
+                footerTextAr: document.getElementById('hp_footerTextAr').value,
+                footerTextEn: document.getElementById('hp_footerTextEn').value,
+            };
+
+            try {
+                await api.homepage.updateSettings(updateData);
+                showToast(t('common.message.success') || 'تم حفظ التغييرات بنجاح', 'success');
+                homepageSettings = { ...homepageSettings, ...updateData };
+            } catch (error) {
+                console.error('Error saving homepage settings:', error);
+                showToast(t('common.message.error') || 'فشل في حفظ التغييرات', 'error');
+            }
+        }
+
+        // ==================== PLANS ====================
+
+        async function loadPlans() {
+            try {
+                plans = await api.subscriptions.getPlans(true);
+                renderPlansTable();
+            } catch (error) {
+                console.error('Error loading plans:', error);
+                showToast(t('institutions.form.load_plans_error') || 'فشل في تحميل الباقات', 'error');
+            }
+        }
+
+        function renderPlansTable() {
+            const tbody = document.getElementById('plansTableBody');
+
+            if (!plans || plans.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                            لا توجد باقات. قم بإضافة باقة جديدة.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Store original prices
+            plans.forEach(p => {
+                originalPrices[p.id] = p.price;
+            });
+
+            tbody.innerHTML = plans.map(plan => `
+                <tr data-plan-id="${plan.id}">
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.5rem;">${getDurationEmoji(plan.durationMonths)}</span>
+                            <div>
+                                <strong style="color: white;">${plan.name}</strong>
+                                ${plan.nameEn ? `<br><small style="color: #64748b;">${plan.nameEn}</small>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="color: #818cf8; font-weight: 600;">${plan.durationMonths}</span> ${plan.durationMonths === 1 ? t('common.label.month') : t('common.label.months')}
+                    </td>
+                    <td>
+                        <input type="number" 
+                               class="price-input" 
+                               value="${plan.price}" 
+                               data-plan-id="${plan.id}"
+                               onchange="markPriceChanged(${plan.id})"
+                               min="0" 
+                               step="0.01">
+                    </td>
+                    <td>
+                        <span class="status-badge ${plan.isActive ? 'active' : 'inactive'}">
+                            ${plan.isActive ? '✓ ' + t('common.label.active') : '○ ' + t('common.label.inactive')}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-icon" onclick="togglePlanVisibility(${plan.id})" title="${plan.isActive ? 'إخفاء' : 'إظهار'}">
+                                ${plan.isActive ?
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+                    : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+                }
+                            </button>
+                            <button class="btn-icon danger" onclick="deletePlan(${plan.id}, '${plan.name}')" title="حذف">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getDurationEmoji(months) {
+            if (months === 1) return '📅';
+            if (months <= 3) return '📆';
+            if (months <= 6) return '🗓️';
+            return '📅';
+        }
+
+        function markPriceChanged(planId) {
+            document.getElementById('saveAllBtn').style.display = 'inline-flex';
+        }
+
+        async function saveAllPrices() {
+            const inputs = document.querySelectorAll('.price-input');
+            const changes = [];
+
+            // Identify changes first
+            for (const input of inputs) {
+                const planId = parseInt(input.dataset.planId);
+                const newPrice = parseFloat(input.value);
+
+                if (originalPrices[planId] !== newPrice) {
+                    changes.push({ planId, price: newPrice });
+                }
+            }
+
+            if (changes.length === 0) return;
+
+            showConfirmModal({
+                title: 'حفظ التغييرات',
+                message: 'هل أنت متأكد من حفظ تغيرات الأسعار؟',
+                confirmText: 'حفظ',
+                icon: '💾',
+                btnClass: 'btn-primary',
+                onConfirm: async () => {
+                    let errorOccurred = false;
+                    for (const change of changes) {
+                        try {
+                            await api.subscriptions.updatePlan(change.planId, { price: change.price });
+                            originalPrices[change.planId] = change.price;
+                        } catch (error) {
+                            console.error(`Error updating plan ${change.planId}:`, error);
+                            errorOccurred = true;
+                        }
+                    }
+
+                    if (!errorOccurred) {
+                        showToast('تم حفظ جميع التغييرات بنجاح', 'success');
+                        document.getElementById('saveAllBtn').style.display = 'none';
+                    } else {
+                        showToast('حدث خطأ أثناء حفظ بعض التغييرات', 'warning');
+                        // Keep button visible to retry
+                    }
+                }
+            });
+        }
+
+        async function togglePlanVisibility(planId) {
+            try {
+                await api.subscriptions.togglePlanVisibility(planId);
+                await loadPlans();
+                showToast('تم تحديث حالة الباقة', 'success');
+            } catch (error) {
+                console.error('Error toggling plan:', error);
+                showToast('فشل في تحديث الباقة', 'error');
+            }
+        }
+
+        function deletePlan(planId, planName) {
+            showConfirmModal({
+                title: t('tools.plans.delete_title') || 'Delete Plan',
+                message: (t('tools.plans.delete_message') || 'Are you sure you want to delete plan') + ` "${planName}"?`,
+                confirmText: t('common.button.delete'),
+                icon: '🗑️',
+                btnClass: 'btn-danger',
+                onConfirm: async () => {
+                    try {
+                        await api.subscriptions.deletePlan(planId);
+                        await loadPlans();
+                        showToast('تم حذف الباقة بنجاح', 'success');
+                    } catch (error) {
+                        console.error('Error deleting plan:', error);
+                        showToast(error.message || 'فشل في حذف الباقة', 'error');
+                    }
+                }
+            });
+        }
+
+        function toggleAddPlanForm() {
+            const form = document.getElementById('addPlanForm');
+            form.classList.toggle('active');
+
+            if (!form.classList.contains('active')) {
+                // Clear form
+                document.getElementById('newPlanName').value = '';
+                document.getElementById('newPlanNameEn').value = '';
+                document.getElementById('newPlanDuration').value = '';
+                document.getElementById('newPlanPrice').value = '';
+            }
+        }
+
+        async function savePlan() {
+            const name = document.getElementById('newPlanName').value.trim();
+            const nameEn = document.getElementById('newPlanNameEn').value.trim();
+            const durationMonths = parseInt(document.getElementById('newPlanDuration').value);
+            const price = parseFloat(document.getElementById('newPlanPrice').value);
+
+            if (!name) {
+                showToast('يرجى إدخال اسم الباقة', 'error');
+                return;
+            }
+
+            if (!durationMonths || durationMonths < 1) {
+                showToast('يرجى إدخال مدة صحيحة', 'error');
+                return;
+            }
+
+            if (isNaN(price) || price < 0) {
+                showToast('يرجى إدخال سعر صحيح', 'error');
+                return;
+            }
+
+            try {
+                await api.subscriptions.createPlan({
+                    name,
+                    nameEn,
+                    durationMonths,
+                    price,
+                    sortOrder: plans.length + 1,
+                });
+
+                toggleAddPlanForm();
+                await loadPlans();
+                showToast('تم إضافة الباقة بنجاح', 'success');
+            } catch (error) {
+                console.error('Error creating plan:', error);
+                showToast('فشل في إضافة الباقة', 'error');
+            }
+        }
+
+        function toggleFreeTrial() {
+            const isEnabled = document.getElementById('freeTrialToggle').checked;
+            showToast(isEnabled ? 'تم تفعيل الشهر المجاني' : 'تم إلغاء الشهر المجاني', 'success');
+            // TODO: Save to settings
+        }
+
+        // ==================== ANNOUNCEMENTS ====================
+
+        async function loadAnnouncements() {
+            try {
+                announcements = await api.announcements.getAll();
+                renderAnnouncements();
+            } catch (error) {
+                console.error('Error loading announcements:', error);
+                document.getElementById('announcementsList').innerHTML = `
+                    <p style="color: #94a3b8; text-align: center;">فشل في تحميل الإعلانات</p>
+                `;
+            }
+        }
+
+        function renderAnnouncements() {
+            const container = document.getElementById('announcementsList');
+
+            if (!announcements || announcements.length === 0) {
+                container.innerHTML = `
+                    <p style="color: #94a3b8; text-align: center; padding: 2rem;">
+                        لا توجد إعلانات. قم بإنشاء إعلان جديد.
+                    </p>
+                `;
+                return;
+            }
+
+            container.innerHTML = announcements.map(ann => {
+                const currentLang = localStorage.getItem('locale') || 'ar';
+                const text = currentLang === 'ar' ? ann.textAr : (ann.textEn || ann.textAr);
+
+                return `
+                <div class="announcement-item">
+                    <div class="announcement-preview" style="background: ${ann.backgroundColor}; color: ${ann.textColor};">
+                        📢 ${text}
+                    </div>
+                    <div class="announcement-info">
+                        <span class="status-badge ${ann.isActive ? 'active' : 'inactive'}">
+                            ${ann.isActive ? '✓ ' + t('common.label.active') : '○ ' + t('common.label.inactive')}
+                        </span>
+                        <small>${formatDate(ann.createdAt)}</small>
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn-icon" onclick="toggleAnnouncementStatus(${ann.id})" title="${ann.isActive ? 'إلغاء التفعيل' : 'تفعيل'}">
+                            ${ann.isActive ?
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>'
+                        : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
+                    }
+                        </button>
+                        <button class="btn-icon" onclick="editAnnouncement(${ann.id})" title="تعديل">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                        </button>
+                        <button class="btn-icon danger" onclick="deleteAnnouncement(${ann.id})" title="حذف">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        function openAnnouncementModal(announcement = null) {
+            editingAnnouncementId = announcement ? announcement.id : null;
+
+            document.getElementById('announcementModalTitle').textContent =
+                announcement ? t('tools.announcements.modal_edit') : t('tools.announcements.modal_create');
+
+            document.getElementById('announcementTextAr').value = announcement?.textAr || '';
+            document.getElementById('announcementTextEn').value = announcement?.textEn || '';
+            document.getElementById('bgColor').value = announcement?.backgroundColor || '#3b82f6';
+            document.getElementById('textColor').value = announcement?.textColor || '#ffffff';
+            document.getElementById('announcementIsActive').checked = announcement?.isActive || false;
+
+            updatePreview();
+            document.getElementById('announcementModal').classList.add('active');
+        }
+
+        function closeAnnouncementModal() {
+            document.getElementById('announcementModal').classList.remove('active');
+            editingAnnouncementId = null;
+        }
+
+        function updatePreview() {
+            const textAr = document.getElementById('announcementTextAr').value || 'معاينة الإعلان...';
+            const textEn = document.getElementById('announcementTextEn').value || 'Announcement preview...';
+            const bgColor = document.getElementById('bgColor').value;
+            const textColor = document.getElementById('textColor').value;
+
+            const preview = document.getElementById('previewBanner');
+            preview.style.backgroundColor = bgColor;
+            preview.style.color = textColor;
+
+            const currentLang = localStorage.getItem('locale') || 'ar';
+            document.getElementById('previewText').textContent = currentLang === 'ar' ? textAr : textEn;
+        }
+
+        function setBgColor(color) {
+            document.getElementById('bgColor').value = color;
+            updatePreview();
+        }
+
+        function setTextColor(color) {
+            document.getElementById('textColor').value = color;
+            updatePreview();
+        }
+
+        async function saveAnnouncement() {
+            const textAr = document.getElementById('announcementTextAr').value.trim();
+            const textEn = document.getElementById('announcementTextEn').value.trim();
+            const backgroundColor = document.getElementById('bgColor').value;
+            const textColor = document.getElementById('textColor').value;
+            const isActive = document.getElementById('announcementIsActive').checked;
+
+            if (!textAr || !textEn) {
+                showToast('يرجى إدخال النص بالعربية والإنجليزية', 'error');
+                return;
+            }
+
+            const actionText = editingAnnouncementId ? t('tools.announcements.modal_edit') : t('tools.announcements.create');
+
+            const confirmMessage = editingAnnouncementId ?
+                t('tools.announcements.save_confirm_msg_update') :
+                t('tools.announcements.save_confirm_msg_create');
+
+            showConfirmModal({
+                title: actionText,
+                message: confirmMessage,
+                confirmText: t('common.button.save'),
+                icon: '💾',
+                btnClass: 'btn-danger',
+                onConfirm: async () => {
+                    try {
+                        if (editingAnnouncementId) {
+                            await api.announcements.update(editingAnnouncementId, {
+                                textAr,
+                                textEn,
+                                backgroundColor,
+                                textColor,
+                                isActive,
+                            });
+                            showToast(t('common.message.success'), 'success');
+                        } else {
+                            await api.announcements.create({
+                                textAr,
+                                textEn,
+                                backgroundColor,
+                                textColor,
+                                isActive,
+                            });
+                            showToast(t('common.message.success'), 'success');
+                        }
+
+                        closeAnnouncementModal();
+                        await loadAnnouncements();
+                    } catch (error) {
+                        console.error('Error saving announcement:', error);
+                        showToast(t('common.message.error'), 'error');
+                    }
+                }
+            });
+        }
+
+        function editAnnouncement(id) {
+            const announcement = announcements.find(a => a.id === id);
+            if (announcement) {
+                openAnnouncementModal(announcement);
+            }
+        }
+
+        async function toggleAnnouncementStatus(id) {
+            try {
+                await api.announcements.toggle(id);
+                await loadAnnouncements();
+                showToast('تم تحديث حالة الإعلان', 'success');
+            } catch (error) {
+                console.error('Error toggling announcement:', error);
+                showToast('فشل في تحديث الإعلان', 'error');
+            }
+        }
+
+        function deleteAnnouncement(id) {
+            showConfirmModal({
+                title: t('tools.announcements.delete_title'),
+                message: t('tools.announcements.delete_message'),
+                confirmText: t('common.button.delete'),
+                icon: '🗑️',
+                btnClass: 'btn-danger',
+                onConfirm: async () => {
+                    try {
+                        await api.announcements.delete(id);
+                        await loadAnnouncements();
+                        showToast('تم حذف الإعلان بنجاح', 'success');
+                    } catch (error) {
+                        console.error('Error deleting announcement:', error);
+                        showToast('فشل في حذف الإعلان', 'error');
+                    }
+                }
+            });
+        }
+
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize
+        initPage();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center justify-between mb-8"
+        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+        <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: 2rem;">📦</div>
+          <div>
+            <h1 class="text-3xl font-bold text-white" data-i18n-key="products.title">المنتجات</h1>
+            <p class="text-secondary" data-i18n-key="products.product_details">إدارة منتجات القروض</p>
+          </div>
+        </div>
+        <a href="products-new.html" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span data-i18n-key="products.add_product">إضافة منتج</span>
+        </a>
+      </div>
+
+      <!-- Products Table -->
+      <div class="glass-card">
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th data-i18n-key="products.id">ID</th>
+                <th data-i18n-key="products.name">Name</th>
+                <th data-i18n-key="products.description">Description</th>
+                <th data-i18n-key="products.scope">Scope</th>
+                <th data-i18n-key="products.status">Status</th>
+                <th data-i18n-key="products.created">Created</th>
+                <th data-i18n-key="products.actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 3rem;">
+                  <div class="spinner" style="margin: 0 auto;"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div id="paginationContainer" class="flex justify-center"
+          style="display: flex; justify-content: center; margin-top: 2rem; padding: 1rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script src="../components/pagination.js"></script>
+  <script>
+    async function initPage() {
+      await waitForI18n();
+
+      // Check authentication
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const user = getCurrentUser();
+
+      // Allow Super Admin, Institution, and Branch roles
+      if (!['Super Admin', 'Institution', 'Branch'].includes(user.roleName)) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('products.title'),
+        t('products.product_details')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('products');
+
+      // Translate all static content with data-i18n-key attributes
+      window.i18n.translatePage();
+
+      // Load products with pagination
+      loadProducts();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+
+    let currentPage = 1;
+    let totalPages = 1;
+    const pageSize = 10;
+
+    async function loadProducts(page = 1) {
+      try {
+        const response = await api.products.getAll(page, pageSize);
+        currentPage = response.meta.page;
+        totalPages = response.meta.totalPages;
+        renderProducts(response.data);
+      } catch (error) {
+        console.error('Error loading products:', error);
+        showToast(t('products.failed_to_load'), 'error');
+        document.getElementById('productsTableBody').innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('products.failed_to_load')}</td></tr>`;
+      }
+    }
+
+    function changePage(page) {
+      if (page < 1 || page > totalPages || page === currentPage) return;
+      loadProducts(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderProducts(products) {
+      const tbody = document.getElementById('productsTableBody');
+
+      if (products.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('products.no_products')}</td></tr>`;
+        return;
+      }
+
+      const productsHTML = products.map(product => {
+        let scopeBadge = '';
+        if (product.branchId) {
+          scopeBadge = `<span class="badge badge-info">${translateData(product.branch?.name) || t('products.branch')}</span>`;
+        } else if (product.institutionId) {
+          scopeBadge = `<span class="badge badge-primary">${translateData(product.institution?.name) || t('products.institution')}</span>`;
+        } else {
+          scopeBadge = `<span class="badge badge-secondary">${t('products.global')}</span>`;
+        }
+
+        return `
+        <tr>
+          <td><span class="font-semibold">#${product.productId}</span></td>
+          <td class="text-white font-medium">${product.name}</td>
+          <td class="text-secondary">${product.description || '-'}</td>
+          <td>${scopeBadge}</td>
+          <td>
+            <span class="badge ${product.isActive ? 'badge-success' : 'badge-danger'}">
+              ${product.isActive ? t('products.active') : t('products.inactive')}
+            </span>
+          </td>
+          <td class="text-secondary">${formatDate(product.createdAt)}</td>
+          <td>
+            <div class="flex items-center gap-2" style="display: flex; gap: 0.5rem;">
+              <a href="products-view.html?id=${product.productId}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
+                ${t('products.view_details') || 'View Details'}
+              </a>
+              <a href="products-edit.html?id=${product.productId}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
+                ${t('products.edit')}
+              </a>
+            </div>
+          </td>
+        </tr>
+      `}).join('');
+
+      tbody.innerHTML = productsHTML;
+
+      // Render pagination
+      const paginationContainer = document.getElementById('paginationContainer');
+      if (paginationContainer) {
+        paginationContainer.innerHTML = createPagination(currentPage, totalPages, changePage);
+      }
+    }
+  </script>
+</body>
+
+</html>

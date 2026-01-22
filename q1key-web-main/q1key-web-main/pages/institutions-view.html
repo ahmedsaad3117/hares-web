@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Institution Details - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8"
+        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="institutions.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="institutions.view_institution">Institution Details
+          </h1>
+          <p class="text-secondary" data-i18n-key="institutions.view_institution_info">View institution information</p>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div id="loadingContainer" class="loading-container">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Institution Details -->
+      <div id="institutionContainer" style="display: none;">
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-6"
+            style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div>
+              <h2 id="institutionName" class="text-2xl font-bold text-white mb-2"></h2>
+              <p class="text-muted"><span data-i18n-key="institutions.view_page.institution_id">Institution ID</span>:
+                <span id="institutionId"></span>
+              </p>
+            </div>
+            <div class="flex gap-2" style="display: flex; gap: 0.5rem; align-items: center;">
+              <span id="statusBadge" class="badge"></span>
+
+              <div class="meatball-container">
+                <button class="meatball-btn">⋮</button>
+                <div class="meatball-dropdown">
+                  <a id="whatsappBtn" class="dropdown-item" style="display: none; color: #25D366;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                      fill="currentColor">
+                      <path
+                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                    </svg>
+                    <span>WhatsApp</span>
+                  </a>
+                  <a id="editBtn" class="dropdown-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    <span data-i18n-key="common.button.edit">Edit</span>
+                  </a>
+                  <button id="deleteBtn" class="dropdown-item text-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    <span data-i18n-key="common.button.delete">Delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-6"
+            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.tax_id">Tax ID</p>
+              <p id="taxId" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.phone_number">Phone Number</p>
+              <p id="phoneNumber" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.email">Email</p>
+              <p id="email" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.max_users">Max Users</p>
+              <p id="maxUsers" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.can_create_branches">Can Create Branches
+              </p>
+              <p id="canCreateBranches" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.expiration_date">Expiration Date</p>
+              <p id="expirationDate" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.created_at">Created At</p>
+              <p id="createdAt" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="institutions.view_page.last_updated">Last Updated</p>
+              <p id="updatedAt" class="text-white font-medium" style="color: #fff;"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="glass-card p-6 mb-6">
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="institutions.view_page.statistics">Statistics
+          </h3>
+          <div id="statsContainer">
+            <div class="loading-container">
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Branches -->
+        <div class="glass-card p-6">
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="institutions.view_page.branches">Branches</h3>
+          <div id="branchesContainer">
+            <div class="loading-container">
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/ui-utils.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    async function initPage() {
+      await waitForI18n();
+
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('institutions.institution_details'),
+        t('institutions.view_institution_info')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('institutions');
+
+      // Load institution data
+      await loadInstitution();
+
+      // Initialize meatball menu after data is loaded and DOM populated
+      initMeatballMenu();
+    }
+
+    const loadingContainer = document.getElementById('loadingContainer');
+    const institutionContainer = document.getElementById('institutionContainer');
+
+    // Get institution ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const institutionId = urlParams.get('id');
+
+    if (!institutionId) {
+      window.location.href = 'institutions.html';
+    }
+
+    let institutionData = null;
+    let institutionStats = null;
+
+    // Load institution data
+    async function loadInstitution() {
+      try {
+        institutionData = await api.institutions.getById(institutionId);
+
+        // Populate institution details
+        document.getElementById('institutionName').textContent = institutionData.name;
+        document.getElementById('institutionId').textContent = institutionData.institutionId;
+        document.getElementById('taxId').textContent = institutionData.taxId || '--';
+        document.getElementById('phoneNumber').textContent = institutionData.phoneNumber || '--';
+        document.getElementById('email').textContent = institutionData.email || '--';
+        document.getElementById('maxUsers').textContent = institutionData.maxUsers;
+
+        if (institutionData.phoneNumber && createWhatsappLink(institutionData.phoneNumber)) {
+          const waBtn = document.getElementById('whatsappBtn');
+          waBtn.style.display = 'flex';
+          waBtn.onclick = () => openWhatsapp(institutionData.phoneNumber);
+
+          // Also append icon next to phone number for visibility
+          const phoneEl = document.getElementById('phoneNumber');
+          phoneEl.innerHTML = `${institutionData.phoneNumber} 
+             <button onclick="openWhatsapp('${institutionData.phoneNumber}')" class="btn-whatsapp" style="padding: 0.25rem 0.5rem; margin-left: 0.5rem;" title="Chat on WhatsApp">
+               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+             </button>`;
+        }
+
+        document.getElementById('canCreateBranches').innerHTML = institutionData.canCreateBranches
+          ? `<span class="badge badge-success">✓ ${t('institutions.view_page.yes')}</span>`
+          : `<span class="badge badge-danger">✗ ${t('institutions.view_page.no')}</span>`;
+        document.getElementById('expirationDate').textContent = institutionData.expirationDate ? formatDate(institutionData.expirationDate) : t('institutions.view_page.no_expiration');
+        document.getElementById('createdAt').textContent = formatDateTime(institutionData.createdAt);
+        document.getElementById('updatedAt').textContent = formatDateTime(institutionData.updatedAt);
+
+        const statusBadge = document.getElementById('statusBadge');
+        statusBadge.textContent = institutionData.isActive ? t('institutions.view_page.active') : t('institutions.view_page.inactive');
+        statusBadge.className = `badge ${institutionData.isActive ? 'badge-success' : 'badge-danger'}`;
+
+        document.getElementById('editBtn').href = `institutions-edit.html?id=${institutionId}`;
+
+        loadingContainer.style.display = 'none';
+        institutionContainer.style.display = 'block';
+
+        // Load statistics and branches
+        await loadStatistics();
+        loadBranches();
+
+        // Setup delete button based on integrity
+        setupDeleteAction();
+
+      } catch (error) {
+        console.error('Error loading institution:', error);
+        showToast('Failed to load institution', 'error');
+        setTimeout(() => window.location.href = 'institutions.html', 2000);
+      }
+    }
+
+    async function loadStatistics() {
+      try {
+        institutionStats = await api.institutions.getStatistics(institutionId);
+        const statsContainer = document.getElementById('statsContainer');
+
+        statsContainer.innerHTML = `
+          <div class="grid grid-cols-4 gap-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+            <div style="padding: 1.5rem; border-radius: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="font-size: 1.5rem;">🏢</div>
+                <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_branches">${t('institutions.view_page.total_branches')}</p>
+              </div>
+              <p class="text-2xl font-bold text-white" style="color: #fff;">${institutionStats.totalBranches || 0}</p>
+            </div>
+            <div style="padding: 1.5rem; border-radius: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="font-size: 1.5rem;">👥</div>
+                <p class="text-muted text-sm" data-i18n-key="institutions.view_page.active_users">${t('institutions.view_page.active_users')}</p>
+              </div>
+              <p class="text-2xl font-bold text-white" style="color: #fff;">${institutionStats.activeUsers || 0}</p>
+            </div>
+            <div style="padding: 1.5rem; border-radius: 12px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="font-size: 1.5rem;">👤</div>
+                <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_customers">${t('institutions.view_page.total_customers')}</p>
+              </div>
+              <p class="text-2xl font-bold text-white" style="color: #fff;">${institutionStats.totalCustomers || 0}</p>
+            </div>
+            <div style="padding: 1.5rem; border-radius: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <div style="font-size: 1.5rem;">💰</div>
+                <p class="text-muted text-sm" data-i18n-key="institutions.view_page.total_loans">${t('institutions.view_page.total_loans')}</p>
+              </div>
+              <p class="text-2xl font-bold text-white" style="color: #fff;">${institutionStats.totalLoans || 0}</p>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error loading statistics:', error);
+        document.getElementById('statsContainer').innerHTML = `<p class="text-muted" data-i18n-key="institutions.view_page.failed_to_load_statistics">${t('institutions.view_page.failed_to_load_statistics')}</p>`;
+      }
+    }
+
+    async function loadBranches() {
+      try {
+        const branches = await api.branches.getAll(1, 100, institutionId);
+        const branchesContainer = document.getElementById('branchesContainer');
+
+        if (branches.data.length === 0) {
+          branchesContainer.innerHTML = `<p class="text-muted" data-i18n-key="institutions.view_page.no_branches_found">${t('institutions.view_page.no_branches_found')}</p>`;
+          return;
+        }
+
+        const branchesHTML = branches.data.map(branch => `
+          <div style="padding: 1rem; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 0.75rem;">
+            <div class="flex items-center justify-between" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <a href="branches-view.html?id=${branch.branchId}" class="text-white font-medium" style="color: #fff; text-decoration: underline; font-size: 1rem;">${branch.name}</a>
+                <p class="text-sm text-muted" style="margin-top: 0.25rem;"><span data-i18n-key="institutions.view_page.branch_id">${t('institutions.view_page.branch_id')}</span>: #${branch.branchId}</p>
+              </div>
+              <span class="badge ${branch.isActive ? 'badge-success' : 'badge-danger'}">${branch.isActive ? t('institutions.view_page.active') : t('institutions.view_page.inactive')}</span>
+            </div>
+          </div>
+        `).join('');
+
+        branchesContainer.innerHTML = branchesHTML;
+      } catch (error) {
+        console.error('Error loading branches:', error);
+        document.getElementById('branchesContainer').innerHTML = `<p class="text-muted" data-i18n-key="institutions.view_page.failed_to_load_branches">${t('institutions.view_page.failed_to_load_branches')}</p>`;
+      }
+    }
+
+    function setupDeleteAction() {
+      const deleteBtn = document.getElementById('deleteBtn');
+
+      // Check integrity: totalBranches, totalCustomers, totalLoans
+      // We allow deletion even if activeUsers > 0 because the backend will now delete them automatically
+      const hasLinks = institutionStats && (
+        institutionStats.totalBranches > 0 ||
+        institutionStats.totalCustomers > 0 ||
+        institutionStats.totalLoans > 0
+      );
+
+      if (hasLinks) {
+        deleteBtn.disabled = true;
+        deleteBtn.classList.add('opacity-50');
+        deleteBtn.title = t('institutions.view_page.delete_prevented_hint') || 'Cannot delete institution with existing data';
+
+        // Add a message if linked
+        const warningBox = document.createElement('div');
+        warningBox.style.padding = '0.75rem';
+        warningBox.style.background = 'rgba(239, 68, 68, 0.1)';
+        warningBox.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+        warningBox.style.borderRadius = '8px';
+        warningBox.style.marginTop = '1rem';
+        warningBox.innerHTML = `
+          <p class="text-sm text-danger" style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            ${t('institutions.view_page.delete_prevented_msg') || 'Cannot be deleted: Linked to branches, users or records.'}
+          </p>
+        `;
+        institutionContainer.prepend(warningBox);
+      } else {
+        deleteBtn.addEventListener('click', () => {
+          showDeleteModal({
+            title: t('institutions.view_page.delete_confirm_title') || 'Delete Institution',
+            itemName: institutionData.name,
+            warningText: t('institutions.view_page.delete_warning') || 'This will permanently remove the institution and all access. This action cannot be undone.',
+            onConfirm: async () => {
+              try {
+                await api.institutions.delete(institutionId);
+                showToast(t('institutions.deleted_success'), 'success');
+                window.location.href = 'institutions.html';
+              } catch (error) {
+                console.error('Error deleting institution:', error);
+                showToast(error.message || t('institutions.delete_failed'), 'error');
+              }
+            }
+          });
+        });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+  </script>
+</body>
+
+</html>

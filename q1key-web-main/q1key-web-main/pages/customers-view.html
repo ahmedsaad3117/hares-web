@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Details - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <!-- Page Header -->
+      <div class="flex items-center justify-between gap-3 mb-8"
+        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <a href="customers.html" class="btn btn-secondary" style="padding: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+          </a>
+          <div>
+            <h1 class="text-3xl font-bold text-white" data-i18n-key="customers.view_page.customer_details_title">
+              Customer
+              Details</h1>
+            <p class="text-secondary" data-i18n-key="customers.view_page.view_profile">View customer profile</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons Container (Safe Zone) -->
+        <div id="headerActions" style="display: flex; gap: 10px; align-items: center;">
+          <!-- Dynamic Actions will appear here -->
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div id="loadingContainer" class="loading-container">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Link Banner (Hidden by default) -->
+      <!-- Link Banner will be injected dynamically -->
+
+      <!-- Customer Details -->
+      <div id="customerContainer" style="display: none;">
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-6"
+            style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div class="flex items-center gap-4" style="display: flex; align-items: center; gap: 1rem;">
+              <div id="customerAvatar"
+                style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #4f46e5); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 2rem;">
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                  <h2 id="customerName" class="text-2xl font-bold text-white" style="margin: 0;"></h2>
+                  <span id="trustStatusBadge"></span>
+                </div>
+                <p class="text-muted" style="margin: 0;">
+                  <span data-i18n-key="customers.view_page.customer_id">Customer ID</span>:
+                  <span id="customerIdDisplay"></span>
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-2" style="display: flex; gap: 0.5rem; align-items: center;">
+              <div class="meatball-container">
+                <button class="meatball-btn">⋮</button>
+                <div class="meatball-dropdown">
+                  <a id="whatsappBtn" class="dropdown-item" style="display: none; color: #25D366;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                      fill="currentColor">
+                      <path
+                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                    </svg>
+                    <span>WhatsApp</span>
+                  </a>
+                  <a id="editBtn" class="dropdown-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    <span data-i18n-key="common.button.edit">Edit</span>
+                  </a>
+                  <button id="softDeleteBtn" class="dropdown-item" style="color: #f59e0b; display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18" />
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                    </svg>
+                    <span>نقل للمحذوفين</span>
+                  </button>
+                  <button id="deleteBtn" class="dropdown-item text-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    <span data-i18n-key="common.button.delete">Delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-6"
+            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.national_id">National ID</p>
+              <p id="nationalId" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.phone_number">Phone Number</p>
+              <p id="phoneNumber" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.institution">Institution</p>
+              <p id="institutionInfo" class="text-white font-medium">--</p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.added_by">Added By</p>
+              <p id="creatorInfo" class="text-white font-medium">--</p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.created_at">Created At</p>
+              <p id="createdAt" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="customers.view_page.last_updated">Last Updated</p>
+              <p id="updatedAt" class="text-white font-medium"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Record Section -->
+        <div class="glass-card p-6 mb-6">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h3 class="text-xl font-bold text-white" style="display: flex; align-items: center; gap: 0.5rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span>سجل العميل</span>
+            </h3>
+            <button id="toggleRecordBtn" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+              <span id="toggleRecordArrow">▼</span> عرض السجل
+            </button>
+          </div>
+
+          <!-- Record Content (Hidden by default) -->
+          <div id="customerRecordContent" style="display: none;">
+            <!-- Tabs -->
+            <div class="record-tabs"
+              style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
+              <button class="record-tab active" data-tab="loans"
+                style="padding: 0.5rem 1rem; background: rgba(99, 102, 241, 0.2); border: none; border-radius: 0.5rem; color: white; cursor: pointer; transition: all 0.2s;">
+                <span style="display: flex; align-items: center; gap: 0.5rem;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                  القروض <span id="loansCount" class="badge"
+                    style="background: #6366f1; padding: 0.125rem 0.5rem; border-radius: 1rem; font-size: 0.75rem;">0</span>
+                </span>
+              </button>
+              <button class="record-tab" data-tab="searches"
+                style="padding: 0.5rem 1rem; background: transparent; border: none; border-radius: 0.5rem; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s;">
+                <span style="display: flex; align-items: center; gap: 0.5rem;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  سجلات البحث <span id="searchesCount" class="badge"
+                    style="background: #374151; padding: 0.125rem 0.5rem; border-radius: 1rem; font-size: 0.75rem;">0</span>
+                </span>
+              </button>
+              <button class="record-tab" data-tab="notes"
+                style="padding: 0.5rem 1rem; background: transparent; border: none; border-radius: 0.5rem; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s;">
+                <span style="display: flex; align-items: center; gap: 0.5rem;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                  الملاحظات <span id="notesCount" class="badge"
+                    style="background: #374151; padding: 0.125rem 0.5rem; border-radius: 1rem; font-size: 0.75rem;">0</span>
+                </span>
+              </button>
+            </div>
+
+            <!-- Loans Tab Content -->
+            <div id="loansTab" class="tab-content" style="display: block;">
+              <div id="loansLoading" class="text-center text-muted" style="padding: 2rem;">
+                <div class="spinner" style="margin: 0 auto 1rem;"></div>
+                جاري تحميل القروض...
+              </div>
+              <div id="loansEmpty"
+                style="display: none; text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1" style="margin: 0 auto 1rem; opacity: 0.5;">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <p>لا توجد قروض مسجلة لهذا العميل</p>
+              </div>
+              <div id="loansList" style="display: none;"></div>
+            </div>
+
+            <!-- Search Logs Tab Content -->
+            <div id="searchesTab" class="tab-content" style="display: none;">
+              <div id="searchesLoading" class="text-center text-muted" style="padding: 2rem;">
+                <div class="spinner" style="margin: 0 auto 1rem;"></div>
+                جاري تحميل سجلات البحث...
+              </div>
+              <div id="searchesEmpty"
+                style="display: none; text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1" style="margin: 0 auto 1rem; opacity: 0.5;">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <p>لم يتم البحث عن هذا العميل من قبل أي مؤسسة أخرى</p>
+              </div>
+              <div id="searchesList" style="display: none;"></div>
+            </div>
+
+            <!-- Notes Tab Content -->
+            <div id="notesTab" class="tab-content" style="display: none;">
+              <!-- Notes List (at top) -->
+              <div id="notesLoading" class="text-center text-muted" style="padding: 2rem;">
+                <div class="spinner" style="margin: 0 auto 1rem;"></div>
+                جاري تحميل الملاحظات...
+              </div>
+              <div id="notesEmpty"
+                style="display: none; text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1" style="margin: 0 auto 1rem; opacity: 0.5;">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <p>لا توجد ملاحظات مسجلة لهذا العميل</p>
+                <p style="font-size: 0.8rem; opacity: 0.7;">أضف ملاحظة من النموذج أدناه</p>
+              </div>
+              <div id="notesList" style="display: none; margin-bottom: 1rem;"></div>
+
+              <!-- Add Note Form (at bottom) -->
+              <div class="glass-card p-3"
+                style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2);">
+                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                  <textarea id="newNoteText" class="input" placeholder="أضف ملاحظة جديدة..."
+                    style="flex: 1; min-height: 60px; resize: vertical;"></textarea>
+                  <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <select id="noteCategory" class="input"
+                      style="padding: 0.4rem 0.5rem; font-size: 0.8rem; min-width: 100px;">
+                      <option value="General">عام</option>
+                      <option value="Follow-up">متابعة</option>
+                      <option value="Complaint">شكوى</option>
+                      <option value="Payment Issue">مشكلة دفع</option>
+                    </select>
+                    <button id="addNoteBtn" class="btn btn-primary"
+                      style="padding: 0.4rem 0.75rem; font-size: 0.85rem; white-space: nowrap;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" style="margin-left: 0.25rem;">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                      إضافة
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trust Status Management -->
+        <div id="trustStatusSection" class="glass-card p-6 mb-6" style="display: none;">
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="customers.view_page.trust_status_title">Trust
+            Status Management</h3>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <label for="trustStatusSelect" class="text-muted" style="min-width: 120px;"
+                data-i18n-key="customers.view_page.current_status">Current Status:</label>
+              <select id="trustStatusSelect" class="input" style="flex: 1; max-width: 300px;">
+                <option value="Unverified" data-i18n-key="customers.view_page.trust_status_options.unverified">
+                  Unverified</option>
+                <option value="Trusted" data-i18n-key="customers.view_page.trust_status_options.trusted">Trusted
+                </option>
+                <option value="Suspicious" data-i18n-key="customers.view_page.trust_status_options.suspicious">
+                  Suspicious</option>
+                <option value="Flagged" data-i18n-key="customers.view_page.trust_status_options.flagged">Flagged
+                </option>
+                <option value="Blocked" data-i18n-key="customers.view_page.trust_status_options.blocked">Blocked
+                </option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+              <button id="updateTrustStatusBtn" type="button" class="btn btn-primary" style="padding: 0.5rem 1.5rem;"
+                data-i18n-key="customers.view_page.update_status">
+                Update Status
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="dynamicSections"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/ui-utils.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    let user = null;
+    let customerDataLoaded = null;
+    let customerLoans = [];
+    let targetCustomerId = null;
+
+    // --- GLOBAL LINK FUNCTION ---
+    window.linkCustomerAction = async function () {
+      if (!targetCustomerId) {
+        showToast('خطأ: لم يتم العثور على المعرف', 'error');
+        return;
+      }
+
+      const name = customerDataLoaded ? customerDataLoaded.name : 'العميل';
+
+      showConfirmModal({
+        title: 'ربط العميل',
+        message: 'هل تريد ربط هذا العميل بمؤسستك لتتمكن من إدارته؟',
+        subMessage: name,
+        confirmText: 'ربط بمؤسستي',
+        icon: '🔗',
+        btnClass: 'btn-success', // Green like the original button
+        onConfirm: async () => {
+          try {
+            console.log('Linking ID:', targetCustomerId);
+            await api.customers.link(parseInt(targetCustomerId));
+            showToast(`تم ربط العميل "${name}" بنجاح!`, 'success');
+
+            // Reload after short delay to refresh data
+            setTimeout(() => window.location.reload(), 1000);
+          } catch (err) {
+            console.error('Link Error:', err);
+            showToast(err.message || 'فشل الربط', 'error');
+          }
+        }
+      });
+    };
+
+    async function initPage() {
+      await waitForI18n();
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      targetCustomerId = urlParams.get('id');
+
+      if (!targetCustomerId) {
+        window.location.href = 'customers.html';
+        return;
+      }
+
+      user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(t('customers.customer_details'), t('customers.view_customer_info'));
+      initializeLanguageSwitcher();
+      setActiveNav('customers');
+      window.i18n.translatePage();
+
+      await loadCustomer();
+      initMeatballMenu();
+    }
+
+    // Expose explicitly to window
+    window.handleLinkCustomer = async function () {
+      console.log('handleLinkCustomer called');
+
+      if (!targetCustomerId) {
+        alert('خطأ: رقم العميل مفقود');
+        return;
+      }
+
+      const name = customerDataLoaded ? customerDataLoaded.name : 'العميل';
+
+      showConfirmModal({
+        title: 'ربط العميل',
+        message: 'هل تريد ربط هذا العميل بمؤسستك؟',
+        subMessage: name,
+        confirmText: 'ربط بمؤسستي',
+        icon: '🔗',
+        btnClass: 'btn-success',
+        onConfirm: async () => {
+          const btn = document.getElementById('linkCustomerBtn');
+          const originalText = btn ? btn.innerHTML : 'ربط بمؤسستي';
+
+          if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-left:0.5rem;"></div> جاري الربط...';
+          }
+
+          try {
+            await api.customers.link(parseInt(targetCustomerId));
+            showToast(`تم ربط العميل "${name}" بنجاح!`, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+          } catch (err) {
+            console.error('Link Error:', err);
+            showToast(err.message || 'فشل الربط', 'error');
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = originalText;
+            }
+          }
+        }
+      });
+    };
+
+    // Function to setup Header Actions is removed. Actions are now back in the meatball menu.
+    function setupDropdownVisibility(isExternalCustomer) {
+      const meatballContainer = document.querySelector('.meatball-container');
+      if (!meatballContainer) return;
+
+      if (isExternalCustomer) {
+        meatballContainer.style.display = 'none';
+      } else {
+        meatballContainer.style.display = 'block';
+        // Ensure high z-index for the dropdown interactions
+        meatballContainer.style.zIndex = '100';
+      }
+    }
+
+    // Unified Create Link Banner Function
+    function createLinkBanner() {
+      // 1. Check if banner already exists
+      let banner = document.getElementById('dynamicLinkBanner');
+
+      // 2. If it exists, just ensure it is visible and return
+      if (banner) {
+        banner.style.display = 'flex';
+        return;
+      }
+
+      // 3. Create Banner Element
+      banner = document.createElement('div');
+      banner.id = 'dynamicLinkBanner';
+      banner.className = 'glass-card mb-6';
+      // Ensure high visibility
+      banner.style.cssText = 'background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; position: relative; z-index: 1000; margin-bottom: 2rem;';
+
+      banner.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="background: rgba(245, 158, 11, 0.2); padding: 0.75rem; border-radius: 50%;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-white">عميل خارجي (مؤسسة أخرى)</h3>
+              <p style="color: #fbbf24; font-size: 0.9rem; margin-top: 0.25rem;">يجب ربط هذا العميل بمؤسستك لتتمكن من إضافة قروض أو تعديل بيانه.</p>
+            </div>
+          </div>
+      `;
+
+      // 4. Create Button
+      const btn = document.createElement('button');
+      btn.id = 'linkCustomerBtn';
+      btn.textContent = 'ربط بمؤسستي';
+      btn.className = 'btn';
+      btn.style.cssText = 'background: #10b981; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; cursor: pointer; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-right: auto;';
+
+      btn.onclick = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.handleLinkCustomer) {
+          window.handleLinkCustomer();
+        } else if (window.linkCustomerAction) {
+          window.linkCustomerAction();
+        }
+      };
+
+      banner.appendChild(btn);
+
+      // 5. Inject into DOM
+      // Try to inject before customer container
+      const container = document.querySelector('.page-content');
+      const details = document.getElementById('customerContainer');
+
+      if (container && details) {
+        container.insertBefore(banner, details);
+      } else {
+        // Fallback: append to page content
+        if (container) container.appendChild(banner);
+      }
+    }
+
+    async function loadCustomer(retryCount = 0) {
+      try {
+        const data = await api.customers.getById(targetCustomerId);
+        customerDataLoaded = data;
+
+        // Populate fields
+        const avatar = document.getElementById('customerAvatar');
+        const nameEl = document.getElementById('customerName');
+        const idEl = document.getElementById('customerIdDisplay');
+        const natId = document.getElementById('nationalId');
+        const phone = document.getElementById('phoneNumber');
+        const inst = document.getElementById('institutionInfo');
+        const creator = document.getElementById('creatorInfo');
+        const created = document.getElementById('createdAt');
+        const updated = document.getElementById('updatedAt');
+        const badge = document.getElementById('trustStatusBadge');
+        const editBtn = document.getElementById('editBtn');
+
+        if (avatar) avatar.textContent = data.name.charAt(0).toUpperCase();
+        if (nameEl) nameEl.textContent = data.name;
+        if (idEl) idEl.textContent = data.customerId;
+        if (natId) natId.textContent = data.nationalId;
+        if (phone) {
+          phone.textContent = data.phoneNumber || '--';
+
+          if (data.phoneNumber && createWhatsappLink(data.phoneNumber)) {
+            const waBtn = document.getElementById('whatsappBtn');
+            waBtn.style.display = 'flex';
+            waBtn.onclick = () => openWhatsapp(data.phoneNumber);
+
+            // Also append icon to phone display
+            phone.innerHTML = `${data.phoneNumber} 
+                 <button onclick="openWhatsapp('${data.phoneNumber}')" class="btn-whatsapp" style="padding: 0.25rem 0.5rem; margin-left: 0.5rem;" title="Chat on WhatsApp">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                 </button>`;
+          }
+        }
+        if (inst) inst.textContent = data.institutionName || '--';
+        if (creator) creator.textContent = data.createdByName || '--';
+        if (created) created.textContent = formatDateTime(data.createdAt);
+        if (updated) updated.textContent = formatDateTime(data.updatedAt);
+        if (badge) badge.innerHTML = formatTrustStatusBadge(data.trustStatus);
+
+        if (editBtn) editBtn.href = `customers-edit.html?id=${targetCustomerId}`;
+
+        // Check for External Customer (Different Institution AND Not Linked)
+        const isExternalCustomer = user.roleName !== 'Super Admin' &&
+          data.institutionId !== user.institutionId &&
+          !data.isLinked;
+
+        // Debugging
+        console.log('Is Linked:', data.isLinked);
+        console.log('Is External:', isExternalCustomer);
+
+        // Load loans FIRST to pass to setupHeaderActions
+        customerLoans = await api.loans.getByCustomer(targetCustomerId);
+
+        // Setup Header Actions (Replaces Meatball & Banner)
+        // Setup Dropdown Visibility
+        setupDropdownVisibility(isExternalCustomer);
+
+        // Inject New Loan Button into headerActions
+        const headerActions = document.getElementById('headerActions');
+        if (headerActions) {
+          headerActions.innerHTML = ''; // Clear previous
+
+          // Only show for non-external customers who act as "My Customer" or if User is Super Admin
+          // Basically if we can see the meatball menu (not isExternalCustomer), we can probably add a loan.
+          // Or if user is allowed to create loans.
+          if (!isExternalCustomer) {
+            const newLoanBtn = document.createElement('a');
+            newLoanBtn.href = `loans-new.html?customer_id=${targetCustomerId}`;
+            newLoanBtn.className = 'btn btn-primary';
+            newLoanBtn.style.padding = '0.5rem 1rem';
+            newLoanBtn.style.display = 'flex';
+            newLoanBtn.style.alignItems = 'center';
+            newLoanBtn.style.gap = '0.5rem';
+            newLoanBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>${t('loans.add_loan') || 'New Loan'}</span>
+            `;
+            headerActions.appendChild(newLoanBtn);
+          }
+        }
+
+        if (isExternalCustomer) {
+          createLinkBanner(); // RESTORE THE BANNER
+
+          // Hide Management Actions
+          if (editBtn) editBtn.style.display = 'none';
+          // Already hidden by setupDropdownVisibility
+
+          // Hide Trust Status Section
+          const trustSec = document.getElementById('trustStatusSection');
+          if (trustSec) trustSec.style.display = 'none';
+
+        } else {
+          // Normal Customer (My Institution or Super Admin or Branch)
+          // Allow Branch to manage trust status too (per user request)
+          if (user.roleName === 'Institution' || user.roleName === 'Super Admin' || user.roleName === 'Branch') {
+            const trustSec = document.getElementById('trustStatusSection');
+            const trustSel = document.getElementById('trustStatusSelect');
+            if (trustSec) trustSec.style.display = 'block';
+            if (trustSel) trustSel.value = data.trustStatus;
+          }
+        }
+
+        document.getElementById('loadingContainer').style.display = 'none';
+        document.getElementById('customerContainer').style.display = 'block';
+
+        // Setup Dropdown Actions
+        setupDeleteAction();
+      } catch (error) {
+        console.error('Error loading customer:', error);
+
+        // Retry up to 3 times for network errors
+        if (retryCount < 3 && (error.message === 'Failed to fetch' || error.name === 'TypeError')) {
+          console.log(`Retrying... attempt ${retryCount + 1}`);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+          return loadCustomer(retryCount + 1);
+        }
+
+        showToast(t('customers.load_failed') || 'Failed to load customer', 'error');
+        // Only redirect after exhausting retries
+        if (retryCount >= 3) {
+          setTimeout(() => window.location.href = 'customers.html', 3000);
+        }
+      }
+    }
+
+    function setupDeleteAction() {
+      const deleteBtn = document.getElementById('deleteBtn');
+      const softDeleteBtn = document.getElementById('softDeleteBtn');
+      if (!deleteBtn) return;
+
+      // Filter loans to only count those belonging to current user's scope
+      // This allows users to soft-delete linked customers even if they have loans in OTHER institutions/branches
+      const myScopeLoans = customerLoans ? customerLoans.filter(loan => {
+        // Super Admin sees all loans
+        if (user.roleName === 'Super Admin') return true;
+
+        // Branch users: only count loans from their SPECIFIC branch
+        if (user.roleName === 'Branch' && user.branchId) {
+          return loan.branchId === user.branchId;
+        }
+
+        // Institution users: count loans from ANY branch in their institution
+        return loan.institutionId === user.institutionId;
+      }) : [];
+
+      const hasLoans = myScopeLoans.length > 0;
+      const isSuperAdmin = user && user.roleName === 'Super Admin';
+      const isInstitutionOrBranch = user && (user.roleName === 'Institution' || user.roleName === 'Branch');
+      const hasInstitution = customerDataLoaded && customerDataLoaded.institutionId;
+
+      // Show soft delete button (نقل للمحذوفين):
+      // - For Super Admin: show only if customer has an institution
+      // - For Institution/Branch: always show (they can only soft delete)
+      if (softDeleteBtn) {
+        if (isSuperAdmin && hasInstitution) {
+          softDeleteBtn.style.display = 'flex';
+        } else if (isInstitutionOrBranch) {
+          softDeleteBtn.style.display = 'flex';
+        } else {
+          softDeleteBtn.style.display = 'none';
+        }
+      }
+
+      // Hide permanent delete button for Institution/Branch users
+      // Only Super Admin can permanently delete
+      if (deleteBtn && isInstitutionOrBranch) {
+        deleteBtn.style.display = 'none';
+      }
+
+      if (hasLoans) {
+        deleteBtn.disabled = true;
+        deleteBtn.classList.add('opacity-50');
+        deleteBtn.title = t('customers.view_page.delete_prevented_hint') || 'Cannot delete customer with active loans';
+
+        if (softDeleteBtn) {
+          softDeleteBtn.disabled = true;
+          softDeleteBtn.classList.add('opacity-50');
+        }
+
+        const warning = document.createElement('div');
+        warning.className = 'glass-card p-4 mb-4';
+        warning.style.background = 'rgba(239, 68, 68, 0.1)';
+        warning.innerHTML = `<p class="text-danger text-sm">${t('customers.view_page.delete_prevented_msg') || 'Cannot delete customer because they have associated loans or records.'}</p>`;
+        document.getElementById('customerContainer').prepend(warning);
+      } else {
+        // Soft Delete button (moves to deleted list)
+        if (softDeleteBtn) {
+          softDeleteBtn.addEventListener('click', () => {
+            showDeleteModal({
+              title: 'نقل للمحذوفين',
+              itemName: customerDataLoaded.name,
+              warningText: 'هل أنت متأكد من نقل هذا العميل لقائمة المحذوفين؟\n\nيمكنك استعادته لاحقاً من صفحة العملاء المحذوفين.',
+              confirmText: 'نعم، انقل للمحذوفين',
+              onConfirm: async () => {
+                try {
+                  await api.customers.softDelete(targetCustomerId);
+                  showToast('تم نقل العميل لقائمة المحذوفين', 'success');
+                  window.location.href = 'customers.html';
+                } catch (error) {
+                  console.error('Error soft deleting:', error);
+                  showToast(error.message || 'فشل نقل العميل', 'error');
+                }
+              }
+            });
+          });
+        }
+
+        // Hard Delete button (permanent)
+        deleteBtn.addEventListener('click', () => {
+          showDeleteModal({
+            title: t('customers.view_page.delete_confirm_title') || 'Delete Customer',
+            itemName: customerDataLoaded.name,
+            warningText: isSuperAdmin
+              ? 'تحذير: سيتم حذف العميل وجميع بياناته نهائياً. لا يمكن التراجع عن هذا الإجراء!'
+              : (t('customers.view_page.delete_warning') || 'Are you sure? This will remove the customer profile permanently.'),
+            onConfirm: async () => {
+              try {
+                await api.customers.delete(targetCustomerId);
+                showToast(t('customers.deleted_success'), 'success');
+                window.location.href = 'customers.html';
+              } catch (error) {
+                console.error('Error deleting:', error);
+                showToast('Delete failed', 'error');
+              }
+            }
+          });
+        });
+      }
+    }
+
+    // Customer Record Functions
+    let recordLoaded = false;
+    let searchLogs = [];
+
+    function setupCustomerRecord() {
+      const toggleBtn = document.getElementById('toggleRecordBtn');
+      const content = document.getElementById('customerRecordContent');
+      const arrow = document.getElementById('toggleRecordArrow');
+
+      if (!toggleBtn) return;
+
+      toggleBtn.addEventListener('click', async () => {
+        const isHidden = content.style.display === 'none';
+
+        if (isHidden) {
+          content.style.display = 'block';
+          arrow.textContent = '▲';
+          toggleBtn.innerHTML = `<span id="toggleRecordArrow">▲</span> إخفاء السجل`;
+
+          // Load data only once
+          if (!recordLoaded) {
+            await loadCustomerRecord();
+            recordLoaded = true;
+          }
+        } else {
+          content.style.display = 'none';
+          arrow.textContent = '▼';
+          toggleBtn.innerHTML = `<span id="toggleRecordArrow">▼</span> عرض السجل`;
+        }
+      });
+
+      // Setup tabs
+      document.querySelectorAll('.record-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetTab = tab.dataset.tab;
+
+          // Update tab styles
+          document.querySelectorAll('.record-tab').forEach(t => {
+            t.style.background = 'transparent';
+            t.style.color = 'rgba(255,255,255,0.6)';
+          });
+          tab.style.background = 'rgba(99, 102, 241, 0.2)';
+          tab.style.color = 'white';
+
+          // Show/hide content
+          document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+          document.getElementById(targetTab + 'Tab').style.display = 'block';
+        });
+      });
+    }
+
+    async function loadCustomerRecord() {
+      // Load Loans
+      await loadLoansRecord();
+
+      // Load Search Logs
+      await loadSearchLogsRecord();
+
+      // Load Notes
+      await loadNotesRecord();
+    }
+
+    async function loadLoansRecord() {
+      const loading = document.getElementById('loansLoading');
+      const empty = document.getElementById('loansEmpty');
+      const list = document.getElementById('loansList');
+      const count = document.getElementById('loansCount');
+
+      try {
+        const loans = customerLoans || [];
+        count.textContent = loans.length;
+
+        loading.style.display = 'none';
+
+        if (loans.length === 0) {
+          empty.style.display = 'block';
+          list.style.display = 'none';
+        } else {
+          empty.style.display = 'none';
+          list.style.display = 'block';
+
+          list.innerHTML = loans.map(loan => `
+            <div class="record-item" style="background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; border-right: 3px solid ${getLoanStatusColor(loan.status)};">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge" style="background: ${getLoanStatusColor(loan.status)}; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">
+                      ${getLoanStatusText(loan.status)}
+                    </span>
+                    <span class="text-muted" style="font-size: 0.875rem;">#${loan.loanId}</span>
+                  </div>
+                  <p class="text-white" style="font-weight: 600; margin: 0;">${loan.productName || 'قرض'}</p>
+                  <p class="text-muted" style="font-size: 0.875rem; margin: 0.25rem 0 0;">${loan.branchName || 'الفرع'}</p>
+                </div>
+                <div style="text-align: left;">
+                  <p class="text-white" style="font-weight: 600; font-size: 1.25rem; margin: 0;">${formatCurrency(loan.loanAmount)}</p>
+                  <p class="text-muted" style="font-size: 0.75rem; margin: 0.25rem 0 0;">
+                    ${formatDate(loan.createdAt)}
+                  </p>
+                </div>
+              </div>
+              ${loan.remainingAmount > 0 ? `
+                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.875rem;">
+                    <span class="text-muted">المبلغ المتبقي</span>
+                    <span class="text-warning" style="font-weight: 600;">${formatCurrency(loan.remainingAmount)}</span>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          `).join('');
+        }
+      } catch (error) {
+        console.error('Error loading loans:', error);
+        loading.style.display = 'none';
+        empty.style.display = 'block';
+      }
+    }
+
+    async function loadSearchLogsRecord() {
+      const loading = document.getElementById('searchesLoading');
+      const empty = document.getElementById('searchesEmpty');
+      const list = document.getElementById('searchesList');
+      const count = document.getElementById('searchesCount');
+
+      try {
+        const response = await api.searchLogs.getByCustomer(targetCustomerId, 1, 50);
+        searchLogs = response.data || [];
+        count.textContent = searchLogs.length;
+
+        // Update count badge color if there are searches
+        if (searchLogs.length > 0) {
+          count.style.background = '#f59e0b';
+        }
+
+        loading.style.display = 'none';
+
+        if (searchLogs.length === 0) {
+          empty.style.display = 'block';
+          list.style.display = 'none';
+        } else {
+          empty.style.display = 'none';
+          list.style.display = 'block';
+
+          list.innerHTML = searchLogs.map(log => {
+            // Determine the organization name and phone
+            const orgName = log.branchName || log.institutionName || 'مؤسسة غير محددة';
+            const orgPhone = log.branchPhone || log.institutionPhone;
+            const orgType = log.branchName ? 'فرع' : 'مؤسسة';
+
+            return `
+            <div class="record-item" style="background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; border-right: 3px solid #f59e0b;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span class="text-white" style="font-weight: 600; font-size: 1rem;">${orgName}</span>
+                    <span class="badge" style="background: rgba(99, 102, 241, 0.3); padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; color: #a5b4fc;">${orgType}</span>
+                  </div>
+                  <p class="text-muted" style="font-size: 0.875rem; margin: 0 0 0.5rem 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-left: 0.25rem;">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    قام بالبحث عن هذا العميل
+                    ${log.searchType ? `<span class="badge" style="background: #374151; padding: 0.125rem 0.5rem; border-radius: 0.25rem; margin-right: 0.5rem;">${log.searchType}</span>` : ''}
+                  </p>
+                  <p class="text-muted" style="font-size: 0.75rem; margin: 0;">
+                    <span style="opacity: 0.7;">بواسطة:</span> ${log.userName || 'مستخدم'}
+                  </p>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+                  <div style="text-align: left;">
+                    <p class="text-muted" style="font-size: 0.875rem; margin: 0;">
+                      ${formatDateTime(log.createdAt)}
+                    </p>
+                    <p class="text-muted" style="font-size: 0.75rem; margin: 0.25rem 0 0;">
+                      ${formatRelativeTime(log.createdAt)}
+                    </p>
+                  </div>
+                  ${orgPhone ? `
+                    <button onclick="openWhatsapp('${orgPhone}')" class="btn-whatsapp" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: #25D366; border: none; border-radius: 0.5rem; color: white; cursor: pointer; font-size: 0.75rem; transition: all 0.2s;" title="تواصل مع ${orgName}">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                      </svg>
+                      تواصل
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `}).join('');
+        }
+      } catch (error) {
+        console.error('Error loading search logs:', error);
+        loading.style.display = 'none';
+        empty.style.display = 'block';
+      }
+    }
+
+    // Customer Notes Functions
+    let customerNotes = [];
+
+    async function loadNotesRecord() {
+      const loading = document.getElementById('notesLoading');
+      const empty = document.getElementById('notesEmpty');
+      const list = document.getElementById('notesList');
+      const count = document.getElementById('notesCount');
+
+      try {
+        const response = await api.customerNotes.getByCustomer(targetCustomerId, 1, 100);
+        customerNotes = response.data || [];
+        count.textContent = customerNotes.length;
+
+        // Update count badge color if there are notes
+        if (customerNotes.length > 0) {
+          count.style.background = '#10b981';
+        }
+
+        loading.style.display = 'none';
+
+        if (customerNotes.length === 0) {
+          empty.style.display = 'block';
+          list.style.display = 'none';
+        } else {
+          empty.style.display = 'none';
+          list.style.display = 'block';
+          renderNotes();
+        }
+      } catch (error) {
+        console.error('Error loading notes:', error);
+        loading.style.display = 'none';
+        empty.style.display = 'block';
+      }
+    }
+
+    function renderNotes() {
+      const list = document.getElementById('notesList');
+
+      list.innerHTML = customerNotes.map(note => {
+        const categoryInfo = getNoteCategoryInfo(note.category);
+        const userName = note.user?.name || 'مستخدم';
+        const canDelete = user.roleName === 'Super Admin' || note.user_id === user.userId || note.created_by === user.userId;
+
+        // Determine organization details and phone
+        let orgName = '';
+        let orgPhone = '';
+        let orgTypeLabel = '';
+
+        if (note.branch) {
+          // It's a branch user
+          const branchName = note.branch.name;
+          const institutionName = note.branch.institution?.name || '';
+          orgName = institutionName ? `${branchName} - ${institutionName}` : branchName;
+          orgPhone = note.branch.phoneNumber || note.branch.institution?.phoneNumber;
+          orgTypeLabel = 'فرع';
+        } else {
+          // It's an institution user (no branch)
+          orgName = note.user?.institution?.name || 'المؤسسة الأم';
+          orgPhone = note.user?.institution?.phoneNumber;
+          orgTypeLabel = 'مؤسسة';
+        }
+
+        return `
+          <div class="record-item" style="background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; border-right: 3px solid ${categoryInfo.color};">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+              <div style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                  <span class="badge" style="background: ${categoryInfo.bgColor}; color: ${categoryInfo.color}; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">
+                    ${categoryInfo.icon} ${categoryInfo.label}
+                  </span>
+                  <span class="text-muted" style="font-size: 0.75rem;">
+                    بواسطة: <strong style="color: white;">${userName}</strong>
+                  </span>
+                  <span class="badge" style="background: rgba(99, 102, 241, 0.2); padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; color: #a5b4fc;" title="${orgTypeLabel}">
+                    ${orgName}
+                  </span>
+                </div>
+                <p class="text-white" style="margin: 0.5rem 0; line-height: 1.6; white-space: pre-wrap;">${escapeHtml(note.note_text)}</p>
+                <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem;">
+                  <p class="text-muted" style="font-size: 0.75rem; margin: 0;">
+                    ${formatDateTime(note.created_at)} • ${formatRelativeTime(note.created_at)}
+                    ${note.edited_at ? '<span style="color: #f59e0b; margin-right: 0.5rem;">(معدلة)</span>' : ''}
+                  </p>
+                  ${orgPhone ? `
+                    <button onclick="openWhatsapp('${orgPhone}')" class="btn-whatsapp" 
+                      style="display: flex; align-items: center; gap: 0.25rem; padding: 0.15rem 0.5rem; background: rgba(37, 211, 102, 0.1); border: 1px solid rgba(37, 211, 102, 0.2); border-radius: 0.25rem; color: #25D366; cursor: pointer; font-size: 0.7rem; transition: all 0.2s;" 
+                      title="تواصل مع ${orgName}">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                      </svg>
+                      تواصل
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+              ${canDelete ? `
+                <button onclick="deleteNote(${note.id})" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444;" title="حذف الملاحظة">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getNoteCategoryInfo(category) {
+      const categories = {
+        'General': { label: 'عام', color: '#6b7280', bgColor: 'rgba(107, 114, 128, 0.2)', icon: '📝' },
+        'Follow-up': { label: 'متابعة', color: '#6366f1', bgColor: 'rgba(99, 102, 241, 0.2)', icon: '📌' },
+        'Complaint': { label: 'شكوى', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.2)', icon: '⚠️' },
+        'Payment Issue': { label: 'مشكلة دفع', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.2)', icon: '💰' }
+      };
+      return categories[category] || categories['General'];
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function addNote() {
+      const noteText = document.getElementById('newNoteText').value.trim();
+      const category = document.getElementById('noteCategory').value;
+      const addBtn = document.getElementById('addNoteBtn');
+
+      if (!noteText) {
+        showToast('يرجى كتابة الملاحظة', 'error');
+        return;
+      }
+
+      const originalText = addBtn.innerHTML;
+      addBtn.disabled = true;
+      addBtn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;"></div>';
+
+      try {
+        await api.customerNotes.create({
+          customer_id: parseInt(targetCustomerId),
+          note_text: noteText,
+          category: category
+        });
+
+        showToast('تم إضافة الملاحظة بنجاح', 'success');
+        document.getElementById('newNoteText').value = '';
+        document.getElementById('noteCategory').value = 'general';
+
+        // Reload notes
+        await loadNotesRecord();
+      } catch (error) {
+        console.error('Error adding note:', error);
+        showToast(error.message || 'فشل إضافة الملاحظة', 'error');
+      } finally {
+        addBtn.disabled = false;
+        addBtn.innerHTML = originalText;
+      }
+    }
+
+    async function deleteNote(noteId) {
+      const note = customerNotes.find(n => n.id === noteId);
+      if (!note) return;
+
+      showConfirmModal({
+        title: 'حذف الملاحظة',
+        message: 'هل أنت متأكد من حذف هذه الملاحظة؟',
+        subMessage: note.note_text.substring(0, 50) + (note.note_text.length > 50 ? '...' : ''),
+        confirmText: 'نعم، احذف',
+        icon: '🗑️',
+        btnClass: 'btn-danger',
+        onConfirm: async () => {
+          try {
+            await api.customerNotes.delete(noteId);
+            showToast('تم حذف الملاحظة', 'success');
+            await loadNotesRecord();
+          } catch (error) {
+            console.error('Error deleting note:', error);
+            showToast(error.message || 'فشل حذف الملاحظة', 'error');
+          }
+        }
+      });
+    }
+
+    // Setup add note button
+    function setupNotesActions() {
+      const addBtn = document.getElementById('addNoteBtn');
+      if (addBtn) {
+        addBtn.addEventListener('click', addNote);
+      }
+
+      // Allow submit with Ctrl+Enter
+      const noteTextArea = document.getElementById('newNoteText');
+      if (noteTextArea) {
+        noteTextArea.addEventListener('keydown', (e) => {
+          if (e.ctrlKey && e.key === 'Enter') {
+            addNote();
+          }
+        });
+      }
+    }
+
+
+    function getLoanStatusColor(status) {
+      const colors = {
+        'Active': '#10b981',
+        'Pending': '#f59e0b',
+        'Completed': '#6366f1',
+        'Defaulted': '#ef4444',
+        'Cancelled': '#6b7280'
+      };
+      return colors[status] || '#6b7280';
+    }
+
+    function getLoanStatusText(status) {
+      const texts = {
+        'Active': 'نشط',
+        'Pending': 'معلق',
+        'Completed': 'مكتمل',
+        'Defaulted': 'متعثر',
+        'Cancelled': 'ملغي'
+      };
+      return texts[status] || status;
+    }
+
+    // Setup Trust Status Update Action
+    // Setup Trust Status Update Action
+    function setupTrustStatusAction() {
+      const updateBtn = document.getElementById('updateTrustStatusBtn');
+      const statusSelect = document.getElementById('trustStatusSelect');
+
+      // Remove existing listener to prevent duplicates if function is called multiple times
+      const newUpdateBtn = updateBtn ? updateBtn.cloneNode(true) : null;
+      if (updateBtn && newUpdateBtn) {
+        updateBtn.parentNode.replaceChild(newUpdateBtn, updateBtn);
+      }
+
+      const btn = document.getElementById('updateTrustStatusBtn');
+
+      if (btn && statusSelect) {
+        btn.addEventListener('click', () => {
+          const newStatus = statusSelect.value;
+          const currentStatus = customerDataLoaded ? customerDataLoaded.trustStatus : 'Unverified';
+
+          if (!newStatus) {
+            showToast('Please select a status', 'error');
+            return;
+          }
+
+          if (newStatus === currentStatus) {
+            showToast(t('customers.view_page.status_no_change') || 'Status is unchanged', 'info');
+            return;
+          }
+
+          // Translate status for display
+          const statusDisplay = t(`customers.view_page.trust_status_options.${newStatus.toLowerCase()}`) || newStatus;
+
+          showConfirmModal({
+            title: t('customers.view_page.update_status_confirm_title') || 'Update Trust Status',
+            message: t('customers.view_page.update_status_confirm_msg') || 'Are you sure you want to update the trust status?',
+            subMessage: `${t('customers.view_page.new_status') || 'New Status'}: ${statusDisplay}`,
+            confirmText: t('customers.view_page.update_status_confirm_btn') || 'Yes, Update',
+            icon: '🛡️',
+            btnClass: 'btn-primary',
+            onConfirm: async () => {
+              const originalText = btn.getAttribute('data-i18n-key') ? t(btn.getAttribute('data-i18n-key')) : btn.innerText;
+              btn.disabled = true;
+              btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;"></div>';
+
+              try {
+                await api.customers.updateTrustStatus(targetCustomerId, newStatus);
+                showToast(t('customers.view_page.status_updated_success') || 'Trust status updated successfully', 'success');
+
+                // Reload data to refresh UI
+                await loadCustomer();
+              } catch (error) {
+                console.error('Error updating trust status:', error);
+                showToast(error.message || 'Failed to update trust status', 'error');
+              } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText || 'Update Status';
+              }
+            }
+          });
+        });
+      }
+    }
+
+    // Update initPage to include record setup
+    async function initPageWithRecord() {
+      await initPage();
+      setupCustomerRecord();
+      setupNotesActions();
+      setupTrustStatusAction();
+    }
+
+    initPageWithRecord();
+  </script>
+</body>
+
+</html>

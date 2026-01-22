@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Details - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8"
+        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="loans.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="loans.view_page.title">Loan Details</h1>
+          <p class="text-secondary" data-i18n-key="loans.view_page.subtitle">View loan information</p>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div id="loadingContainer" class="loading-container">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Loan Details -->
+      <div id="loanContainer" style="display: none;">
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-6"
+            style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <h2 id="loanIdDisplay" class="text-2xl font-bold text-white" style="margin: 0;"></h2>
+                <span id="statusBadge"></span>
+              </div>
+              <p class="text-muted" style="margin: 0;" data-i18n-key="loans.view_page.loan_application">Loan Application
+              </p>
+            </div>
+            <div class="flex gap-2" style="display: flex; gap: 0.5rem; align-items: center;">
+              <div class="meatball-container">
+                <button class="meatball-btn">⋮</button>
+                <div class="meatball-dropdown">
+                  <a id="editBtn" class="dropdown-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    <span data-i18n-key="common.button.edit">Edit</span>
+                  </a>
+                  <button id="deleteBtn" class="dropdown-item text-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    <span data-i18n-key="common.button.delete">Delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rest of the details (Customer, Branch, etc.) -->
+          <div class="grid grid-cols-2 gap-6 mb-6"
+            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.customer">Customer</p>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <a id="customerLink" href="#" class="text-white font-medium hover:text-primary"
+                  style="color: #fff; text-decoration: none; transition: color 0.2s;">
+                  <span id="customerName"></span>
+                </a>
+              </div>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.branch">Branch</p>
+              <p id="branchName" class="text-white font-medium"></p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-6"
+            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.principal_amount">Principal Amount</p>
+              <p id="principalAmount" class="text-white font-medium text-lg"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.due_date">Due Date</p>
+              <p id="dueDate" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="loans.view_page.status">Status</p>
+              <p id="statusText" class="text-white font-medium"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Installments -->
+        <div id="installmentsSection" class="glass-card p-6 mb-6">
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="loans.view_page.installments_title">Installments
+          </h3>
+          <div id="installmentsContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js?v=2.0"></script>
+  <script src="../js/ui-utils.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    let loanData = null;
+    let installmentsData = [];
+
+    async function initPage() {
+      await waitForI18n();
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(t('loans.loan_details'), t('loans.view_loan_info'));
+      initializeLanguageSwitcher();
+      setActiveNav('loans');
+      window.i18n.translatePage();
+
+      await loadLoan();
+      initMeatballMenu();
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const loanId = urlParams.get('id');
+
+    async function loadLoan() {
+      try {
+        loanData = await api.loans.getById(loanId);
+        installmentsData = await api.loans.getInstallments(loanId);
+
+        document.getElementById('loanIdDisplay').textContent = `#${loanData.loanId}`;
+        document.getElementById('customerName').textContent = loanData.customer.name;
+        document.getElementById('customerLink').href = `customers-view.html?id=${loanData.customer.customerId}`;
+        document.getElementById('branchName').textContent = loanData.branch?.name || '--';
+        document.getElementById('principalAmount').textContent = formatCurrency(loanData.principalAmount);
+        document.getElementById('dueDate').textContent = formatDate(loanData.dueDate);
+        const translatedStatus = t(`loans.status.${loanData.status.toLowerCase()}`) || loanData.status;
+
+        document.getElementById('statusText').textContent = translatedStatus;
+
+        const statusBadge = document.getElementById('statusBadge');
+        statusBadge.innerHTML = `<span class="badge ${getStatusClass(loanData.status)}">${translatedStatus}</span>`;
+
+        renderInstallments();
+
+        document.getElementById('loadingContainer').style.display = 'none';
+        document.getElementById('loanContainer').style.display = 'block';
+
+        // Setup Edit Button
+        const editBtn = document.getElementById('editBtn');
+        if (editBtn) {
+          editBtn.href = `loans-edit.html?id=${loanId}`;
+        }
+
+        setupDeleteAction();
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    function getStatusClass(status) {
+      if (status === 'Active') return 'badge-success';
+      if (status === 'Late') return 'badge-warning';
+      if (status === 'Paid') return 'badge-info';
+      return 'badge-secondary';
+    }
+
+    function renderInstallments() {
+      const container = document.getElementById('installmentsContainer');
+      if (!installmentsData || installmentsData.length === 0) {
+        container.innerHTML = `<p class="text-muted">${t('installments.no_installments_found')}</p>`;
+        return;
+      }
+      container.innerHTML = installmentsData.map(inst => {
+        const statusKey = inst.status.toLowerCase();
+        const translatedInstStatus = t(`loans.status.${statusKey}`) || inst.status;
+        return `
+        <div class="glass-card p-3 mb-2 flex items-center justify-between" style="display: flex; justify-content: space-between;">
+          <div>
+            <span class="font-bold">#${inst.installmentNumber}</span> - ${formatCurrency(inst.amount)}
+          </div>
+          <span class="badge ${inst.status === 'Paid' ? 'badge-success' : 'badge-secondary'}">${translatedInstStatus}</span>
+        </div>
+        `;
+      }).join('');
+    }
+
+    function setupDeleteAction() {
+      const deleteBtn = document.getElementById('deleteBtn');
+
+      deleteBtn.addEventListener('click', () => {
+        // Toggle menu off
+        const menu = deleteBtn.closest('.meatball-dropdown');
+        if (menu) menu.classList.remove('show');
+
+        showDeleteModal({
+          title: t('loans.view_page.delete_confirm_title') || 'Delete Loan',
+          itemName: `Loan #${loanData.loanId}`,
+          warningText: t('loans.view_page.cascade_delete_warning'),
+          confirmText: t('common.button.delete'),
+          onConfirm: async () => {
+            try {
+              await api.loans.delete(loanId);
+              showToast('Loan deleted successfully', 'success');
+              setTimeout(() => window.location.href = 'loans.html', 1000);
+            } catch (e) {
+              console.error(e);
+              showToast(e.message || 'Delete failed', 'error');
+            }
+          }
+        });
+      });
+    }
+
+    initPage();
+  </script>
+</body>
+
+</html>

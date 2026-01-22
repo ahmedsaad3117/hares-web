@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customers - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center justify-between mb-8"
+        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+        <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: 2rem;">👥</div>
+          <div>
+            <h1 class="text-3xl font-bold text-white" data-i18n-key="customers.title">العملاء</h1>
+            <p class="text-secondary" data-i18n-key="customers.customer_details">إدارة سجلات العملاء</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3" style="display: flex; gap: 0.75rem;">
+        <a href="customers-deleted.html" class="btn btn-secondary"
+          style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18" />
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+          </svg>
+          <span data-i18n-key="customers.show_deleted">العملاء المحذوفين</span>
+        </a>
+        <a href="customers-new.html" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span data-i18n-key="customers.add_customer">إضافة عميل</span>
+        </a>
+      </div>
+
+      <!-- Search Bar - National ID or Phone -->
+      <div class="glass-card p-4 mb-6">
+        <div style="position: relative;">
+          <svg
+            style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #94a3b8;"
+            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input type="text" id="searchInput" maxlength="10" pattern="[0-9]*" inputmode="numeric"
+            placeholder="البحث برقم الهوية أو رقم الهاتف..." class="input"
+            style="padding-left: 3rem; padding-right: 7rem;" />
+          <button id="searchBtn" class="btn btn-primary"
+            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); padding: 0.5rem 1rem; font-size: 0.875rem;">
+            بحث
+          </button>
+        </div>
+        <p class="text-muted" style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.7;">
+          💡 البحث برقم الهوية (10 أرقام) أو رقم الهاتف (مثال: 0551234567). إذا كان العميل تابعاً لمؤسسة أخرى، يمكنك
+          ربطه بمؤسستك.
+        </p>
+      </div>
+
+      <!-- Customers Grid -->
+      <div id="customersGrid" class="grid grid-cols-3 gap-4"
+        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="loading-container" style="grid-column: 1 / -1;">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div id="paginationContainer" class="flex justify-center"
+        style="display: flex; justify-content: center; margin-top: 2rem;"></div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/ui-utils.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script src="../components/pagination.js"></script>
+  <script>
+    // Global variables definition
+    let user = null;
+    let allCustomers = [];
+    let currentPage = 1;
+    let totalPages = 1;
+    const pageSize = 12;
+    let searchTimeout;
+
+    // Initialize page
+    async function initPage() {
+      await waitForI18n();
+
+      // Check authentication
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      user = getCurrentUser(); // Set global user variable
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('customers.title'),
+        t('customers.customer_details')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('customers');
+
+      // Set search placeholder after i18n is ready
+      const sInput = document.getElementById('searchInput');
+      if (sInput) sInput.placeholder = t('customers.search_placeholder');
+
+      // Translate static content
+      window.i18n.translatePage();
+
+      // Load customers with pagination
+      loadCustomers();
+
+      // Enable auto-refresh (every 10 seconds)
+      if (window.setupAutoRefresh) {
+        window.setupAutoRefresh(() => {
+          // Don't refresh if user is searching
+          const s = document.getElementById('searchInput');
+          if (s && s.value.trim()) return;
+          loadCustomers(currentPage);
+        }, 10000);
+      }
+    }
+
+
+    // Helper functions
+    async function loadCustomers(page = 1) {
+      try {
+        const response = await api.customers.getAll(page, pageSize, false); // Always load active customers
+        allCustomers = response.data;
+        currentPage = response.meta.page;
+        totalPages = response.meta.totalPages;
+        renderCustomers(allCustomers);
+      } catch (error) {
+        console.error('Error loading customers:', error);
+        showToast(t('customers.failed_to_load'), 'error');
+        document.getElementById('customersGrid').innerHTML = `<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">${t('customers.failed_to_load')}</p>`;
+      }
+    }
+
+    async function performSearch() {
+      const searchTerm = searchInput.value.trim();
+
+      if (!searchTerm) {
+        loadCustomers(1);
+        return;
+      }
+
+      // No validation restrictions - search exactly what user typed
+
+      try {
+        // Show loading indicator
+        document.getElementById('customersGrid').innerHTML = `
+          <div class="glass-card p-6" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <div class="spinner" style="margin: 0 auto;"></div>
+            <p class="text-muted" style="margin-top: 1rem;">جاري البحث...</p>
+          </div>
+        `;
+
+        // Search by BOTH National ID AND Phone Number (Exact match will be handled by backend)
+        const results = await api.customers.search({
+          nationalId: searchTerm,
+          phoneNumber: searchTerm
+        });
+
+        allCustomers = results;
+        currentPage = 1;
+        totalPages = 1;
+
+        // Use generic label since we search both fields
+        let displayType = 'الرقم';
+
+        // Render with special handling for external customers
+        renderSearchResults(results, searchTerm, displayType);
+
+        if (results.length > 0) {
+          showToast(`تم العثور على ${results.length} عميل`, 'success');
+        } else {
+          showToast(`لم يتم العثور على عميل`, 'info');
+        }
+      } catch (error) {
+        console.error('Error searching customers:', error);
+
+        // Handle customer found in another institution
+        if (error.code === 'CUSTOMER_EXISTS_OTHER_INSTITUTION' && error.customer) {
+          renderExternalCustomer(error.customer, searchTerm);
+          return;
+        }
+
+        showToast('فشل البحث', 'error');
+        document.getElementById('customersGrid').innerHTML = `<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">فشل البحث</p>`;
+      }
+    }
+
+    function renderSearchResults(customers, searchedValue, searchType) {
+      const grid = document.getElementById('customersGrid');
+      // Generic label
+      const label = searchType;
+      // Always pass as nationalId initially, user can move it to phone field if needed
+      const queryParam = `nationalId=${searchedValue}`;
+
+      if (customers.length === 0) {
+        grid.innerHTML = `
+          <div class="glass-card p-6" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <svg style="width: 64px; height: 64px; margin: 0 auto 1rem; color: #475569;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <p class="text-white" style="font-size: 1.25rem; margin-bottom: 0.5rem;">لم يتم العثور على عميل</p>
+            <p class="text-muted" style="margin-bottom: 1.5rem;">${label}: ${searchedValue}</p>
+            <p class="text-muted" style="font-size: 0.875rem;">هذا العميل جديد في النظام. يمكنك إضافته الآن.</p>
+            <a href="customers-new.html?${queryParam}" class="btn btn-primary" style="margin-top: 1rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              إضافة عميل جديد
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      // Render found customers with link button if from another institution
+      const customersHTML = customers.map(customer => {
+        // A customer is "mine" if they belong to my institution OR if I have linked them
+        const isMyCustomer = customer.institutionId === user.institutionId || customer.isLinked === true;
+        const isLinkedToMyBranch = customer.branchId === user.branchId;
+
+        // Only show link actions if they are NOT "my customer" (not owned and not linked)
+        const canLink = !isMyCustomer && user.roleName !== 'Super Admin';
+
+        return `
+        <div class="glass-card p-6" style="transition: all 0.2s ease; ${!isMyCustomer ? 'border: 2px solid #f59e0b;' : ''}">
+          ${!isMyCustomer ? `
+            <div style="background: rgba(245, 158, 11, 0.1); border-radius: 0.5rem; padding: 0.5rem 0.75rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              <span style="color: #f59e0b; font-size: 0.75rem; font-weight: 600;">عميل في مؤسسة أخرى</span>
+            </div>
+          ` : ''}
+          <div class="flex items-center justify-between mb-4" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem;">
+            <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, ${isMyCustomer ? '#6366f1, #4f46e5' : '#f59e0b, #d97706'}); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1.25rem;">
+                ${customer.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-white">${customer.name}</h3>
+                <p class="text-sm text-muted">ID: ${customer.customerId}</p>
+              </div>
+            </div>
+            ${formatTrustStatusBadge(customer.trustStatus)}
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+            <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem; color: #cbd5e1;">
+              <svg style="width: 16px; height: 16px; color: #64748b;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="M7 15h0M2 9.5h20"/>
+              </svg>
+              <span class="text-sm">${customer.nationalId}</span>
+            </div>
+            <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem; color: #cbd5e1;">
+              <svg style="width: 16px; height: 16px; color: #64748b;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              <span class="text-sm">${customer.phoneNumber || '--'}</span>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            ${canLink ? `
+              <div class="flex gap-2" style="flex: 1;">
+                <button onclick="linkCustomer(${customer.customerId}, '${customer.name}')" class="btn btn-primary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem; background: linear-gradient(135deg, #10b981, #059669);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 0.25rem;">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                  </svg>
+                  ربط
+                </button>
+                <a href="customers-view.html?id=${customer.customerId}" class="btn btn-secondary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 0.25rem;">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  عرض
+                </a>
+              </div>
+            ` : `
+              <a href="customers-view.html?id=${customer.customerId}" class="btn btn-secondary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem 1rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                عرض
+              </a>
+            `}
+            ${createWhatsappLink(customer.phoneNumber) ? `
+              <button onclick="openWhatsapp('${customer.phoneNumber}')" class="btn-whatsapp" style="flex: 0 0 auto;" title="WhatsApp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+              </button>
+            `: ''}
+          </div>
+        </div>
+      `}).join('');
+
+      grid.innerHTML = customersHTML;
+
+      // Clear pagination for search results
+      const paginationContainer = document.getElementById('paginationContainer');
+      if (paginationContainer) {
+        paginationContainer.innerHTML = '';
+      }
+    }
+
+    async function linkCustomer(customerId, customerName) {
+      showConfirmModal({
+        title: 'ربط العميل',
+        message: 'هل تريد ربط هذا العميل بمؤسستك؟',
+        subMessage: customerName,
+        confirmText: 'ربط بمؤسستي',
+        icon: '🔗',
+        btnClass: 'btn-success',
+        onConfirm: async () => {
+          try {
+            await api.customers.link(customerId);
+            showToast(`تم ربط العميل "${customerName}" بمؤسستك بنجاح!`, 'success');
+            // Redirect to customer view
+            window.location.href = `customers-view.html?id=${customerId}`;
+          } catch (error) {
+            console.error('Error linking customer:', error);
+            showToast(error.message || 'فشل ربط العميل', 'error');
+          }
+        }
+      });
+    }
+
+    function changePage(page) {
+      if (page < 1 || page > totalPages || page === currentPage) return;
+      loadCustomers(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+
+
+    function renderCustomers(customers) {
+      const grid = document.getElementById('customersGrid');
+
+      if (customers.length === 0) {
+        grid.innerHTML = `
+          <div class="glass-card p-6" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <svg style="width: 64px; height: 64px; margin: 0 auto 1rem; color: #475569;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <p class="text-muted">${searchInput ? (searchInput.value ? t('customers.no_customers_found') : t('customers.no_customers')) : t('customers.no_customers')}</p>
+          </div>
+        `;
+        return;
+      }
+
+      const customersHTML = customers.map(customer => `
+        <div class="glass-card p-6" style="transition: all 0.2s ease;">
+          <div class="flex items-center justify-between mb-4" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem;">
+            <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #4f46e5); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1.25rem;">
+                ${customer.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-white">${customer.name}</h3>
+                <p class="text-sm text-muted">ID: ${customer.customerId}</p>
+              </div>
+            </div>
+            ${formatTrustStatusBadge(customer.trustStatus)}
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+            <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem; color: #cbd5e1;">
+              <svg style="width: 16px; height: 16px; color: #64748b;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="M7 15h0M2 9.5h20"/>
+              </svg>
+              <span class="text-sm">${customer.nationalId}</span>
+            </div>
+            <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem; color: #cbd5e1;">
+              <svg style="width: 16px; height: 16px; color: #64748b;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              <span class="text-sm">${customer.phoneNumber}</span>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            ${user.roleName === 'Super Admin' || customer.createdBy === user.userId ? `
+              <a href="customers-edit.html?id=${customer.customerId}" class="btn btn-secondary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem 1rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                </svg>
+                ${t('customers.edit')}
+              </a>
+            ` : ''}
+            <a href="customers-view.html?id=${customer.customerId}" class="btn btn-secondary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem 1rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              ${t('customers.view')}
+            </a>
+            ${createWhatsappLink(customer.phoneNumber) ? `
+              <button onclick="openWhatsapp('${customer.phoneNumber}')" class="btn-whatsapp" style="flex: 0 0 auto;" title="WhatsApp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+              </button>
+            `: ''}
+          </div>
+        </div>
+      `).join('');
+
+      grid.innerHTML = customersHTML;
+
+      // Render pagination
+      const paginationContainer = document.getElementById('paginationContainer');
+      if (paginationContainer) {
+        paginationContainer.innerHTML = createPagination(currentPage, totalPages, changePage);
+      }
+    }
+    // Explicitly expose renderCustomers to window to be safe
+    window.renderCustomers = renderCustomers;
+    window.linkCustomer = linkCustomer;
+
+    // Search input listener - search only on Enter or button click
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+
+    if (searchInput) {
+      // Only allow numbers
+      searchInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+      });
+
+      // Search on Enter key
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          performSearch();
+        }
+      });
+    }
+
+    if (searchBtn) {
+      searchBtn.addEventListener('click', () => {
+        performSearch();
+      });
+    }
+
+    // Start execution
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Installments | Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div id="sidebarContainer"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <div id="headerContainer"></div>
+
+      <!-- Page Content -->
+      <div class="page-wrapper">
+        <div class="container">
+          <!-- Page Header -->
+          <div class="flex items-center justify-between mb-6"
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div>
+              <h1 class="text-3xl font-bold text-white" data-i18n-key="installments.title">Payment Installments</h1>
+              <p class="text-muted mt-1" data-i18n-key="installments.subtitle">Track and manage loan payment schedules
+              </p>
+            </div>
+          </div>
+
+          <!-- Summary Cards -->
+          <div class="grid grid-cols-4 gap-4 mb-6"
+            style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;"
+            id="summaryCards">
+            <!-- Will be populated by JavaScript -->
+          </div>
+
+          <!-- Search and Filters -->
+          <div class="glass-card p-4 mb-6" style="padding: 1rem; margin-bottom: 1.5rem;">
+            <!-- Search Input -->
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <input type="text" id="searchInput" data-i18n-placeholder="installments.search_placeholder"
+                placeholder="Search by customer name, phone, ID, or amount..." class="input" style="width: 100%;" />
+            </div>
+
+            <!-- Status Filters -->
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button id="filter-all" onclick="filterByStatus('all')" class="btn"
+                style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #fff;">
+                📋 <span data-i18n-key="installments.all_installments">All Installments</span>
+              </button>
+              <button id="filter-this-month" onclick="filterByStatus('this-month')" class="btn"
+                style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                📅 <span data-i18n-key="installments.due_this_month">Due This Month</span>
+              </button>
+              <button id="filter-pending" onclick="filterByStatus('Pending')" class="btn"
+                style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                ⏳ <span data-i18n-key="installments.pending">Pending</span>
+              </button>
+              <button id="filter-paid" onclick="filterByStatus('Paid')" class="btn"
+                style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                ✅ <span data-i18n-key="installments.paid">Paid</span>
+              </button>
+              <button id="filter-overdue" onclick="filterByStatus('Overdue')" class="btn"
+                style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
+                ⚠️ <span data-i18n-key="installments.overdue">Overdue</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Installments Table -->
+          <div class="glass-card">
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th data-i18n-key="installments.loan">Loan</th>
+                    <th data-i18n-key="installments.customer">Customer</th>
+                    <th data-i18n-key="customers.table.phone">Phone</th>
+                    <th data-i18n-key="installments.branch">Branch</th>
+                    <th data-i18n-key="installments.amount">Amount</th>
+                    <th data-i18n-key="installments.due_date">Due Date</th>
+                    <th data-i18n-key="installments.status">Status</th>
+                    <th data-i18n-key="installments.paid_date">Paid Date</th>
+                    <th data-i18n-key="installments.actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="installmentsTableBody">
+                  <tr>
+                    <td colspan="10" style="text-align: center; padding: 3rem;">
+                      <div class="spinner"></div>
+                      <p class="text-muted mt-2" data-i18n-key="installments.loading">Loading installments...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div id="paginationContainer" class="pagination-container"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div id="paymentModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title" data-i18n-key="installments.process_payment">Process Payment</h2>
+        <button onclick="closePaymentModal()" class="modal-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div id="errorMessage" class="alert alert-danger hidden"></div>
+
+        <div class="form-group">
+          <label class="label" data-i18n-key="installments.installment_details">Installment Details</label>
+          <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span class="text-muted" data-i18n-key="installments.installment_number">Installment #</span>
+              <span class="text-white font-medium" id="modalInstallmentNumber"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span class="text-muted" data-i18n-key="installments.loan_id">Loan ID</span>
+              <span class="text-white font-medium" id="modalLoanId"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span class="text-muted" data-i18n-key="installments.customer">Customer</span>
+              <span class="text-white font-medium" id="modalCustomer"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span class="text-muted" data-i18n-key="installments.amount_due">Amount Due</span>
+              <span class="text-white font-semibold text-lg" id="modalAmount"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="label" data-i18n-key="installments.payment_date">Payment Date *</label>
+          <input type="date" id="paymentDate" class="input" required />
+          <div id="paymentDateError" class="error-text hidden"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" onclick="closePaymentModal()" class="btn btn-secondary"
+          data-i18n-key="installments.cancel">Cancel</button>
+        <button type="button" onclick="processPayment()" id="processPaymentBtn" class="btn btn-primary"
+          data-i18n-key="installments.process_payment">Process Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Scripts -->
+  <script src="../components/header.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/pagination.js"></script>
+  <script src="../js/ui-utils.js"></script>
+  <script src="../js/api.js"></script>
+
+  <script>
+    async function initPage() {
+      await waitForI18n();
+
+      // Authentication check
+      const user = getCurrentUser();
+      if (!user) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      // Load components
+      document.getElementById('sidebarContainer').innerHTML = createSidebar(user);
+      document.getElementById('headerContainer').innerHTML = createHeader(
+        t('installments.title')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('installments');
+
+      // Translate all static content with data-i18n-key attributes
+      window.i18n.translatePage();
+
+      // Initialize page
+      loadInstallments();
+      setupSearch();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+
+    // State
+    let currentPage = 1;
+    let totalPages = 1;
+    const pageSize = 20;
+    let currentFilter = 'all';
+    let allInstallments = [];
+    let filteredInstallments = [];
+    let searchTerm = '';
+    let searchTimeout = null;
+
+    // Toast notification
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast show ${type === 'success' ? 'toast-success' : type === 'error' ? 'toast-error' : 'toast-info'}`;
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Setup search with debounce
+    function setupSearch() {
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', (e) => {
+        const value = e.target.value.trim();
+
+        // Clear existing timeout
+        if (searchTimeout) {
+          clearTimeout(searchTimeout);
+        }
+
+        // Set new timeout for 1 second
+        searchTimeout = setTimeout(() => {
+          searchTerm = value;
+          performSearch();
+        }, 1000);
+      });
+    }
+
+    // Date formatting
+    function formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // Currency formatting
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('ar-SA', {
+        style: 'currency',
+        currency: 'SAR',
+        minimumFractionDigits: 2
+      }).format(amount || 0);
+    }
+
+    // Check if installment is overdue
+    function isOverdue(installment) {
+      if (installment.status === 'Paid') return false;
+      const dueDate = new Date(installment.dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return dueDate < today;
+    }
+
+    // Load installments from all loans OR from search
+    async function performSearch() {
+      if (searchTerm) {
+        // Show loading
+        document.getElementById('installmentsTableBody').innerHTML =
+          '<tr><td colspan="10" style="text-align: center; padding: 3rem;"><div class="spinner"></div><p class="text-muted mt-2">Searching...</p></td></tr>';
+
+        // Perform search via API
+        try {
+          const searchResults = await api.installments.search(searchTerm);
+
+          // Normalize the structure - backend returns loan.customer and loan.branch
+          allInstallments = searchResults.map(inst => ({
+            ...inst,
+            customer: inst.loan.customer,
+            branch: inst.loan.branch
+          }));
+
+          // Update summary cards with search results
+          updateSummaryCards();
+
+          filterAndRenderInstallments();
+        } catch (error) {
+          console.error('Search failed:', error);
+          showToast('Search failed', 'error');
+          document.getElementById('installmentsTableBody').innerHTML =
+            '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #ef4444;">Search failed</td></tr>';
+        }
+      } else {
+        // Load all installments
+        loadInstallments();
+      }
+    }
+
+    // Load installments from all loans
+    async function loadInstallments() {
+      try {
+        // Get all loans with installments (paginated to get all)
+        let allLoansData = [];
+        let currentPage = 1;
+        let hasMore = true;
+
+        while (hasMore) {
+          const loansResponse = await api.loans.getAll(currentPage, 100);
+          allLoansData = allLoansData.concat(loansResponse.data || []);
+
+          if (currentPage >= loansResponse.meta.totalPages) {
+            hasMore = false;
+          } else {
+            currentPage++;
+          }
+        }
+
+        // Collect all installments from all loans
+        allInstallments = [];
+        for (const loan of allLoansData) {
+          const installments = await api.loans.getInstallments(loan.loanId);
+          installments.forEach(inst => {
+            allInstallments.push({
+              ...inst,
+              loan: loan,
+              customer: loan.customer,
+              branch: loan.branch
+            });
+          });
+        }
+
+        // Sort by due date
+        allInstallments.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+        // Update summary cards
+        updateSummaryCards();
+
+        filterAndRenderInstallments();
+      } catch (error) {
+        console.error('Failed to load installments:', error);
+        showToast('Failed to load installments', 'error');
+        document.getElementById('installmentsTableBody').innerHTML =
+          '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load installments</td></tr>';
+      }
+    }
+
+    // Update summary cards
+    function updateSummaryCards() {
+      const totalInstallments = allInstallments.length;
+      const paidCount = allInstallments.filter(i => i.status === 'Paid').length;
+      const pendingCount = allInstallments.filter(i => i.status === 'Pending').length;
+      const overdueCount = allInstallments.filter(i => isOverdue(i)).length;
+
+      // This month
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      const thisMonthCount = allInstallments.filter(inst => {
+        const dueDate = new Date(inst.dueDate);
+        return dueDate.getMonth() === currentMonth &&
+          dueDate.getFullYear() === currentYear &&
+          inst.status !== 'Paid';
+      }).length;
+
+      const totalAmount = allInstallments.reduce((sum, i) => sum + Number(i.amount), 0);
+      const paidAmount = allInstallments.filter(i => i.status === 'Paid').reduce((sum, i) => sum + Number(i.amount), 0);
+
+      const summaryHTML = `
+        <div class="glass-card p-4" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.paid')}</span>
+            <span style="font-size: 1.5rem;">✅</span>
+          </div>
+          <div class="text-white font-bold" style="font-size: 1.75rem; margin-bottom: 0.25rem;">${paidCount}</div>
+          <div class="text-success" style="font-size: 0.85rem; color: #10b981;">${formatCurrency(paidAmount)}</div>
+        </div>
+        
+        <div class="glass-card p-4" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.pending')}</span>
+            <span style="font-size: 1.5rem;">⏳</span>
+          </div>
+          <div class="text-white font-bold" style="font-size: 1.75rem;">${pendingCount}</div>
+        </div>
+        
+        <div class="glass-card p-4" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.overdue')}</span>
+            <span style="font-size: 1.5rem;">⚠️</span>
+          </div>
+          <div class="text-white font-bold" style="font-size: 1.75rem;">${overdueCount}</div>
+        </div>
+        
+        <div class="glass-card p-4" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.due_this_month')}</span>
+            <span style="font-size: 1.5rem;">📅</span>
+          </div>
+          <div class="text-white font-bold" style="font-size: 1.75rem;">${thisMonthCount}</div>
+        </div>
+      `;
+
+      document.getElementById('summaryCards').innerHTML = summaryHTML;
+    }
+
+    // Filter by status
+    function filterByStatus(status) {
+      currentFilter = status;
+
+      // Update active filter button
+      document.querySelectorAll('[id^="filter-"]').forEach(btn => {
+        btn.style.background = 'rgba(255, 255, 255, 0.05)';
+        btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+      });
+      const buttonId = `filter-${status.toLowerCase()}`;
+      const activeButton = document.getElementById(buttonId);
+      if (activeButton) {
+        activeButton.style.background = 'rgba(99, 102, 241, 0.2)';
+        activeButton.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+      }
+
+      filterAndRenderInstallments();
+    }
+
+    // Change page
+    function changePage(page) {
+      currentPage = page;
+      renderInstallments();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Filter and render installments
+    function filterAndRenderInstallments() {
+      let filtered = allInstallments;
+
+      if (currentFilter === 'this-month') {
+        // Filter for unpaid installments due this month
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        filtered = allInstallments.filter(inst => {
+          const dueDate = new Date(inst.dueDate);
+          return dueDate.getMonth() === currentMonth &&
+            dueDate.getFullYear() === currentYear &&
+            inst.status !== 'Paid';
+        });
+      } else if (currentFilter === 'Overdue') {
+        // Show all overdue installments (not paid and past due date)
+        filtered = allInstallments.filter(inst => isOverdue(inst));
+      } else if (currentFilter === 'Pending') {
+        // Show all pending installments (status === 'Pending')
+        filtered = allInstallments.filter(inst => inst.status === 'Pending');
+      } else if (currentFilter === 'Paid') {
+        // Show all paid installments
+        filtered = allInstallments.filter(inst => inst.status === 'Paid');
+      } else if (currentFilter !== 'all') {
+        // Default: filter by status
+        filtered = allInstallments.filter(inst => inst.status === currentFilter);
+      }
+
+      // Sort by due date (ascending - earliest first)
+      filtered.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+      filteredInstallments = filtered;
+      currentPage = 1;
+      renderInstallments();
+    }
+
+    // Render installments table
+    function renderInstallments() {
+      const tbody = document.getElementById('installmentsTableBody');
+
+      if (filteredInstallments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('installments.no_installments_found')}</td></tr>`;
+        document.getElementById('paginationContainer').innerHTML = '';
+        return;
+      }
+
+      // Calculate pagination
+      totalPages = Math.ceil(filteredInstallments.length / pageSize);
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const pageInstallments = filteredInstallments.slice(startIndex, endIndex);
+
+      const installmentsHTML = pageInstallments.map(inst => {
+        const overdue = isOverdue(inst);
+        const statusBadge =
+          inst.status === 'Paid' ? 'badge-success' :
+            overdue ? 'badge-danger' :
+              'badge-warning';
+
+        const statusText = inst.status === 'Paid'
+          ? `✅ ${t('installments.paid')}`
+          : overdue
+            ? `⚠️ ${t('installments.overdue')}`
+            : `⏳ ${t('installments.pending')}`;
+
+        // Check days until/past due
+        const today = new Date();
+        const dueDate = new Date(inst.dueDate);
+        const daysDiff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+        let dueDateClass = '';
+        if (inst.status !== 'Paid') {
+          if (daysDiff < 0) dueDateClass = 'style="color: #ef4444;"'; // overdue - red
+          else if (daysDiff <= 7) dueDateClass = 'style="color: #f59e0b;"'; // due soon - orange
+        }
+
+        return `
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <td style="padding: 1rem 0.5rem;">
+              <span class="font-semibold text-white" style="font-size: 0.95rem;">#${inst.installmentNumber}</span>
+            </td>
+            <td style="padding: 1rem 0.5rem;">
+              <a href="loans-view.html?id=${inst.loan.loanId}" class="text-white font-medium" style="color: #fff; text-decoration: underline; font-size: 0.95rem;">
+                #${inst.loan.loanId}
+              </a>
+            </td>
+            <td style="padding: 1rem 0.75rem;">
+              <div>
+                <div class="text-white font-medium" style="font-size: 0.95rem; margin-bottom: 0.125rem;">${inst.customer.name}</div>
+                <div class="text-muted" style="font-size: 0.8rem;">ID: ${inst.customer.customerId}</div>
+              </div>
+            </td>
+            <td style="padding: 1rem 0.75rem;">
+              <span class="text-secondary" style="font-size: 0.9rem;">${inst.customer.phoneNumber || '-'}</span>
+            </td>
+            <td style="padding: 1rem 0.75rem;">
+              <span class="text-secondary" style="font-size: 0.9rem;">${inst.branch ? inst.branch.name : (inst.institution ? inst.institution.name : 'N/A')}</span>
+            </td>
+            <td style="padding: 1rem 0.75rem;">
+              <span class="text-white font-semibold" style="font-size: 1rem;">${formatCurrency(inst.amount)}</span>
+            </td>
+            <td ${dueDateClass} style="padding: 1rem 0.5rem;">
+              <div style="font-size: 0.9rem;">${formatDate(inst.dueDate)}</div>
+              ${inst.status !== 'Paid' && daysDiff <= 7 && daysDiff >= 0 ?
+            `<div style="font-size: 0.75rem; color: #f59e0b; margin-top: 0.125rem;">${daysDiff} day${daysDiff !== 1 ? 's' : ''} left</div>` :
+            inst.status !== 'Paid' && daysDiff < 0 ?
+              `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.125rem;">${Math.abs(daysDiff)} day${Math.abs(daysDiff) !== 1 ? 's' : ''} late</div>` : ''}
+            </td>
+            <td style="padding: 1rem 0.5rem;">
+              <span class="badge ${statusBadge}" style="font-size: 0.85rem; white-space: nowrap;">${statusText}</span>
+            </td>
+            <td style="padding: 1rem 0.5rem;">
+              <span class="text-secondary" style="font-size: 0.9rem;">${inst.paymentDate ? formatDate(inst.paymentDate) : '-'}</span>
+            </td>
+            <td style="padding: 1rem 0.5rem;">
+              <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: center;">
+                <a href="installments-view.html?id=${inst.id}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
+                  ${t('installments.view')}
+                </a>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      tbody.innerHTML = installmentsHTML;
+
+      // Render pagination
+      totalPages = Math.ceil(filteredInstallments.length / pageSize);
+      const paginationContainer = document.getElementById('paginationContainer');
+      if (paginationContainer && totalPages > 1) {
+        paginationContainer.innerHTML = createPagination(currentPage, totalPages, changePage);
+      } else if (paginationContainer) {
+        paginationContainer.innerHTML = '';
+      }
+    }
+
+    // Change page
+    function changePage(page) {
+      if (page < 1 || page > Math.ceil(filteredInstallments.length / pageSize)) return;
+      currentPage = page;
+      renderInstallments();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Payment modal
+    let currentInstallmentId = null;
+
+    async function openPaymentModal(installmentId) {
+      const installment = allInstallments.find(i => i.id === installmentId);
+      if (!installment) return;
+
+      // Check if previous installments are paid
+      if (installment.installmentNumber > 1) {
+        const loanInstallments = allInstallments.filter(i => i.loan.loanId === installment.loan.loanId);
+        loanInstallments.sort((a, b) => a.installmentNumber - b.installmentNumber);
+
+        const unpaidPrevious = loanInstallments.find(
+          i => i.installmentNumber < installment.installmentNumber && i.status !== 'Paid'
+        );
+
+        if (unpaidPrevious) {
+          showToast(`Cannot pay installment #${installment.installmentNumber}. Please pay installment #${unpaidPrevious.installmentNumber} first.`, 'error');
+          return;
+        }
+      }
+
+      currentInstallmentId = installmentId;
+
+      document.getElementById('modalInstallmentNumber').textContent = `#${installment.installmentNumber}`;
+      document.getElementById('modalLoanId').textContent = `#${installment.loan.loanId}`;
+      document.getElementById('modalCustomer').textContent = installment.customer.name;
+      document.getElementById('modalAmount').textContent = formatCurrency(installment.amount);
+      document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+
+      document.getElementById('errorMessage').classList.add('hidden');
+      document.getElementById('paymentDateError').classList.add('hidden');
+
+      const modal = document.getElementById('paymentModal');
+      modal.style.display = 'flex';
+      // Small delay to ensure display:flex applies before adding class for transition
+      setTimeout(() => modal.classList.add('show'), 10);
+    }
+
+    function closePaymentModal() {
+      const modal = document.getElementById('paymentModal');
+      modal.classList.remove('show');
+      setTimeout(() => {
+        modal.style.display = 'none';
+        currentInstallmentId = null;
+      }, 300); // Match CSS transition duration
+    }
+
+    async function processPayment() {
+      const paymentDate = document.getElementById('paymentDate').value;
+
+      // Clear previous errors
+      document.getElementById('errorMessage').classList.add('hidden');
+      document.getElementById('paymentDateError').classList.add('hidden');
+
+      // Validate
+      if (!paymentDate) {
+        document.getElementById('paymentDateError').textContent = 'Payment date is required';
+        document.getElementById('paymentDateError').classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const btn = document.getElementById('processPaymentBtn');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        await api.installments.payInstallment(currentInstallmentId, paymentDate);
+
+        showToast('Payment processed successfully', 'success');
+        closePaymentModal();
+
+        // Reload installments
+        await loadInstallments();
+
+      } catch (error) {
+        console.error('Payment failed:', error);
+        const errorMsg = error.error || error.message || 'Failed to process payment';
+        document.getElementById('errorMessage').textContent = errorMsg;
+        document.getElementById('errorMessage').classList.remove('hidden');
+      } finally {
+        const btn = document.getElementById('processPaymentBtn');
+        btn.disabled = false;
+        btn.textContent = 'Process Payment';
+      }
+    }
+
+    // Initialize with all filter
+    document.getElementById('filter-all').click();
+  </script>
+</body>
+
+</html>

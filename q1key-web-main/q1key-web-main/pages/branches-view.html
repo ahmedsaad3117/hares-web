@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Branch Details - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8"
+        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="branches.html" class="btn btn-secondary" style="padding: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="branches.view_page.title">Branch Details</h1>
+          <p class="text-secondary" data-i18n-key="branches.view_page.subtitle">View branch information</p>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div id="loadingContainer" class="loading-container">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Branch Details -->
+      <div id="branchContainer" style="display: none;">
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-6"
+            style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
+            <div>
+              <h2 id="branchName" class="text-2xl font-bold text-white mb-2"></h2>
+              <p class="text-muted"><span data-i18n-key="branches.view_page.branch_id">Branch ID</span>: <span
+                  id="branchId"></span></p>
+              <p class="text-muted"><span data-i18n-key="branches.view_page.institution">Institution</span>: <span
+                  id="institutionName"></span></p>
+            </div>
+            <div class="flex gap-2" style="display: flex; gap: 0.5rem; align-items: center;">
+              <span id="statusBadge" class="badge"></span>
+
+              <div class="meatball-container">
+                <button class="meatball-btn">⋮</button>
+                <div class="meatball-dropdown">
+                  <a id="whatsappBtn" class="dropdown-item" style="display: none; color: #25D366;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                      fill="currentColor">
+                      <path
+                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                    </svg>
+                    <span>WhatsApp</span>
+                  </a>
+                  <a id="editBtn" class="dropdown-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    <span data-i18n-key="common.button.edit">Edit</span>
+                  </a>
+                  <button id="deleteBtn" class="dropdown-item text-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                    <span data-i18n-key="common.button.delete">Delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Capacity Info -->
+          <div id="capacityInfo" class="mb-6"></div>
+
+          <div class="grid grid-cols-2 gap-6"
+            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="branches.form.phone_label">Phone Number</p>
+              <p id="phoneNumber" class="text-2xl font-bold text-white"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="branches.view_page.total_loans_amount">Total Loans Amount</p>
+              <p id="totalLoans" class="text-2xl font-bold text-white"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="branches.view_page.maximum_loans_amount">Maximum Loans Amount
+              </p>
+              <p id="maximumLoans" class="text-2xl font-bold text-white"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="branches.view_page.created_at">Created At</p>
+              <p id="createdAt" class="text-white font-medium"></p>
+            </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="branches.view_page.last_updated">Last Updated</p>
+              <p id="updatedAt" class="text-white font-medium"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="glass-card p-6 mb-6">
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="branches.view_page.statistics">Statistics</h3>
+          <div id="statsContainer">
+            <div class="loading-container">
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Loans -->
+        <div class="glass-card p-6">
+          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="branches.view_page.recent_loans">Recent Loans
+          </h3>
+          <div id="loansContainer">
+            <div class="loading-container">
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/ui-utils.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    async function initPage() {
+      await waitForI18n();
+
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const user = getCurrentUser();
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('branches.branch_details'),
+        t('branches.view_branch_info')
+      );
+      initializeLanguageSwitcher();
+      setActiveNav('branches');
+      window.i18n.translatePage();
+
+      // Load branch data
+      await loadBranch();
+
+      // Initialize meatball menu
+      initMeatballMenu();
+    }
+
+    // Get branch ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const branchId = urlParams.get('id');
+
+    if (!branchId) {
+      window.location.href = 'branches.html';
+    }
+
+    let branchData = null;
+    let branchStats = null;
+    let branchTeam = null;
+
+    // Load branch data
+    async function loadBranch() {
+      const loadingContainer = document.getElementById('loadingContainer');
+      const branchContainer = document.getElementById('branchContainer');
+
+      try {
+        branchData = await api.branches.getById(branchId);
+
+        // Populate branch details
+        document.getElementById('branchName').textContent = branchData.name;
+        document.getElementById('branchId').textContent = branchData.branchId;
+        document.getElementById('institutionName').textContent = branchData.institution?.name || 'N/A';
+
+        // Phone Number & WhatsApp
+        document.getElementById('phoneNumber').textContent = branchData.phoneNumber || '--';
+        if (branchData.phoneNumber && createWhatsappLink(branchData.phoneNumber)) {
+          const waBtn = document.getElementById('whatsappBtn');
+          waBtn.style.display = 'flex';
+          waBtn.onclick = () => openWhatsapp(branchData.phoneNumber);
+
+          // Append icon to phone display
+          const phoneEl = document.getElementById('phoneNumber');
+          phoneEl.innerHTML = `${branchData.phoneNumber} 
+             <button onclick="openWhatsapp('${branchData.phoneNumber}')" class="btn-whatsapp" style="padding: 0.25rem 0.5rem; margin-left: 0.5rem;" title="Chat on WhatsApp">
+               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+             </button>`;
+        }
+
+        document.getElementById('totalLoans').textContent = formatCurrency(branchData.totalLoans || 0);
+        document.getElementById('maximumLoans').textContent = branchData.maximumLoans ? formatCurrency(branchData.maximumLoans) : 'Unlimited';
+        document.getElementById('createdAt').textContent = formatDateTime(branchData.createdAt);
+        document.getElementById('updatedAt').textContent = formatDateTime(branchData.updatedAt);
+
+        const statusBadge = document.getElementById('statusBadge');
+        if (statusBadge) {
+          statusBadge.textContent = branchData.isActive ? t('branches.active') : t('branches.inactive');
+          statusBadge.className = `badge ${branchData.isActive ? 'badge-success' : 'badge-danger'}`;
+        }
+
+        // Show capacity info if maximum loans is set
+        if (branchData.maximumLoans) {
+          const utilizationPercent = (branchData.totalLoans / branchData.maximumLoans) * 100;
+          const capacityColor = utilizationPercent >= 90 ? '#ef4444' : utilizationPercent >= 70 ? '#f59e0b' : '#10b981';
+
+          document.getElementById('capacityInfo').innerHTML = `
+            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+              <div class="flex items-center justify-between mb-2" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <p class="text-sm text-muted">${t('branches.view_page.capacity_utilization')}</p>
+                <p class="text-sm font-medium" style="color: ${capacityColor};">${utilizationPercent.toFixed(1)}%</p>
+              </div>
+              <div style="width: 100%; height: 8px; background: rgba(30, 41, 59, 0.8); border-radius: 9999px; overflow: hidden;">
+                <div style="width: ${Math.min(utilizationPercent, 100)}%; height: 100%; background: ${capacityColor}; transition: width 0.3s;"></div>
+              </div>
+            </div>
+          `;
+        }
+
+        document.getElementById('editBtn').href = `branches-edit.html?id=${branchId}`;
+
+        if (loadingContainer) loadingContainer.style.display = 'none';
+        if (branchContainer) branchContainer.style.display = 'block';
+
+        // Load statistics, loans, and team for integrity check
+        await loadStatistics();
+        loadLoans();
+
+        // Load team (users)
+        try {
+          branchTeam = await api.branches.getTeam(branchId);
+        } catch (e) {
+          console.error('Error loading team:', e);
+          branchTeam = [];
+        }
+
+        // Setup delete button based on integrity
+        setupDeleteAction();
+
+      } catch (error) {
+        console.error('Error loading branch:', error);
+        showToast('Failed to load branch', 'error');
+        setTimeout(() => window.location.href = 'branches.html', 2000);
+      }
+    }
+
+    async function loadStatistics() {
+      try {
+        branchStats = await api.branches.getStatistics(branchId);
+        const statsContainer = document.getElementById('statsContainer');
+
+        statsContainer.innerHTML = `
+          <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+              <p class="text-muted text-sm">${t('branches.view_page.total_customers')}</p>
+              <p class="text-2xl font-bold text-white">${branchStats.totalCustomers || 0}</p>
+            </div>
+            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+              <p class="text-muted text-sm">${t('branches.view_page.active_loans_count')}</p>
+              <p class="text-2xl font-bold text-white">${branchStats.activeLoans || 0}</p>
+            </div>
+            <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
+              <p class="text-muted text-sm">${t('branches.view_page.total_loans_amount')}</p>
+              <p class="text-2xl font-bold text-white">${formatCurrency(branchStats.totalLoanAmount || 0)}</p>
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error loading statistics:', error);
+        document.getElementById('statsContainer').innerHTML = '<p class="text-muted">Failed to load statistics</p>';
+      }
+    }
+
+    async function loadLoans() {
+      try {
+        const loans = await api.branches.getLoans(branchId);
+        const loansContainer = document.getElementById('loansContainer');
+
+        if (loans.length === 0) {
+          loansContainer.innerHTML = `<p class="text-muted">No loans found</p>`;
+          return;
+        }
+
+        const loansHTML = loans.slice(0, 10).map(loan => `
+          <div class="glass-card p-4 mb-3" style="background: rgba(30, 41, 59, 0.5);">
+            <div class="flex items-center justify-between" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <p class="text-white font-medium">${t('loans.view_page.loan_number')} #${loan.loanId}</p>
+                <p class="text-sm text-muted">${loan.customer?.name || 'N/A'} - ${formatCurrency(loan.principalAmount)}</p>
+              </div>
+              <span class="badge ${loan.status === 'active' ? 'badge-success' : loan.status === 'pending' ? 'badge-warning' : 'badge-danger'}">${t('loans.status.' + loan.status.toLowerCase()) || loan.status}</span>
+            </div>
+          </div>
+        `).join('');
+
+        loansContainer.innerHTML = loansHTML;
+      } catch (error) {
+        console.error('Error loading loans:', error);
+        document.getElementById('loansContainer').innerHTML = '<p class="text-muted">Failed to load loans</p>';
+      }
+    }
+
+    function setupDeleteAction() {
+      const deleteBtn = document.getElementById('deleteBtn');
+      const branchContainer = document.getElementById('branchContainer');
+
+      // Check integrity: totalCustomers, activeLoans, branchTeam
+      const hasLinks = (branchStats && (branchStats.totalCustomers > 0 || branchStats.activeLoans > 0)) ||
+        (branchTeam && branchTeam.length > 0);
+
+      if (hasLinks) {
+        deleteBtn.disabled = true;
+        deleteBtn.classList.add('opacity-50');
+        deleteBtn.title = t('branches.view_page.delete_prevented_hint') || 'Cannot delete branch with existing data';
+
+        // Add a message if linked
+        const warningBox = document.createElement('div');
+        warningBox.style.padding = '0.75rem';
+        warningBox.style.background = 'rgba(239, 68, 68, 0.1)';
+        warningBox.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+        warningBox.style.borderRadius = '8px';
+        warningBox.style.marginTop = '1rem';
+        warningBox.innerHTML = `
+          <p class="text-sm text-danger" style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            ${t('branches.view_page.delete_prevented_msg') || 'Cannot be deleted: Linked to users, loans or customers.'}
+          </p>
+        `;
+        branchContainer.prepend(warningBox);
+      } else {
+        deleteBtn.addEventListener('click', () => {
+          showDeleteModal({
+            title: t('branches.view_page.delete_confirm_title') || 'Delete Branch',
+            itemName: branchData.name,
+            warningText: t('branches.view_page.delete_warning') || 'This will permanently remove the branch and all associated settings. This action cannot be undone.',
+            onConfirm: async () => {
+              try {
+                await api.branches.delete(branchId);
+                showToast(t('branches.deleted_success'), 'success');
+                window.location.href = 'branches.html';
+              } catch (error) {
+                console.error('Error deleting branch:', error);
+                showToast(error.message || t('branches.delete_failed'), 'error');
+              }
+            }
+          });
+        });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اشتراكي - Q1KEY Platform</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .page-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .subscription-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .subscription-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .subscription-info h2 {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .subscription-info p {
+            color: #94a3b8;
+            margin: 0;
+        }
+
+        /* Status Cards */
+        .status-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .status-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-card .label {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        .status-card.active .value {
+            color: #10b981;
+        }
+
+        .status-card.warning .value {
+            color: #f59e0b;
+        }
+
+        .status-card.danger .value {
+            color: #ef4444;
+        }
+
+        /* Alert Box */
+        .alert-box {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-box.warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1));
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+        }
+
+        .alert-box.danger {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(248, 113, 113, 0.1));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        .alert-box.info {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+        }
+
+        .alert-box.success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-content strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Plans Section */
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .plan-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .plan-card:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .plan-card.selected {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .plan-card .plan-duration {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-card .plan-name {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-card .plan-price {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 0.25rem;
+        }
+
+        .plan-card .plan-currency {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .plan-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 24px;
+            height: 24px;
+            background: #6366f1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .plan-card {
+            position: relative;
+        }
+
+        /* Request Form */
+        .request-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .request-summary {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .summary-row .label {
+            color: #94a3b8;
+        }
+
+        .summary-row .value {
+            color: white;
+        }
+
+        .summary-row:last-child .value {
+            color: #10b981;
+        }
+
+        .notes-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 80px;
+            margin-bottom: 1rem;
+        }
+
+        .notes-input:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+
+        /* Pending Request Card */
+        .pending-card {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.05));
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .pending-card h3 {
+            color: #fbbf24;
+            margin-bottom: 1rem;
+        }
+
+        .pending-details {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .pending-details p {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+            color: #e2e8f0;
+        }
+
+        /* History Section */
+        .history-section {
+            margin-top: 2rem;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .history-icon.approved {
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .history-icon.pending {
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .history-icon.rejected {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .history-content {
+            flex: 1;
+        }
+
+        .history-content strong {
+            color: white;
+        }
+
+        .history-content small {
+            color: #64748b;
+        }
+
+        .history-amount {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+        <div id="sidebar"></div>
+
+        <div class="main-content">
+            <div id="header"></div>
+
+            <div class="page-container">
+                <div class="glass-card" id="subscriptionContent">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>جاري تحميل بيانات الاشتراك...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/ui-utils.js"></script>
+    <script src="../components/sidebar.js?v=5"></script>
+    <script src="../components/header.js"></script>
+    <script>
+        let subscriptionData = null;
+        let selectedPlanId = null;
+
+        async function initPage() {
+            await waitForI18n();
+
+            if (!isAuthenticated()) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            const user = getCurrentUser();
+
+            // Only Institution or Branch can access this page
+            if (user.roleName !== 'Institution' && user.roleName !== 'Branch') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            document.getElementById('sidebar').innerHTML = createSidebar(user);
+            document.getElementById('header').innerHTML = createHeader('اشتراكي', 'إدارة اشتراكك في المنصة');
+            if (typeof initializeLanguageSwitcher === 'function') initializeLanguageSwitcher();
+            setActiveNav('my-subscription');
+
+            await loadSubscriptionData();
+        }
+
+        async function loadSubscriptionData() {
+            try {
+                subscriptionData = await api.subscriptions.getMySubscription();
+                renderPage();
+            } catch (error) {
+                console.error('Error loading subscription:', error);
+                document.getElementById('subscriptionContent').innerHTML = `
+                    <div class="loading-state">
+                        <p style="color: #ef4444;">فشل في تحميل بيانات الاشتراك</p>
+                        <button class="btn btn-primary" onclick="loadSubscriptionData()">إعادة المحاولة</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderPage() {
+            const container = document.getElementById('subscriptionContent');
+            const d = subscriptionData;
+
+            let statusClass = '';
+            let statusIcon = '✅';
+            let statusText = 'نشط';
+
+            if (d.status === 'expired') {
+                statusClass = 'danger';
+                statusIcon = '❌';
+                statusText = 'منتهي';
+            } else if (d.status === 'expiring_soon') {
+                statusClass = 'danger';
+                statusIcon = '⚠️';
+                statusText = 'ينتهي قريباً';
+            } else if (d.status === 'expiring') {
+                statusClass = 'warning';
+                statusIcon = '⏳';
+                statusText = 'ينتهي خلال 30 يوم';
+            } else {
+                statusClass = 'active';
+            }
+
+            let alertHtml = '';
+            if (d.status === 'expired') {
+                alertHtml = `
+                    <div class="alert-box danger">
+                        <span class="alert-icon">🚫</span>
+                        <div class="alert-content">
+                            <strong>انتهت صلاحية اشتراكك!</strong>
+                            <span>يرجى تجديد الاشتراك للاستمرار في استخدام المنصة</span>
+                        </div>
+                    </div>
+                `;
+            } else if (d.status === 'expiring_soon') {
+                alertHtml = `
+                    <div class="alert-box warning">
+                        <span class="alert-icon">⚠️</span>
+                        <div class="alert-content">
+                            <strong>اشتراكك سينتهي خلال ${d.daysRemaining} يوم!</strong>
+                            <span>قم بالتجديد الآن لتجنب انقطاع الخدمة</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            let pendingHtml = '';
+            if (d.hasPendingRequest && d.pendingRequest) {
+                const req = d.pendingRequest;
+                pendingHtml = `
+                    <div class="pending-card">
+                        <h3>🕐 لديك طلب تجديد تحت المعالجة</h3>
+                        <div class="pending-details">
+                            <p><span>الباقة:</span> <strong>${req.plan?.name || 'مخصص'}</strong></p>
+                            <p><span>المبلغ:</span> <strong style="color: #10b981;">${req.amount} ر.س</strong></p>
+                            <p><span>تاريخ الطلب:</span> <strong>${formatDate(req.createdAt)}</strong></p>
+                        </div>
+                        <p style="color: #94a3b8; font-size: 0.9rem;">
+                            سيتم تفعيل اشتراكك فور استلام التحويل وتأكيده من قبل الإدارة
+                        </p>
+                        <button class="btn btn-secondary" onclick="cancelMyRequest(${req.id})">
+                            إلغاء الطلب
+                        </button>
+                    </div>
+                `;
+            }
+
+            let plansHtml = '';
+            if (!d.hasPendingRequest && d.availablePlans && d.availablePlans.length > 0) {
+                plansHtml = `
+                    <div class="request-section">
+                        <h3 style="color: white; margin-bottom: 1rem;">📦 اختر باقة التجديد</h3>
+                        <div class="plans-grid">
+                            ${d.availablePlans.map(plan => `
+                                <div class="plan-card ${selectedPlanId === plan.id ? 'selected' : ''}" 
+                                     onclick="selectPlan(${plan.id})">
+                                    <div class="plan-duration">${getDurationEmoji(plan.durationMonths)}</div>
+                                    <div class="plan-name">${plan.name}</div>
+                                    <div class="plan-price">${plan.price}</div>
+                                    <div class="plan-currency">ريال سعودي</div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div id="requestForm" style="display: none; margin-top: 2rem;">
+                            <div class="request-summary">
+                                <div class="summary-row">
+                                    <span class="label">الباقة المختارة</span>
+                                    <span class="value" id="selectedPlanName">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="label">المدة</span>
+                                    <span class="value" id="selectedPlanDuration">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="label">المبلغ المطلوب</span>
+                                    <span class="value" id="selectedPlanPrice">-</span>
+                                </div>
+                            </div>
+
+                            <textarea class="notes-input" id="requestNotes" placeholder="ملاحظات إضافية (اختياري)..."></textarea>
+
+                            <button class="btn btn-primary submit-btn" onclick="submitRequest()">
+                                📤 تقديم طلب التجديد
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="subscription-header">
+                    <div class="subscription-icon">${d.type === 'Institution' ? '🏛️' : '🏪'}</div>
+                    <div class="subscription-info">
+                        <h2>${d.entityName}</h2>
+                        <p>${d.type === 'Institution' ? 'مؤسسة' : 'فرع'}</p>
+                    </div>
+                </div>
+
+                ${alertHtml}
+
+                <div class="status-cards">
+                    <div class="status-card ${statusClass}">
+                        <div class="value">${statusIcon} ${statusText}</div>
+                        <div class="label">حالة الاشتراك</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="value">${d.expirationDate ? formatDate(d.expirationDate) : 'غير محدد'}</div>
+                        <div class="label">تاريخ الانتهاء</div>
+                    </div>
+                    <div class="status-card ${d.daysRemaining <= 5 ? 'danger' : d.daysRemaining <= 30 ? 'warning' : ''}">
+                        <div class="value">${d.daysRemaining !== null ? d.daysRemaining : '-'}</div>
+                        <div class="label">يوم متبقي</div>
+                    </div>
+                </div>
+
+                ${pendingHtml}
+                ${plansHtml}
+            `;
+        }
+
+        function getDurationEmoji(months) {
+            if (months === 1) return '📅';
+            if (months <= 3) return '📆';
+            if (months <= 6) return '🗓️';
+            return '📅';
+        }
+
+        function selectPlan(planId) {
+            selectedPlanId = planId;
+            const plan = subscriptionData.availablePlans.find(p => p.id === planId);
+
+            // Update UI
+            document.querySelectorAll('.plan-card').forEach(card => card.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            // Show form
+            document.getElementById('requestForm').style.display = 'block';
+            document.getElementById('selectedPlanName').textContent = plan.name;
+            document.getElementById('selectedPlanDuration').textContent = `${plan.durationMonths} شهر`;
+            document.getElementById('selectedPlanPrice').textContent = `${plan.price} ر.س`;
+        }
+
+        async function submitRequest() {
+            if (!selectedPlanId) {
+                showToast('يرجى اختيار باقة أولاً', 'error');
+                return;
+            }
+
+            const notes = document.getElementById('requestNotes').value.trim();
+
+            showConfirmModal({
+                title: 'تأكيد طلب التجديد',
+                message: 'سيتم إرسال طلب التجديد للإدارة. بعد استلام التحويل وتأكيده، سيتم تفعيل اشتراكك.',
+                confirmText: 'تأكيد الطلب',
+                icon: '📤',
+                btnClass: 'btn-primary',
+                onConfirm: async () => {
+                    try {
+                        await api.subscriptions.createRequest({
+                            planId: selectedPlanId,
+                            notes
+                        });
+
+                        showToast('تم تقديم طلب التجديد بنجاح', 'success');
+                        await loadSubscriptionData();
+                    } catch (error) {
+                        console.error('Error submitting request:', error);
+                        showToast(error.message || 'فشل في تقديم الطلب', 'error');
+                    }
+                }
+            });
+        }
+
+        async function cancelMyRequest(requestId) {
+            showConfirmModal({
+                title: 'إلغاء الطلب',
+                message: 'هل أنت متأكد من إلغاء طلب التجديد؟',
+                confirmText: 'إلغاء الطلب',
+                icon: '❌',
+                btnClass: 'btn-danger',
+                onConfirm: async () => {
+                    try {
+                        await api.subscriptions.cancelRequest(requestId);
+                        showToast('تم إلغاء الطلب', 'success');
+                        await loadSubscriptionData();
+                    } catch (error) {
+                        console.error('Error cancelling request:', error);
+                        showToast('فشل في إلغاء الطلب', 'error');
+                    }
+                }
+            });
+        }
+
+        // Initialize
+        initPage();
+    </script>
+</body>
+
+</html>

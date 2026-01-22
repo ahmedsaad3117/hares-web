@@ -1,0 +1,422 @@
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Branch } from '../../entities/branch.entity';
+import { Institution } from '../../entities/institution.entity';
+import { User } from '../../entities/user.entity';
+import { Customer } from '../../entities/customer.entity';
+import { Loan, LoanStatus } from '../../entities/loan.entity';
+import { UsersService } from '../users/users.service';
+import { CreateBranchDto } from './dto/create-branch.dto';
+import { UpdateBranchDto } from './dto/update-branch.dto';
+import { BranchDashboardStatsDto, BranchTeamMemberDto, BranchCustomerDto, BranchLoanDto, ActivityDto } from './dto/branch-dashboard.dto';
+import { PaginationDto, PaginatedResult } from '../../common/dto/pagination.dto';
+import { SubscriptionRequest, RequesterType, SubscriptionRequestStatus } from '../../entities/subscription-request.entity';
+import { SubscriptionPlan } from '../../entities/subscription-plan.entity';
+
+@Injectable()
+export class BranchesService {
+  constructor(
+    @InjectRepository(Branch)
+    private branchesRepository: Repository<Branch>,
+    @InjectRepository(Institution)
+    private institutionsRepository: Repository<Institution>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+    @InjectRepository(Customer)
+    private customersRepository: Repository<Customer>,
+    @InjectRepository(Loan)
+    private loansRepository: Repository<Loan>,
+    @InjectRepository(SubscriptionRequest)
+    private requestsRepository: Repository<SubscriptionRequest>,
+    @InjectRepository(SubscriptionPlan)
+    private plansRepository: Repository<SubscriptionPlan>,
+    private usersService: UsersService,
+  ) { }
+
+  async create(createBranchDto: CreateBranchDto): Promise<Branch> {
+    const { userName, userEmail, userPassword, userPhoneNumber, userIsActive, planId, ...branchData } = createBranchDto as any;
+
+    // Verify institution exists
+    const institution = await this.institutionsRepository.findOne({
+      where: { institutionId: branchData.institutionId },
+    });
+
+    if (!institution) {
+      throw new NotFoundException(
+        `Institution with ID ${branchData.institutionId} not found`
+      );
+    }
+
+    // Check if institution can create branches
+    if (!institution.canCreateBranches) {
+      throw new ForbiddenException(
+        `Institution '${institution.name}' is not allowed to create branches`
+      );
+    }
+
+    // Validate Plan if provided
+    let plan: SubscriptionPlan | null = null;
+    if (planId) {
+      plan = await this.plansRepository.findOne({ where: { id: planId } });
+      if (!plan) {
+        throw new BadRequestException('Invalid subscription plan ID');
+      }
+    } else {
+      throw new BadRequestException('Subscription Plan is required');
+    }
+
+    // Create branch (Force INACTIVE)
+    const branch = this.branchesRepository.create({
+      ...branchData,
+      isActive: false
+    }) as unknown as Branch;
+    const savedBranch = await this.branchesRepository.save(branch);
+
+    // Create Subscription Request
+    const request = this.requestsRepository.create({
+      requesterType: RequesterType.BRANCH, // Make sure correct enum is used
+      institutionId: savedBranch.institutionId,
+      branchId: savedBranch.branchId,
+      planId: plan.id,
+      amount: plan.price,
+      status: SubscriptionRequestStatus.PENDING,
+      notes: `طلب اشتراك أولي للفرع: ${savedBranch.name}`
+    });
+    await this.requestsRepository.save(request);
+
+    // If user details are provided, create the branch user
+    if (userName && userEmail && userPassword) {
+      await this.usersService.create({
+        name: userName,
+        email: userEmail,
+        password: userPassword,
+        phoneNumber: userPhoneNumber,
+        roleId: 3, // Branch role
+        institutionId: savedBranch.institutionId,
+        branchId: savedBranch.branchId,
+        isActive: true, // User Active, Branch Inactive
+      });
+    }
+
+    return savedBranch;
+  }
+
+  async findAll(paginationDto: PaginationDto, institutionId?: number): Promise<PaginatedResult<Branch>> {
+    const { page = 1, limit = 10 } = paginationDto;
+    const skip = (page - 1) * limit;
+    const where = institutionId ? { institutionId } : {};
+
+    const [branches, total] = await this.branchesRepository.findAndCount({
+      where,
+      relations: ['institution'],
+      skip,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+
+    return {
+      data: branches,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async search(searchTerm: string): Promise<Branch[]> {
+    const queryBuilder = this.branchesRepository
+      .createQueryBuilder('branch')
+      .leftJoinAndSelect('branch.institution', 'institution')
+      .orderBy('branch.createdAt', 'DESC');
+
+    if (searchTerm && searchTerm.trim()) {
+      const term = `%${searchTerm.trim()}%`;
+      queryBuilder.where(
+        '(branch.name ILIKE :term OR branch.phoneNumber ILIKE :term OR institution.name ILIKE :term OR CAST(branch.branchId AS TEXT) ILIKE :term)',
+        { term }
+      );
+    }
+
+    return await queryBuilder.getMany();
+  }
+
+  async findOne(id: number): Promise<Branch> {
+    const branch = await this.branchesRepository.findOne({
+      where: { branchId: id },
+      relations: ['institution'],
+    });
+
+    if (!branch) {
+      throw new NotFoundException(`Branch with ID ${id} not found`);
+    }
+
+    return branch;
+  }
+
+  async findByInstitution(institutionId: number): Promise<Branch[]> {
+    return await this.branchesRepository.find({
+      where: { institutionId },
+      order: { name: 'ASC' },
+    });
+  }
+
+  async update(id: number, updateBranchDto: UpdateBranchDto, currentUser?: any): Promise<Branch> {
+    const branch = await this.findOne(id);
+
+    // If user is Institution owner, verify they own this branch
+    if (currentUser?.role?.roleName === 'Institution' &&
+      currentUser.institutionId !== branch.institutionId) {
+      throw new ForbiddenException('You can only update branches in your institution');
+    }
+
+    Object.assign(branch, updateBranchDto);
+    return await this.branchesRepository.save(branch);
+  }
+
+  async remove(id: number): Promise<void> {
+    const branch = await this.findOne(id);
+
+    // Check if branch has users
+    const userCount = await this.usersRepository.count({
+      where: { branchId: id },
+    });
+
+    if (userCount > 0) {
+      throw new BadRequestException(
+        `Cannot delete branch with ${userCount} users. Please reassign or delete users first.`
+      );
+    }
+
+    await this.branchesRepository.remove(branch);
+  }
+
+  async toggleActive(id: number): Promise<Branch> {
+    const branch = await this.findOne(id);
+    branch.isActive = !branch.isActive;
+    return await this.branchesRepository.save(branch);
+  }
+
+  async getStatistics(id: number) {
+    const branch = await this.findOne(id);
+
+    const userCount = await this.usersRepository.count({
+      where: { branchId: id, isActive: true },
+    });
+
+    // Get total customers
+    const customersData = await this.loansRepository
+      .createQueryBuilder('loan')
+      .select('COUNT(DISTINCT loan.customerId)', 'count')
+      .where('loan.branchId = :branchId', { branchId: id })
+      .getRawOne();
+
+    const totalCustomers = parseInt(customersData.count) || 0;
+
+    // Get loans count
+    const totalLoansCount = await this.loansRepository.count({
+      where: { branchId: id },
+    });
+
+    const activeLoans = await this.loansRepository.count({
+      where: { branchId: id, status: LoanStatus.ACTIVE },
+    });
+
+    // Get total loan amount
+    const loanAmountData = await this.loansRepository
+      .createQueryBuilder('loan')
+      .select('SUM(loan.principalAmount)', 'total')
+      .where('loan.branchId = :branchId', { branchId: id })
+      .andWhere('loan.status IN (:...statuses)', {
+        statuses: [LoanStatus.ACTIVE, LoanStatus.LATE]
+      })
+      .getRawOne();
+
+    const totalLoanAmount = parseFloat(loanAmountData.total) || 0;
+
+    return {
+      branchId: branch.branchId,
+      name: branch.name,
+      institutionId: branch.institutionId,
+      institutionName: branch.institution?.name,
+      totalUsers: userCount,
+      totalCustomers,
+      totalLoansCount,
+      activeLoans,
+      totalLoanAmount,
+      isActive: branch.isActive,
+      createdAt: branch.createdAt,
+    };
+  }
+
+  async getBranchDashboard(id: number): Promise<BranchDashboardStatsDto> {
+    const branch = await this.findOne(id);
+
+    // Get customers count for this branch (via loans)
+    const customersData = await this.loansRepository
+      .createQueryBuilder('loan')
+      .select('COUNT(DISTINCT loan.customerId)', 'count')
+      .where('loan.branchId = :branchId', { branchId: id })
+      .getRawOne();
+
+    const totalCustomers = parseInt(customersData.count) || 0;
+
+    // Get loans metrics
+    const totalLoans = await this.loansRepository.count({
+      where: { branchId: id },
+    });
+
+    const activeLoans = await this.loansRepository.count({
+      where: { branchId: id, status: LoanStatus.ACTIVE },
+    });
+
+    const lateLoans = await this.loansRepository.count({
+      where: { branchId: id, status: LoanStatus.LATE },
+    });
+
+    // Get portfolio value
+    const portfolioData = await this.loansRepository
+      .createQueryBuilder('loan')
+      .select('SUM(loan.principalAmount)', 'total')
+      .where('loan.branchId = :branchId', { branchId: id })
+      .andWhere('loan.status IN (:...statuses)', {
+        statuses: [LoanStatus.ACTIVE, LoanStatus.LATE]
+      })
+      .getRawOne();
+
+    const totalPortfolioValue = parseFloat(portfolioData.total) || 0;
+
+    // Calculate average loan size
+    const averageLoanSize = totalLoans > 0 ? totalPortfolioValue / activeLoans : 0;
+
+    // Get team members count
+    const teamMembers = await this.usersRepository.count({
+      where: { branchId: id, isActive: true },
+    });
+
+    // Get recent activities (last 10 loans created)
+    const recentLoans = await this.loansRepository.find({
+      where: { branchId: id },
+      relations: ['customer'],
+      order: { createdAt: 'DESC' },
+      take: 10,
+    });
+
+    const recentActivities: ActivityDto[] = recentLoans.map((loan, index) => ({
+      id: index + 1,
+      type: 'loan_created' as const,
+      description: `New loan of ${loan.principalAmount} created for ${loan.customer?.name || 'Unknown'}`,
+      user: 'System', // TODO: Track actual user when loan creation is implemented
+      timestamp: loan.createdAt.toISOString(),
+    }));
+
+    return {
+      branchId: branch.branchId,
+      branchName: branch.name,
+      institution: {
+        id: branch.institution.institutionId,
+        name: branch.institution.name,
+      },
+      metrics: {
+        totalCustomers,
+        totalLoans,
+        activeLoans,
+        lateLoans,
+        totalPortfolioValue,
+        averageLoanSize,
+      },
+      teamMembers,
+      recentActivities,
+    };
+  }
+
+  async getBranchCustomers(id: number): Promise<BranchCustomerDto[]> {
+    // Get unique customers who have loans in this branch
+    const customersWithLoans = await this.loansRepository
+      .createQueryBuilder('loan')
+      .leftJoinAndSelect('loan.customer', 'customer')
+      .select([
+        'customer.customerId as customerId',
+        'customer.name as name',
+        'customer.nationalId as nationalId',
+        'customer.phoneNumber as phoneNumber',
+        'customer.createdAt as createdAt',
+        'COUNT(loan.loanId) as totalLoans',
+        'SUM(CASE WHEN loan.status = :active THEN 1 ELSE 0 END) as activeLoans',
+      ])
+      .where('loan.branchId = :branchId', { branchId: id })
+      .setParameter('active', LoanStatus.ACTIVE)
+      .groupBy('customer.customerId')
+      .addGroupBy('customer.name')
+      .addGroupBy('customer.nationalId')
+      .addGroupBy('customer.phoneNumber')
+      .addGroupBy('customer.createdAt')
+      .orderBy('customer.createdAt', 'DESC')
+      .getRawMany();
+
+    return customersWithLoans.map(c => ({
+      customerId: c.customerId,
+      name: c.name,
+      nationalId: c.nationalId,
+      phoneNumber: c.phoneNumber,
+      totalLoans: parseInt(c.totalLoans) || 0,
+      activeLoans: parseInt(c.activeLoans) || 0,
+      createdAt: c.createdAt,
+    }));
+  }
+
+  async getBranchLoans(id: number): Promise<BranchLoanDto[]> {
+    const loans = await this.loansRepository.find({
+      where: { branchId: id },
+      relations: ['customer', 'product'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return loans.map(loan => ({
+      loanId: loan.loanId,
+      customerName: loan.customer?.name || 'Unknown',
+      customerId: loan.customerId,
+      principalAmount: parseFloat(loan.principalAmount.toString()),
+      status: loan.status,
+      createdAt: loan.createdAt,
+      dueDate: loan.dueDate,
+      productName: loan.product?.name || 'Unknown Product',
+    }));
+  }
+
+  async getBranchTeam(id: number): Promise<BranchTeamMemberDto[]> {
+    const users = await this.usersRepository.find({
+      where: { branchId: id },
+      relations: ['role'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return users.map(user => ({
+      id: user.userId,
+      name: user.name,
+      email: user.email,
+      role: user.role?.roleName || 'Unknown',
+      status: user.isActive ? 'active' : 'inactive',
+    }));
+  }
+
+  async getBranchActivities(id: number): Promise<ActivityDto[]> {
+    // Get recent loans as activities
+    const recentLoans = await this.loansRepository.find({
+      where: { branchId: id },
+      relations: ['customer'],
+      order: { createdAt: 'DESC' },
+      take: 20,
+    });
+
+    return recentLoans.map((loan, index) => ({
+      id: index + 1,
+      type: 'loan_created' as const,
+      description: `Loan ${loan.loanId} created for ${loan.customer?.name || 'Unknown'} - Amount: ${loan.principalAmount}`,
+      user: 'System',
+      timestamp: loan.createdAt.toISOString(),
+    }));
+  }
+}

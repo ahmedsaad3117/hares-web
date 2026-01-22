@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <script>
+    (function () {
+      var lang = localStorage.getItem('locale') || 'ar';
+      document.documentElement.setAttribute('lang', lang);
+      document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+      if (lang === 'ar') document.documentElement.classList.add('rtl');
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Dashboard Actions -->
+      <div class="flex justify-end mb-6" style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button onclick="printDashboard()" class="btn btn-secondary" title="Print Dashboard">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9" />
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+            <rect x="6" y="14" width="12" height="8" />
+          </svg>
+          <span>Print</span>
+        </button>
+      </div>
+
+      <!-- Stats Grid -->
+      <div id="statsGrid" class="stats-grid mb-8"></div>
+
+      <!-- Installments Report Card -->
+      <div class="glass-card p-6 mb-8">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2 class="text-xl font-bold text-white" data-i18n-key="dashboard.installments_report.title">Installments
+            Report</h2>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.from_date">From
+                Date</label>
+              <input type="date" id="fromDate" class="input"
+                style="padding: 0.5rem; font-size: 0.875rem; min-width: 140px;" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.to_date">To Date</label>
+              <input type="date" id="toDate" class="input"
+                style="padding: 0.5rem; font-size: 0.875rem; min-width: 140px;" />
+            </div>
+            <button id="filterInstallments" class="btn btn-primary" style="margin-top: 1.25rem; padding: 0.5rem 1rem;"
+              data-i18n-key="dashboard.installments_report.filter">Filter</button>
+          </div>
+        </div>
+
+        <div id="installmentsStats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
+          <div
+            style="padding: 1.5rem; border-radius: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <div style="font-size: 1.5rem;">📅</div>
+              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.total_due">Total Due</span>
+            </div>
+            <div class="text-white font-bold text-2xl" id="totalDueInstallments">0</div>
+            <div class="text-primary text-xl font-bold" id="totalDueAmount">0.00 ر.س</div>
+          </div>
+
+          <div
+            style="padding: 1.5rem; border-radius: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <div style="font-size: 1.5rem;">✅</div>
+              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.paid">Paid</span>
+            </div>
+            <div class="text-white font-bold text-2xl" id="paidInstallments">0</div>
+            <div style="color: #10b981;" class="text-xl font-bold" id="paidAmount">0.00 ر.س</div>
+          </div>
+
+          <div
+            style="padding: 1.5rem; border-radius: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <div style="font-size: 1.5rem;">⏳</div>
+              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.pending">Pending</span>
+            </div>
+            <div class="text-white font-bold text-2xl" id="pendingInstallments">0</div>
+            <div style="color: #f59e0b;" class="text-xl font-bold" id="pendingAmount">0.00 ر.س</div>
+          </div>
+
+          <div
+            style="padding: 1.5rem; border-radius: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <div style="font-size: 1.5rem;">⚠️</div>
+              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.overdue">Overdue</span>
+            </div>
+            <div class="text-white font-bold text-2xl" id="overdueInstallments">0</div>
+            <div style="color: #ef4444;" class="text-xl font-bold" id="overdueAmount">0.00 ر.س</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions and Recent Activity -->
+      <div class="grid grid-cols-2 gap-4 mb-8"
+        style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+        <!-- Quick Actions -->
+        <div class="glass-card p-6">
+          <h2 class="text-xl font-bold text-white mb-6" data-i18n-key="dashboard.quick_actions">Quick Actions</h2>
+          <div id="quickActions" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="glass-card p-6">
+          <h2 class="text-xl font-bold text-white mb-6" data-i18n-key="dashboard.recent_activity">Recent Activity</h2>
+          <div id="recentActivity" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div class="loading-container">
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui-utils.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script>
+    console.log('Dashboard loading...');
+    console.log('Token:', getToken()?.substring(0, 20) + '...');
+    console.log('User:', getCurrentUser());
+
+    // Wait for i18n to be ready before initializing
+    async function startDashboard() {
+      await waitForI18n();
+
+      // Check authentication
+      if (!requireAuth()) {
+        console.log('Not authenticated, redirecting...');
+      } else {
+        console.log('Authentication passed!');
+        try {
+          initializeDashboard();
+        } catch (error) {
+          console.error('Error initializing dashboard:', error);
+        }
+      }
+    }
+
+    // Start when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startDashboard);
+    } else {
+      startDashboard();
+    }
+
+    function initializeDashboard() {
+      const user = getCurrentUser();
+      console.log('Initializing dashboard for user:', user);
+
+      if (!user) {
+        console.error('User object is null/undefined!');
+        clearAuthData();
+        window.location.href = '../index.html';
+        return;
+      }
+
+      // Render sidebar and header with translations
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(t('dashboard.title'), t('dashboard.welcome_back') + ', ' + user.name);
+
+      // Initialize language switcher after header is rendered
+      initializeLanguageSwitcher();
+
+      setActiveNav('dashboard');
+
+      // Translate any data-i18n elements
+      i18n.translatePage();
+
+      // Initialize dashboard
+      console.log('Calling initDashboard...');
+      initDashboard();
+    }
+
+    async function initDashboard() {
+      const user = getCurrentUser();
+      console.log('initDashboard - User role:', user?.roleName || user?.role_name);
+
+      try {
+        // Branch users should see their branch dashboard
+        if ((user.roleName === 'Branch' || user.role_name === 'Branch') && user.branchId) {
+          console.log('Loading branch dashboard...');
+          await loadBranchDashboard(user.branchId);
+        } else {
+          console.log('Loading global dashboard...');
+          await loadGlobalDashboard(user);
+        }
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        showToast('Failed to load dashboard data', 'error');
+      }
+    }
+
+    async function loadGlobalDashboard(user) {
+      console.log('Loading global dashboard data...');
+
+      // Load statistics
+      try {
+        // For Institution users, load institution-specific statistics
+        if ((user.roleName === 'Institution' || user.role_name === 'Institution') && user.institutionId) {
+          console.log('Loading institution-specific dashboard for institutionId:', user.institutionId);
+          const stats = await api.institutions.getStatistics(user.institutionId);
+          console.log('Institution stats:', stats);
+
+          // Render institution stats
+          const statsHTML = `
+            <a href="branches.html" style="text-decoration: none; color: inherit;">
+            <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div class="flex items-center justify-between mb-4">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                  🏢
+                </div>
+                <span class="badge badge-info">${stats.totalBranches}</span>
+              </div>
+              <div class="stat-card-value">${stats.totalBranches}</div>
+              <div class="stat-card-label">${t('dashboard.stats.total_branches')}</div>
+            </div>
+            </a>
+            
+            <a href="customers.html" style="text-decoration: none; color: inherit;">
+            <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div class="flex items-center justify-between mb-4">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                  👥
+                </div>
+                <span class="badge badge-success">${stats.totalCustomers}</span>
+              </div>
+              <div class="stat-card-value">${stats.totalCustomers}</div>
+              <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
+            </div>
+            </a>
+            
+            <a href="loans.html" style="text-decoration: none; color: inherit;">
+            <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div class="flex items-center justify-between mb-4">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                  💰
+                </div>
+                <span class="badge badge-success">${stats.totalLoans}</span>
+              </div>
+              <div class="stat-card-value">${stats.totalLoans}</div>
+              <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
+            </div>
+            </a>
+            
+            <div class="glass-card stat-card">
+              <div class="flex items-center justify-between mb-4">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+                  ⚠️
+                </div>
+                <span class="badge badge-warning">${stats.lateLoans || 0}</span>
+              </div>
+              <div class="stat-card-value">${stats.lateLoans || 0}</div>
+              <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
+            </div>
+          `;
+
+          document.getElementById('statsGrid').innerHTML = statsHTML;
+          renderQuickActions();
+          await loadRecentActivity();
+          return;
+        }
+
+        // For Super Admin and other roles, load all data
+        console.log('Fetching institutions, branches, customers, loans...');
+        const [institutionsResponse, branchesResponse, customersResponse, loansResponse] = await Promise.all([
+          (user.roleName === 'Super Admin' || user.role_name === 'Super Admin') ? api.institutions.getAll(1, 100) : Promise.resolve({ data: [] }),
+          api.branches.getAll(1, 100),
+          api.customers.getAll(1, 100),
+          api.loans.getAll(1, 100),
+        ]);
+
+        const institutions = institutionsResponse.data || [];
+        const branches = branchesResponse.data || [];
+        const customers = customersResponse.data || [];
+        const loans = loansResponse.data || [];
+
+        console.log('Fetched:', { institutions: institutions.length, branches: branches.length, customers: customers.length, loans: loans.length });
+
+        console.log('Fetching loan statistics...');
+        const loanStats = await api.loans.getStatistics();
+        console.log('Loan stats:', loanStats);
+
+        // Render stats
+        const statsHTML = `
+        ${user.roleName === 'Super Admin' ? `
+        <a href="institutions.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(139, 92, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              🏛️
+            </div>
+            <span class="badge badge-info">${institutions.length}</span>
+          </div>
+          <div class="stat-card-value">${institutions.length}</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_institutions')}</div>
+        </div>
+        </a>
+        ` : ''}
+        
+        ${user.roleName !== 'Branch' ? `
+        <a href="branches.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              🏢
+            </div>
+            <span class="badge badge-info">${branches.length}</span>
+          </div>
+          <div class="stat-card-value">${branches.length}</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_branches')}</div>
+        </div>
+        </a>
+        ` : ''}
+        
+        <a href="customers.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              👥
+            </div>
+            <span class="badge badge-success">${customers.length}</span>
+          </div>
+          <div class="stat-card-value">${customers.length}</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
+        </div>
+        </a>
+        
+        <a href="loans.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              💰
+            </div>
+            <span class="badge badge-success">${loanStats.byStatus.active || 0}</span>
+          </div>
+          <div class="stat-card-value">${loanStats.total}</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
+        </div>
+        </a>
+        
+        <a href="loans.html?filter=late" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              ⚠️
+            </div>
+            <span class="badge badge-warning">${loanStats.byStatus.late || 0}</span>
+          </div>
+          <div class="stat-card-value">${loanStats.byStatus.late || 0}</div>
+          <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
+        </div>
+        </a>
+      `;
+
+        document.getElementById('statsGrid').innerHTML = statsHTML;
+
+        // Render quick actions
+        renderQuickActions();
+
+        // Load recent activity
+        await loadRecentActivity();
+
+        // Load installments report
+        await loadInstallmentsReport();
+
+      } catch (error) {
+        console.error('Error loading global dashboard:', error);
+        showToast('Failed to load dashboard data', 'error');
+      }
+    }
+
+    async function loadBranchDashboard(branchId) {
+      const dashboardData = await api.branches.getDashboard(branchId);
+
+      // Render branch-specific stats
+      const statsHTML = `
+        <a href="customers.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              👥
+            </div>
+            <span class="badge badge-success">${dashboardData.metrics.totalCustomers}</span>
+          </div>
+          <div class="stat-card-value">${dashboardData.metrics.totalCustomers}</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
+        </div>
+        </a>
+        
+        <a href="loans.html" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              💰
+            </div>
+            <span class="badge badge-success">${dashboardData.metrics.activeLoans}</span>
+          </div>
+          <div class="stat-card-value">${dashboardData.metrics.totalLoans}</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
+        </div>
+        </a>
+        
+        <a href="loans.html?filter=late" style="text-decoration: none; color: inherit;">
+        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              ⚠️
+            </div>
+            <span class="badge badge-warning">${dashboardData.metrics.lateLoans}</span>
+          </div>
+          <div class="stat-card-value">${dashboardData.metrics.lateLoans}</div>
+          <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
+        </div>
+        </a>
+        
+        <div class="glass-card stat-card">
+          <div class="flex items-center justify-between mb-4">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
+              📊
+            </div>
+          </div>
+          <div class="stat-card-value">${formatCurrency(dashboardData.metrics.totalPortfolioValue)}</div>
+          <div class="stat-card-label">${t('dashboard.stats.total_portfolio')}</div>
+        </div>
+      `;
+
+      document.getElementById('statsGrid').innerHTML = statsHTML;
+
+      // Render quick actions
+      renderQuickActions();
+
+      // Render recent activity
+      renderRecentActivity(dashboardData.recentActivities || []);
+
+      // Load installments report
+      await loadInstallmentsReport();
+    }
+
+    function renderQuickActions() {
+      const user = getCurrentUser();
+      const actions = [
+        { icon: '👤', title: t('dashboard.actions.add_customer'), subtitle: t('dashboard.actions.add_customer_desc'), href: 'customers-new.html' },
+        { icon: '💰', title: t('dashboard.actions.issue_loan'), subtitle: t('dashboard.actions.issue_loan_desc'), href: 'loans-new.html' },
+      ];
+
+      if (user.roleName === 'Super Admin' || user.role_name === 'Super Admin') {
+        actions.push({ icon: '🏛️', title: t('dashboard.actions.add_institution'), subtitle: t('dashboard.actions.add_institution_desc'), href: 'institutions-new.html' });
+      }
+
+      const actionsHTML = actions.map(action => `
+        <a href="${action.href}" class="flex items-center gap-3 p-4 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-200" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); text-decoration: none; transition: all 0.2s ease;">
+          <div style="font-size: 1.5rem;">${action.icon}</div>
+          <div>
+            <p class="text-white font-medium">${action.title}</p>
+            <p class="text-sm text-muted">${action.subtitle}</p>
+          </div>
+        </a>
+      `).join('');
+
+      document.getElementById('quickActions').innerHTML = actionsHTML;
+    }
+
+    async function loadRecentActivity() {
+      try {
+        const user = getCurrentUser();
+        let activities = [];
+
+        // Get recent loans and customers to build activity feed
+        const [loansResponse, customersResponse] = await Promise.all([
+          api.loans.getAll(1, 5),  // Get last 5 loans
+          api.customers.getAll(1, 5)  // Get last 5 customers
+        ]);
+
+        const recentLoans = loansResponse.data || [];
+        const recentCustomers = customersResponse.data || [];
+
+        // Build activity feed from recent items
+        recentLoans.forEach(loan => {
+          activities.push({
+            type: 'loan_created',
+            description: t('dashboard.activity.loan_created', { amount: formatCurrency(loan.principalAmount), customer: loan.customerName || t('dashboard.activity.customer_generic') }),
+            timestamp: loan.createdAt
+          });
+        });
+
+        recentCustomers.forEach(customer => {
+          activities.push({
+            type: 'customer_added',
+            description: t('dashboard.activity.customer_added', { name: customer.name }),
+            timestamp: customer.createdAt
+          });
+        });
+
+        // Sort by timestamp (newest first)
+        activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        // Take top 5
+        activities = activities.slice(0, 5);
+
+        renderRecentActivity(activities);
+      } catch (error) {
+        console.error('Error loading recent activity:', error);
+        renderRecentActivity([]);
+      }
+    }
+
+    function renderRecentActivity(activities) {
+      if (!activities || activities.length === 0) {
+        document.getElementById('recentActivity').innerHTML = `<p class="text-muted text-sm">${t('dashboard.activity.no_activity')}</p>`;
+        return;
+      }
+
+      const activityHTML = activities.slice(0, 5).map(activity => {
+        const icon = activity.type === 'loan_created' ? '💰' :
+          activity.type === 'customer_added' ? '👤' :
+            activity.type === 'payment_received' ? '💳' : '📝';
+
+        return `
+          <div class="flex items-center gap-3 p-3 rounded-lg bg-white/5" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
+            <div style="font-size: 1.25rem;">${icon}</div>
+            <div style="flex: 1;">
+              <p class="text-white text-sm">${activity.description}</p>
+              <p class="text-muted text-sm">${formatDateTime(activity.timestamp)}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('recentActivity').innerHTML = activityHTML;
+    }
+
+    // Load installments report
+    async function loadInstallmentsReport(fromDate = null, toDate = null) {
+      try {
+        // Set default dates if not provided
+        if (!fromDate) {
+          const today = new Date();
+          const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+          fromDate = firstDay.toISOString().split('T')[0];
+          document.getElementById('fromDate').value = fromDate;
+        }
+
+        if (!toDate) {
+          const today = new Date();
+          toDate = today.toISOString().split('T')[0];
+          document.getElementById('toDate').value = toDate;
+        }
+
+        // Fetch all loans with installments
+        const loansResponse = await api.loans.getAll(1, 1000);
+        const loans = loansResponse.data || [];
+
+        let allInstallments = [];
+
+        // Fetch installments for each loan
+        for (const loan of loans) {
+          try {
+            const installments = await api.loans.getInstallments(loan.loanId);
+            allInstallments = allInstallments.concat(installments);
+          } catch (error) {
+            console.error(`Error fetching installments for loan ${loan.loanId}:`, error);
+          }
+        }
+
+        // Filter installments by date range
+        const fromDateObj = new Date(fromDate);
+        const toDateObj = new Date(toDate);
+        toDateObj.setHours(23, 59, 59, 999); // Include the entire end date
+
+        const filteredInstallments = allInstallments.filter(inst => {
+          const dueDate = new Date(inst.dueDate);
+          return dueDate >= fromDateObj && dueDate <= toDateObj;
+        });
+
+        // Calculate statistics
+        const totalDue = filteredInstallments.length;
+        const paid = filteredInstallments.filter(i => i.status === 'Paid');
+        const pending = filteredInstallments.filter(i => i.status === 'Pending');
+        const overdue = filteredInstallments.filter(i => i.status === 'Overdue');
+
+        const totalDueAmount = filteredInstallments.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+        const paidAmount = paid.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+        const pendingAmount = pending.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+        const overdueAmount = overdue.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+
+        // Update UI
+        document.getElementById('totalDueInstallments').textContent = totalDue;
+        document.getElementById('totalDueAmount').textContent = formatCurrency(totalDueAmount);
+
+        document.getElementById('paidInstallments').textContent = paid.length;
+        document.getElementById('paidAmount').textContent = formatCurrency(paidAmount);
+
+        document.getElementById('pendingInstallments').textContent = pending.length;
+        document.getElementById('pendingAmount').textContent = formatCurrency(pendingAmount);
+
+        document.getElementById('overdueInstallments').textContent = overdue.length;
+        document.getElementById('overdueAmount').textContent = formatCurrency(overdueAmount);
+
+      } catch (error) {
+        console.error('Error loading installments report:', error);
+        showToast(t('dashboard.installments_report.load_error'), 'error');
+      }
+    }
+
+    // Setup filter button
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterBtn = document.getElementById('filterInstallments');
+      if (filterBtn) {
+        filterBtn.addEventListener('click', () => {
+          const fromDate = document.getElementById('fromDate').value;
+          const toDate = document.getElementById('toDate').value;
+
+          if (!fromDate || !toDate) {
+            showToast(t('dashboard.installments_report.select_dates'), 'error');
+            return;
+          }
+
+          if (new Date(fromDate) > new Date(toDate)) {
+            showToast(t('dashboard.installments_report.invalid_date_range'), 'error');
+            return;
+          }
+
+          loadInstallmentsReport(fromDate, toDate);
+        });
+      }
+    });
+    // --- Export Functions ---
+    function printDashboard() {
+      const content = document.querySelector('.page-content').innerHTML;
+      const printWindow = window.open('', '', 'height=600,width=800');
+
+      printWindow.document.write('<html><head><title>Print Dashboard</title>');
+      printWindow.document.write('<style>');
+      printWindow.document.write(`
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; padding: 20px; }
+        h1 { text-align: center; color: #4f46e5; margin-bottom: 20px; }
+        .glass-card { 
+          border: 1px solid #ccc; 
+          padding: 15px; 
+          margin-bottom: 20px; 
+          border-radius: 8px; 
+          background: #fff; /* White background for print */
+          color: #333; /* Dark text for print */
+          box-shadow: none;
+        }
+        .text-white { color: #333 !important; }
+        .text-muted { color: #666 !important; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .stat-card { text-align: center; }
+        .stat-card-value { font-size: 24px; font-weight: bold; margin: 10px 0; }
+        .grid { display: grid; gap: 20px; }
+        .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .badge { padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; }
+        a { text-decoration: none; color: inherit; }
+        /* Hide actions in print */
+        .flex.justify-end { display: none; }
+      `);
+      printWindow.document.write('</style></head><body>');
+      printWindow.document.write(`<h1>Q1KEY Dashboard - ${new Date().toLocaleString()}</h1>`);
+      printWindow.document.write(content);
+      printWindow.document.write('</body></html>');
+
+      printWindow.document.close();
+      printWindow.focus();
+
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    }
+  </script>
+</body>
+
+</html>

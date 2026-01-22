@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Branches - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+
+  <div class="main-content">
+    <div id="header"></div>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="flex items-center justify-between mb-8"
+        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+        <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: 2rem;">🏢</div>
+          <div>
+            <h1 class="text-3xl font-bold text-white" data-i18n-key="branches.title">${t('branches.title')}</h1>
+            <p class="text-secondary" data-i18n-key="branches.branch_details">${t('branches.branch_details')}</p>
+          </div>
+        </div>
+        <a href="branches-new.html" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span data-i18n-key="branches.add_branch">${t('branches.add_branch')}</span>
+        </a>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="glass-card p-4 mb-6">
+        <div class="form-group" style="margin-bottom: 0;">
+          <input type="text" id="searchInput" data-i18n-placeholder="branches.search_placeholder"
+            placeholder="Search by name or phone number..." class="input" style="width: 100%;" />
+        </div>
+      </div>
+
+      <!-- Branches Grid -->
+      <div id="branchesGrid" class="grid grid-cols-3 gap-4"
+        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+        <div class="loading-container" style="grid-column: 1 / -1;">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div id="paginationContainer" class="flex justify-center"
+        style="display: flex; justify-content: center; margin-top: 2rem;"></div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/ui-utils.js"></script>
+  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js"></script>
+  <script src="../components/pagination.js"></script>
+  <script>
+    // Wait for i18n to be ready
+    async function initPage() {
+      await waitForI18n();
+
+      // Check authentication
+      if (!isAuthenticated()) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const user = getCurrentUser();
+
+      // Check if user has access to branches page
+      if (user.roleName === 'Institution' && user.canCreateBranches === false) {
+        showToast('You do not have permission to access branches', 'error');
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      // Branch users cannot access this page
+      if (user.roleName === 'Branch') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(t('branches.title'), t('branches.branch_details'));
+      initializeLanguageSwitcher();
+      setActiveNav('branches');
+
+      // Setup search
+      setupSearch();
+
+      // Load branches with pagination
+      loadBranches();
+
+      // Enable auto-refresh (every 15 seconds)
+      if (window.setupAutoRefresh) {
+        window.setupAutoRefresh(() => loadBranches(currentPage), 15000);
+      }
+    }
+
+    // Start when ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+
+    let currentPage = 1;
+    let totalPages = 1;
+    const pageSize = 12;
+    let searchTerm = '';
+    let searchTimeout = null;
+
+    // Setup search with debounce
+    function setupSearch() {
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', (e) => {
+        const value = e.target.value.trim();
+
+        // Clear existing timeout
+        if (searchTimeout) {
+          clearTimeout(searchTimeout);
+        }
+
+        // Set new timeout
+        searchTimeout = setTimeout(() => {
+          searchTerm = value;
+          performSearch();
+        }, 300);
+      });
+    }
+
+    // Perform search
+    async function performSearch() {
+      if (searchTerm) {
+        const grid = document.getElementById('branchesGrid');
+        grid.innerHTML = '<div class="loading-container" style="grid-column: 1 / -1;"><div class="spinner"></div><p class="text-muted mt-2">Searching...</p></div>';
+
+        try {
+          const searchResults = await api.branches.search(searchTerm);
+          renderBranches(searchResults);
+
+          // Hide pagination during search
+          document.getElementById('paginationContainer').innerHTML = '';
+        } catch (error) {
+          console.error('Error searching branches:', error);
+          grid.innerHTML = `<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">${t('branches.failed_to_load')}</p>`;
+        }
+      } else {
+        // If search is cleared, reload normal list
+        loadBranches(1);
+      }
+    }
+
+    async function loadBranches(page = 1) {
+      try {
+        const response = await api.branches.getAll(page, pageSize);
+        currentPage = response.meta.page;
+        totalPages = response.meta.totalPages;
+        renderBranches(response.data);
+      } catch (error) {
+        console.error('Error loading branches:', error);
+        showToast(t('branches.failed_to_load'), 'error');
+        document.getElementById('branchesGrid').innerHTML = `<p class="text-muted" style="grid-column: 1 / -1; text-align: center;">${t('branches.failed_to_load')}</p>`;
+      }
+    }
+
+    function changePage(page) {
+      if (page < 1 || page > totalPages || page === currentPage) return;
+      loadBranches(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderBranches(branches) {
+      const grid = document.getElementById('branchesGrid');
+      const user = getCurrentUser(); // Get user for role check
+
+      if (branches.length === 0) {
+        grid.innerHTML = `
+          <div class="glass-card p-6" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <svg style="width: 64px; height: 64px; margin: 0 auto 1rem; color: #475569;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            <p class="text-muted">${t('branches.no_branches')}</p>
+          </div>
+        `;
+        return;
+      }
+
+      const branchesHTML = branches.map(branch => {
+        const totalLoans = branch.totalLoans || 0;
+        const maximumLoans = branch.maximumLoans || 0;
+        const utilizationPercent = maximumLoans > 0 ? (totalLoans / maximumLoans) * 100 : 0;
+        const capacityColor = utilizationPercent >= 90 ? '#ef4444' : utilizationPercent >= 70 ? '#f59e0b' : '#10b981';
+
+        return `
+        <div class="glass-card p-6">
+          <div class="flex items-center justify-between mb-4" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem;">
+            <div>
+              <h3 class="text-xl font-bold text-white mb-1">${branch.name}</h3>
+              <p class="text-sm text-secondary">${branch.institution.name}</p>
+            </div>
+            <span class="badge ${branch.isActive ? 'badge-success' : 'badge-danger'}">
+              ${branch.isActive ? t('branches.active') : t('branches.inactive')}
+            </span>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; padding: 1rem 0; border-top: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
+              <span class="text-muted text-sm">${t('branches.form.phone_label')}</span>
+              <span class="text-white font-semibold">${branch.phoneNumber || 'No phone'}</span>
+            </div>
+            <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
+              <span class="text-muted text-sm">${t('branches.view_page.institution')}</span>
+              <span class="text-secondary">${branch.institution.name}</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+              <div class="flex items-center justify-between" style="display: flex; justify-content: space-between;">
+                <span class="text-muted text-sm">${t('branches.loan_capacity')}</span>
+                <span class="text-white font-semibold">${formatCurrency(totalLoans)}/${formatCurrency(maximumLoans)}</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden;">
+                <div style="width: ${utilizationPercent}%; height: 100%; background: ${capacityColor}; transition: width 0.3s ease;"></div>
+              </div>
+              ${utilizationPercent >= 90 && utilizationPercent < 100 ? `<span class="text-xs" style="color: #ef4444;">⚠️ ${t('branches.near_capacity')}</span>` : ''}
+              ${utilizationPercent >= 100 ? `<span class="text-xs" style="color: #ef4444;">🚫 ${t('branches.at_capacity')}</span>` : ''}
+            </div>
+          </div>
+          
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 1rem;">
+            ${t('branches.created')}: ${formatDate(branch.createdAt)}
+          </div>
+          
+          <div class="flex items-center gap-2" style="display: flex; gap: 0.5rem;">
+            <a href="branches-edit.html?id=${branch.branchId}" class="btn btn-secondary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem 1rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+              </svg>
+              ${t('branches.edit')}
+            </a>
+            <a href="branches-view.html?id=${branch.branchId}" class="btn btn-secondary" style="flex: 1; font-size: 0.875rem; padding: 0.5rem 1rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              ${t('branches.view')}
+            </a>
+            ${createWhatsappLink(branch.phoneNumber) ? `
+              <button onclick="openWhatsapp('${branch.phoneNumber}')" class="btn-whatsapp" style="flex: 0 0 auto;" title="WhatsApp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+              </button>
+            `: ''}
+          </div>
+        </div>
+      `}).join('');
+
+      grid.innerHTML = branchesHTML;
+
+      // Render pagination
+      const paginationContainer = document.getElementById('paginationContainer');
+      if (paginationContainer) {
+        paginationContainer.innerHTML = createPagination(currentPage, totalPages, changePage);
+      }
+    }
+
+    async function toggleActive(id, currentStatus) {
+      const action = currentStatus ? 'deactivate' : 'activate';
+      const confirmMsg = currentStatus ? t('branches.deactivate_confirmation') : t('branches.activate_confirmation');
+
+      showConfirmModal({
+        title: currentStatus ? t('branches.deactivate') || 'تعطيل الفرع' : t('branches.activate') || 'تفعيل الفرع',
+        message: confirmMsg,
+        confirmText: currentStatus ? t('branches.deactivate') || 'تعطيل' : t('branches.activate') || 'تفعيل',
+        icon: currentStatus ? '⏸️' : '▶️',
+        btnClass: currentStatus ? 'btn-warning' : 'btn-success',
+        onConfirm: async () => {
+          try {
+            await api.branches.toggleActive(id);
+            const successMsg = currentStatus ? t('branches.deactivated_success') : t('branches.activated_success');
+            showToast(successMsg, 'success');
+            loadBranches(currentPage);
+          } catch (error) {
+            console.error('Error toggling branch status:', error);
+            showToast(t('branches.toggle_failed'), 'error');
+          }
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقارير - Q1KEY Platform</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/i18n.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+        /* === Reports Specific Styles === */
+        .reports-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+            padding: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 180px;
+        }
+
+        .filter-group label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-right: auto;
+        }
+
+        /* Tabs */
+        .report-tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .report-tab {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            font-weight: 500;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .report-tab:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .report-tab.active {
+            color: white;
+            background: rgba(99, 102, 241, 0.2);
+            border-bottom: 2px solid #6366f1;
+        }
+
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            gap: 0.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.25rem;
+            border-radius: 8px;
+        }
+
+        .view-toggle button {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .view-toggle button:hover {
+            color: white;
+        }
+
+        .view-toggle button.active {
+            background: rgba(99, 102, 241, 0.3);
+            color: white;
+        }
+
+        /* Report Content */
+        .report-content {
+            display: none;
+        }
+
+        .report-content.active {
+            display: block;
+        }
+
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            padding: 1.25rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .stat-card .stat-value.positive {
+            color: #10b981;
+        }
+
+        .stat-card .stat-value.negative {
+            color: #ef4444;
+        }
+
+        /* Data Table */
+        .report-table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .report-table th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            text-align: right;
+            color: #94a3b8;
+            font-weight: 600;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+        }
+
+        .report-table td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: #e2e8f0;
+        }
+
+        .report-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .report-table .text-muted {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+
+        /* Chart Container */
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+            padding: 1rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .status-badge.paid {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .status-badge.late,
+        .status-badge.overdue {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        /* Export Dropdown */
+        .export-dropdown {
+            position: relative;
+        }
+
+        .export-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem;
+            min-width: 150px;
+            display: none;
+            z-index: 100;
+        }
+
+        .export-dropdown:hover .export-menu {
+            display: block;
+        }
+
+        .export-menu button {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            color: #e2e8f0;
+            text-align: right;
+            cursor: pointer;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .export-menu button:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Search in Table */
+        .table-search {
+            margin-bottom: 1rem;
+        }
+
+        .table-search input {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .table-search input::placeholder {
+            color: #64748b;
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: #94a3b8;
+        }
+
+        .loading-overlay .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 0.75rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .filter-actions {
+                margin-right: 0;
+                justify-content: flex-end;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div id="sidebar"></div>
+
+        <div class="main-content">
+            <div id="header"></div>
+
+            <div class="page-content">
+                <div class="reports-container">
+                    <!-- Filter Bar -->
+                    <div class="glass-card filter-bar">
+                        <div class="filter-group" id="institutionFilterContainer" style="display: none;">
+                            <label>المؤسسة</label>
+                            <select id="filterInstitution" class="input input-sm">
+                                <option value="">جميع المؤسسات</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group" id="branchFilterContainer" style="display: none;">
+                            <label>الفرع</label>
+                            <select id="filterBranch" class="input input-sm">
+                                <option value="">جميع الفروع</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>من تاريخ</label>
+                            <input type="date" id="filterStartDate" class="input input-sm">
+                        </div>
+
+                        <div class="filter-group">
+                            <label>إلى تاريخ</label>
+                            <input type="date" id="filterEndDate" class="input input-sm">
+                        </div>
+
+                        <div class="filter-group" id="statusFilterContainer" style="display: none;">
+                            <label>الحالة</label>
+                            <select id="filterStatus" class="input input-sm">
+                                <option value="">الكل</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group" id="typeFilterContainer" style="display: none;">
+                            <label>النوع</label>
+                            <select id="filterType" class="input input-sm">
+                                <option value="">الكل</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-actions">
+                            <button onclick="applyFilters()" class="btn btn-primary btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                </svg>
+                                تطبيق
+                            </button>
+                            <button onclick="resetFilters()" class="btn btn-secondary btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabs & Actions -->
+                    <div class="glass-card p-4">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                            <div class="report-tabs">
+                                <button class="report-tab active" onclick="switchTab('general')">نظرة عامة</button>
+                                <button class="report-tab" onclick="switchTab('cashbox')">الصندوق</button>
+                                <button class="report-tab" onclick="switchTab('customers')">العملاء</button>
+                                <button class="report-tab" onclick="switchTab('loans')">القروض</button>
+                                <button class="report-tab" onclick="switchTab('installments')">الأقساط</button>
+                            </div>
+
+                            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                                <!-- View Toggle -->
+                                <div class="view-toggle">
+                                    <button id="viewTable" class="active" onclick="setViewMode('table')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                            <line x1="3" y1="9" x2="21" y2="9" />
+                                            <line x1="3" y1="15" x2="21" y2="15" />
+                                            <line x1="9" y1="3" x2="9" y2="21" />
+                                        </svg>
+                                        جدول
+                                    </button>
+                                    <button id="viewChart" onclick="setViewMode('chart')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="18" y1="20" x2="18" y2="10" />
+                                            <line x1="12" y1="20" x2="12" y2="4" />
+                                            <line x1="6" y1="20" x2="6" y2="14" />
+                                        </svg>
+                                        رسم بياني
+                                    </button>
+                                </div>
+
+                                <!-- Export -->
+                                <div class="export-dropdown">
+                                    <button class="btn btn-secondary btn-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                            <polyline points="7 10 12 15 17 10" />
+                                            <line x1="12" y1="15" x2="12" y2="3" />
+                                        </svg>
+                                        تصدير
+                                    </button>
+                                    <div class="export-menu">
+                                        <button onclick="exportToExcel()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                            </svg>
+                                            Excel
+                                        </button>
+                                        <button onclick="exportToPDF()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                            </svg>
+                                            PDF
+                                        </button>
+                                        <button onclick="exportToCSV()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="4 14 10 14 10 20" />
+                                                <polyline points="20 10 14 10 14 4" />
+                                            </svg>
+                                            CSV
+                                        </button>
+                                        <button onclick="printReport()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="6 9 6 2 18 2 18 9" />
+                                                <path
+                                                    d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                                            </svg>
+                                            طباعة
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report Content Area -->
+                    <div id="reportContent">
+                        <!-- General Tab -->
+                        <div id="tab-general" class="report-content active">
+                            <div id="generalStats"></div>
+                            <div id="generalTable" class="glass-card p-4"></div>
+                            <div id="generalChart" class="glass-card p-4" style="display: none;"></div>
+                        </div>
+
+                        <!-- Cash Box Tab -->
+                        <div id="tab-cashbox" class="report-content">
+                            <div id="cashboxStats"></div>
+                            <div id="cashboxTable" class="glass-card p-4"></div>
+                            <div id="cashboxChart" class="glass-card p-4" style="display: none;"></div>
+                        </div>
+
+                        <!-- Customers Tab -->
+                        <div id="tab-customers" class="report-content">
+                            <div id="customersStats"></div>
+                            <div id="customersTable" class="glass-card p-4"></div>
+                            <div id="customersChart" class="glass-card p-4" style="display: none;"></div>
+                        </div>
+
+                        <!-- Loans Tab -->
+                        <div id="tab-loans" class="report-content">
+                            <div id="loansStats"></div>
+                            <div id="loansTable" class="glass-card p-4"></div>
+                            <div id="loansChart" class="glass-card p-4" style="display: none;"></div>
+                        </div>
+
+                        <!-- Installments Tab -->
+                        <div id="tab-installments" class="report-content">
+                            <div id="installmentsStats"></div>
+                            <div id="installmentsTable" class="glass-card p-4"></div>
+                            <div id="installmentsChart" class="glass-card p-4" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/ui-utils.js"></script>
+    <script src="../components/sidebar.js?v=4"></script>
+    <script src="../components/header.js"></script>
+    <script>
+        // ========== STATE MANAGEMENT ==========
+        let currentTab = 'general';
+        let viewMode = 'table'; // 'table' or 'chart'
+        let reportData = {}; // Single source of truth for all report data
+        let charts = {};
+
+        // ========== TRANSLATION MAPS ==========
+        const statusTranslations = {
+            'Active': 'نشط',
+            'Paid': 'مدفوع',
+            'Late': 'متأخر',
+            'Finished': 'منتهي',
+            'Pending': 'قيد الانتظار',
+            'Overdue': 'متأخر',
+            'Cancelled': 'ملغي',
+            'Approved': 'مُعتمد',
+            'Rejected': 'مرفوض'
+        };
+
+        const segmentTranslations = {
+            'vip': 'عميل مميز',
+            'active': 'نشط',
+            'normal': 'عادي',
+            'low_engagement': 'منخفض التفاعل',
+            'risk': 'عالي المخاطر'
+        };
+
+        const transactionTypeTranslations = {
+            'Deposit': 'إيداع',
+            'Withdrawal': 'سحب',
+            'LoanDisbursement': 'صرف قرض',
+            'LoanPayment': 'سداد قسط',
+            'Subscription': 'اشتراك',
+            'Adjustment': 'تعديل',
+            'deposit': 'إيداع',
+            'withdrawal': 'سحب',
+            'loan_out': 'صرف قرض',
+            'payment_in': 'سداد قسط',
+            'expense': 'مصروف',
+            'income': 'دخل'
+        };
+
+        const trustStatusTranslations = {
+            'Trusted': 'موثوق',
+            'Unverified': 'غير موثق',
+            'Suspicious': 'مشبوه',
+            'Flagged': 'مُعلَّم',
+            'Blocked': 'محظور'
+        };
+
+        function translateStatus(status) {
+            return statusTranslations[status] || status;
+        }
+
+        function translateSegment(segment) {
+            return segmentTranslations[segment] || segment;
+        }
+
+        function translateTransactionType(type) {
+            return transactionTypeTranslations[type] || type;
+        }
+
+        function translateTrustStatus(status) {
+            return trustStatusTranslations[status] || status;
+        }
+
+        // ========== INITIALIZATION ==========
+        async function initPage() {
+            await waitForI18n();
+
+            if (!isAuthenticated()) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            const user = getCurrentUser();
+            document.getElementById('sidebar').innerHTML = createSidebar(user);
+            document.getElementById('header').innerHTML = createHeader('التقارير', 'تقارير مالية وإدارية شاملة');
+            if (typeof initializeLanguageSwitcher === 'function') initializeLanguageSwitcher();
+            setActiveNav('reports');
+
+            await setupFilters(user);
+            setDefaultDates();
+            await loadAllReports();
+        }
+
+        async function setupFilters(user) {
+            const instContainer = document.getElementById('institutionFilterContainer');
+            const branchContainer = document.getElementById('branchFilterContainer');
+            const instSelect = document.getElementById('filterInstitution');
+            const branchSelect = document.getElementById('filterBranch');
+
+            if (user.roleName === 'Super Admin') {
+                instContainer.style.display = 'block';
+                branchContainer.style.display = 'block';
+
+                try {
+                    const res = await api.institutions.getAll(1, 100);
+                    res.data.forEach(inst => {
+                        const opt = document.createElement('option');
+                        opt.value = inst.institutionId;
+                        opt.textContent = inst.name;
+                        instSelect.appendChild(opt);
+                    });
+                } catch (e) { console.error(e); }
+
+                instSelect.addEventListener('change', async () => {
+                    branchSelect.innerHTML = '<option value="">جميع الفروع</option>';
+                    if (instSelect.value) {
+                        const res = await api.branches.getAll(1, 100, instSelect.value);
+                        res.data.forEach(br => {
+                            const opt = document.createElement('option');
+                            opt.value = br.branchId;
+                            opt.textContent = br.name;
+                            branchSelect.appendChild(opt);
+                        });
+                    }
+                });
+
+            } else if (user.roleName === 'Institution') {
+                branchContainer.style.display = 'block';
+                const res = await api.branches.getAll(1, 100, user.institutionId);
+                res.data.forEach(br => {
+                    const opt = document.createElement('option');
+                    opt.value = br.branchId;
+                    opt.textContent = br.name;
+                    branchSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function setDefaultDates() {
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+            document.getElementById('filterStartDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('filterEndDate').value = lastDay.toISOString().split('T')[0];
+        }
+
+        function getFilters() {
+            return {
+                startDate: document.getElementById('filterStartDate').value,
+                endDate: document.getElementById('filterEndDate').value,
+                institutionId: document.getElementById('filterInstitution').value,
+                branchId: document.getElementById('filterBranch').value,
+                status: document.getElementById('filterStatus').value,
+                type: document.getElementById('filterType').value
+            };
+        }
+
+        // ========== DATA LOADING ==========
+        async function loadAllReports() {
+            showLoading();
+
+            const filters = getFilters();
+
+            try {
+                // Load all reports in parallel
+                const [general, cashbox, customers, loans, installments] = await Promise.all([
+                    api.reports.getGeneralStats(filters),
+                    api.reports.getCashBoxReport(filters),
+                    api.reports.getCustomersReport(filters),
+                    api.reports.getLoansReport(filters),
+                    api.reports.getInstallmentsReport(filters)
+                ]);
+
+                // Store in single source of truth
+                reportData = {
+                    general,
+                    cashbox,
+                    customers,
+                    loans,
+                    installments,
+                    loadedAt: new Date()
+                };
+
+                // Render current tab
+                renderCurrentTab();
+
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                showToast('فشل في تحميل التقارير', 'error');
+            }
+        }
+
+        function showLoading() {
+            // Don't replace content, just show overlay on each stats element
+            ['generalStats', 'cashboxStats', 'customersStats', 'loansStats', 'installmentsStats'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerHTML = `
+                        <div class="loading-overlay">
+                            <div class="spinner"></div>
+                            <span>جاري تحميل البيانات...</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // Ensure tab elements exist before rendering
+        function ensureTabElements(tabName) {
+            const tabEl = document.getElementById(`tab-${tabName}`);
+            if (!tabEl) return;
+
+            const elements = {
+                'general': ['generalStats', 'generalTable', 'generalChart'],
+                'cashbox': ['cashboxStats', 'cashboxTable', 'cashboxChart'],
+                'customers': ['customersStats', 'customersTable', 'customersChart'],
+                'loans': ['loansStats', 'loansTable', 'loansChart'],
+                'installments': ['installmentsStats', 'installmentsTable', 'installmentsChart']
+            };
+
+            const required = elements[tabName];
+            if (!required) return;
+
+            required.forEach((id, idx) => {
+                if (!document.getElementById(id)) {
+                    const div = document.createElement('div');
+                    div.id = id;
+                    if (idx > 0) {
+                        div.className = 'glass-card p-4';
+                        if (idx === 2) div.style.display = 'none';
+                    }
+                    tabEl.appendChild(div);
+                }
+            });
+        }
+
+        // ========== TAB SWITCHING ==========
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Update tab buttons
+            document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.report-tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+
+            // Update content visibility
+            document.querySelectorAll('.report-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+
+            // Update filter visibility based on tab
+            updateFiltersForTab(tab);
+
+            // Render tab content
+            renderCurrentTab();
+        }
+
+        function updateFiltersForTab(tab) {
+            const statusContainer = document.getElementById('statusFilterContainer');
+            const typeContainer = document.getElementById('typeFilterContainer');
+            const statusSelect = document.getElementById('filterStatus');
+            const typeSelect = document.getElementById('filterType');
+
+            statusContainer.style.display = 'none';
+            typeContainer.style.display = 'none';
+
+            if (tab === 'loans' || tab === 'installments') {
+                statusContainer.style.display = 'block';
+                statusSelect.innerHTML = '<option value="">الكل</option>';
+
+                if (tab === 'loans') {
+                    ['Active', 'Paid', 'Late', 'Finished'].forEach(s => {
+                        statusSelect.innerHTML += `<option value="${s}">${translateStatus(s)}</option>`;
+                    });
+                } else {
+                    ['Pending', 'Paid', 'Overdue'].forEach(s => {
+                        statusSelect.innerHTML += `<option value="${s}">${translateStatus(s)}</option>`;
+                    });
+                }
+            }
+
+            if (tab === 'cashbox') {
+                typeContainer.style.display = 'block';
+                typeSelect.innerHTML = '<option value="">الكل</option>';
+                ['Deposit', 'Withdrawal', 'LoanDisbursement', 'LoanPayment', 'Subscription', 'Adjustment'].forEach(t => {
+                    typeSelect.innerHTML += `<option value="${t}">${translateTransactionType(t)}</option>`;
+                });
+            }
+        }
+
+        // ========== VIEW MODE ==========
+        function setViewMode(mode) {
+            viewMode = mode;
+
+            document.getElementById('viewTable').classList.toggle('active', mode === 'table');
+            document.getElementById('viewChart').classList.toggle('active', mode === 'chart');
+
+            renderCurrentTab();
+        }
+
+        // ========== RENDERING ==========
+        function renderCurrentTab() {
+            // Ensure all required elements exist
+            ensureTabElements(currentTab);
+
+            switch (currentTab) {
+                case 'general':
+                    renderGeneralReport();
+                    break;
+                case 'cashbox':
+                    renderCashboxReport();
+                    break;
+                case 'customers':
+                    renderCustomersReport();
+                    break;
+                case 'loans':
+                    renderLoansReport();
+                    break;
+                case 'installments':
+                    renderInstallmentsReport();
+                    break;
+            }
+        }
+
+        function renderGeneralReport() {
+            const data = reportData.general;
+            if (!data) return;
+
+            // Stats
+            document.getElementById('generalStats').innerHTML = `
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-label">إجمالي العملاء</div>
+                        <div class="stat-value">${data.totalCustomers}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">عدد القروض</div>
+                        <div class="stat-value">${data.totalLoans}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">قيمة القروض</div>
+                        <div class="stat-value">${formatCurrency(data.totalLoanAmount)}</div>
+                    </div>
+                </div>
+            `;
+
+            const tableEl = document.getElementById('generalTable');
+            const chartEl = document.getElementById('generalChart');
+
+            if (viewMode === 'table') {
+                tableEl.style.display = 'block';
+                chartEl.style.display = 'none';
+
+                tableEl.innerHTML = `
+                    <h3 style="color: white; margin-bottom: 1rem;">القروض حسب الحالة</h3>
+                    <div class="report-table-container">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>الحالة</th>
+                                    <th>العدد</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.loansByStatus.map(s => `
+                                    <tr>
+                                        <td><span class="status-badge ${s.status.toLowerCase()}">${translateStatus(s.status)}</span></td>
+                                        <td>${s.count}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                tableEl.style.display = 'none';
+                chartEl.style.display = 'block';
+
+                chartEl.innerHTML = `
+                    <h3 style="color: white; margin-bottom: 1rem;">القروض حسب الحالة</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="generalStatusChart"></canvas>
+                    </div>
+                `;
+
+                renderChart('generalStatusChart', 'bar', {
+                    labels: data.loansByStatus.map(s => translateStatus(s.status)),
+                    datasets: [{
+                        label: 'عدد القروض',
+                        data: data.loansByStatus.map(s => s.count),
+                        backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 1
+                    }]
+                });
+            }
+        }
+
+        function renderCashboxReport() {
+            const data = reportData.cashbox;
+            if (!data) return;
+
+            // Stats
+            document.getElementById('cashboxStats').innerHTML = `
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-label">إجمالي الوارد</div>
+                        <div class="stat-value positive">${formatCurrency(data.totals.totalIn)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">إجمالي الصادر</div>
+                        <div class="stat-value negative">${formatCurrency(data.totals.totalOut)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">صافي الرصيد</div>
+                        <div class="stat-value">${formatCurrency(data.totals.netBalance)}</div>
+                    </div>
+                </div>
+            `;
+
+            const tableEl = document.getElementById('cashboxTable');
+            const chartEl = document.getElementById('cashboxChart');
+
+            if (viewMode === 'table') {
+                tableEl.style.display = 'block';
+                chartEl.style.display = 'none';
+
+                tableEl.innerHTML = `
+                    <div class="table-search">
+                        <input type="text" placeholder="بحث في العمليات..." onkeyup="filterTable(this, 'cashboxDataTable')">
+                    </div>
+                    <div class="report-table-container" style="max-height: 500px; overflow-y: auto;">
+                        <table class="report-table" id="cashboxDataTable">
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>النوع</th>
+                                    <th>المبلغ</th>
+                                    <th>الوصف</th>
+                                    <th>الفرع</th>
+                                    <th>بواسطة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.transactions.map(t => `
+                                    <tr>
+                                        <td>${formatDateTime(t.createdAt)}</td>
+                                        <td>${translateTransactionType(t.type)}</td>
+                                        <td class="${['Deposit', 'LoanPayment', 'Subscription'].includes(t.type) ? 'positive' : 'negative'}" style="color: ${['Deposit', 'LoanPayment', 'Subscription'].includes(t.type) ? '#10b981' : '#ef4444'}">
+                                            ${formatCurrency(t.amount)}
+                                        </td>
+                                        <td>${t.description || '-'}</td>
+                                        <td>${t.branchName || '-'}</td>
+                                        <td>${t.createdBy || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                tableEl.style.display = 'none';
+                chartEl.style.display = 'block';
+
+                chartEl.innerHTML = `
+                    <h3 style="color: white; margin-bottom: 1rem;">توزيع العمليات حسب النوع</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="cashboxTypeChart"></canvas>
+                    </div>
+                `;
+
+                const inTypes = ['deposit', 'payment_in', 'subscription', 'income'];
+                renderChart('cashboxTypeChart', 'doughnut', {
+                    labels: data.summary.map(s => translateTransactionType(s.type)),
+                    datasets: [{
+                        data: data.summary.map(s => s.totalAmount),
+                        backgroundColor: data.summary.map(s =>
+                            inTypes.includes(s.type) ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)'
+                        )
+                    }]
+                });
+            }
+        }
+
+        function renderCustomersReport() {
+            const data = reportData.customers;
+            if (!data) return;
+
+            // Stats
+            document.getElementById('customersStats').innerHTML = `
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-label">إجمالي العملاء</div>
+                        <div class="stat-value">${data.total}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">معدل الاحتفاظ</div>
+                        <div class="stat-value positive">${data.kpi.retentionRate}%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">معدل الفقد</div>
+                        <div class="stat-value negative">${data.kpi.churnRate}%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">متوسط قيمة العميل</div>
+                        <div class="stat-value">${formatCurrency(data.kpi.avgCLV)}</div>
+                    </div>
+                </div>
+            `;
+
+            const tableEl = document.getElementById('customersTable');
+            const chartEl = document.getElementById('customersChart');
+
+            if (viewMode === 'table') {
+                tableEl.style.display = 'block';
+                chartEl.style.display = 'none';
+
+                tableEl.innerHTML = `
+                    <div class="table-search">
+                        <input type="text" placeholder="بحث بالاسم أو الهاتف..." onkeyup="filterTable(this, 'customersDataTable')">
+                    </div>
+                    <div class="report-table-container" style="max-height: 500px; overflow-y: auto;">
+                        <table class="report-table" id="customersDataTable">
+                            <thead>
+                                <tr>
+                                    <th>العميل</th>
+                                    <th>الهاتف</th>
+                                    <th>التصنيف</th>
+                                    <th>النقاط</th>
+                                    <th>القروض</th>
+                                    <th>إجمالي القيمة</th>
+                                    <th>آخر نشاط</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.customers.map(c => `
+                                    <tr>
+                                        <td><strong>${c.name}</strong></td>
+                                        <td class="text-muted">${c.phoneNumber}</td>
+                                        <td><span class="status-badge ${c.segment}">${translateSegment(c.segment)}</span></td>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div style="width: 60px; height: 6px; background: #334155; border-radius: 3px;">
+                                                    <div style="width: ${c.score}%; height: 100%; background: #6366f1; border-radius: 3px;"></div>
+                                                </div>
+                                                <span>${c.score}</span>
+                                            </div>
+                                        </td>
+                                        <td>${c.totalLoans}</td>
+                                        <td>${formatCurrency(c.totalValue)}</td>
+                                        <td class="text-muted">${c.lastActivity ? formatDate(c.lastActivity) : '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                tableEl.style.display = 'none';
+                chartEl.style.display = 'block';
+
+                chartEl.innerHTML = `
+                    <div class="charts-grid">
+                        <div>
+                            <h3 style="color: white; margin-bottom: 1rem;">توزيع العملاء حسب التصنيف</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="customersSegmentChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 style="color: white; margin-bottom: 1rem;">نمو العملاء</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="customersGrowthChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Segments Chart
+                renderChart('customersSegmentChart', 'doughnut', {
+                    labels: Object.keys(data.segments).map(s => translateSegment(s)),
+                    datasets: [{
+                        data: Object.values(data.segments),
+                        backgroundColor: [
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(59, 130, 246, 0.6)',
+                            'rgba(100, 116, 139, 0.6)',
+                            'rgba(239, 68, 68, 0.6)'
+                        ]
+                    }]
+                });
+
+                // Growth Chart
+                renderChart('customersGrowthChart', 'line', {
+                    labels: data.growth.map(g => formatDate(g.date)),
+                    datasets: [{
+                        label: 'عملاء جدد',
+                        data: data.growth.map(g => g.count),
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                });
+            }
+        }
+
+        function renderLoansReport() {
+            const data = reportData.loans;
+            if (!data) return;
+
+            // Stats
+            document.getElementById('loansStats').innerHTML = `
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-label">عدد القروض</div>
+                        <div class="stat-value">${data.totals.count}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">إجمالي المبلغ</div>
+                        <div class="stat-value">${formatCurrency(data.totals.totalPrincipal)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">إجمالي الأرباح</div>
+                        <div class="stat-value positive">${formatCurrency(data.totals.totalProfit)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">المتبقي</div>
+                        <div class="stat-value negative">${formatCurrency(data.totals.totalRemaining)}</div>
+                    </div>
+                </div>
+            `;
+
+            const tableEl = document.getElementById('loansTable');
+            const chartEl = document.getElementById('loansChart');
+
+            if (viewMode === 'table') {
+                tableEl.style.display = 'block';
+                chartEl.style.display = 'none';
+
+                tableEl.innerHTML = `
+                    <div class="table-search">
+                        <input type="text" placeholder="بحث بالعميل أو المنتج..." onkeyup="filterTable(this, 'loansDataTable')">
+                    </div>
+                    <div class="report-table-container" style="max-height: 500px; overflow-y: auto;">
+                        <table class="report-table" id="loansDataTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>العميل</th>
+                                    <th>المنتج</th>
+                                    <th>المبلغ</th>
+                                    <th>المدفوع</th>
+                                    <th>المتبقي</th>
+                                    <th>الحالة</th>
+                                    <th>الفرع</th>
+                                    <th>التاريخ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.loans.map(l => `
+                                    <tr>
+                                        <td>${l.loanId}</td>
+                                        <td>
+                                            <strong>${l.customerName || '-'}</strong>
+                                            <div class="text-muted">${l.customerPhone || ''}</div>
+                                        </td>
+                                        <td>${l.productName || '-'}</td>
+                                        <td>${formatCurrency(l.principalAmount)}</td>
+                                        <td class="positive" style="color: #10b981">${formatCurrency(l.paidAmount)}</td>
+                                        <td class="negative" style="color: #ef4444">${formatCurrency(l.remaining)}</td>
+                                        <td><span class="status-badge ${l.status.toLowerCase()}">${translateStatus(l.status)}</span></td>
+                                        <td>${l.branchName || '-'}</td>
+                                        <td class="text-muted">${formatDate(l.createdAt)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                tableEl.style.display = 'none';
+                chartEl.style.display = 'block';
+
+                chartEl.innerHTML = `
+                    <div class="charts-grid">
+                        <div>
+                            <h3 style="color: white; margin-bottom: 1rem;">القروض حسب المنتج</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="loansProductChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 style="color: white; margin-bottom: 1rem;">القروض حسب الحالة</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="loansStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                renderChart('loansProductChart', 'doughnut', {
+                    labels: data.byProduct.map(p => p.name),
+                    datasets: [{
+                        data: data.byProduct.map(p => p.count),
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.6)',
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(245, 158, 11, 0.6)',
+                            'rgba(239, 68, 68, 0.6)',
+                            'rgba(139, 92, 246, 0.6)'
+                        ]
+                    }]
+                });
+
+                renderChart('loansStatusChart', 'bar', {
+                    labels: data.byStatus.map(s => translateStatus(s.status)),
+                    datasets: [{
+                        label: 'قيمة القروض',
+                        data: data.byStatus.map(s => s.amount),
+                        backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1
+                    }]
+                });
+            }
+        }
+
+        function renderInstallmentsReport() {
+            const data = reportData.installments;
+            if (!data) return;
+
+            // Stats
+            document.getElementById('installmentsStats').innerHTML = `
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-label">إجمالي الأقساط</div>
+                        <div class="stat-value">${data.totals.count}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">المدفوع</div>
+                        <div class="stat-value positive">${data.totals.paidCount}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">قيد الانتظار</div>
+                        <div class="stat-value">${data.totals.pendingCount}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">متأخر</div>
+                        <div class="stat-value negative">${data.totals.overdueCount}</div>
+                    </div>
+                </div>
+            `;
+
+            const tableEl = document.getElementById('installmentsTable');
+            const chartEl = document.getElementById('installmentsChart');
+
+            if (viewMode === 'table') {
+                tableEl.style.display = 'block';
+                chartEl.style.display = 'none';
+
+                tableEl.innerHTML = `
+                    <div class="table-search">
+                        <input type="text" placeholder="بحث بالعميل..." onkeyup="filterTable(this, 'installmentsDataTable')">
+                    </div>
+                    <div class="report-table-container" style="max-height: 500px; overflow-y: auto;">
+                        <table class="report-table" id="installmentsDataTable">
+                            <thead>
+                                <tr>
+                                    <th>رقم القرض</th>
+                                    <th>القسط</th>
+                                    <th>العميل</th>
+                                    <th>المبلغ</th>
+                                    <th>الاستحقاق</th>
+                                    <th>الحالة</th>
+                                    <th>الفرع</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.installments.map(i => `
+                                    <tr>
+                                        <td>${i.loanId}</td>
+                                        <td>${i.installmentNumber}</td>
+                                        <td>
+                                            <strong>${i.customerName || '-'}</strong>
+                                            <div class="text-muted">${i.customerPhone || ''}</div>
+                                        </td>
+                                        <td>${formatCurrency(i.amount)}</td>
+                                        <td class="${i.isOverdue ? 'negative' : ''}" style="${i.isOverdue ? 'color: #ef4444' : ''}">${formatDate(i.dueDate)}</td>
+                                        <td><span class="status-badge ${i.status.toLowerCase()} ${i.isOverdue ? 'overdue' : ''}">${i.isOverdue ? 'متأخر' : translateStatus(i.status)}</span></td>
+                                        <td>${i.branchName || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                tableEl.style.display = 'none';
+                chartEl.style.display = 'block';
+
+                chartEl.innerHTML = `
+                    <h3 style="color: white; margin-bottom: 1rem;">الأقساط حسب الحالة</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="installmentsStatusChart"></canvas>
+                    </div>
+                `;
+
+                renderChart('installmentsStatusChart', 'bar', {
+                    labels: data.byStatus.map(s => translateStatus(s.status)),
+                    datasets: [{
+                        label: 'عدد الأقساط',
+                        data: data.byStatus.map(s => s.count),
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        yAxisID: 'y'
+                    }, {
+                        label: 'المبلغ',
+                        data: data.byStatus.map(s => s.amount),
+                        backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                        yAxisID: 'y1'
+                    }]
+                }, true);
+            }
+        }
+
+        // ========== CHART RENDERING ==========
+        function renderChart(canvasId, type, data, dualAxis = false) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+
+            if (charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
+
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: 'white', font: { family: 'Cairo, sans-serif' } }
+                    }
+                }
+            };
+
+            if (type === 'bar' || type === 'line') {
+                options.scales = {
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        beginAtZero: true
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    }
+                };
+
+                if (dualAxis) {
+                    options.scales.y1 = {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: '#10b981' }
+                    };
+                }
+            }
+
+            charts[canvasId] = new Chart(ctx, { type, data, options });
+        }
+
+        // ========== FILTERS ==========
+        async function applyFilters() {
+            await loadAllReports();
+        }
+
+        function resetFilters() {
+            setDefaultDates();
+            document.getElementById('filterInstitution').value = '';
+            document.getElementById('filterBranch').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterType').value = '';
+            loadAllReports();
+        }
+
+        function filterTable(input, tableId) {
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById(tableId);
+            if (!table) return;
+
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+
+        // ========== EXPORT FUNCTIONS ==========
+        function getExportData() {
+            let data = [];
+            let title = '';
+
+            switch (currentTab) {
+                case 'general':
+                    title = 'نظرة عامة';
+                    data = reportData.general?.loansByStatus?.map(s => ({
+                        'الحالة': s.status,
+                        'العدد': s.count
+                    })) || [];
+                    break;
+                case 'cashbox':
+                    title = 'الصندوق';
+                    data = reportData.cashbox?.transactions?.map(t => ({
+                        'التاريخ': formatDateTime(t.createdAt),
+                        'النوع': t.type,
+                        'المبلغ': t.amount,
+                        'الوصف': t.description || '',
+                        'الفرع': t.branchName || '',
+                        'بواسطة': t.createdBy || ''
+                    })) || [];
+                    break;
+                case 'customers':
+                    title = 'العملاء';
+                    data = reportData.customers?.customers?.map(c => ({
+                        'الاسم': c.name,
+                        'الهاتف': c.phoneNumber,
+                        'التصنيف': c.segment,
+                        'النقاط': c.score,
+                        'القروض': c.totalLoans,
+                        'إجمالي القيمة': c.totalValue
+                    })) || [];
+                    break;
+                case 'loans':
+                    title = 'القروض';
+                    data = reportData.loans?.loans?.map(l => ({
+                        'رقم القرض': l.loanId,
+                        'العميل': l.customerName || '',
+                        'المنتج': l.productName || '',
+                        'المبلغ': l.principalAmount,
+                        'المدفوع': l.paidAmount,
+                        'المتبقي': l.remaining,
+                        'الحالة': l.status,
+                        'التاريخ': formatDate(l.createdAt)
+                    })) || [];
+                    break;
+                case 'installments':
+                    title = 'الأقساط';
+                    data = reportData.installments?.installments?.map(i => ({
+                        'رقم القرض': i.loanId,
+                        'رقم القسط': i.installmentNumber,
+                        'العميل': i.customerName || '',
+                        'المبلغ': i.amount,
+                        'الاستحقاق': formatDate(i.dueDate),
+                        'الحالة': i.status
+                    })) || [];
+                    break;
+            }
+
+            return { data, title };
+        }
+
+        function exportToExcel() {
+            const { data, title } = getExportData();
+            if (!data.length) {
+                showToast('لا توجد بيانات للتصدير', 'warning');
+                return;
+            }
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, title);
+            XLSX.writeFile(wb, `Q1KEY_${title}_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showToast('تم التصدير بنجاح', 'success');
+        }
+
+        function exportToCSV() {
+            const { data, title } = getExportData();
+            if (!data.length) {
+                showToast('لا توجد بيانات للتصدير', 'warning');
+                return;
+            }
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const csv = XLSX.utils.sheet_to_csv(ws);
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Q1KEY_${title}_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            showToast('تم التصدير بنجاح', 'success');
+        }
+
+        async function exportToPDF() {
+            const content = document.querySelector('.report-content.active');
+            const opt = {
+                margin: 0.5,
+                filename: `Q1KEY_Report_${currentTab}_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+            };
+
+            try {
+                await html2pdf().set(opt).from(content).save();
+                showToast('تم التصدير بنجاح', 'success');
+            } catch (e) {
+                console.error(e);
+                showToast('فشل التصدير', 'error');
+            }
+        }
+
+        function printReport() {
+            // Get active tab content
+            const activeTabContent = document.querySelector('.report-content.active');
+            if (!activeTabContent) {
+                showToast('الرجاء اختيار تقرير للطباعة', 'warning');
+                return;
+            }
+
+            const printWindow = window.open('', '', 'height=800,width=800');
+            const title = document.querySelector('.report-tab.active').textContent;
+
+            printWindow.document.write('<html><head><title>تقرير ' + title + '</title>');
+            printWindow.document.write('<style>');
+            printWindow.document.write(`
+                body { 
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                    direction: rtl; 
+                    background: white; 
+                    color: black; 
+                    padding: 20px;
+                }
+                h1 { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+                
+                /* Stats */
+                .stats-row { 
+                    display: grid; 
+                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+                    gap: 15px; 
+                    margin-bottom: 30px; 
+                }
+                .stat-card { 
+                    border: 1px solid #ddd; 
+                    border-radius: 8px; 
+                    padding: 15px; 
+                    text-align: center; 
+                    background: #f9fafb;
+                }
+                .stat-label { font-size: 0.9rem; color: #666; margin-bottom: 5px; }
+                .stat-value { font-size: 1.5rem; font-weight: bold; color: #333; }
+                .stat-value.positive { color: #10b981; }
+                .stat-value.negative { color: #ef4444; }
+
+                /* Tables */
+                .report-table-container { width: 100%; overflow: visible; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem; }
+                th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: center; }
+                th { background-color: #f8fafc; font-weight: 600; color: #475569; }
+                tr:nth-child(even) { background-color: #f1f5f9; }
+                
+                /* Badges */
+                .status-badge { 
+                    padding: 4px 8px; 
+                    border-radius: 4px; 
+                    font-size: 0.8rem; 
+                    font-weight: 500;
+                    border: 1px solid #ddd;
+                }
+                
+                /* Hide search and non-printable elements */
+                .table-search, .export-dropdown, .view-toggle { display: none !important; }
+                
+                /* Utilities */
+                .text-muted { color: #64748b; }
+            `);
+            printWindow.document.write('</style></head><body>');
+
+            printWindow.document.write(`<h1>Q1KEY - تقرير ${title} (${new Date().toLocaleDateString('ar-SA')})</h1>`);
+
+            // If view mode is chart, we need to handle canvas
+            if (viewMode === 'chart') {
+                // Print stats first
+                const statsDiv = activeTabContent.querySelector('[id$="Stats"]');
+                if (statsDiv) printWindow.document.write(statsDiv.innerHTML);
+
+                const canvases = activeTabContent.querySelectorAll('canvas');
+                if (canvases.length > 0) {
+                    printWindow.document.write('<div style="display:flex; flex-direction:column; gap:30px; align-items:center; margin-top:30px;">');
+                    canvases.forEach(canvas => {
+                        try {
+                            const img = canvas.toDataURL("image/png");
+                            printWindow.document.write(`<img src="${img}" style="max-width:100%; border:1px solid #eee; padding:10px;">`);
+                        } catch (e) { console.error('Canvas capture failed', e); }
+                    });
+                    printWindow.document.write('</div>');
+                }
+            } else {
+                // For table view, clone and clean up
+                const contentClone = activeTabContent.cloneNode(true);
+                // Remove search inputs from clone
+                const searchInputs = contentClone.querySelectorAll('.table-search');
+                searchInputs.forEach(el => el.remove());
+
+                printWindow.document.write(contentClone.innerHTML);
+            }
+
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus();
+
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
+
+        // ========== INITIALIZATION ==========
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details - Q1KEY Platform</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/i18n.js"></script>
+</head>
+
+<body>
+    <div id="sidebar"></div>
+
+    <div class="main-content">
+        <div id="header"></div>
+
+        <div class="page-content">
+            <!-- Page Header -->
+            <div class="flex items-center gap-3 mb-8"
+                style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+                <a href="users.html" class="btn btn-secondary" style="padding: 0.5rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-white" data-i18n-key="users.view_user">User Details</h1>
+                    <p class="text-secondary" data-i18n-key="users.view_user_info">View user profile information</p>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div id="loadingContainer" class="loading-container">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- User Details -->
+            <div id="userContainer" style="display: none;">
+                <div class="glass-card p-6 mb-6">
+                    <div class="flex items-center justify-between mb-6"
+                        style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
+                        <div class="flex items-center gap-4">
+                            <div class="user-avatar"
+                                style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #a855f7); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; color: white;">
+                                <span id="userInitial">U</span>
+                            </div>
+                            <div>
+                                <h2 id="userName" class="text-2xl font-bold text-white mb-1"></h2>
+                                <p class="text-muted"><span data-i18n-key="users.user_id">User ID</span>: <span
+                                        id="userId"></span></p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2" style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span id="statusBadge" class="badge"></span>
+
+                            <div class="meatball-container">
+                                <button class="meatball-btn">⋮</button>
+                                <div class="meatball-dropdown">
+                                    <a id="editBtn" class="dropdown-item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                        </svg>
+                                        <span data-i18n-key="common.button.edit">Edit</span>
+                                    </a>
+                                    <button id="toggleActiveBtn" class="dropdown-item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <line x1="15" y1="9" x2="9" y2="15" />
+                                        </svg>
+                                        <span id="toggleActiveText">Deactivate</span>
+                                    </button>
+                                    <button id="deleteBtn" class="dropdown-item text-danger">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6" />
+                                            <path
+                                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                        </svg>
+                                        <span data-i18n-key="common.button.delete">Delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-8"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div class="info-section">
+                            <h3 class="text-sm font-bold text-muted uppercase mb-4" data-i18n-key="users.personal_info">
+                                Personal Information</h3>
+                            <div class="grid gap-4">
+                                <div>
+                                    <p class="text-muted text-xs mb-1" data-i18n-key="users.email">Email Address</p>
+                                    <p id="userEmail" class="text-white font-medium"></p>
+                                </div>
+                                <div>
+                                    <p class="text-muted text-xs mb-1" data-i18n-key="users.phone">Phone Number</p>
+                                    <p id="userPhone" class="text-white font-medium"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-section">
+                            <h3 class="text-sm font-bold text-muted uppercase mb-4" data-i18n-key="users.account_info">
+                                Account Information</h3>
+                            <div class="grid gap-4">
+                                <div>
+                                    <p class="text-muted text-xs mb-1" data-i18n-key="users.role">Role</p>
+                                    <p id="userRole" class="text-white font-medium badge badge-info"></p>
+                                </div>
+                                <div>
+                                    <p class="text-muted text-xs mb-1" data-i18n-key="users.institution">Institution</p>
+                                    <p id="userInstitution" class="text-white font-medium"></p>
+                                </div>
+                                <div>
+                                    <p class="text-muted text-xs mb-1" data-i18n-key="users.branch">Branch</p>
+                                    <p id="userBranch" class="text-white font-medium"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; gap: 2rem;">
+                        <div>
+                            <p class="text-muted text-xs mb-1" data-i18n-key="users.created_at">Created At</p>
+                            <p id="createdAt" class="text-white text-sm"></p>
+                        </div>
+                        <div>
+                            <p class="text-muted text-xs mb-1" data-i18n-key="users.updated_at">Last Updated</p>
+                            <p id="updatedAt" class="text-white text-sm"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/ui-utils.js"></script>
+    <script src="../components/sidebar.js?v=4"></script>
+    <script src="../components/header.js"></script>
+    <script>
+        async function initPage() {
+            await waitForI18n();
+
+            if (!isAuthenticated()) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            const user = getCurrentUser();
+            document.getElementById('sidebar').innerHTML = createSidebar(user);
+            document.getElementById('header').innerHTML = createHeader(
+                t('users.view_user'),
+                t('users.view_user_info')
+            );
+            initializeLanguageSwitcher();
+            setActiveNav('users');
+            window.i18n.translatePage();
+
+            // Load user data
+            await loadUserData();
+
+            // Initialize meatball menu
+            initMeatballMenu();
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUserId = urlParams.get('id');
+
+        if (!targetUserId) {
+            window.location.href = 'users.html';
+        }
+
+        let userData = null;
+
+        async function loadUserData() {
+            const loadingContainer = document.getElementById('loadingContainer');
+            const userContainer = document.getElementById('userContainer');
+
+            try {
+                userData = await api.users.getById(targetUserId);
+
+                // Populate details
+                document.getElementById('userName').textContent = userData.name;
+                document.getElementById('userId').textContent = userData.userId;
+                document.getElementById('userInitial').textContent = userData.name.charAt(0).toUpperCase();
+                document.getElementById('userEmail').textContent = userData.email;
+                document.getElementById('userPhone').textContent = userData.phoneNumber || '--';
+                document.getElementById('userRole').textContent = userData.roleName;
+                document.getElementById('userInstitution').textContent = userData.institution?.name || 'N/A';
+                document.getElementById('userBranch').textContent = userData.branch?.name || 'N/A';
+                document.getElementById('createdAt').textContent = formatDateTime(userData.createdAt);
+                document.getElementById('updatedAt').textContent = formatDateTime(userData.updatedAt);
+
+                const statusBadge = document.getElementById('statusBadge');
+                statusBadge.textContent = userData.isActive ? (t('users.active') || 'نشط') : (t('users.inactive') || 'غير نشط');
+                statusBadge.className = `badge ${userData.isActive ? 'badge-success' : 'badge-danger'}`;
+
+                const toggleActiveText = document.getElementById('toggleActiveText');
+                toggleActiveText.textContent = userData.isActive ? 'Deactivate' : 'Activate';
+
+                document.getElementById('editBtn').href = `users-edit.html?id=${targetUserId}`;
+
+                loadingContainer.style.display = 'none';
+                userContainer.style.display = 'block';
+
+                // Setup actions with integrity check
+                await setupActions();
+
+            } catch (error) {
+                console.error('Error loading user:', error);
+                showToast('Failed to load user information', 'error');
+                setTimeout(() => window.location.href = 'users.html', 2000);
+            }
+        }
+
+        async function setupActions() {
+            const deleteBtn = document.getElementById('deleteBtn');
+            const toggleActiveBtn = document.getElementById('toggleActiveBtn');
+            const userContainer = document.getElementById('userContainer');
+            const currentUser = getCurrentUser();
+
+            let preventDelete = false;
+            let reason = '';
+
+            // 1. Prevent self-deletion
+            if (parseInt(targetUserId) === currentUser.userId) {
+                preventDelete = true;
+                reason = "You cannot delete your own account";
+            }
+
+            // 2. Prevent Super Admin deletion by non-super admins (though roles guard should handle it)
+            if (userData.roleName === 'Super Admin' && currentUser.roleName !== 'Super Admin') {
+                preventDelete = true;
+                reason = "Only Super Admins can manage other Super Admin accounts";
+            }
+
+            // 3. SPECIAL RULE: Protect Master Admin (admin@q1key.com)
+            // Cannot delete or deactivate the master admin under ANY circumstances
+            if (userData.email === 'admin@q1key.com') {
+                // Hide Delete Button
+                deleteBtn.style.display = 'none';
+
+                // Hide Deactivate Button (Toggle Active)
+                if (toggleActiveBtn) {
+                    toggleActiveBtn.style.display = 'none';
+                }
+
+                // Change "Edit" to "Change Password" to clarify intent
+                const editBtn = document.getElementById('editBtn');
+                if (editBtn) {
+                    // Change icon to key
+                    const svg = editBtn.querySelector('svg');
+                    if (svg) {
+                        svg.innerHTML = '<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>';
+                    }
+
+                    const editSpan = editBtn.querySelector('span');
+                    if (editSpan) {
+                        editSpan.textContent = "تغيير كلمة المرور";
+                    }
+                }
+
+                return;
+            }
+
+            // 4. Check for associated records (logs as proxy for activity)
+            try {
+                const logs = await api.searchLogs.getByUser(targetUserId, 1, 1);
+                if (logs.data && logs.data.length > 0) {
+                    preventDelete = true;
+                    reason = "هذا المستخدم لديه سجلات نشاط مرتبطة به. يوصى بالتعطيل بدلاً من الحذف.";
+                }
+            } catch (e) {
+                console.error('Error checking user logs:', e);
+            }
+
+            if (preventDelete) {
+                deleteBtn.disabled = true;
+                deleteBtn.classList.add('opacity-50');
+                deleteBtn.title = reason;
+
+                const warningBox = document.createElement('div');
+                warningBox.style.padding = '0.75rem';
+                warningBox.style.background = 'rgba(239, 68, 68, 0.1)';
+                warningBox.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+                warningBox.style.borderRadius = '8px';
+                warningBox.style.marginTop = '1rem';
+                warningBox.innerHTML = `
+                    <p class="text-sm text-danger" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        ${reason}
+                    </p>
+                `;
+                userContainer.prepend(warningBox);
+            } else {
+                deleteBtn.addEventListener('click', () => {
+                    showDeleteModal({
+                        title: t('users.delete_confirm_title') || 'Delete User',
+                        itemName: userData.name,
+                        warningText: t('users.delete_warning_text') || 'This will permanently remove the user and all their permissions. This action cannot be undone.',
+                        onConfirm: async () => {
+                            try {
+                                await api.users.delete(targetUserId);
+                                showToast(t('users.deleted_success'), 'success');
+                                window.location.href = 'users.html';
+                            } catch (error) {
+                                console.error('Error deleting user:', error);
+                                showToast(error.message || t('users.delete_failed'), 'error');
+                            }
+                        }
+                    });
+                });
+            }
+
+            toggleActiveBtn.addEventListener('click', async () => {
+                const action = userData.isActive ? 'deactivate' : 'activate';
+                const actionText = userData.isActive ? t('users.deactivate') || 'تعطيل' : t('users.activate') || 'تفعيل';
+
+                showConfirmModal({
+                    title: actionText + ' ' + (t('users.user') || 'المستخدم'),
+                    message: `هل أنت متأكد من ${actionText} هذا المستخدم؟`,
+                    subMessage: userData.name,
+                    confirmText: actionText,
+                    icon: userData.isActive ? '⏸️' : '▶️',
+                    btnClass: userData.isActive ? 'btn-warning' : 'btn-success',
+                    onConfirm: async () => {
+                        try {
+                            await api.users.toggleActive(targetUserId);
+                            showToast(`User ${action}d successfully`, 'success');
+                            loadUserData(); // Reload
+                        } catch (error) {
+                            console.error('Error toggling user status:', error);
+                            showToast('Failed to update user status', 'error');
+                        }
+                    }
+                });
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
+    </script>
+</body>
+
+</html>
