@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit User - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css?v=12">
+  <link rel="stylesheet" href="../css/styles.css?v=18">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -64,6 +64,15 @@
             <input type="tel" id="phoneNumber" name="phoneNumber" class="input"
               data-i18n-placeholder="users.form.phone_placeholder" placeholder="Enter phone number" required />
             <div id="phoneNumberError" class="error-text hidden"></div>
+          </div>
+
+          <!-- National ID -->
+          <div class="form-group">
+            <label class="label"><span data-i18n-key="users.form.national_id_label">National ID</span> <span
+                data-i18n-key="common.required">*</span></label>
+            <input type="text" id="nationalId" name="nationalId" class="input"
+              data-i18n-placeholder="users.form.national_id_placeholder" placeholder="Enter National ID" required />
+            <div id="nationalIdError" class="error-text hidden"></div>
           </div>
 
           <!-- Password Section (Adaptive) -->
@@ -246,6 +255,7 @@
           document.getElementById('name').value = userData.name;
           document.getElementById('email').value = userData.email;
           document.getElementById('phoneNumber').value = userData.phoneNumber || '';
+          document.getElementById('nationalId').value = userData.nationalId || '';
           document.getElementById('isActive').checked = userData.isActive;
 
           // Disable Active checkbox if editing own account
@@ -357,6 +367,7 @@
           // Standard User Update
           formData.name = document.getElementById('name').value.trim();
           formData.phoneNumber = document.getElementById('phoneNumber').value.trim();
+          formData.nationalId = document.getElementById('nationalId').value.trim();
           formData.isActive = document.getElementById('isActive').checked;
 
           // Only include password if provided

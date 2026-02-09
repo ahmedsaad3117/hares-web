@@ -42,6 +42,18 @@
   color: var(--emerald-300) !important;
 }
 
+.text-white {
+  color: white !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
 .hover\:text-emerald-300:hover {
   color: var(--emerald-300) !important;
 }
@@ -77,6 +89,24 @@ body {
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.5;
+  /* 
+     Global Text Selection & Cursor Behavior:
+     1. Text is SELECTABLE (user-select: text) so users can copy info.
+     2. Cursor is DEFAULT (arrow) by default, not text (I-beam), to look cleaner.
+     3. Inputs/Textareas get the text cursor.
+  */
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  cursor: default;
+}
+
+/* Ensure inputs/textareas show the text cursor when hovered/focused */
+input,
+textarea,
+[contenteditable="true"] {
+  cursor: text;
 }
 
 .container {
@@ -175,6 +205,8 @@ body {
   text-decoration: none;
   position: relative;
   z-index: 10;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .btn-primary {
@@ -184,6 +216,10 @@ body {
 
 .btn-primary:hover {
   background: linear-gradient(to right, #4f46e5, #4338ca);
+}
+
+.btn-primary {
+  color: #ffffff !important;
 }
 
 .btn-secondary {
@@ -200,11 +236,31 @@ body {
 .btn-danger {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  color: #ef4444 !important;
+}
+
+.btn-success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #10b981 !important;
+}
+
+.btn-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #f59e0b !important;
 }
 
 .btn-danger:hover {
   background: rgba(239, 68, 68, 0.2);
+}
+
+.btn-success:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.btn-warning:hover {
+  background: rgba(245, 158, 11, 0.2);
 }
 
 .btn:disabled {
@@ -232,6 +288,13 @@ body {
   outline: none;
   border-color: #6366f1;
   background: rgba(255, 255, 255, 0.08);
+}
+
+/* Global Date Picker Icon Styling */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
 }
 
 /* Touch Device Optimizations */
@@ -277,6 +340,20 @@ select.input option {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-secondary);
+}
+
+/* Global Required Asterisk Styling */
+.required-star,
+[data-i18n-key="common.required"],
+[data-i18n-key$="_required"],
+[data-i18n-key*=".required"] {
+  color: #ff4d4d !important;
+  /* Brighter red */
+  font-weight: 800 !important;
+  margin-inline-start: 4px;
+  display: inline-block;
+  text-shadow: 0 0 5px rgba(255, 77, 77, 0.3);
+  /* Subtle glow */
 }
 
 .form-group {
@@ -355,6 +432,8 @@ select.input option {
   color: var(--text-secondary);
   text-decoration: none;
   transition: all 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .sidebar-nav-link:hover {
@@ -372,6 +451,7 @@ select.input option {
   margin-left: 260px;
   min-height: 100vh;
   transition: margin 0.3s ease;
+  overflow-x: auto;
 }
 
 [dir="rtl"] .main-content {
@@ -408,7 +488,7 @@ select.input option {
 .language-switcher:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
-  color: var(--text-primary);
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
@@ -521,34 +601,50 @@ select.input option {
 }
 
 /* Badge */
+/* Badge system */
 .badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 10px;
   font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .badge-success {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #10b981 !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
 }
 
 .badge-warning {
-  background: rgba(245, 158, 11, 0.2);
-  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #f59e0b !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
 }
 
 .badge-danger {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
 }
 
 .badge-info {
-  background: rgba(99, 102, 241, 0.2);
-  color: #818cf8;
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: #818cf8 !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
 }
 
 /* Responsive Grid System */
@@ -727,6 +823,8 @@ body.menu-open {
     margin-right: 0 !important;
     padding-bottom: 80px;
     /* Extra space for bottom safe areas */
+    overflow-x: auto;
+    width: 100%;
   }
 
   /* Increase touch targets for mobile nav */
@@ -930,6 +1028,7 @@ body.menu-open {
 .meatball-dropdown {
   position: absolute;
   top: 100%;
+  left: auto;
   right: 0;
   margin-top: 0.5rem;
   background: #1e293b;
@@ -942,17 +1041,57 @@ body.menu-open {
   overflow: hidden;
 }
 
+/* Global RTL: Dashboard/Tables etc. where button is on the LEFT 
+   The menu should align LEFT edge of button and grow RIGHT */
 [dir="rtl"] .meatball-dropdown {
-  right: auto;
-  left: 0;
+  left: 0 !important;
+  right: auto !important;
 }
 
-/* Fix for forced LTR headers within RTL pages */
+/* Forced LTR sections (Headers): Buttons are on the RIGHT edge.
+   The menu MUST align RIGHT edge of button and grow LEFT. */
+[dir="ltr"] .meatball-dropdown,
 [dir="rtl"] [dir="ltr"] .meatball-dropdown {
-  left: auto;
-  right: 0;
-  text-align: right;
-  direction: rtl;
+  right: 0 !important;
+  left: auto !important;
+}
+
+/* Ensure flex order is natural in forced LTR sections */
+[dir="rtl"] [dir="ltr"].flex,
+[dir="rtl"] [dir="ltr"] .flex {
+  flex-direction: row !important;
+}
+
+/* Warning Banner Styles */
+.warning-banner {
+  padding: 1rem 1.25rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: start;
+  /* Standard for all languages */
+}
+
+.warning-banner p {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: #ef4444;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* Ensure punctuation doesn't flip in LTR text within RTL pages */
+[dir="rtl"] .warning-banner p span:lang(en),
+[dir="rtl"] .warning-banner p span:not([lang="ar"]) {
+  direction: ltr;
+  display: inline-block;
+  text-align: left;
 }
 
 .meatball-dropdown.show {
@@ -1128,8 +1267,9 @@ body.menu-open {
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   border: 1px solid transparent;
+  color: #ffffff !important;
 }
 
 .badge-secondary {
@@ -1458,8 +1598,8 @@ body.menu-open {
 
 .premium-card {
   position: relative;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   padding: 1rem 1.25rem;
   text-decoration: none;
@@ -1628,9 +1768,7 @@ body.menu-open {
 }
 
 [dir="rtl"] .header-top-bar {
-  /* No change needed for grid-template-columns as it balances automatically, 
-     but we ensure the date is on the 'start' side (right in RTL) 
-     and the spacer is on the 'end' side (left in RTL) */
+  grid-template-columns: 1fr auto 1fr;
 }
 
 /* Ensure centering on small screens by stacking */
@@ -1669,7 +1807,7 @@ body.menu-open {
 .date-divider {
   width: 1px;
   height: 16px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--glass-border);
 }
 
 /* Quick Links Styling */
@@ -1719,11 +1857,12 @@ body.menu-open {
 .header-main-title {
   font-size: 1.85rem;
   font-weight: 800;
-  color: white;
+  color: #ffffff;
   letter-spacing: -0.025em;
   margin: 0;
   background: linear-gradient(to right, #fff, #cbd5e1);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -1755,14 +1894,14 @@ body.menu-open {
   display: block;
   font-weight: 700;
   font-size: 0.95rem;
-  color: white;
+  color: #ffffff;
   line-height: 1.2;
 }
 
 .user-role {
   display: block;
   font-size: 0.75rem;
-  color: var(--accent-secondary);
+  color: #6366f1;
   font-weight: 500;
   opacity: 0.9;
 }
@@ -2241,4 +2380,109 @@ body.menu-open {
 
 .border-none {
   border: none !important;
+}
+
+/* --- Flicker Prevention & Pre-loading --- */
+body:not(.i18n-ready) {
+  visibility: hidden;
+}
+
+body.i18n-ready {
+  visibility: visible;
+}
+
+/* Reserve space for sidebar to prevent jump */
+@media (min-width: 769px) {
+  .main-content {
+    margin-left: 260px !important;
+  }
+
+  html.rtl .main-content {
+    margin-left: 0 !important;
+    margin-right: 260px !important;
+  }
+
+  /* Fixed Sidebar from the start */
+  #sidebar {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    z-index: 100;
+  }
+
+  html:not(.rtl) #sidebar {
+    left: 0;
+  }
+
+  html.rtl #sidebar {
+    right: 0;
+  }
+}
+
+/* Skeleton Loading Animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+.skeleton-text {
+  height: 1rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.skeleton-title {
+  height: 2rem;
+  margin-bottom: 1rem;
+  width: 60%;
+}
+
+.skeleton-card {
+  height: 120px;
+  width: 100%;
+}
+
+/* Page Transition Overlay */
+#page-preloader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+#page-preloader.fade-out {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.preloader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(129, 140, 248, 0.1);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

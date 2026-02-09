@@ -4,19 +4,22 @@ import {
   ConflictException,
   Logger,
   OnModuleInit,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, Or, In, Not, IsNull } from 'typeorm';
-import { Customer } from '../../entities/customer.entity';
-import { CustomerRelation } from '../../entities/customer-relation.entity';
-import { TrustStatus } from '../../entities/trust-status.enum';
-import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
-import { UpdateTrustStatusDto } from './dto/update-trust-status.dto';
-import { SearchCustomerDto } from './dto/search-customer.dto';
-import { CustomerResponseDto } from './dto/customer-response.dto';
-import { PaginationDto, PaginatedResult } from '../../common/dto/pagination.dto';
-import { SearchLogsService } from '../search-logs/search-logs.service';
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, Like, Or, In, Not, IsNull } from "typeorm";
+import { Customer } from "../../entities/customer.entity";
+import { CustomerRelation } from "../../entities/customer-relation.entity";
+import { TrustStatus } from "../../entities/trust-status.enum";
+import { CreateCustomerDto } from "./dto/create-customer.dto";
+import { UpdateCustomerDto } from "./dto/update-customer.dto";
+import { UpdateTrustStatusDto } from "./dto/update-trust-status.dto";
+import { SearchCustomerDto } from "./dto/search-customer.dto";
+import { CustomerResponseDto } from "./dto/customer-response.dto";
+import {
+  PaginationDto,
+  PaginatedResult,
+} from "../../common/dto/pagination.dto";
+import { SearchLogsService } from "../search-logs/search-logs.service";
 
 @Injectable()
 export class CustomersService implements OnModuleInit {
@@ -37,13 +40,16 @@ export class CustomersService implements OnModuleInit {
   async migrateLegacyCustomers() {
     try {
       const legacyCustomers = await this.customerRepository.find({
-        where: { institutionId: Not(IsNull()) }
+        where: { institutionId: Not(IsNull()) },
       });
       let count = 0;
       for (const cust of legacyCustomers) {
         if (!cust.institutionId) continue;
         const exists = await this.relationRepository.findOne({
-          where: { customerId: cust.customerId, institutionId: cust.institutionId }
+          where: {
+            customerId: cust.customerId,
+            institutionId: cust.institutionId,
+          },
         });
         if (!exists) {
           await this.relationRepository.save({
@@ -55,13 +61,17 @@ export class CustomersService implements OnModuleInit {
           count++;
         }
       }
-      if (count > 0) this.logger.log(`Migrated ${count} legacy customers to relations.`);
+      if (count > 0)
+        this.logger.log(`Migrated ${count} legacy customers to relations.`);
     } catch (e) {
-      this.logger.error('Migration failed', e);
+      this.logger.error("Migration failed", e);
     }
   }
 
-  async create(createCustomerDto: CreateCustomerDto, user: any): Promise<CustomerResponseDto> {
+  async create(
+    createCustomerDto: CreateCustomerDto,
+    user: any,
+  ): Promise<CustomerResponseDto> {
     // 1. Check Global Existence by National ID
     let customer = await this.customerRepository.findOne({
       where: { nationalId: createCustomerDto.nationalId },
@@ -80,10 +90,10 @@ export class CustomersService implements OnModuleInit {
         where: {
           customerId: customer.customerId,
           institutionId: user.institutionId,
-          // If user is Branch Admin, check exact branch match? 
+          // If user is Branch Admin, check exact branch match?
           // Requirement: "Customer can be linked to multiple branches".
           // So we should check if linked to THIS branch.
-          ...(user.branchId ? { branchId: user.branchId } : {})
+          ...(user.branchId ? { branchId: user.branchId } : {}),
         },
         withDeleted: true,
       });
@@ -91,24 +101,23 @@ export class CustomersService implements OnModuleInit {
       if (relation) {
         if (relation.deletedAt) {
           // Exists but deleted -> Suggest Restore?
-          // We can treat this as "Exists globally" but with a flag? 
+          // We can treat this as "Exists globally" but with a flag?
           // Or just let the Link flow handle restore.
           // Let's stick to consistent "Exists Global" response.
-        }
-        else {
+        } else {
           // Already active in this scope
           throw new ConflictException({
-            message: 'Customer already linked and active in this scope',
-            code: 'CUSTOMER_EXISTS_LOCAL',
-            customer: this.toResponseDto(customer)
+            message: "Customer already linked and active in this scope",
+            code: "CUSTOMER_EXISTS_LOCAL",
+            customer: this.toResponseDto(customer),
           });
         }
       }
 
       // Throw special error for Frontend to handle "Link" permission/prompt
       throw new ConflictException({
-        message: 'Customer exists in global system',
-        code: 'CUSTOMER_EXISTS_GLOBAL',
+        message: "Customer exists in global system",
+        code: "CUSTOMER_EXISTS_GLOBAL",
         customer: this.toResponseDto(customer),
       });
     }
@@ -118,7 +127,9 @@ export class CustomersService implements OnModuleInit {
       where: { phoneNumber: createCustomerDto.phoneNumber },
     });
     if (existingPhone) {
-      throw new ConflictException('Customer with this phone number already exists');
+      throw new ConflictException(
+        "Customer with this phone number already exists",
+      );
     }
 
     // 3. Create Global Record
@@ -143,7 +154,11 @@ export class CustomersService implements OnModuleInit {
     return this.toResponseDto(savedCustomer);
   }
 
-  async findAll(paginationDto: PaginationDto, user?: any, deleted: boolean = false): Promise<PaginatedResult<CustomerResponseDto>> {
+  async findAll(
+    paginationDto: PaginationDto,
+    user?: any,
+    deleted: boolean = false,
+  ): Promise<PaginatedResult<CustomerResponseDto>> {
     const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
 
@@ -157,31 +172,32 @@ export class CustomersService implements OnModuleInit {
     }
 
     // For active customers, use the standard approach
-    const queryBuilder = this.customerRepository.createQueryBuilder('customer')
-      .leftJoinAndSelect('customer.loans', 'loan')
-      .leftJoinAndSelect('loan.branch', 'branch')
-      .orderBy('customer.createdAt', 'DESC')
+    const queryBuilder = this.customerRepository
+      .createQueryBuilder("customer")
+      .leftJoinAndSelect("customer.loans", "loan")
+      .leftJoinAndSelect("loan.branch", "branch")
+      .orderBy("customer.createdAt", "DESC")
       .skip(skip)
       .take(limit);
 
-    if (user && roleName !== 'Super Admin' && user.institutionId) {
+    if (user && roleName !== "Super Admin" && user.institutionId) {
       // Branch: see only their own customers
       // Institution: see their own AND their branches' customers
-      let branchCondition = '';
+      let branchCondition = "";
       if (user.branchId) {
         // Branch user: only their branch
-        branchCondition = 'AND rel.branch_id = :branchId ';
+        branchCondition = "AND rel.branch_id = :branchId ";
       }
 
       // Use raw innerJoin for active customers (deleted_at IS NULL)
       queryBuilder.innerJoin(
-        'customer_relations',
-        'rel',
-        'rel.customer_id = customer.customer_id ' +
-        'AND rel.institution_id = :instId ' +
+        "customer_relations",
+        "rel",
+        "rel.customer_id = customer.customer_id " +
+        "AND rel.institution_id = :instId " +
         branchCondition +
-        'AND rel.deleted_at IS NULL',
-        { instId: user.institutionId, branchId: user.branchId || null }
+        "AND rel.deleted_at IS NULL",
+        { instId: user.institutionId, branchId: user.branchId || null },
       );
     }
 
@@ -204,25 +220,26 @@ export class CustomersService implements OnModuleInit {
   private async findDeletedCustomers(
     paginationDto: PaginationDto,
     user?: any,
-    roleName?: string
+    roleName?: string,
   ): Promise<PaginatedResult<CustomerResponseDto>> {
     const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
 
-    let whereClause = '';
+    let whereClause = "";
     const params: any[] = [];
 
-    if (user && roleName !== 'Super Admin' && user.institutionId) {
-      whereClause = 'WHERE cr.institution_id = $1 AND cr.deleted_at IS NOT NULL';
+    if (user && roleName !== "Super Admin" && user.institutionId) {
+      whereClause =
+        "WHERE cr.institution_id = $1 AND cr.deleted_at IS NOT NULL";
       params.push(user.institutionId);
 
       if (user.branchId) {
-        whereClause += ' AND cr.branch_id = $2';
+        whereClause += " AND cr.branch_id = $2";
         params.push(user.branchId);
       }
     } else {
       // Super Admin - see all deleted
-      whereClause = 'WHERE cr.deleted_at IS NOT NULL';
+      whereClause = "WHERE cr.deleted_at IS NOT NULL";
     }
 
     // Count query
@@ -234,7 +251,7 @@ export class CustomersService implements OnModuleInit {
     `;
 
     const countResult = await this.customerRepository.query(countQuery, params);
-    const total = parseInt(countResult[0]?.count || '0', 10);
+    const total = parseInt(countResult[0]?.count || "0", 10);
 
     // Data query with pagination
     const dataQuery = `
@@ -303,33 +320,37 @@ export class CustomersService implements OnModuleInit {
     // Get role name
     const roleName = user?.role?.roleName || user?.roleName;
 
-    if (roleName === 'Super Admin') {
+    if (roleName === "Super Admin") {
       if (relationId) {
         const relation = await this.relationRepository.findOne({
           where: { id: relationId },
-          withDeleted: true
+          withDeleted: true,
         });
-        if (!relation) throw new NotFoundException('Relation not found');
+        if (!relation) throw new NotFoundException("Relation not found");
         await this.relationRepository.restore(relation.id);
-        this.logger.log(`RESTORE: Relation ${relationId} restored by Super Admin ${user.userId}`);
+        this.logger.log(
+          `RESTORE: Relation ${relationId} restored by Super Admin ${user.userId}`,
+        );
         return;
       }
       // If no relationId, restore all deleted relations for this customer
       const relations = await this.relationRepository.find({
         where: { customerId: id },
-        withDeleted: true
+        withDeleted: true,
       });
       for (const rel of relations) {
         if (rel.deletedAt) {
           await this.relationRepository.restore(rel.id);
         }
       }
-      this.logger.log(`RESTORE: All relations for customer ${id} restored by Super Admin ${user.userId}`);
+      this.logger.log(
+        `RESTORE: All relations for customer ${id} restored by Super Admin ${user.userId}`,
+      );
       return;
     }
 
     // Institution/Branch: restore within their scope
-    if (!user.institutionId) throw new ConflictException('Scope needed');
+    if (!user.institutionId) throw new ConflictException("Scope needed");
 
     const whereCondition: any = {
       customerId: id,
@@ -344,18 +365,22 @@ export class CustomersService implements OnModuleInit {
 
     const relation = await this.relationRepository.findOne({
       where: whereCondition,
-      withDeleted: true
+      withDeleted: true,
     });
 
-    if (!relation) throw new NotFoundException('Relation not found in your scope');
-    if (!relation.deletedAt) throw new ConflictException('Customer is not deleted');
+    if (!relation)
+      throw new NotFoundException("Relation not found in your scope");
+    if (!relation.deletedAt)
+      throw new ConflictException("Customer is not deleted");
 
     await this.relationRepository.restore(relation.id);
     this.logger.log(`RESTORE: Customer ${id} restored by user ${user.userId}`);
   }
 
   async softDelete(id: number, user: any): Promise<{ message: string }> {
-    this.logger.log(`SOFT DELETE: Starting soft delete for customer ${id} by user ${user.userId}`);
+    this.logger.log(
+      `SOFT DELETE: Starting soft delete for customer ${id} by user ${user.userId}`,
+    );
 
     const customer = await this.customerRepository.findOne({
       where: { customerId: id },
@@ -368,7 +393,7 @@ export class CustomersService implements OnModuleInit {
     // For Super Admin without institution, we need to create/update a relation
     const roleName = user?.role?.roleName || user?.roleName;
 
-    if (roleName === 'Super Admin' && !user.institutionId) {
+    if (roleName === "Super Admin" && !user.institutionId) {
       // Find any existing relation for this customer
       const existingRelation = await this.relationRepository.findOne({
         where: { customerId: id },
@@ -387,7 +412,9 @@ export class CustomersService implements OnModuleInit {
           // Customer was created by Super Admin without institution
           // We need at least one institution to create a deletable relation
           // For now, throw an error - Super Admin should hard delete such customers
-          throw new ConflictException('Customer has no institution. Use permanent delete instead.');
+          throw new ConflictException(
+            "Customer has no institution. Use permanent delete instead.",
+          );
         }
 
         // Create a new relation with the customer's origin institution
@@ -401,13 +428,15 @@ export class CustomersService implements OnModuleInit {
         await this.relationRepository.softDelete(savedRelation.id);
       }
 
-      this.logger.log(`SOFT DELETE: Customer ${id} soft deleted by Super Admin ${user.userId}`);
-      return { message: 'Customer moved to deleted list' };
+      this.logger.log(
+        `SOFT DELETE: Customer ${id} soft deleted by Super Admin ${user.userId}`,
+      );
+      return { message: "Customer moved to deleted list" };
     }
 
     // For normal users with institution
     if (!user.institutionId) {
-      throw new ConflictException('User scope undefined');
+      throw new ConflictException("User scope undefined");
     }
 
     const whereCondition: any = {
@@ -424,21 +453,31 @@ export class CustomersService implements OnModuleInit {
     });
 
     if (!relation) {
-      throw new NotFoundException('Customer not found in your scope');
+      throw new NotFoundException("Customer not found in your scope");
     }
 
     relation.deletedBy = user.userId;
     await this.relationRepository.save(relation);
     await this.relationRepository.softDelete(relation.id);
 
-    this.logger.log(`SOFT DELETE: Customer ${id} unlinked from institution ${user.institutionId} by user ${user.userId}`);
-    return { message: 'Customer moved to deleted list' };
+    this.logger.log(
+      `SOFT DELETE: Customer ${id} unlinked from institution ${user.institutionId} by user ${user.userId}`,
+    );
+    return { message: "Customer moved to deleted list" };
   }
 
   async findOne(id: number, user?: any): Promise<CustomerResponseDto> {
     const customer = await this.customerRepository.findOne({
       where: { customerId: id },
-      relations: ['loans', 'loans.branch', 'loans.branch.institution', 'institution', 'creator'],
+      relations: [
+        "loans",
+        "loans.branch",
+        "loans.branch.institution",
+        "loans.institution",
+        "loans.product",
+        "institution",
+        "creator",
+      ],
     });
 
     if (!customer) {
@@ -452,31 +491,31 @@ export class CustomersService implements OnModuleInit {
           customerId: id,
           userId: user.userId,
           searchQuery: `View customer #${id}`,
-          searchType: 'view',
+          searchType: "view",
         });
       } catch (error) {
-        console.error('Failed to log customer view:', error);
+        console.error("Failed to log customer view:", error);
       }
     }
 
-    // Check if linked to current user's institution
+    // Check if linked to current user's institution/branch (specific scope)
     let isLinked = false;
     const role = user?.role?.roleName || user?.roleName;
-    if (role === 'Super Admin') {
+    if (role === "Super Admin") {
       isLinked = true;
     } else if (user && user.institutionId) {
-      if (customer.institutionId === user.institutionId) {
-        isLinked = true; // Owned by institution
-      } else {
-        const relation = await this.relationRepository.findOne({
-          where: {
-            customerId: id,
-            institutionId: user.institutionId
-          },
-          withDeleted: false
-        });
-        isLinked = !!relation;
-      }
+      const relation = await this.relationRepository.findOne({
+        where: {
+          customerId: id,
+          institutionId: user.institutionId,
+          // Accurate scope check:
+          // Branch Admin -> must be linked to their branch
+          // Institution Admin -> must be linked to institution level (branchId null)
+          branchId: user.branchId || IsNull(),
+        },
+        withDeleted: false,
+      });
+      isLinked = !!relation;
     }
 
     const response = this.toResponseDto(customer);
@@ -484,7 +523,10 @@ export class CustomersService implements OnModuleInit {
     return response;
   }
 
-  async search(searchDto: SearchCustomerDto, user?: any): Promise<CustomerResponseDto[]> {
+  async search(
+    searchDto: SearchCustomerDto,
+    user?: any,
+  ): Promise<CustomerResponseDto[]> {
     const whereConditions: any[] = [];
 
     // Use EXACT match for national ID - full ID required
@@ -510,7 +552,7 @@ export class CustomersService implements OnModuleInit {
     // Global search - no institution filter
     const customers = await this.customerRepository.find({
       where: whereConditions,
-      order: { createdAt: 'DESC' },
+      order: { createdAt: "DESC" },
     });
 
     if (customers.length === 0) {
@@ -523,20 +565,21 @@ export class CustomersService implements OnModuleInit {
     // ===== FIX N+1: Fetch all relations in ONE query =====
     let linkedCustomerIds: Set<number> = new Set();
 
-    if (user && roleName !== 'Super Admin' && user.institutionId) {
-      const customerIds = customers.map(c => c.customerId);
+    if (user && roleName !== "Super Admin" && user.institutionId) {
+      const customerIds = customers.map((c) => c.customerId);
 
-      // Single query to get all relations for these customers
+      // Single query to get all relations for these customers in the SPECIFIC scope
       const relations = await this.relationRepository.find({
         where: {
           customerId: In(customerIds),
-          institutionId: user.institutionId
+          institutionId: user.institutionId,
+          branchId: user.branchId || IsNull(),
         },
-        select: ['customerId'],
-        withDeleted: false
+        select: ["customerId"],
+        withDeleted: false,
       });
 
-      linkedCustomerIds = new Set(relations.map(r => r.customerId));
+      linkedCustomerIds = new Set(relations.map((r) => r.customerId));
     }
 
     const dtos: CustomerResponseDto[] = [];
@@ -545,30 +588,30 @@ export class CustomersService implements OnModuleInit {
     if (user && customers.length > 0) {
       // Fire and forget - log in background
       Promise.all(
-        customers.map(customer =>
-          this.searchLogsService.create({
-            customerId: customer.customerId,
-            userId: user.userId,
-            searchQuery: JSON.stringify(searchDto),
-            searchType: 'search',
-          }).catch(error => console.error('Failed to log customer search:', error))
-        )
+        customers.map((customer) =>
+          this.searchLogsService
+            .create({
+              customerId: customer.customerId,
+              userId: user.userId,
+              searchQuery: JSON.stringify(searchDto),
+              searchType: "search",
+            })
+            .catch((error) =>
+              console.error("Failed to log customer search:", error),
+            ),
+        ),
       );
     }
 
     for (const customer of customers) {
       const dto = this.toResponseDto(customer);
 
-      // Check if linked to current user's institution
-      if (roleName === 'Super Admin') {
+      // Check if linked to current user's institution/branch
+      if (roleName === "Super Admin") {
         dto.isLinked = true;
       } else if (user && user.institutionId) {
-        if (customer.institutionId === user.institutionId) {
-          dto.isLinked = true; // Owned by institution
-        } else {
-          // Use pre-fetched relations instead of N+1 query
-          dto.isLinked = linkedCustomerIds.has(customer.customerId);
-        }
+        // Use pre-fetched relations instead of N+1 query
+        dto.isLinked = linkedCustomerIds.has(customer.customerId);
       }
 
       dtos.push(dto);
@@ -590,30 +633,52 @@ export class CustomersService implements OnModuleInit {
       throw new NotFoundException(`Customer with ID ${id} not found`);
     }
 
-    // Check permissions: only creator or Super Admin can update
-    // Get role name
+    // Check permissions
     const userRoleName = user?.role?.roleName || user?.roleName;
-    if (user && userRoleName !== 'Super Admin' && customer.createdBy !== user.userId) {
-      throw new ConflictException('You do not have permission to update this customer');
+    if (user && userRoleName !== "Super Admin") {
+      // Must be creator OR linked to the institution/branch
+      const relation = await this.relationRepository.findOne({
+        where: {
+          customerId: id,
+          institutionId: user.institutionId,
+          ...(user.branchId ? { branchId: user.branchId } : {}),
+        },
+      });
+
+      if (customer.createdBy !== user.userId && !relation) {
+        throw new ConflictException(
+          "You do not have permission to update this customer",
+        );
+      }
     }
 
     // Check for duplicate national ID if updating
-    if (updateCustomerDto.nationalId && updateCustomerDto.nationalId !== customer.nationalId) {
+    if (
+      updateCustomerDto.nationalId &&
+      updateCustomerDto.nationalId !== customer.nationalId
+    ) {
       const existingNationalId = await this.customerRepository.findOne({
         where: { nationalId: updateCustomerDto.nationalId },
       });
       if (existingNationalId) {
-        throw new ConflictException('Customer with this national ID already exists');
+        throw new ConflictException(
+          "Customer with this national ID already exists",
+        );
       }
     }
 
     // Check for duplicate phone number if updating
-    if (updateCustomerDto.phoneNumber && updateCustomerDto.phoneNumber !== customer.phoneNumber) {
+    if (
+      updateCustomerDto.phoneNumber &&
+      updateCustomerDto.phoneNumber !== customer.phoneNumber
+    ) {
       const existingPhone = await this.customerRepository.findOne({
         where: { phoneNumber: updateCustomerDto.phoneNumber },
       });
       if (existingPhone) {
-        throw new ConflictException('Customer with this phone number already exists');
+        throw new ConflictException(
+          "Customer with this phone number already exists",
+        );
       }
     }
 
@@ -627,7 +692,7 @@ export class CustomersService implements OnModuleInit {
       where: {
         customerId,
         institutionId: user.institutionId,
-        ...(user.branchId ? { branchId: user.branchId } : {}),
+        branchId: user.branchId || IsNull(),
       },
       withDeleted: true,
     });
@@ -637,7 +702,7 @@ export class CustomersService implements OnModuleInit {
         await this.relationRepository.restore(relation.id);
         return;
       }
-      throw new ConflictException('Customer already linked to this scope');
+      throw new ConflictException("Customer already linked to this scope");
     }
 
     const newRel = this.relationRepository.create({
@@ -655,14 +720,16 @@ export class CustomersService implements OnModuleInit {
 
       const customer = await this.customerRepository.findOne({
         where: { customerId: id },
-        relations: ['loans'],
+        relations: ["loans"],
       });
 
       if (!customer) {
         throw new NotFoundException(`Customer with ID ${id} not found`);
       }
 
-      this.logger.log(`REMOVE: Customer found: ${customer.name}, loans count: ${customer.loans?.length || 0}`);
+      this.logger.log(
+        `REMOVE: Customer found: ${customer.name}, loans count: ${customer.loans?.length || 0}`,
+      );
 
       // Super Admin: Hard Delete
       // Get role name - handle both object and flattened formats
@@ -670,33 +737,44 @@ export class CustomersService implements OnModuleInit {
 
       this.logger.log(`REMOVE: Role name resolved to: ${roleName}`);
 
-      if (user && roleName === 'Super Admin') {
-        this.logger.log(`REMOVE: Super Admin detected, proceeding with hard delete`);
+      if (user && roleName === "Super Admin") {
+        this.logger.log(
+          `REMOVE: Super Admin detected, proceeding with hard delete`,
+        );
 
         if (customer.loans && customer.loans.length > 0) {
-          throw new ConflictException('Cannot delete customer with existing loans.');
+          throw new ConflictException(
+            "Cannot delete customer with existing loans.",
+          );
         }
 
         // Delete related records first to avoid foreign key constraint violations
         // 1. Delete search logs
-        const deletedSearchLogs = await this.searchLogsService.deleteByCustomerId(id);
-        this.logger.log(`REMOVE: Deleted ${deletedSearchLogs} search logs for customer ${id}`);
+        const deletedSearchLogs =
+          await this.searchLogsService.deleteByCustomerId(id);
+        this.logger.log(
+          `REMOVE: Deleted ${deletedSearchLogs} search logs for customer ${id}`,
+        );
 
         // 2. Delete customer relations (hard delete, not soft delete)
         await this.relationRepository.delete({ customerId: id });
-        this.logger.log(`REMOVE: Deleted customer relations for customer ${id}`);
+        this.logger.log(
+          `REMOVE: Deleted customer relations for customer ${id}`,
+        );
 
         // 3. Now delete the customer
         await this.customerRepository.remove(customer);
-        this.logger.warn(`HARD DELETE: Customer ${id} (${customer.name}) deleted by Super Admin ${user.userId}`);
-        return { message: 'Customer permanently deleted' };
+        this.logger.warn(
+          `HARD DELETE: Customer ${id} (${customer.name}) deleted by Super Admin ${user.userId}`,
+        );
+        return { message: "Customer permanently deleted" };
       }
 
       this.logger.log(`REMOVE: Not Super Admin, proceeding with soft delete`);
 
       // Institution/Branch: Soft Delete (Unlink)
       if (!user?.institutionId) {
-        throw new ConflictException('User scope undefined');
+        throw new ConflictException("User scope undefined");
       }
 
       const whereCondition: any = {
@@ -710,11 +788,11 @@ export class CustomersService implements OnModuleInit {
       }
 
       const relation = await this.relationRepository.findOne({
-        where: whereCondition
+        where: whereCondition,
       });
 
       if (!relation) {
-        throw new NotFoundException('Customer not found in your scope');
+        throw new NotFoundException("Customer not found in your scope");
       }
 
       // Record who deleted and when
@@ -724,9 +802,11 @@ export class CustomersService implements OnModuleInit {
       // Soft delete relation
       await this.relationRepository.softDelete(relation.id);
 
-      this.logger.log(`SOFT DELETE: Customer ${id} unlinked from institution ${user.institutionId} by user ${user.userId}`);
+      this.logger.log(
+        `SOFT DELETE: Customer ${id} unlinked from institution ${user.institutionId} by user ${user.userId}`,
+      );
 
-      return { message: 'Customer unlinked successfully' };
+      return { message: "Customer unlinked successfully" };
     } catch (error) {
       this.logger.error(`REMOVE ERROR: ${error.message}`);
       this.logger.error(`REMOVE ERROR STACK: ${error.stack}`);
@@ -777,18 +857,23 @@ export class CustomersService implements OnModuleInit {
       updatedAt: customer.updatedAt,
     };
 
+    const response: CustomerResponseDto = {
+      ...baseDto,
+      loans: customer.loans || [],
+    };
+
     if (customer.relations && customer.relations.length > 0) {
       const rel = customer.relations[0];
       if (rel.deletedAt) {
         return {
-          ...baseDto,
+          ...response,
           deletedAt: rel.deletedAt,
           deletedBy: rel.deletedBy,
           deletedByName: rel.deleter?.name,
-          branchName: rel.branch?.name || rel.institution?.name
+          branchName: rel.branch?.name || rel.institution?.name,
         };
       }
     }
-    return baseDto;
+    return response;
   }
 }

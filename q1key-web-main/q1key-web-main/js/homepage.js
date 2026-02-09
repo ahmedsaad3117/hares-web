@@ -229,14 +229,23 @@ function renderContactCards(isAr) {
 
     container.innerHTML = `
         <a href="https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}" class="contact-card" target="_blank">
-            <div class="contact-icon">💬</div>
+            <div class="contact-icon" style="background: rgba(37, 211, 102, 0.15); color: #25D366;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+            </div>
             <div class="contact-info">
                 <h4>${isAr ? 'واتساب' : 'WhatsApp'}</h4>
                 <p>${whatsapp}</p>
             </div>
         </a>
         <a href="mailto:${email}" class="contact-card">
-            <div class="contact-icon">📧</div>
+            <div class="contact-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="20" height="16" x="2" y="4" rx="2"/>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+            </div>
             <div class="contact-info">
                 <h4>${isAr ? 'البريد الإلكتروني' : 'Email'}</h4>
                 <p>${email}</p>
@@ -409,8 +418,6 @@ function updateAllTexts() {
     document.querySelectorAll('[data-text-ar][data-text-en]').forEach(el => {
         const text = isAr ? el.getAttribute('data-text-ar') : el.getAttribute('data-text-en');
         if (text) {
-            // Only update if not already handled by dynamic data above (to avoid overwriting)
-            // Actually, dynamic data usually has specific IDs, so this is safe.
             const requiredStar = el.querySelector('.required-star');
             if (requiredStar) {
                 el.childNodes.forEach(node => {
@@ -421,6 +428,14 @@ function updateAllTexts() {
             } else if (!el.id || !['heroTitle', 'heroSubtitle', 'featuresTitle', 'plansTitle', 'aboutTitle', 'aboutText', 'contactTitle'].includes(el.id)) {
                 el.textContent = text;
             }
+        }
+    });
+
+    // Update placeholders
+    document.querySelectorAll('[data-placeholder-ar][data-placeholder-en]').forEach(el => {
+        const placeholder = isAr ? el.getAttribute('data-placeholder-ar') : el.getAttribute('data-placeholder-en');
+        if (placeholder) {
+            el.setAttribute('placeholder', placeholder);
         }
     });
 }
@@ -519,17 +534,66 @@ async function handleLogin(event) {
 
         const errorMessage = error.message || '';
 
-        if (errorMessage.includes('ALREADY_LOGGED_IN')) {
+        // ترجمة رسائل الخطأ من الـ Backend للعربية
+        const translateError = (msg) => {
+            if (!isAr) return msg;
+
+            const translations = {
+                'Invalid credentials': 'بيانات الدخول غير صحيحة (البريد الإلكتروني أو كلمة المرور)',
+                'Account is deactivated': 'الحساب معطّل. يرجى التواصل مع الإدارة',
+                'User not found': 'المستخدم غير موجود في النظام',
+                'Invalid password': 'كلمة المرور غير صحيحة',
+                'Session expired': 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مجدداً',
+                'Session expired or terminated by administrator': 'تم إنهاء الجلسة من قبل المسؤول أو انتهت صلاحيتها',
+                'Invalid or expired refresh token': 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مجدداً',
+                'Unauthorized': 'غير مصرح لك بالدخول',
+                'Invalid response': 'استجابة غير صالحة من الخادم'
+            };
+
+            // البحث عن ترجمة مطابقة
+            for (const [en, ar] of Object.entries(translations)) {
+                if (msg.toLowerCase().includes(en.toLowerCase())) {
+                    return ar;
+                }
+            }
+            return msg;
+        };
+
+        // Handle subscription expired error
+        if (errorMessage.includes('SUBSCRIPTION_EXPIRED')) {
             showError(errorDiv, isAr
-                ? 'الحساب مفتوح حالياً في جهاز آخر. يرجى تسجيل الخروج من الجهاز الآخر أو الانتظار لمدة دقيقة واحدة من الخمول لتمكن من الدخول مجدداً.'
-                : 'This account is already logged in on another device. Please log out from there or wait 1 minute of inactivity to log in again.');
+                ? '⚠️ انتهى اشتراك المؤسسة/الفرع. يرجى التواصل مع الإدارة لتجديد الاشتراك قبل تسجيل الدخول.'
+                : '⚠️ Institution/Branch subscription has expired. Please contact admin to renew your subscription before logging in.');
+        } else if (errorMessage.includes('ACTIVE_SESSION_EXISTS') || errorMessage.includes('ALREADY_LOGGED_IN')) {
+            showError(errorDiv, isAr
+                ? '🔒 يوجد هناك جهاز نشط، يجب تسجيل الخروج من الجهاز الآخر أو الانتظار لمدة 15 دقيقة.'
+                : '🔒 An active session exists. Please logout from the other device or wait for 15 minutes of inactivity.');
         } else if (errorMessage === 'TIMEOUT' || errorMessage.includes('Failed to fetch')) {
-            showError(errorDiv, isAr ? 'خطأ في الاتصال بالخادم، يرجى التحقق من اتصالك' : 'Server connection error, please check your connection');
+            showError(errorDiv, isAr
+                ? '🌐 خطأ في الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت والمحاولة مجدداً.'
+                : 'Server connection error, please check your connection');
+        } else if (errorMessage.includes('Invalid credentials') || errorMessage.includes('Invalid password')) {
+            showError(errorDiv, isAr
+                ? '❌ البريد الإلكتروني أو كلمة المرور غير صحيحة'
+                : 'Invalid email or password');
+        } else if (errorMessage.includes('deactivated') || errorMessage.includes('معطّل')) {
+            showError(errorDiv, isAr
+                ? '🚫 الحساب معطّل. يرجى التواصل مع الإدارة لتفعيل حسابك.'
+                : 'Account is deactivated. Please contact admin to activate your account.');
+        } else if (errorMessage.includes('not found')) {
+            showError(errorDiv, isAr
+                ? '❓ المستخدم غير موجود. يرجى التأكد من البريد الإلكتروني أو رقم الهاتف.'
+                : 'User not found. Please check your email or phone number.');
         } else if (errorMessage) {
-            // Show specific error from server if exists (e.g. "Account is deactivated")
-            showError(errorDiv, isAr ? `فشل تسجيل الدخول: ${errorMessage}` : `Login failed: ${errorMessage}`);
+            // ترجمة الرسالة إذا كانت عربية
+            const translatedMsg = translateError(errorMessage);
+            showError(errorDiv, isAr
+                ? `❌ ${translatedMsg}`
+                : `Login failed: ${errorMessage}`);
         } else {
-            showError(errorDiv, isAr ? 'فشل تسجيل الدخول: بيانات غير صحيحة' : 'Login failed: Invalid credentials');
+            showError(errorDiv, isAr
+                ? '❌ فشل تسجيل الدخول. يرجى التأكد من البيانات والمحاولة مجدداً.'
+                : 'Login failed: Invalid credentials');
         }
         submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
@@ -598,6 +662,7 @@ async function handleSubscribe(event) {
     const instTaxId = document.getElementById('subInstTaxId').value.trim();
     const instPhone = document.getElementById('subInstPhone').value.trim();
     const instEmail = document.getElementById('subInstEmail').value.trim();
+    const adminNationalId = document.getElementById('subAdminNationalId').value.trim();
 
     // Validate
     if (!planId) {
@@ -605,8 +670,8 @@ async function handleSubscribe(event) {
         return;
     }
 
-    if (!adminName || !adminEmail || !adminPhone || !adminPassword) {
-        showError(errorDiv, isAr ? 'يرجى إدخال جميع بيانات المدير' : 'Please fill all admin details');
+    if (!adminName || !adminEmail || !adminPhone || !adminPassword || !adminNationalId) {
+        showError(errorDiv, isAr ? 'يرجى إدخال جميع بيانات المدير بما في ذلك رقم الهوية' : 'Please fill all admin details including National ID');
         return;
     }
 
@@ -650,6 +715,7 @@ async function handleSubscribe(event) {
                 adminEmail,
                 adminPhoneNumber: adminPhone,
                 adminPassword,
+                adminNationalId,
                 adminIsActive: true,
                 isActive: true,
                 maxUsers: 1,

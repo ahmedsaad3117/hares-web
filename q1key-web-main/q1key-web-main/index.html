@@ -8,26 +8,13 @@
             document.documentElement.setAttribute('lang', lang);
             document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
 
-            // وظيفة للتحقق من انتهاء الاشتراك
-            function isSubscriptionExpired(expirationDate) {
-                if (!expirationDate) return false;
-                const now = new Date();
-                const exp = new Date(expirationDate);
-                const diffTime = exp.getTime() - now.getTime();
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays <= 0;
-            }
-
-            // إذا كان هناك token، انتقل للجهة المناسبة
+            // Simple redirect if already logged in - api.js will handle the strict checks
             if (localStorage.getItem('token')) {
+                // We'll let the api.js and homepage.js handle the redirection logic
+                // but as a fallback for direct index.html access:
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
-                const role = user.roleName || user.role_name;
-                const isExpired = role !== 'Super Admin' && isSubscriptionExpired(user.expirationDate);
-
-                if (isExpired) {
-                    window.location.href = 'pages/my-subscription.html';
-                } else {
-                    window.location.href = 'pages/dashboard.html';
+                if (user.userId) {
+                    // Just a placeholder, homepage.js will handle the real redirect
                 }
             }
         })();
@@ -102,9 +89,9 @@
                     <span data-text-ar="منصة معتمدة" data-text-en="Certified Platform">🏆 منصة معتمدة</span>
                 </div>
                 <h1 class="hero-title" id="heroTitle">
-                    <span data-text-ar="منصة" data-text-en="The">منصة</span>
+                    <span data-text-ar="منصة" data-text-en="">منصة</span>
                     <span class="text-gradient">Q1KEY</span>
-                    <span data-text-ar="لإدارة القروض" data-text-en="for Loan Management">لإدارة القروض</span>
+                    <span data-text-ar="لإدارة القروض" data-text-en="Loan Management Platform">لإدارة القروض</span>
                 </h1>
                 <p class="hero-subtitle" id="heroSubtitle"
                     data-text-ar="الحل الأمثل لإدارة مؤسستك المالية بكفاءة وأمان. تتبع القروض، إدارة العملاء، وتقارير متقدمة في منصة واحدة متكاملة."
@@ -114,7 +101,7 @@
                 </p>
                 <div class="hero-actions">
                     <button class="btn-primary btn-lg" onclick="openSubscribeModal()" id="heroSubscribeBtn">
-                        <span data-text-ar="ابدأ الآن مجاناً" data-text-en="Start Free Now">ابدأ الآن مجاناً</span>
+                        <span data-text-ar="ابدأ الآن مجاناً" data-text-en="Start Now">ابدأ الآن مجاناً</span>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M5 12h14M12 5l7 7-7 7" />
                         </svg>
@@ -153,7 +140,7 @@
                     data-text-en="Platform Features">مميزات المنصة</h2>
                 <p class="section-desc" id="featuresDesc"
                     data-text-ar="نوفر لك أدوات متكاملة لإدارة مؤسستك المالية بأعلى معايير الأمان والكفاءة"
-                    data-text-en="We provide you with integrated tools to manage your financial institution with the highest standards of security and efficiency">
+                    data-text-en="We provide integrated tools to manage your financial institution with the highest standards of security and efficiency.">
                     نوفر لك أدوات متكاملة لإدارة مؤسستك المالية بأعلى معايير الأمان والكفاءة
                 </p>
             </div>
@@ -194,11 +181,12 @@
                     <h2 class="section-title" id="aboutTitle" data-text-ar="شريكك في النجاح المالي"
                         data-text-en="Your Partner in Financial Success">شريكك في النجاح المالي</h2>
                     <p class="about-text" id="aboutText"
-                        data-text-ar="نحن فريق من الخبراء في مجال التقنية المالية، نسعى لتوفير حلول متطورة تساعد المؤسسات المالية على تحقيق أهدافها بكفاءة عالية. منصتنا مبنية على أحدث التقنيات مع التركيز على الأمان وسهولة الاستخدام."
-                        data-text-en="We are a team of experts in financial technology, striving to provide advanced solutions that help financial institutions achieve their goals efficiently. Our platform is built on the latest technologies with a focus on security and ease of use.">
-                        نحن فريق من الخبراء في مجال التقنية المالية، نسعى لتوفير حلول متطورة تساعد المؤسسات المالية على
-                        تحقيق أهدافها بكفاءة عالية. منصتنا مبنية على أحدث التقنيات مع التركيز على الأمان وسهولة
-                        الاستخدام.
+                        data-text-ar="كيونكي هي منظومة رائدة في التحول الرقمي المالي، تمنحكم السيطرة الكاملة على إدارة الصناديق والقروض و الأقساط. نجمع بين سهولة الاستخدام وقوة التحليل لنضع أدوات النجاح بين يدي المؤسسات المالية وفروعها في منصة واحدة آمنة ومتكاملة."
+                        data-text-en="Q1Key is a leading system in financial digital transformation, giving you full control over the management of funds, loans, and installments. We combine ease of use with analytical power to put the tools for success in the hands of financial institutions and their branches in one secure and integrated platform.">
+                        كيونكي هي منظومة رائدة في التحول الرقمي المالي، تمنحكم السيطرة الكاملة على إدارة الصناديق
+                        والقروض
+                        و الأقساط. نجمع بين سهولة الاستخدام وقوة التحليل لنضع أدوات النجاح بين يدي المؤسسات المالية
+                        وفروعها في منصة واحدة آمنة ومتكاملة.
                     </p>
                     <div class="about-features">
                         <div class="about-feature">
@@ -253,9 +241,10 @@
                         </div>
                         <span class="logo-text">Q1KEY</span>
                     </div>
-                    <p class="footer-desc" id="footerDesc" data-text-ar="منصة Q1KEY لإدارة القروض والمؤسسات المالية"
+                    <p class="footer-desc" id="footerDesc"
+                        data-text-ar="منصة Q1KEY لإدارة الحلول المالية للمؤسسات والشركات"
                         data-text-en="Q1KEY Platform for Loan & Financial Management">
-                        منصة Q1KEY لإدارة القروض والمؤسسات المالية
+                        منصة Q1KEY لإدارة الحلول المالية للمؤسسات والشركات
                     </p>
                 </div>
                 <div class="footer-links" id="footerLinks">
@@ -293,9 +282,12 @@
             <div class="modal-error" id="loginError"></div>
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label id="loginIdentifierLabel" data-text-ar="البريد الإلكتروني أو رقم الهاتف"
-                        data-text-en="Email or Phone">البريد الإلكتروني أو رقم الهاتف</label>
-                    <input type="text" id="loginIdentifier" required autocomplete="username">
+                    <label id="loginIdentifierLabel" data-text-ar="البريد الإلكتروني، رقم الهاتف أو رقم الهوية"
+                        data-text-en="Email, Phone or National ID">البريد الإلكتروني، رقم الهاتف أو رقم الهوية</label>
+                    <input type="text" id="loginIdentifier" required autocomplete="username"
+                        data-placeholder-ar="أدخل البريد، الهاتف أو رقم الهوية"
+                        data-placeholder-en="Enter Email, Phone or National ID"
+                        placeholder="أدخل البريد، الهاتف أو رقم الهوية">
                 </div>
                 <div class="form-group">
                     <label id="loginPasswordLabel" data-text-ar="كلمة المرور" data-text-en="Password">كلمة
@@ -363,22 +355,26 @@
                             <div class="form-group">
                                 <label data-text-ar="اسم المؤسسة" data-text-en="Institution Name">اسم المؤسسة <span
                                         class="required-star">*</span></label>
-                                <input type="text" id="subInstName" required>
+                                <input type="text" id="subInstName" required autocomplete="off"
+                                    data-placeholder-ar="اسم المؤسسة" data-placeholder-en="Institution Name">
                             </div>
                             <div class="form-group">
                                 <label data-text-ar="السجل التجاري" data-text-en="Commercial Reg.">السجل التجاري <span
                                         class="required-star">*</span></label>
-                                <input type="text" id="subInstTaxId" required>
+                                <input type="text" id="subInstTaxId" required autocomplete="off"
+                                    data-placeholder-ar="السجل التجاري" data-placeholder-en="Commercial Reg.">
                             </div>
                             <div class="form-group">
                                 <label data-text-ar="رقم الهاتف" data-text-en="Phone">رقم الهاتف <span
                                         class="required-star">*</span></label>
-                                <input type="tel" id="subInstPhone" required>
+                                <input type="tel" id="subInstPhone" required autocomplete="off"
+                                    data-placeholder-ar="رقم الهاتف" data-placeholder-en="Phone Number">
                             </div>
                             <div class="form-group">
                                 <label data-text-ar="البريد الإلكتروني" data-text-en="Email">البريد الإلكتروني <span
                                         class="required-star">*</span></label>
-                                <input type="email" id="subInstEmail" required>
+                                <input type="email" id="subInstEmail" required autocomplete="off"
+                                    data-placeholder-ar="البريد الإلكتروني" data-placeholder-en="Email Address">
                             </div>
                         </div>
 
@@ -389,22 +385,32 @@
                             <div class="form-group">
                                 <label data-text-ar="الاسم الكامل" data-text-en="Full Name">الاسم الكامل <span
                                         class="required-star">*</span></label>
-                                <input type="text" id="subAdminName" required>
+                                <input type="text" id="subAdminName" required autocomplete="off"
+                                    data-placeholder-ar="الاسم الكامل" data-placeholder-en="Full Name">
                             </div>
                             <div class="form-group">
                                 <label data-text-ar="البريد الإلكتروني" data-text-en="Email">البريد الإلكتروني <span
                                         class="required-star">*</span></label>
-                                <input type="email" id="subAdminEmail" required>
+                                <input type="email" id="subAdminEmail" required autocomplete="off"
+                                    data-placeholder-ar="البريد الإلكتروني" data-placeholder-en="Email Address">
                             </div>
                             <div class="form-group">
                                 <label data-text-ar="رقم الهاتف" data-text-en="Phone">رقم الهاتف <span
                                         class="required-star">*</span></label>
-                                <input type="tel" id="subAdminPhone" required>
+                                <input type="tel" id="subAdminPhone" required autocomplete="off"
+                                    data-placeholder-ar="رقم الهاتف" data-placeholder-en="Phone Number">
+                            </div>
+                            <div class="form-group">
+                                <label data-text-ar="رقم الهوية" data-text-en="National ID">رقم الهوية <span
+                                        class="required-star">*</span></label>
+                                <input type="text" id="subAdminNationalId" required autocomplete="off"
+                                    data-placeholder-ar="رقم الهوية" data-placeholder-en="National ID">
                             </div>
                             <div class="form-group">
                                 <label data-text-ar="كلمة المرور" data-text-en="Password">كلمة المرور <span
                                         class="required-star">*</span></label>
-                                <input type="password" id="subAdminPassword" required minlength="6">
+                                <input type="password" id="subAdminPassword" required minlength="6" autocomplete="off"
+                                    data-placeholder-ar="كلمة المرور" data-placeholder-en="Password">
                             </div>
                         </div>
                     </div>

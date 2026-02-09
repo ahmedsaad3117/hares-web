@@ -1,6 +1,6 @@
 export enum InstallmentStatus {
-  PENDING = 'Pending',
-  PAID = 'Paid',
-  OVERDUE = 'Overdue',
-  CANCELLED = 'Cancelled',
+  PENDING = "Pending",
+  PAID = "Paid",
+  OVERDUE = "Overdue",
+  CANCELLED = "Cancelled",
 }

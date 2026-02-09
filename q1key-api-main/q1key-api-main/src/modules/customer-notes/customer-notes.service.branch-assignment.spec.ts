@@ -1,12 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CustomerNotesService } from './customer-notes.service';
-import { CustomerNote } from './entities/customer-note.entity';
-import { CreateCustomerNoteDto } from './dto/create-customer-note.dto';
-import { NoteCategory } from './entities/note-category.enum';
+import { Test, TestingModule } from "@nestjs/testing";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { CustomerNotesService } from "./customer-notes.service";
+import { CustomerNote } from "./entities/customer-note.entity";
+import { CreateCustomerNoteDto } from "./dto/create-customer-note.dto";
+import { NoteCategory } from "./entities/note-category.enum";
 
-describe('CustomerNotesService - Branch Assignment Logic', () => {
+describe("CustomerNotesService - Branch Assignment Logic", () => {
   let service: CustomerNotesService;
   let repository: Repository<CustomerNote>;
 
@@ -39,17 +39,17 @@ describe('CustomerNotesService - Branch Assignment Logic', () => {
     jest.clearAllMocks();
   });
 
-  describe('Branch Assignment for Regular Users (Branch role)', () => {
+  describe("Branch Assignment for Regular Users (Branch role)", () => {
     const branchUser = {
       userId: 10,
       branchId: 5,
-      role: { roleName: 'Branch' },
+      role: { roleName: "Branch" },
     };
 
-    it('should auto-assign branch from user for regular users', async () => {
+    it("should auto-assign branch from user for regular users", async () => {
       const createDto: CreateCustomerNoteDto = {
         customer_id: 1,
-        note_text: 'Test note',
+        note_text: "Test note",
         category: NoteCategory.GENERAL,
       };
 
@@ -77,10 +77,10 @@ describe('CustomerNotesService - Branch Assignment Logic', () => {
       expect(result.branch_id).toBe(5);
     });
 
-    it('should ignore branch_id in request for regular users', async () => {
+    it("should ignore branch_id in request for regular users", async () => {
       const createDto: CreateCustomerNoteDto = {
         customer_id: 1,
-        note_text: 'Test note',
+        note_text: "Test note",
         category: NoteCategory.GENERAL,
         branch_id: 99, // Trying to override
       };
@@ -109,17 +109,17 @@ describe('CustomerNotesService - Branch Assignment Logic', () => {
     });
   });
 
-  describe('Branch Assignment for Institution Admin', () => {
+  describe("Branch Assignment for Institution Admin", () => {
     const institutionAdmin = {
       userId: 20,
       branchId: 3,
-      role: { roleName: 'Institution' },
+      role: { roleName: "Institution" },
     };
 
-    it('should use provided branch_id when Institution Admin provides one', async () => {
+    it("should use provided branch_id when Institution Admin provides one", async () => {
       const createDto: CreateCustomerNoteDto = {
         customer_id: 1,
-        note_text: 'Admin note',
+        note_text: "Admin note",
         category: NoteCategory.COMPLAINT,
         branch_id: 10, // Manual override
       };
@@ -146,10 +146,10 @@ describe('CustomerNotesService - Branch Assignment Logic', () => {
       expect(result.branch_id).toBe(10);
     });
 
-    it('should use user branch when Institution Admin does not provide branch_id', async () => {
+    it("should use user branch when Institution Admin does not provide branch_id", async () => {
       const createDto: CreateCustomerNoteDto = {
         customer_id: 1,
-        note_text: 'Admin note without branch',
+        note_text: "Admin note without branch",
         category: NoteCategory.GENERAL,
       };
 
@@ -176,17 +176,17 @@ describe('CustomerNotesService - Branch Assignment Logic', () => {
     });
   });
 
-  describe('Branch Assignment for Super Admin', () => {
+  describe("Branch Assignment for Super Admin", () => {
     const superAdmin = {
       userId: 1,
       branchId: 1,
-      role: { roleName: 'Super Admin' },
+      role: { roleName: "Super Admin" },
     };
 
-    it('should use provided branch_id when Super Admin provides one', async () => {
+    it("should use provided branch_id when Super Admin provides one", async () => {
       const createDto: CreateCustomerNoteDto = {
         customer_id: 1,
-        note_text: 'Super admin note',
+        note_text: "Super admin note",
         category: NoteCategory.PAYMENT_ISSUE,
         branch_id: 15, // Manual override
       };
@@ -213,10 +213,10 @@ describe('CustomerNotesService - Branch Assignment Logic', () => {
       expect(result.branch_id).toBe(15);
     });
 
-    it('should use user branch when Super Admin does not provide branch_id', async () => {
+    it("should use user branch when Super Admin does not provide branch_id", async () => {
       const createDto: CreateCustomerNoteDto = {
         customer_id: 1,
-        note_text: 'Super admin note without branch',
+        note_text: "Super admin note without branch",
         category: NoteCategory.GENERAL,
       };
 
@@ -243,17 +243,17 @@ describe('CustomerNotesService - Branch Assignment Logic', () => {
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle user with null branchId', async () => {
+  describe("Edge Cases", () => {
+    it("should handle user with null branchId", async () => {
       const userWithoutBranch = {
         userId: 30,
         branchId: null,
-        role: { roleName: 'Branch' },
+        role: { roleName: "Branch" },
       };
 
       const createDto: CreateCustomerNoteDto = {
         customer_id: 1,
-        note_text: 'Test note',
+        note_text: "Test note",
         category: NoteCategory.GENERAL,
       };
 
@@ -274,7 +274,7 @@ describe('CustomerNotesService - Branch Assignment Logic', () => {
       expect(result.branch_id).toBeNull();
     });
 
-    it('should handle user with no role object', async () => {
+    it("should handle user with no role object", async () => {
       const userWithoutRole = {
         userId: 40,
         branchId: 7,
@@ -283,7 +283,7 @@ describe('CustomerNotesService - Branch Assignment Logic', () => {
 
       const createDto: CreateCustomerNoteDto = {
         customer_id: 1,
-        note_text: 'Test note',
+        note_text: "Test note",
         category: NoteCategory.GENERAL,
         branch_id: 99, // Trying to override
       };

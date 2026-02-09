@@ -6,6 +6,7 @@ export class UserResponseDto {
   name: string;
   email: string;
   phoneNumber?: string;
+  nationalId?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

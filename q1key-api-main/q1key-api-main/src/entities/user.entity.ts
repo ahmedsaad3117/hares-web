@@ -34,13 +34,21 @@ export class User {
   @Column({ name: "phone_number", unique: true, length: 50, nullable: true })
   phoneNumber: string;
 
+  @Column({ name: "national_id", unique: true, length: 50, nullable: true })
+  nationalId: string;
+
   @Column({ name: "password_hash", length: 255 })
   passwordHash: string;
 
   @Column({ name: "is_active", default: true })
   isActive: boolean;
 
-  @Column({ name: "active_session_id", type: "varchar", nullable: true, length: 255 })
+  @Column({
+    name: "active_session_id",
+    type: "varchar",
+    nullable: true,
+    length: 255,
+  })
   activeSessionId: string | null;
 
   @Column({ name: "last_activity_at", type: "timestamp", nullable: true })

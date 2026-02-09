@@ -1,13 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
-import { InstallmentsService } from './installments.service';
-import { Installment } from '../../entities/installment.entity';
-import { Loan, LoanStatus } from '../../entities/loan.entity';
-import { InstallmentStatus } from '../../entities/installment-status.enum';
-import { NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from "@nestjs/testing";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { Repository, LessThan } from "typeorm";
+import { InstallmentsService } from "./installments.service";
+import { Installment } from "../../entities/installment.entity";
+import { Loan, LoanStatus } from "../../entities/loan.entity";
+import { InstallmentStatus } from "../../entities/installment-status.enum";
+import { NotFoundException } from "@nestjs/common";
 
-describe('InstallmentsService', () => {
+describe("InstallmentsService", () => {
   let service: InstallmentsService;
   let installmentsRepository: Repository<Installment>;
   let loansRepository: Repository<Loan>;
@@ -43,22 +43,20 @@ describe('InstallmentsService', () => {
     installmentsRepository = module.get<Repository<Installment>>(
       getRepositoryToken(Installment),
     );
-    loansRepository = module.get<Repository<Loan>>(
-      getRepositoryToken(Loan),
-    );
+    loansRepository = module.get<Repository<Loan>>(getRepositoryToken(Loan));
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('generateInstallments', () => {
-    it('should create correct number of installments', async () => {
+  describe("generateInstallments", () => {
+    it("should create correct number of installments", async () => {
       const loan = {
         loanId: 1,
         principalAmount: 10000,
         paymentPlanMonths: 5,
-        createdAt: new Date('2025-01-01'),
+        createdAt: new Date("2025-01-01"),
       } as Loan;
 
       mockInstallmentsRepository.create.mockImplementation((data) => data);
@@ -77,12 +75,12 @@ describe('InstallmentsService', () => {
       );
     });
 
-    it('should calculate installment amounts correctly', async () => {
+    it("should calculate installment amounts correctly", async () => {
       const loan = {
         loanId: 1,
         principalAmount: 10000,
         paymentPlanMonths: 4,
-        createdAt: new Date('2025-01-01'),
+        createdAt: new Date("2025-01-01"),
       } as Loan;
 
       const createdInstallments: any[] = [];
@@ -100,12 +98,12 @@ describe('InstallmentsService', () => {
       });
     });
 
-    it('should calculate due dates correctly (monthly intervals)', async () => {
+    it("should calculate due dates correctly (monthly intervals)", async () => {
       const loan = {
         loanId: 1,
         principalAmount: 12000,
         paymentPlanMonths: 3,
-        createdAt: new Date('2025-01-15'),
+        createdAt: new Date("2025-01-15"),
       } as Loan;
 
       const createdInstallments: any[] = [];
@@ -122,12 +120,12 @@ describe('InstallmentsService', () => {
       expect(createdInstallments[2].dueDate.getMonth()).toBe(3); // April
     });
 
-    it('should set all installments to Pending status', async () => {
+    it("should set all installments to Pending status", async () => {
       const loan = {
         loanId: 1,
         principalAmount: 6000,
         paymentPlanMonths: 3,
-        createdAt: new Date('2025-01-01'),
+        createdAt: new Date("2025-01-01"),
       } as Loan;
 
       const createdInstallments: any[] = [];
@@ -145,8 +143,8 @@ describe('InstallmentsService', () => {
     });
   });
 
-  describe('markAsPaid', () => {
-    it('should update installment status to Paid', async () => {
+  describe("markAsPaid", () => {
+    it("should update installment status to Paid", async () => {
       const installment = {
         id: 1,
         loanId: 1,
@@ -167,14 +165,14 @@ describe('InstallmentsService', () => {
       mockLoansRepository.findOne.mockResolvedValue(loan);
       mockLoansRepository.save.mockResolvedValue(loan);
 
-      const paymentDate = new Date('2025-02-01');
+      const paymentDate = new Date("2025-02-01");
       const result = await service.markAsPaid(1, paymentDate);
 
       expect(result.status).toBe(InstallmentStatus.PAID);
       expect(result.paymentDate).toBe(paymentDate);
     });
 
-    it('should update loan paid_amount when installment is marked paid', async () => {
+    it("should update loan paid_amount when installment is marked paid", async () => {
       const installment = {
         id: 1,
         loanId: 1,
@@ -205,18 +203,18 @@ describe('InstallmentsService', () => {
     });
   });
 
-  describe('findOverdue', () => {
-    it('should return only overdue installments', async () => {
+  describe("findOverdue", () => {
+    it("should return only overdue installments", async () => {
       const overdueInstallments = [
         {
           id: 1,
           status: InstallmentStatus.PENDING,
-          dueDate: new Date('2024-12-01'),
+          dueDate: new Date("2024-12-01"),
         },
         {
           id: 2,
           status: InstallmentStatus.PENDING,
-          dueDate: new Date('2024-11-01'),
+          dueDate: new Date("2024-11-01"),
         },
       ];
 
@@ -236,8 +234,8 @@ describe('InstallmentsService', () => {
     });
   });
 
-  describe('findByLoan', () => {
-    it('should return installments for a specific loan', async () => {
+  describe("findByLoan", () => {
+    it("should return installments for a specific loan", async () => {
       const installments = [
         { id: 1, loanId: 1, installmentNumber: 1 },
         { id: 2, loanId: 1, installmentNumber: 2 },
@@ -251,13 +249,13 @@ describe('InstallmentsService', () => {
       expect(result).toHaveLength(3);
       expect(mockInstallmentsRepository.find).toHaveBeenCalledWith({
         where: { loanId: 1 },
-        order: { installmentNumber: 'ASC' },
+        order: { installmentNumber: "ASC" },
       });
     });
   });
 
-  describe('findOne', () => {
-    it('should return a single installment', async () => {
+  describe("findOne", () => {
+    it("should return a single installment", async () => {
       const installment = {
         id: 1,
         loanId: 1,
@@ -271,21 +269,21 @@ describe('InstallmentsService', () => {
       expect(result).toEqual(installment);
     });
 
-    it('should throw NotFoundException when installment not found', async () => {
+    it("should throw NotFoundException when installment not found", async () => {
       mockInstallmentsRepository.findOne.mockResolvedValue(null);
 
       await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('validation', () => {
-    it('should validate payment_plan_months range (1-12)', async () => {
+  describe("validation", () => {
+    it("should validate payment_plan_months range (1-12)", async () => {
       // This would be tested via DTO validation in integration tests
       const loan = {
         loanId: 1,
         principalAmount: 12000,
         paymentPlanMonths: 12,
-        createdAt: new Date('2025-01-01'),
+        createdAt: new Date("2025-01-01"),
       } as Loan;
 
       mockInstallmentsRepository.create.mockImplementation((data) => data);

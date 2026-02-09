@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Loan - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css?v=12">
-  <script src="../js/i18n.js"></script>
+  <link rel="stylesheet" href="../css/styles.css?v=19">
+  <script src="../js/i18n.js?v=2"></script>
 </head>
 
 <body>
@@ -44,7 +44,8 @@
             <div class="form-group">
               <label class="label" data-i18n-key="loans.form.customer_label">Customer</label>
               <input type="text" id="customerName" class="input opacity-60 cursor-not-allowed bg-white-5" readonly />
-              <p class="text-muted text-xs mt-1" data-i18n-key="loans.edit_page.customer_readonly">Customer cannot be
+              <p class="text-red-500 text-xs mt-1" data-i18n-key="loans.edit_page.customer_readonly">* Customer cannot
+                be
                 changed after loan creation</p>
             </div>
 
@@ -52,7 +53,7 @@
             <div class="form-group">
               <label class="label" data-i18n-key="loans.form.branch_label">Branch</label>
               <input type="text" id="branchName" class="input opacity-60 cursor-not-allowed bg-white-5" readonly />
-              <p class="text-muted text-xs mt-1" data-i18n-key="loans.edit_page.branch_readonly">Branch cannot be
+              <p class="text-red-500 text-xs mt-1" data-i18n-key="loans.edit_page.branch_readonly">* Branch cannot be
                 changed after loan creation</p>
             </div>
 
@@ -60,14 +61,15 @@
             <div class="form-group">
               <label class="label" data-i18n-key="loans.form.product_label">Product</label>
               <input type="text" id="productName" class="input opacity-60 cursor-not-allowed bg-white-5" readonly />
-              <p class="text-muted text-xs mt-1" data-i18n-key="loans.edit_page.product_readonly">Product cannot be
+              <p class="text-red-500 text-xs mt-1" data-i18n-key="loans.edit_page.product_readonly">* Product cannot be
                 changed after loan creation</p>
             </div>
 
             <!-- Principal Amount -->
             <div class="form-group">
-              <label class="label" data-i18n-key="loans.form.principal_amount">Principal Amount</label> <span
-                data-i18n-key="common.required">*</span>
+              <label class="label inline-block mb-2" data-i18n-key="loans.form.principal_amount">Principal
+                Amount</label>
+              <span class="text-red-500">*</span>
               <input type="number" id="principalAmount" name="principalAmount" class="input"
                 data-i18n-placeholder="loans.form.principal_placeholder" placeholder="5000.00" step="0.01" min="0"
                 required />
@@ -83,8 +85,9 @@
 
             <!-- Payment Plan -->
             <div class="form-group">
-              <label class="label" data-i18n-key="loans.form.payment_plan">Payment Plan (Months)</label> <span
-                data-i18n-key="common.required">*</span>
+              <label class="label inline-block mb-2" data-i18n-key="loans.form.payment_plan">Payment Plan
+                (Months)</label>
+              <span class="text-red-500">*</span>
               <select id="paymentPlanMonths" name="paymentPlanMonths" class="input" required></select>
             </div>
 
@@ -108,16 +111,16 @@
 
             <!-- Due Date -->
             <div class="form-group">
-              <label class="label" data-i18n-key="loans.form.due_date_label">Due Date</label> <span
-                data-i18n-key="common.required">*</span>
+              <label class="label inline-block mb-2" data-i18n-key="loans.form.due_date_label">Due Date</label>
+              <span class="text-red-500">*</span>
               <input type="date" id="dueDate" name="dueDate" class="input" required />
               <div id="dueDateError" class="error-text hidden"></div>
             </div>
 
             <!-- Status -->
             <div class="form-group">
-              <label class="label" data-i18n-key="common.label.status">Status</label> <span
-                data-i18n-key="common.required">*</span>
+              <label class="label inline-block mb-2" data-i18n-key="common.label.status">Status</label>
+              <span class="text-red-500">*</span>
               <select id="status" name="status" class="input" required>
                 <option value="Active" data-i18n-key="loans.status.active">Active</option>
                 <option value="Late" data-i18n-key="loans.status.late">Late</option>
@@ -235,7 +238,9 @@
 
           // Populate form fields
           document.getElementById('customerName').value = loanData.customer.name;
-          document.getElementById('branchName').value = loanData.branch?.name || '--';
+          const instName = loanData.branch?.institution?.name || loanData.institution?.name || '';
+          const brName = loanData.branch?.name || '';
+          document.getElementById('branchName').value = brName ? `${instName} - ${brName}` : (instName || (t('loans.form.main_treasury') || 'Main Treasury'));
           document.getElementById('productName').value = loanData.product?.name || '--';
           document.getElementById('principalAmount').value = loanData.principalAmount;
           document.getElementById('profitAmount').value = loanData.profitAmount || 0;

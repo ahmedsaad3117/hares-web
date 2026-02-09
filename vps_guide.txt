@@ -1,0 +1,184 @@
+
+# دليل نشر مشروع Q1KEY على سيرفر Hostinger (Linux Ubuntu)
+
+مرحباً عزيزي المطور، هذا الملف يحتوي على جميع التعليمات اللازمة لرفع وتشغيل المشروع (Frontend + Backend + Database) على بيئة الإنتاج (VPS).
+
+---
+
+## 🏗️ المتطلبات الأساسية (Prerequisites)
+1.  **سيرفر VPS:** يفضل نظام Ubuntu 22.04 LTS (أو أحدث).
+2.  **صلاحيات الروت (Root Access):** لتثبيت الحزم اللازمة.
+3.  **دومين (Domain):** موجه إلى IP السيرفر (اختياري للبداية).
+
+--- 
+
+## 1️⃣ إعداد السيرفر (Server Preparation)
+
+قم بالدخول إلى السيرفر عبر SSH ونفذ الأوامر التالية لتثبيت البيئة:
+
+```bash
+# تحديث النظام
+sudo apt update && sudo apt upgrade -y
+
+# تثبيت Node.js (إصدار 20 LTS)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# تثبيت مدير العمليات PM2 لتشغيل الـ Backend في الخلفية
+sudo npm install -g pm2
+
+# تثبيت Nginx كسيرفر ويب Reverse Proxy
+sudo apt install -y nginx
+
+# تثبيت قاعدة بيانات PostgreSQL
+sudo apt install -y postgresql postgresql-contrib
+```
+
+---
+
+## 2️⃣ إعداد قاعدة البيانات (Database Setup)
+
+**1. الدخول إلى Postgres:**
+```bash
+sudo -u postgres psql
+```
+
+**2. إنشاء قاعدة البيانات والمستخدم:**
+(يمكنك تغيير كلمة المرور 'StrongPassword123' بكلمة مرور قوية خاصة بك)
+
+```sql
+CREATE DATABASE hares_db;
+CREATE USER q1key_user WITH PASSWORD 'StrongPassword123';
+GRANT ALL PRIVILEGES ON DATABASE hares_db TO q1key_user;
+ALTER DATABASE hares_db OWNER TO q1key_user;
+\q
+```
+
+---
+
+## 3️⃣ رفع وتشغيل الباك إند (Backend Setup)
+
+**المسار المقترح:** `/var/www/q1key/api`
+
+1.  ارفع محتويات مجلد `q1key-api-main` إلى السيرفر في المسار أعلاه (بدون مجلد node_modules).
+2.  ادخل إلى المجلد ونفذ التالي:
+
+```bash
+cd /var/www/q1key/api
+
+# تثبيت المكتبات وتوليد ملف البناء
+npm install
+npm run build
+```
+
+3.  **إنشاء ملف البيئة `.env`:**
+
+يجب أن يحتوي الملف على البيانات التالية (تأكد من تحديث كلمة مرور القاعدة):
+
+```env
+PORT=3001
+NODE_ENV=production
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=q1key_user
+DB_PASSWORD=StrongPassword123
+DB_DATABASE=hares_db
+JWT_SECRET=CHANGE_THIS_TO_A_VERY_LONG_RANDOM_STRING
+CORS_ORIGIN=*    # يمكن تقييد هذا لاحقاً بالدومين الخاص بك
+```
+
+4.  **استيراد هيكل قاعدة البيانات (Tables & Roles):**
+
+⚠️ **هام:** قبل الاستيراد، تأكد من تحديث كلمة مرور الآدمن في ملف `database/schema.sql`.
+
+```bash
+# استيراد البيانات (سيطلب كلمة مرور المستخدم q1key_user)
+psql -U q1key_user -d hares_db -f database/schema.sql
+```
+
+5.  **تشغيل التطبيق باستخدام PM2:**
+
+```bash
+pm2 start dist/main.js --name "q1key-api"
+pm2 save
+pm2 startup
+```
+
+---
+
+## 4️⃣ رفع وتشغيل الفرونت إند (Frontend Setup)
+
+**المسار المقترح:** `/var/www/q1key/web`
+
+1.  **تحديث الإعدادات (قبل الرفع):**
+    افتح ملف `js/config.js` وتأكد من أن الرابط يشير لنفس الدومين عبر الـ Proxy:
+    ```javascript
+    window.API_CONFIG = {
+        baseUrl: '/api' 
+    };
+    ```
+
+2.  ارفع محتويات مجلد `q1key-web-main` إلى المسار `/var/www/q1key/web`.
+
+---
+
+## 5️⃣ ربط المسارات (Nginx Configuration)
+
+نحتاج لضبط Nginx ليقوم بعرض الفرونت إند وتوجيه طلبات الـ API إلى الباك إند.
+
+1.  أنشئ ملف إعداد جديد:
+```bash
+sudo nano /etc/nginx/sites-available/q1key
+```
+
+2.  ضع المحتوى التالي (استبدل `your_domain.com` بدومينك أو IP السيرفر):
+
+```nginx
+server {
+    listen 80;
+    server_name your_domain.com www.your_domain.com; # ضع IP السيرفر هنا إذا لم يكن لديك دومين
+
+    # إعدادات الواجهة الأمامية (Frontend)
+    location / {
+        root /var/www/q1key/web;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # توجيه طلبات الـ API إلى الباك إند (Reverse Proxy)
+    location /api {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+3.  تفعيل الموقع:
+```bash
+sudo ln -s /etc/nginx/sites-available/q1key /etc/nginx/sites-enabled/
+sudo rm /etc/nginx/sites-enabled/default  # (اختياري: حذف الموقع الافتراضي)
+sudo nginx -t                             # التأكد من صحة الملف
+sudo systemctl restart nginx
+```
+
+---
+
+## 6️⃣ تفعيل الحماية SSL (اختياري)
+
+إذا كان لديك دومين مربوط، نفذ التالي لتشفير الاتصال (HTTPS):
+
+```bash
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d your_domain.com
+```
+
+---
+
+## ✅ انتهى!
+المشروع الآن يعمل بالكامل.
+- **Frontend:** http://your_domain.com
+- **Backend API:** http://your_domain.com/api

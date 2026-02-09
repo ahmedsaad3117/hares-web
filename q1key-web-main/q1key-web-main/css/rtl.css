@@ -6,14 +6,9 @@
   text-align: right;
 }
 
-/* Reverse flex directions */
-[dir="rtl"] .flex {
-  flex-direction: row-reverse;
-}
+/* Standard RTL flex behavior is handled by dir="rtl" naturally. 
+   Removing row-reverse as it double-reverses the layout. */
 
-[dir="rtl"] .items-center {
-  flex-direction: row-reverse;
-}
 
 /* Filter buttons in RTL */
 [dir="rtl"] .glass-card.p-4.mb-6 {
@@ -21,7 +16,7 @@
 }
 
 [dir="rtl"] button.btn {
-  flex-direction: row-reverse;
+  /* flex-direction: row-reverse; (REMOVED) */
   gap: 0.5rem;
 }
 
@@ -176,9 +171,7 @@
 }
 
 /* Navigation items */
-[dir="rtl"] .nav-item {
-  flex-direction: row-reverse;
-}
+
 
 /* Header alignment */
 [dir="rtl"] .page-content {
@@ -289,18 +282,12 @@
   text-align: right;
 }
 
-[dir="rtl"] .modal-header {
-  flex-direction: row-reverse;
-}
 
-[dir="rtl"] .modal-footer {
-  flex-direction: row-reverse;
-}
+
+
 
 /* Breadcrumbs */
-[dir="rtl"] .breadcrumb {
-  flex-direction: row-reverse;
-}
+
 
 /* Dropdowns */
 [dir="rtl"] .dropdown-menu {
@@ -386,6 +373,3 @@
 }
 
 /* Language switcher positioning */
-[dir="rtl"] .language-switcher {
-  flex-direction: row-reverse;
-}

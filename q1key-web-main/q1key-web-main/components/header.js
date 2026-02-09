@@ -6,9 +6,10 @@ function translateRole(roleName) {
     'Super Admin': 'users.roles.super_admin',
     'admin': 'users.roles.super_admin', // Handle 'admin' role from DB
     'Institution': 'users.roles.institution',
-    'Branch': 'users.roles.branch'
+    'Branch': 'users.roles.branch',
+    'Guest': 'users.roles.guest'
   };
-  return t(roleMap[roleName] || roleName || 'Guest');
+  return t(roleMap[roleName] || roleName || 'users.roles.guest');
 }
 
 // Session heartbeat - check periodically if session is still valid
@@ -105,7 +106,7 @@ async function loadUserContext() {
     if (user.branchId) {
       const branch = await api.branches.getById(user.branchId);
       if (user.institutionId) {
-        contextInfo = `${translateRole(roleName)} - ${branch.name} & ${branch.institution?.name || 'Institution'}`;
+        contextInfo = `${translateRole(roleName)} - ${branch.name} & ${branch.institution?.name || t('common.type.institution')}`;
       } else {
         contextInfo = `${translateRole(roleName)} - ${branch.name}`;
       }
@@ -192,7 +193,7 @@ function createHeader(title, subtitle = '') {
               <span id="userContext" class="user-role">${translateRole(user.roleName || user.role)}</span>
             </div>
             <div class="avatar-premium-wrapper">
-               <div class="avatar-premium">${user.name.charAt(0).toUpperCase()}</div>
+               <div class="avatar-premium">${(user.name || 'U').charAt(0).toUpperCase()}</div>
                <div class="status-indicator"></div>
             </div>
           </div>
@@ -398,7 +399,7 @@ async function loadQuickLinks() {
     const links = await api.quickLinks.getActive();
 
     if (!links || links.length === 0) {
-      container.innerHTML = '<span class="text-slate-500 text-xs">لا توجد روابط سريعة</span>';
+      container.innerHTML = `<span class="text-slate-500 text-xs">${t('tools.quicklinks.no_links')}</span>`;
       return;
     }
 

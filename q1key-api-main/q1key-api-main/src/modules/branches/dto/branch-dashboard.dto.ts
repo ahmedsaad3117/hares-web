@@ -14,7 +14,7 @@ export class BranchInstitutionDto {
 
 export class ActivityDto {
   id: number;
-  type: 'customer_added' | 'loan_created' | 'payment_received' | 'note_added';
+  type: "customer_added" | "loan_created" | "payment_received" | "note_added";
   description: string;
   user: string;
   timestamp: string;
@@ -34,7 +34,7 @@ export class BranchTeamMemberDto {
   name: string;
   email: string;
   role: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
 }
 
 export class BranchCustomerDto {

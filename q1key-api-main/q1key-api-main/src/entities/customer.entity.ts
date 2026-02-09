@@ -7,53 +7,58 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
-} from 'typeorm';
-import { Loan } from './loan.entity';
-import { TrustStatus } from './trust-status.enum';
-import { Institution } from './institution.entity';
-import { User } from './user.entity';
-import { CustomerRelation } from './customer-relation.entity';
+  Index,
+} from "typeorm";
+import { Loan } from "./loan.entity";
+import { TrustStatus } from "./trust-status.enum";
+import { Institution } from "./institution.entity";
+import { User } from "./user.entity";
+import { CustomerRelation } from "./customer-relation.entity";
 
-@Entity('customers')
+@Entity("customers")
 export class Customer {
-  @PrimaryGeneratedColumn({ name: 'customer_id' })
+  @PrimaryGeneratedColumn({ name: "customer_id" })
   customerId: number;
 
-  @Column({ name: 'institution_id', nullable: true })
+  @Column({ name: "institution_id", nullable: true })
+  @Index("IDX_CUSTOMER_INSTITUTION")
   institutionId?: number;
 
-  @Column({ name: 'created_by', nullable: true })
+  @Column({ name: "created_by", nullable: true })
+  @Index("IDX_CUSTOMER_CREATOR")
   createdBy?: number;
 
   @Column({ length: 255 })
   name: string;
 
-  @Column({ name: 'national_id', unique: true, length: 50 })
+  @Column({ name: "national_id", unique: true, length: 50 })
+  @Index("IDX_CUSTOMER_NATIONAL_ID")
   nationalId: string;
 
-  @Column({ name: 'phone_number', unique: true, length: 50 })
+  @Column({ name: "phone_number", unique: true, length: 50 })
+  @Index("IDX_CUSTOMER_PHONE")
   phoneNumber: string;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: TrustStatus,
     default: TrustStatus.UNVERIFIED,
-    name: 'trust_status',
+    name: "trust_status",
   })
   trustStatus: TrustStatus;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
 
   @ManyToOne(() => Institution)
-  @JoinColumn({ name: 'institution_id' })
+  @JoinColumn({ name: "institution_id" })
   institution: Institution;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'created_by' })
+  @JoinColumn({ name: "created_by" })
   creator: User;
 
   @OneToMany(() => Loan, (loan) => loan.customer)

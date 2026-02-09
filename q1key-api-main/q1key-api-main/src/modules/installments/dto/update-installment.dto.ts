@@ -1,5 +1,5 @@
-import { IsOptional, IsEnum } from 'class-validator';
-import { InstallmentStatus } from '../../../entities/installment-status.enum';
+import { IsOptional, IsEnum } from "class-validator";
+import { InstallmentStatus } from "../../../entities/installment-status.enum";
 
 export class UpdateInstallmentDto {
   @IsOptional()

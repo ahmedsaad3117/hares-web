@@ -118,6 +118,24 @@ class I18nManager {
     // 6. Dispatch event for other components to react
     window.dispatchEvent(new CustomEvent('localeChanged', { detail: { locale: newLocale } }));
 
+    // 7. Mark body as ready to show content & Hide Preloader
+    const updateBody = () => {
+      if (document.body) {
+        document.body.classList.add('i18n-ready');
+        const preloader = document.getElementById('page-preloader');
+        if (preloader) {
+          preloader.classList.add('fade-out');
+          setTimeout(() => preloader.remove(), 400); // Remove from DOM after fade
+        }
+      }
+    };
+
+    if (document.body) {
+      updateBody();
+    } else {
+      document.addEventListener('DOMContentLoaded', updateBody);
+    }
+
     console.log(`Language changed to: ${newLocale}`);
   }
 
@@ -232,7 +250,14 @@ class I18nManager {
     document.querySelectorAll('[data-i18n-key]').forEach(element => {
       const key = element.getAttribute('data-i18n-key');
       const options = element.getAttribute('data-i18n-opt');
-      element.textContent = this.t(key, options ? JSON.parse(options) : {});
+      const translation = this.t(key, options ? JSON.parse(options) : {});
+
+      if (translation.includes('*')) {
+        // Wrap * in a styled span
+        element.innerHTML = translation.replace(/\*/g, '<span class="required-star">*</span>');
+      } else {
+        element.textContent = translation;
+      }
     });
 
     // Placeholders
@@ -252,6 +277,12 @@ class I18nManager {
       const key = element.getAttribute('data-i18n-title');
       element.setAttribute('title', this.t(key));
     });
+
+    // Page Title (Browser Tab)
+    const pageTitleKey = document.querySelector('title')?.getAttribute('data-i18n-key');
+    if (pageTitleKey) {
+      document.title = this.t(pageTitleKey) + ' - Q1KEY Platform';
+    }
   }
 
   /**
@@ -268,7 +299,11 @@ class I18nManager {
       'main financial institution': 'المؤسسة المالية الرئيسية',
       'test institution lnline': 'مؤسسة اختبار',
       'test institution inline': 'مؤسسة اختبار',
-      'downtown branch': 'فرع وسط البلد'
+      'downtown branch': 'فرع وسط البلد',
+      'n/a': 'غير متوفر',
+      'id:': 'الرقم:',
+      'manager - al amana finance': 'مدير مؤسسة - الأمانة للتمويل',
+      'Manager - Al Amana Finance': 'مدير مؤسسة - الأمانة للتمويل'
     };
 
     return mapping[normalized] || text;

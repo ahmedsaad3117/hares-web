@@ -3,6 +3,7 @@
 
 <head>
   <script>
+    // Critical: Immediate direction setup to prevent LTR flash
     (function () {
       var lang = localStorage.getItem('locale') || 'ar';
       document.documentElement.setAttribute('lang', lang);
@@ -12,12 +13,38 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css?v=11">
+  <title data-i18n-key="navigation.dashboard">Dashboard - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css?v=12">
   <script src="../js/i18n.js"></script>
+  <style>
+    /* Disable text selection globally */
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      cursor: default;
+    }
+
+    /* Allow selection in inputs, textareas and contenteditable elements */
+    input,
+    textarea,
+    [contenteditable="true"] {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      cursor: text;
+    }
+  </style>
 </head>
 
 <body>
+  <!-- Page Preloader (Flicker Prevention) -->
+  <div id="page-preloader">
+    <div class="preloader-spinner"></div>
+  </div>
+
   <div id="sidebar"></div>
 
   <div class="main-content">
@@ -37,21 +64,29 @@
         </button>
       </div>
 
-      <!-- Stats Grid -->
-      <div id="statsGrid" class="stats-grid mb-8"></div>
+      <!-- Stats Grid with Skeletons -->
+      <div id="statsGrid" class="stats-grid mb-8">
+        <div class="premium-card skeleton skeleton-card"></div>
+        <div class="premium-card skeleton skeleton-card"></div>
+        <div class="premium-card skeleton skeleton-card"></div>
+        <div class="premium-card skeleton skeleton-card"></div>
+      </div>
 
       <!-- Installments Report Card -->
       <div class="glass-card p-6 mb-8">
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-bold text-white" data-i18n-key="dashboard.installments_report.title">تقرير الأقساط
+          <h2 class="text-xl font-bold text-white" data-i18n-key="dashboard.installments_report.title">تقرير
+            الأقساط
           </h2>
           <div class="flex items-center gap-3">
             <div class="flex flex-col gap-1">
-              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.from_date">من تاريخ</label>
+              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.from_date">من
+                تاريخ</label>
               <input type="date" id="fromDate" class="input input-date" />
             </div>
             <div class="flex flex-col gap-1">
-              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.to_date">إلى تاريخ</label>
+              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.to_date">إلى
+                تاريخ</label>
               <input type="date" id="toDate" class="input input-date" />
             </div>
             <button id="filterInstallments" class="btn btn-primary mt-5 px-4 py-2"
@@ -60,17 +95,18 @@
         </div>
 
         <div id="installmentsStats" class="premium-dashboard-grid" style="margin-bottom: 0;">
+          <!-- Pre-filled structures for report -->
           <div class="premium-card theme-blue">
             <div class="premium-icon-box">📅</div>
             <div class="premium-content">
-              <div class="premium-value" id="totalDueInstallments">0</div>
+              <div class="premium-value" id="totalDueInstallments"><span class="skeleton skeleton-text"
+                  style="width: 30px; display: inline-block;"></span></div>
               <div class="premium-label">
                 <span data-i18n-key="dashboard.installments_report.total_due">إجمالي المستحق</span>
               </div>
               <div class="text-lg font-bold text-blue-400 mt-2" id="totalDueAmount">0.00</div>
             </div>
           </div>
-
           <div class="premium-card theme-emerald">
             <div class="premium-icon-box">✅</div>
             <div class="premium-content">
@@ -81,7 +117,7 @@
               <div class="text-lg font-bold text-emerald-400 mt-2" id="paidAmount">0.00</div>
             </div>
           </div>
-
+          <!-- Other items omitted for brevity in replacement but kept in file -->
           <div class="premium-card theme-amber">
             <div class="premium-icon-box">⏳</div>
             <div class="premium-content">
@@ -92,7 +128,6 @@
               <div class="text-lg font-bold text-amber-400 mt-2" id="pendingAmount">0.00</div>
             </div>
           </div>
-
           <div class="premium-card theme-rose">
             <div class="premium-icon-box">⚠️</div>
             <div class="premium-content">
@@ -111,16 +146,21 @@
         <!-- Quick Actions -->
         <div class="glass-card p-4">
           <h2 class="text-base font-bold text-white mb-3" data-i18n-key="dashboard.quick_actions">إجراءات سريعة</h2>
-          <div id="quickActions" class="flex flex-col gap-2"></div>
+          <div id="quickActions" class="flex flex-col gap-2">
+            <div class="skeleton" style="height: 60px; border-radius: 8px;"></div>
+            <div class="skeleton" style="height: 60px; border-radius: 8px; margin-top: 8px;"></div>
+          </div>
         </div>
 
         <!-- Recent Activity -->
         <div class="glass-card p-6">
           <h2 class="text-xl font-bold text-white mb-6" data-i18n-key="dashboard.recent_activity.title">النشاط الأخير
           </h2>
-          <div id="recentActivity" style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <div class="loading-container">
-              <div class="spinner"></div>
+          <div id="recentActivity">
+            <div class="activity-container-new">
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
             </div>
           </div>
         </div>
@@ -134,7 +174,7 @@
   </script>
   <script src="../js/config.js?v=3"></script>
   <script src="../js/api.js?v=4"></script>
-  <script src="../js/ui-utils.js?v=3"></script>
+  <script src="../js/ui-utils.js?v=6"></script>
   <script src="../components/sidebar.js?v=5"></script>
   <script src="../components/header.js?v=3"></script>
   <script>
@@ -184,18 +224,6 @@
         return;
       }
 
-      // Render sidebar and header with translations
-      document.getElementById('sidebar').innerHTML = createSidebar(user);
-      document.getElementById('header').innerHTML = createHeader(t('navigation.dashboard'), t('dashboard.welcome_back') + ', ' + user.name);
-
-      // Initialize language switcher after header is rendered
-      initializeLanguageSwitcher();
-
-      setActiveNav('dashboard');
-
-      // Translate any data-i18n elements
-      i18n.translatePage();
-
       // Initialize dashboard
       console.log('Calling initDashboard...');
       initDashboard();
@@ -203,252 +231,159 @@
 
     async function initDashboard() {
       const user = getCurrentUser();
-      console.log('initDashboard - User role:', user?.roleName || user?.role_name);
+      console.log('initDashboard - Role:', user?.roleName || user?.role_name);
+
+      // 1. Render Navigation & Headers IMMEDIATELY (UX: Don't wait for API)
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(t('navigation.dashboard'), t('dashboard.welcome_back') + ', ' + user.name);
+      initializeLanguageSwitcher();
+      setActiveNav('dashboard');
+      i18n.translatePage();
 
       try {
-        // Branch users should see their branch dashboard
-        if ((user.roleName === 'Branch' || user.role_name === 'Branch') && user.branchId) {
-          console.log('Loading branch dashboard...');
-          await loadBranchDashboard(user.branchId);
-        } else {
-          console.log('Loading global dashboard...');
-          await loadGlobalDashboard(user);
-        }
-      } catch (error) {
-        console.error('Error loading dashboard:', error);
-        showToast('Failed to load dashboard data', 'error');
-      }
-    }
+        // 2. Fetch ALL dashboard data in ONE request
+        console.log('Fetching dashboard data from API...');
+        const dashboardData = await api.reports.getDashboardData();
+        console.log('Unified Dashboard Data Received:', dashboardData);
 
-    async function loadGlobalDashboard(user) {
-      console.log('Loading global dashboard data...');
-
-      // Load statistics
-      try {
-        // For Institution users, load institution-specific statistics
-        if ((user.roleName === 'Institution' || user.role_name === 'Institution') && user.institutionId) {
-          console.log('Loading institution-specific dashboard for institutionId:', user.institutionId);
-          const stats = await api.institutions.getStatistics(user.institutionId);
-          console.log('Institution stats:', stats);
-
-          // Render institution stats (Premium Design)
-          const statsHTML = `
-            <div class="premium-dashboard-grid">
-              <a href="branches.html" class="premium-card theme-blue clickable-card">
-                <div class="premium-icon-box">🏢</div>
-                <div class="premium-content">
-                  <div class="premium-value">${stats.totalBranches}</div>
-                  <div class="premium-label">
-                    ${t('dashboard.stats.total_branches')}
-                    <span class="premium-indicator" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">${t('dashboard.stats.locations')}</span>
-                  </div>
-                </div>
-              </a>
-              
-              <a href="customers.html" class="premium-card theme-indigo clickable-card">
-                <div class="premium-icon-box">👥</div>
-                <div class="premium-content">
-                  <div class="premium-value">${stats.totalCustomers}</div>
-                  <div class="premium-label">
-                    ${t('dashboard.stats.total_customers')}
-                    <span class="premium-indicator" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">${t('dashboard.stats.all_time')}</span>
-                  </div>
-                </div>
-              </a>
-              
-              <a href="loans.html" class="premium-card theme-emerald clickable-card">
-                <div class="premium-icon-box">💰</div>
-                <div class="premium-content">
-                  <div class="premium-value">${stats.totalLoans}</div>
-                  <div class="premium-label">
-                    ${t('dashboard.stats.total_loans')}
-                    <span class="premium-indicator" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">${t('dashboard.stats.disbursed')}</span>
-                  </div>
-                </div>
-              </a>
-              
-              <a href="loans.html?filter=late" class="premium-card theme-amber clickable-card">
-                <div class="premium-icon-box">⚠️</div>
-                <div class="premium-content">
-                  <div class="premium-value">${stats.lateLoans || 0}</div>
-                  <div class="premium-label">
-                    ${t('dashboard.stats.late_loans')}
-                    <span class="premium-indicator" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">${t('dashboard.stats.late')}</span>
-                  </div>
-                </div>
-              </a>
-            </div>
-          `;
-
-          document.getElementById('statsGrid').innerHTML = statsHTML;
-          renderQuickActions();
-          await loadRecentActivity();
-          return;
+        if (dashboardData.error) {
+          throw new Error(dashboardData.error);
         }
 
-        // For Super Admin and other roles, load all data
-        console.log('Fetching institutions, branches, customers, loans...');
-        const [institutionsResponse, branchesResponse, customersResponse, loansResponse] = await Promise.all([
-          (user.roleName === 'Super Admin' || user.role_name === 'Super Admin') ? api.institutions.getAll(1, 100) : Promise.resolve({ data: [] }),
-          api.branches.getAll(1, 100),
-          api.customers.getAll(1, 100),
-          api.loans.getAll(1, 100),
-        ]);
+        // 3. Render Statistics Grid
+        renderStatsGrid(dashboardData, user);
 
-        const institutions = institutionsResponse.data || [];
-        const branches = branchesResponse.data || [];
-        const customers = customersResponse.data || [];
-        const loans = loansResponse.data || [];
-
-        console.log('Fetched:', { institutions: institutions.length, branches: branches.length, customers: customers.length, loans: loans.length });
-
-        console.log('Fetching loan statistics...');
-        const loanStats = await api.loans.getStatistics();
-        console.log('Loan stats:', loanStats);
-
-        // Render stats (Premium Design)
-        const statsHTML = `
-          <div class="premium-dashboard-grid">
-            ${user.roleName === 'Super Admin' ? `
-            <a href="institutions.html" class="premium-card theme-violet clickable-card">
-              <div class="premium-icon-box">🏛️</div>
-              <div class="premium-content">
-                <div class="premium-value">${institutions.length}</div>
-                <div class="premium-label">
-                  ${t('dashboard.stats.total_institutions')}
-                  <span class="premium-indicator" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa;">${t('common.label.active')}</span>
-                </div>
-              </div>
-            </a>
-            ` : ''}
-            
-            ${user.roleName !== 'Branch' ? `
-            <a href="branches.html" class="premium-card theme-blue clickable-card">
-              <div class="premium-icon-box">🏢</div>
-              <div class="premium-content">
-                <div class="premium-value">${branches.length}</div>
-                <div class="premium-label">
-                  ${t('dashboard.stats.total_branches')}
-                  <span class="premium-indicator" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">${user.institutionId ? t('institutions.details') : t('dashboard.stats.all_time')}</span>
-                </div>
-              </div>
-            </a>
-            ` : ''}
-            
-            <a href="customers.html" class="premium-card theme-indigo clickable-card">
-              <div class="premium-icon-box">👥</div>
-              <div class="premium-content">
-                <div class="premium-value">${customers.length}</div>
-                <div class="premium-label">
-                  ${t('dashboard.stats.total_customers')}
-                  <span class="premium-indicator" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">${t('customers.verified')}</span>
-                </div>
-              </div>
-            </a>
-            
-            <a href="loans.html" class="premium-card theme-emerald clickable-card">
-              <div class="premium-icon-box">💰</div>
-              <div class="premium-content">
-                <div class="premium-value">${loanStats.total}</div>
-                <div class="premium-label">
-                  ${t('dashboard.stats.total_loans')}
-                  <span class="premium-indicator" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">${loanStats.byStatus.active || 0} ${t('common.label.active')}</span>
-                </div>
-              </div>
-            </a>
-            
-            <a href="loans.html?filter=late" class="premium-card theme-amber clickable-card">
-              <div class="premium-icon-box">⚠️</div>
-              <div class="premium-content">
-                <div class="premium-value">${loanStats.byStatus.late || 0}</div>
-                <div class="premium-label">
-                  ${t('dashboard.stats.late_loans')}
-                  <span class="premium-indicator" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">${t('dashboard.stats.late')}</span>
-                </div>
-              </div>
-            </a>
-          </div>
-        `;
-
-        document.getElementById('statsGrid').innerHTML = statsHTML;
-
-        // Render quick actions
+        // 4. Render Quick Actions
         renderQuickActions();
 
-        // Load recent activity
-        await loadRecentActivity();
+        // 5. Render Recent Activity
+        renderRecentActivity(dashboardData.activities || []);
 
-        // Load installments report
-        await loadInstallmentsReport();
+        // 6. Render Installments Report
+        renderInstallmentsSummary(dashboardData.installments);
 
       } catch (error) {
-        console.error('Error loading global dashboard:', error);
-        showToast('Failed to load dashboard data', 'error');
+        console.error('Error loading dashboard:', error);
+        showToast(t('dashboard.errors.load_failed') || 'Failed to load dashboard data', 'error');
+        // Hide skeletons and show error state in grid
+        document.getElementById('statsGrid').innerHTML = `
+          <div class="col-span-full p-8 text-center glass-card">
+            <div class="text-4xl mb-4">🚫</div>
+            <div class="text-xl text-white mb-2">${t('dashboard.errors.load_title') || 'Error loading dashboard'}</div>
+            <div class="text-muted mb-4">${error.message}</div>
+            <button onclick="location.reload()" class="btn btn-primary px-6 py-2 rounded-lg">${t('common.button.retry') || 'Retry'}</button>
+          </div>
+        `;
       }
     }
 
-    async function loadBranchDashboard(branchId) {
-      const dashboardData = await api.branches.getDashboard(branchId);
+    function renderStatsGrid(data, user) {
+      const { stats, systemCounts } = data;
+      const roleName = (user.roleName || user.role_name || '').toLowerCase();
+      let statsHTML = '<div class="premium-dashboard-grid">';
 
-      // Render branch-specific stats (Premium Design)
-      const statsHTML = `
-        <div class="premium-dashboard-grid">
-          <a href="customers.html" class="premium-card theme-indigo clickable-card">
-            <div class="premium-icon-box">👥</div>
+      // --- Super Admin System Stats ---
+      if (roleName === 'super admin' && systemCounts) {
+        statsHTML += `
+          <a href="institutions.html" class="premium-card theme-violet clickable-card">
+            <div class="premium-icon-box">🏛️</div>
             <div class="premium-content">
-              <div class="premium-value">${dashboardData.metrics.totalCustomers}</div>
+              <div class="premium-value">${systemCounts.institutions}</div>
               <div class="premium-label">
-                ${t('dashboard.stats.total_customers')}
-                <span class="premium-indicator" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">${t('customers.verified')}</span>
+                ${t('dashboard.stats.total_institutions')}
+                <span class="premium-indicator" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa;">${t('common.label.active')}</span>
               </div>
             </div>
           </a>
-          
-          <a href="loans.html" class="premium-card theme-emerald clickable-card">
-            <div class="premium-icon-box">💰</div>
+          <a href="branches.html" class="premium-card theme-blue clickable-card">
+            <div class="premium-icon-box">🏢</div>
             <div class="premium-content">
-              <div class="premium-value">${dashboardData.metrics.totalLoans}</div>
+              <div class="premium-value">${systemCounts.branches}</div>
               <div class="premium-label">
-                ${t('dashboard.stats.total_loans')}
-                <span class="premium-indicator" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">${dashboardData.metrics.activeLoans} ${t('common.label.active')}</span>
+                ${t('dashboard.stats.total_branches')}
+                <span class="premium-indicator" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">${t('dashboard.stats.all_time')}</span>
               </div>
             </div>
           </a>
-          
-          <a href="loans.html?filter=late" class="premium-card theme-amber clickable-card">
-            <div class="premium-icon-box">⚠️</div>
+        `;
+      }
+      // --- Institution Specific Stats ---
+      else if (roleName === 'institution') {
+        const branchCount = stats.totalBranches || (systemCounts ? systemCounts.branches : 0);
+        statsHTML += `
+          <a href="branches.html" class="premium-card theme-blue clickable-card">
+            <div class="premium-icon-box">🏢</div>
             <div class="premium-content">
-              <div class="premium-value">${dashboardData.metrics.lateLoans}</div>
+              <div class="premium-value">${branchCount}</div>
               <div class="premium-label">
-                ${t('dashboard.stats.late_loans')}
-                <span class="premium-indicator" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">${t('dashboard.stats.late')}</span>
+                ${t('dashboard.stats.total_branches')}
+                <span class="premium-indicator" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">${t('dashboard.stats.locations')}</span>
               </div>
             </div>
           </a>
-          
-          <div class="premium-card theme-blue">
-            <div class="premium-icon-box">📊</div>
-            <div class="premium-content">
-              <div class="premium-value" style="font-size: 2rem;">${formatCurrency(dashboardData.metrics.totalPortfolioValue)}</div>
-              <div class="premium-label">
-                ${t('dashboard.stats.total_portfolio')}
-                <span class="premium-indicator" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">${t('common.label.total')}</span>
-              </div>
+        `;
+      }
+
+      // --- Common Stats (Customers, Loans, Late) ---
+      statsHTML += `
+        <a href="customers.html" class="premium-card theme-indigo clickable-card">
+          <div class="premium-icon-box">👥</div>
+          <div class="premium-content">
+            <div class="premium-value">${stats.totalCustomers}</div>
+            <div class="premium-label">
+              ${t('dashboard.stats.total_customers')}
+              <span class="premium-indicator" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">${t('dashboard.stats.all_time')}</span>
             </div>
           </div>
-        </div>
-        `;
+        </a>
+        
+        <a href="loans.html" class="premium-card theme-emerald clickable-card">
+          <div class="premium-icon-box">💰</div>
+          <div class="premium-content">
+            <div class="premium-value">${stats.totalLoans}</div>
+            <div class="premium-label">
+              ${t('dashboard.stats.total_loans')}
+              <span class="premium-indicator" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">${formatCurrency(stats.totalLoanAmount)}</span>
+            </div>
+          </div>
+        </a>
+        
+        <a href="loans.html?filter=late" class="premium-card theme-amber clickable-card">
+          <div class="premium-icon-box">⚠️</div>
+          <div class="premium-content">
+            <div class="premium-value">${(stats.loansByStatus || []).find(s => s.status === 'Late')?.count || 0}</div>
+            <div class="premium-label">
+              ${t('dashboard.stats.late_loans')}
+              <span class="premium-indicator" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">${t('dashboard.stats.late')}</span>
+            </div>
+          </div>
+        </a>
+      `;
 
+      statsHTML += '</div>';
       document.getElementById('statsGrid').innerHTML = statsHTML;
+    }
 
-      // Render quick actions
-      renderQuickActions();
+    function renderInstallmentsSummary(data) {
+      if (!data) return;
+      const stats = data.totals || { count: 0, totalAmount: 0 };
+      const byStatus = data.byStatus || [];
 
-      // Render recent activity
-      renderRecentActivity(dashboardData.recentActivities || []);
+      document.getElementById('totalDueInstallments').textContent = stats.count || 0;
+      document.getElementById('totalDueAmount').textContent = formatCurrency(stats.totalAmount || 0);
 
-      // Load installments report
-      await loadInstallmentsReport();
+      const paidData = byStatus.find(s => s.status === 'Paid') || { count: 0, amount: 0 };
+      const pendingData = byStatus.find(s => s.status === 'Pending') || { count: 0, amount: 0 };
+      const overdueData = byStatus.find(s => s.status === 'Overdue') || { count: 0, amount: 0 };
+
+      document.getElementById('paidInstallments').textContent = paidData.count || 0;
+      document.getElementById('paidAmount').textContent = formatCurrency(paidData.amount || 0);
+
+      document.getElementById('pendingInstallments').textContent = pendingData.count || 0;
+      document.getElementById('pendingAmount').textContent = formatCurrency(pendingData.amount || 0);
+
+      document.getElementById('overdueInstallments').textContent = overdueData.count || 0;
+      document.getElementById('overdueAmount').textContent = formatCurrency(overdueData.amount || 0);
     }
 
     function renderQuickActions() {
@@ -477,50 +412,6 @@
       document.getElementById('quickActions').innerHTML = actionsHTML;
     }
 
-    async function loadRecentActivity() {
-      try {
-        const user = getCurrentUser();
-        let activities = [];
-
-        // Get recent loans and customers to build activity feed
-        const [loansResponse, customersResponse] = await Promise.all([
-          api.loans.getAll(1, 5),  // Get last 5 loans
-          api.customers.getAll(1, 5)  // Get last 5 customers
-        ]);
-
-        const recentLoans = loansResponse.data || [];
-        const recentCustomers = customersResponse.data || [];
-
-        // Build activity feed from recent items
-        recentLoans.forEach(loan => {
-          activities.push({
-            type: 'loan_created',
-            description: t('dashboard.activity.loan_created', { amount: formatCurrency(loan.principalAmount), customer: loan.customerName || t('dashboard.activity.customer_generic') }),
-            timestamp: loan.createdAt
-          });
-        });
-
-        recentCustomers.forEach(customer => {
-          activities.push({
-            type: 'customer_added',
-            description: t('dashboard.activity.customer_added', { name: customer.name }),
-            timestamp: customer.createdAt
-          });
-        });
-
-        // Sort by timestamp (newest first)
-        activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-        // Take top 5
-        activities = activities.slice(0, 5);
-
-        renderRecentActivity(activities);
-      } catch (error) {
-        console.error('Error loading recent activity:', error);
-        renderRecentActivity([]);
-      }
-    }
-
     function renderRecentActivity(activities) {
       const container = document.getElementById('recentActivity');
       if (!activities || activities.length === 0) {
@@ -529,32 +420,40 @@
       }
 
       const activitiesHTML = activities.slice(0, 5).map(activity => {
+        console.log('Rendering Activity:', activity); // Debug log
+
         let icon = '📝';
         let color = '#6366f1';
-        const desc = activity.description || '';
+        const type = activity.type || '';
+        const customerName = activity.customerName || activity.customer_name || t('dashboard.activity.customer_generic');
+        const amount = activity.amount !== undefined ? activity.amount : 0;
 
-        if (desc.includes('قرض') || desc.includes('Loan')) {
+        let description = '';
+        if (type === 'loan_created') {
           icon = '💰';
           color = '#10b981';
-        } else if (desc.includes('عميل') || desc.includes('Customer')) {
+          description = t('dashboard.activity.loan_created', {
+            amount: formatCurrency(amount),
+            customer: customerName
+          });
+        } else if (type === 'customer_added') {
           icon = '👤';
           color = '#818cf8';
-        } else if (desc.includes('فرع') || desc.includes('Branch')) {
-          icon = '🏢';
-          color = '#3b82f6';
-        } else if (desc.includes('مؤسسة') || desc.includes('Institution')) {
-          icon = '🏛️';
-          color = '#a78bfa';
+          description = t('dashboard.activity.customer_added', {
+            name: customerName
+          });
+        } else {
+          description = activity.description || t('dashboard.activity.no_activity');
         }
 
         return `
           <div class="activity-card-new" style="--accent: ${color}">
             <div class="activity-icon-new">${icon}</div>
             <div class="activity-info-new">
-              <div class="activity-desc-new">${desc}</div>
+              <div class="activity-desc-new">${description}</div>
               <div class="activity-time-new">
                 <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                ${formatDateTime(activity.timestamp || activity.createdAt)}
+                ${formatDateTime(activity.timestamp || activity.createdAt || new Date())}
               </div>
             </div>
           </div>
@@ -564,58 +463,13 @@
       container.innerHTML = `<div class="activity-container-new">${activitiesHTML}</div>`;
     }
 
-    // Load installments report - Optimized with single API call
-    async function loadInstallmentsReport(fromDateInitial = null, toDateInitial = null) {
+    // Load installments report for date filtering
+    async function loadInstallmentsReport(fromDate, toDate) {
       try {
-        let fromDate = fromDateInitial;
-        let toDate = toDateInitial;
-
-        // Set default dates if not provided
-        if (!fromDate) {
-          const today = new Date();
-          const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-          fromDate = firstDay.toISOString().split('T')[0];
-          document.getElementById('fromDate').value = fromDate;
-        }
-
-        if (!toDate) {
-          const today = new Date();
-          toDate = today.toISOString().split('T')[0];
-          document.getElementById('toDate').value = toDate;
-        }
-
-        // Fetch optimized report from server
-        // This replaces the previous N+1 logic that fetched all loans and all installments
-        const report = await api.reports.getInstallmentsReport({
-          startDate: fromDate,
-          endDate: toDate
-        });
-
-        const stats = report.totals || { count: 0, totalAmount: 0, paidCount: 0, pendingCount: 0, overdueCount: 0 };
-
-        // Update UI
-        document.getElementById('totalDueInstallments').textContent = stats.count;
-        document.getElementById('totalDueAmount').textContent = formatCurrency(stats.totalAmount);
-
-        document.getElementById('paidInstallments').textContent = stats.paidCount;
-        document.getElementById('paidAmount').textContent = formatCurrency(stats.paidAmount || (report.byStatus.find(s => s.status === 'Paid')?.amount || 0));
-
-        // Use backend byStatus data for accurate mapping
-        const paidData = report.byStatus.find(s => s.status === 'Paid') || { count: 0, amount: 0 };
-        const pendingData = report.byStatus.find(s => s.status === 'Pending') || { count: 0, amount: 0 };
-        const overdueData = report.byStatus.find(s => s.status === 'Overdue') || { count: 0, amount: 0 };
-
-        document.getElementById('paidInstallments').textContent = paidData.count;
-        document.getElementById('paidAmount').textContent = formatCurrency(paidData.amount);
-
-        document.getElementById('pendingInstallments').textContent = pendingData.count;
-        document.getElementById('pendingAmount').textContent = formatCurrency(pendingData.amount);
-
-        document.getElementById('overdueInstallments').textContent = overdueData.count;
-        document.getElementById('overdueAmount').textContent = formatCurrency(overdueData.amount);
-
+        const report = await api.reports.getInstallmentsReport({ startDate: fromDate, endDate: toDate });
+        renderInstallmentsSummary(report);
       } catch (error) {
-        console.error('Error loading installments report:', error);
+        console.error('Error filtering installments:', error);
         showToast(t('dashboard.installments_report.load_error'), 'error');
       }
     }
@@ -627,26 +481,19 @@
         filterBtn.addEventListener('click', () => {
           const fromDate = document.getElementById('fromDate').value;
           const toDate = document.getElementById('toDate').value;
-
           if (!fromDate || !toDate) {
             showToast(t('dashboard.installments_report.select_dates'), 'error');
             return;
           }
-
-          if (new Date(fromDate) > new Date(toDate)) {
-            showToast(t('dashboard.installments_report.invalid_date_range'), 'error');
-            return;
-          }
-
           loadInstallmentsReport(fromDate, toDate);
         });
       }
     });
+
     // --- Export Functions ---
     function printDashboard() {
       const content = document.querySelector('.page-content').innerHTML;
       const printWindow = window.open('', '', 'height=600,width=800');
-
       printWindow.document.write('<html><head><title>' + (t('common.button.print') || 'طباعة لوحة التحكم') + '</title>');
       printWindow.document.write('<style>');
       printWindow.document.write(`
@@ -677,7 +524,6 @@
         .premium-content { overflow: hidden; } /* clearfix */
         a { text-decoration: none; color: inherit; }
         .flex.justify-end { display: none; }
-        /* Hide dynamic hover effects */
         .premium-card:hover { transform: none!important; box-shadow: none!important; }
       `);
       printWindow.document.write('</style></head><body>');
@@ -685,10 +531,8 @@
       printWindow.document.write(`<div style="text-align: center; margin-bottom: 20px; color: #666;">${new Date().toLocaleString()}</div>`);
       printWindow.document.write(content);
       printWindow.document.write('</body></html>');
-
       printWindow.document.close();
       printWindow.focus();
-
       setTimeout(() => {
         printWindow.print();
         printWindow.close();

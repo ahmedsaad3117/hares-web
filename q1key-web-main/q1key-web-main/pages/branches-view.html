@@ -38,10 +38,9 @@
       </div>
 
       <!-- Branch Details -->
-      <div id="branchContainer" style="display: none;" dir="rtl" class="text-right">
+      <div id="branchContainer" style="display: none;">
         <div class="glass-card p-6 mb-6">
-          <div class="flex items-center justify-between mb-6" dir="ltr"
-            style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
+          <div class="flex items-center justify-between mb-6">
             <div>
               <h2 id="branchName" class="text-2xl font-bold text-white mb-2"></h2>
               <p class="text-muted"><span data-i18n-key="branches.view_page.branch_id">Branch ID</span>: <span
@@ -109,6 +108,10 @@
               <p class="text-muted mb-1" data-i18n-key="branches.view_page.last_updated">Last Updated</p>
               <p id="updatedAt" class="text-white font-medium"></p>
             </div>
+            <div>
+              <p class="text-muted mb-1" data-i18n-key="common.expiration_date">Expiration Date</p>
+              <p id="expirationDate" class="text-white font-medium"></p>
+            </div>
           </div>
         </div>
 
@@ -167,14 +170,11 @@
       setActiveNav('branches');
       window.i18n.translatePage();
 
-      // Enforce RTL layout for Arabic BUT keep specific headers LTR as requested
-      if (localStorage.getItem('locale') !== 'en') {
-        document.documentElement.dir = 'rtl';
-        document.getElementById('branchContainer').style.direction = 'rtl';
-        // Force headers to LTR to keep Name on Left and Dots on Right
-        document.getElementById('pageHeaderContainer').style.direction = 'ltr';
-        document.querySelector('#branchContainer .flex.items-center.justify-between').style.direction = 'ltr';
-      }
+      // Enforce correct layout direction
+      const locale = localStorage.getItem('locale') || 'en';
+      document.documentElement.setAttribute('dir', locale === 'ar' ? 'rtl' : 'ltr');
+      const container = document.getElementById('branchContainer');
+      if (container) container.setAttribute('dir', locale === 'ar' ? 'rtl' : 'ltr');
 
       // Load branch data
       await loadBranch();
@@ -227,6 +227,7 @@
         document.getElementById('maximumLoans').textContent = branchData.maximumLoans ? formatCurrency(branchData.maximumLoans) : (t('branches.view_page.unlimited') || 'Unlimited');
         document.getElementById('createdAt').textContent = formatDateTime(branchData.createdAt);
         document.getElementById('updatedAt').textContent = formatDateTime(branchData.updatedAt);
+        document.getElementById('expirationDate').textContent = branchData.expirationDate ? formatDate(branchData.expirationDate) : (t('common.not_set') || '--');
 
         const statusBadge = document.getElementById('statusBadge');
         if (statusBadge) {
@@ -302,6 +303,9 @@
             </div>
           </div>
         `;
+
+        // Update top display as well
+        document.getElementById('totalLoans').textContent = formatCurrency(branchStats.totalLoanAmount || 0);
       } catch (error) {
         console.error('Error loading statistics:', error);
         document.getElementById('statsContainer').innerHTML = '<p class="text-muted">Failed to load statistics</p>';
@@ -314,7 +318,7 @@
         const loansContainer = document.getElementById('loansContainer');
 
         if (loans.length === 0) {
-          loansContainer.innerHTML = `<p class="text-muted text-center py-4 bg-white/5 rounded-lg border border-white/5 data-i18n-key="branches.view_page.no_loans">${t('branches.view_page.no_loans') || 'No loans found'}</p>`;
+          loansContainer.innerHTML = `<p class="text-muted text-center py-4 bg-white/5 rounded-lg border border-white/5" data-i18n-key="branches.view_page.no_loans">${t('branches.view_page.no_loans') || 'No loans found'}</p>`;
           return;
         }
 
@@ -323,9 +327,16 @@
             <div class="flex items-center justify-between" style="display: flex; align-items: center; justify-content: space-between;">
               <div>
                 <p class="text-white font-medium">${t('loans.view_page.loan_number')} #${loan.loanId}</p>
-                <p class="text-sm text-muted">${loan.customer?.name || 'N/A'} - ${formatCurrency(loan.principalAmount)}</p>
+                <p class="text-sm text-muted">${t('dashboard.activity.loan_created', {
+          amount: formatCurrency(loan.principalAmount),
+          customer: loan.customerName || loan.customer?.name || t('common.message.na')
+        })}</p>
               </div>
-              <span class="badge ${loan.status === 'active' ? 'badge-success' : loan.status === 'pending' ? 'badge-warning' : 'badge-danger'}">${t('loans.status.' + loan.status.toLowerCase()) || loan.status}</span>
+              <span class="badge ${(loan.status === 'Active' || loan.status === 'active') ? 'badge-success' :
+            (loan.status === 'Late' || loan.status === 'Overdue' || loan.status === 'late' || loan.status === 'overdue') ? 'badge-danger' :
+              (loan.status === 'Paid' || loan.status === 'Finished' || loan.status === 'paid' || loan.status === 'finished') ? 'badge-info' :
+                'badge-warning'
+          }">${t('loans.status.' + (loan.status || '').toLowerCase()) || loan.status}</span>
             </div>
           </div>
         `).join('');
@@ -352,17 +363,13 @@
 
         // Add a message if linked
         const warningBox = document.createElement('div');
-        warningBox.style.padding = '0.75rem';
-        warningBox.style.background = 'rgba(239, 68, 68, 0.1)';
-        warningBox.style.border = '1px solid rgba(239, 68, 68, 0.2)';
-        warningBox.style.borderRadius = '8px';
-        warningBox.style.marginTop = '1rem';
+        warningBox.className = 'warning-banner';
         warningBox.innerHTML = `
-          <p class="text-sm text-danger" style="display: flex; align-items: center; gap: 0.5rem;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <p>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
-            ${t('branches.view_page.delete_prevented_msg') || 'Cannot be deleted: Linked to users, loans or customers.'}
+            <span>${t('branches.view_page.delete_prevented_msg') || 'Cannot be deleted: Linked to users, loans or customers.'}</span>
           </p>
         `;
         branchContainer.prepend(warningBox);

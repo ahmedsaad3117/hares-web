@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم المتقدمة | منصة Q1KEY</title>
+    <link rel="stylesheet" href="../css/styles.css?v=12">
+    <script src="../js/i18n.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        (function () {
+            var lang = localStorage.getItem('locale') || 'ar';
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            if (lang === 'ar') document.documentElement.classList.add('rtl');
+        })();
+    </script>
+
+    <style>
+        /* Advanced Dashboard Styles */
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Hero Stats Section */
+        .hero-stats {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-stats::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.875rem 1.25rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1.5px solid rgba(99, 102, 241, 0.25);
+            border-radius: 12px;
+            color: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        .filter-select option {
+            background: #1e293b;
+            color: white;
+            padding: 0.5rem;
+        }
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1600px) {
+            .kpi-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.25);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+            opacity: 0.6;
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .kpi-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-trend {
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .kpi-trend.up {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .kpi-trend.down {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .kpi-label {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+        }
+
+        .kpi-subtitle {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 0.5rem;
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            color: #a5b4fc;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chart-btn:hover {
+            background: rgba(99, 102, 241, 0.25);
+            color: white;
+        }
+
+        /* Performance Rankings */
+        .rankings-section {
+            margin-bottom: 2rem;
+        }
+
+        .ranking-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ranking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .ranking-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateX(-4px);
+        }
+
+        .ranking-position {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .ranking-position.top-1 {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+        }
+
+        .ranking-position.top-2 {
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+            color: white;
+        }
+
+        .ranking-position.top-3 {
+            background: linear-gradient(135deg, #fb923c, #ea580c);
+            color: white;
+        }
+
+        .ranking-position.other {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .ranking-info {
+            flex: 1;
+        }
+
+        .ranking-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .ranking-meta {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .ranking-value {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.25rem;
+        }
+
+        .ranking-amount {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #10b981;
+        }
+
+        .ranking-percentage {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Export Buttons */
+        .export-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .export-btn {
+            padding: 0.875rem 1.5rem;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .export-btn:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Alerts Section */
+        .alerts-section {
+            margin-bottom: 2rem;
+        }
+
+        .alert-card {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .alert-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 700;
+            color: #fca5a5;
+            margin-bottom: 0.25rem;
+        }
+
+        .alert-message {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 1.75rem;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sidebar"></div>
+
+    <div class="main-content">
+        <div id="header"></div>
+
+        <div class="page-content">
+            <div class="dashboard-container">
+                <!-- Hero Stats Section -->
+                <div class="hero-stats">
+                    <h1 class="hero-title">📊 لوحة الأداء المتقدمة</h1>
+                    <p
+                        style="color: rgba(255, 255, 255, 0.8); font-size: 1.05rem; margin: 0; position: relative; z-index: 1;">
+                        تحليل شامل ومتقدم للأداء المالي والتشغيلي
+                    </p>
+                </div>
+
+                <!-- Export Bar -->
+                <div class="export-bar">
+                    <button class="export-btn" onclick="exportToPDF()">
+                        📄 تصدير PDF
+                    </button>
+                    <button class="export-btn" onclick="exportToExcel()">
+                        📊 تصدير Excel
+                    </button>
+                    <button class="export-btn" onclick="exportToCSV()">
+                        📋 تصدير CSV
+                    </button>
+                    <button class="export-btn" onclick="window.print()">
+                        🖨️ طباعة
+                    </button>
+                </div>
+
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label class="filter-label">الفترة الزمنية</label>
+                        <select class="filter-select" id="periodFilter" onchange="applyFilters()">
+                            <option value="today">اليوم</option>
+                            <option value="week">هذا الأسبوع</option>
+                            <option value="month" selected>هذا الشهر</option>
+                            <option value="quarter">هذا الربع</option>
+                            <option value="year">هذه السنة</option>
+                            <option value="all">جميع الفترات</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">نوع التقرير</label>
+                        <select class="filter-select" id="reportTypeFilter" onchange="applyFilters()">
+                            <option value="overview">نظرة عامة</option>
+                            <option value="loans">القروض</option>
+                            <option value="installments">الأقساط</option>
+                            <option value="funds">الصناديق</option>
+                            <option value="customers">العملاء</option>
+                            <option value="risks">مؤشرات المخاطر</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group" id="comparisonFilterGroup" style="display: none;">
+                        <label class="filter-label">وحدة المقارنة</label>
+                        <select class="filter-select" id="comparisonFilter">
+                            <option value="">اختر وحدة للمقارنة</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">الترتيب</label>
+                        <select class="filter-select" id="sortFilter" onchange="applyFilters()">
+                            <option value="performance-desc">الأعلى أداءً</option>
+                            <option value="performance-asc">الأقل أداءً</option>
+                            <option value="amount-desc">الأعلى قيمة</option>
+                            <option value="amount-asc">الأقل قيمة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Alerts Section -->
+                <div class="alerts-section" id="alertsSection"></div>
+
+                <!-- KPI Grid -->
+                <div class="kpi-grid" id="kpiGrid">
+                    <!-- Will be populated dynamically -->
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="charts-grid" id="chartsGrid">
+                    <!-- Will be populated dynamically -->
+                </div>
+
+                <!-- Rankings Section -->
+                <div class="rankings-section" id="rankingsSection">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner" style="margin: 0 auto 1rem;"></div>
+            <p style="font-size: 1.1rem; font-weight: 600;">جاري تحميل البيانات...</p>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="../components/header.js?v=3"></script>
+    <script src="../components/sidebar.js?v=12"></script>
+    <script src="../js/ui-utils.js?v=3"></script>
+    <script src="../js/api.js?v=4"></script>
+
+    <script>
+        let currentUser = null;
+        let dashboardData = {
+            loans: [],
+            installments: [],
+            customers: [],
+            funds: [],
+            branches: [],
+            institutions: []
+        };
+
+        async function initPage() {
+            await waitForI18n();
+            showLoading();
+
+            try {
+                await api.auth.getProfile();
+            } catch (e) {
+                console.error('Failed to refresh profile:', e);
+            }
+
+            currentUser = getCurrentUser();
+            if (!currentUser) {
+                window.location.href = '../index.html';
+                return;
+            }
+
+            // Load components
+            document.getElementById('sidebar').innerHTML = createSidebar(currentUser);
+            document.getElementById('header').innerHTML = createHeader(
+                'لوحة الأداء المتقدمة',
+                'تحليل شامل ومتقدم للأداء المالي والتشغيلي'
+            );
+            initializeLanguageSwitcher();
+            setActiveNav('dashboard');
+
+            // Setup comparison filter visibility based on role
+            setupComparisonFilter();
+
+            // Load all data
+            await loadDashboardData();
+
+            // Apply initial filters
+            applyFilters();
+
+            hideLoading();
+        }
+
+        function setupComparisonFilter() {
+            const comparisonGroup = document.getElementById('comparisonFilterGroup');
+            const comparisonSelect = document.getElementById('comparisonFilter');
+
+            if (currentUser.roleName === 'Super Admin' || currentUser.roleName === 'Institution') {
+                comparisonGroup.style.display = 'block';
+                // Will populate options when data is loaded
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load based on user role
+                if (currentUser.roleName === 'Super Admin') {
+                    await loadAdminData();
+                } else if (currentUser.roleName === 'Institution') {
+                    await loadInstitutionData();
+                } else if (currentUser.roleName === 'Branch') {
+                    await loadBranchData();
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showToast('حدث خطأ في تحميل البيانات', 'error');
+            }
+        }
+
+        async function loadAdminData() {
+            // Load all loans
+            const loansResponse = await api.loans.getAll(1, 1000);
+            dashboardData.loans = loansResponse.data || [];
+
+            // Load all installments (from loans)
+            const installmentPromises = dashboardData.loans.map(loan =>
+                api.loans.getInstallments(loan.loanId).then(insts =>
+                    insts.map(inst => ({ ...inst, loan }))
+                )
+            );
+            const installmentResults = await Promise.all(installmentPromises);
+            dashboardData.installments = installmentResults.flat();
+
+            // Load customers
+            const customersResponse = await api.customers.getAll(1, 1000);
+            dashboardData.customers = customersResponse.data || [];
+
+            // Load institutions
+            const institutionsResponse = await api.institutions.getAll(1, 1000);
+            dashboardData.institutions = institutionsResponse.data || [];
+
+            // Load branches
+            const branchesResponse = await api.branches.getAll(1, 1000);
+            dashboardData.branches = branchesResponse.data || [];
+        }
+
+        async function loadInstitutionData() {
+            // Load institution's loans only
+            const loansResponse = await api.loans.getAll(1, 1000);
+            dashboardData.loans = (loansResponse.data || []).filter(loan =>
+                loan.institutionId === currentUser.institutionId
+            );
+
+            // Load installments
+            const installmentPromises = dashboardData.loans.map(loan =>
+                api.loans.getInstallments(loan.loanId).then(insts =>
+                    insts.map(inst => ({ ...inst, loan }))
+                )
+            );
+            const installmentResults = await Promise.all(installmentPromises);
+            dashboardData.installments = installmentResults.flat();
+
+            // Load customers
+            const customersResponse = await api.customers.getAll(1, 1000);
+            dashboardData.customers = customersResponse.data || [];
+
+            // Load branches
+            const branchesResponse = await api.branches.getAll(1, 1000);
+            dashboardData.branches = (branchesResponse.data || []).filter(branch =>
+                branch.institutionId === currentUser.institutionId
+            );
+        }
+
+        async function loadBranchData() {
+            // Load branch's loans only
+            const loansResponse = await api.loans.getAll(1, 1000);
+            dashboardData.loans = (loansResponse.data || []).filter(loan =>
+                loan.branchId === currentUser.branchId
+            );
+
+            // Load installments
+            const installmentPromises = dashboardData.loans.map(loan =>
+                api.loans.getInstallments(loan.loanId).then(insts =>
+                    insts.map(inst => ({ ...inst, loan }))
+                )
+            );
+            const installmentResults = await Promise.all(installmentPromises);
+            dashboardData.installments = installmentResults.flat();
+
+            // Load customers
+            const customersResponse = await api.customers.getAll(1, 1000);
+            dashboardData.customers = customersResponse.data || [];
+        }
+
+        function applyFilters() {
+            const period = document.getElementById('periodFilter').value;
+            const reportType = document.getElementById('reportTypeFilter').value;
+            const sortBy = document.getElementById('sortFilter').value;
+
+            // Filter data by period
+            const filteredData = filterDataByPeriod(period);
+
+            // Generate reports based on type
+            switch (reportType) {
+                case 'overview':
+                    renderOverview(filteredData, sortBy);
+                    break;
+                case 'loans':
+                    renderLoansReport(filteredData, sortBy);
+                    break;
+                case 'installments':
+                    renderInstallmentsReport(filteredData, sortBy);
+                    break;
+                case 'customers':
+                    renderCustomersReport(filteredData, sortBy);
+                    break;
+                case 'risks':
+                    renderRisksReport(filteredData, sortBy);
+                    break;
+                default:
+                    renderOverview(filteredData, sortBy);
+            }
+        }
+
+        function filterDataByPeriod(period) {
+            const now = new Date();
+            let startDate;
+
+            switch (period) {
+                case 'today':
+                    startDate = new Date(now.setHours(0, 0, 0, 0));
+                    break;
+                case 'week':
+                    startDate = new Date(now.setDate(now.getDate() - 7));
+                    break;
+                case 'month':
+                    startDate = new Date(now.setMonth(now.getMonth() - 1));
+                    break;
+                case 'quarter':
+                    startDate = new Date(now.setMonth(now.getMonth() - 3));
+                    break;
+                case 'year':
+                    startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+                    break;
+                default:
+                    startDate = new Date(0); // All time
+            }
+
+            return {
+                loans: dashboardData.loans.filter(loan =>
+                    new Date(loan.createdAt) >= startDate
+                ),
+                installments: dashboardData.installments.filter(inst =>
+                    new Date(inst.dueDate) >= startDate
+                ),
+                customers: dashboardData.customers,
+                branches: dashboardData.branches,
+                institutions: dashboardData.institutions
+            };
+        }
+
+        function renderOverview(data, sortBy) {
+            renderAlerts(data);
+            renderKPIs(data);
+            renderCharts(data);
+            renderRankings(data, sortBy);
+        }
+
+        function renderAlerts(data) {
+            const alerts = [];
+
+            // Check for overdue installments
+            const overdueInstallments = data.installments.filter(i =>
+                i.status === 'Overdue'
+            );
+            if (overdueInstallments.length > 0) {
+                alerts.push({
+                    icon: '⚠️',
+                    title: 'أقساط متأخرة',
+                    message: `يوجد ${overdueInstallments.length} قسط متأخر بقيمة إجمالية ${overdueInstallments.reduce((sum, i) => sum + i.amount, 0).toLocaleString('ar-SA')} ر.س`
+                });
+            }
+
+            // Check for low activity
+            const today = new Date();
+            const thisMonth = data.loans.filter(loan => {
+                const loanDate = new Date(loan.createdAt);
+                return loanDate.getMonth() === today.getMonth() &&
+                    loanDate.getFullYear() === today.getFullYear();
+            }).length;
+
+            if (thisMonth === 0) {
+                alerts.push({
+                    icon: '📉',
+                    title: 'نشاط منخفض',
+                    message: 'لم يتم تسجيل أي قروض جديدة هذا الشهر'
+                });
+            }
+
+            const alertsHTML = alerts.length > 0 ? alerts.map(alert => `
+        <div class="alert-card">
+          <div class="alert-icon">${alert.icon}</div>
+          <div class="alert-content">
+            <div class="alert-title">${alert.title}</div>
+            <div class="alert-message">${alert.message}</div>
+          </div>
+        </div>
+      `).join('') : '';
+
+            document.getElementById('alertsSection').innerHTML = alertsHTML;
+        }
+
+        function renderKPIs(data) {
+            const totalLoans = data.loans.length;
+            const totalLoansAmount = data.loans.reduce((sum, l) => sum + (l.amount || 0), 0);
+            const activeLoans = data.loans.filter(l => l.status === 'Active').length;
+
+            const totalInstallments = data.installments.length;
+            const paidInstallments = data.installments.filter(i => i.status === 'Paid').length;
+            const overdueInstallments = data.installments.filter(i => i.status === 'Overdue').length;
+            const paidAmount = data.installments
+                .filter(i => i.status === 'Paid')
+                .reduce((sum, i) => sum + (i.amount || 0), 0);
+
+            const kpis = [
+                {
+                    icon: '💰',
+                    iconBg: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2))',
+                    color: '#818cf8',
+                    value: totalLoans,
+                    label: 'إجمالي القروض',
+                    subtitle: `${totalLoansAmount.toLocaleString('ar-SA')} ر.س`,
+                    trend: { type: 'up', value: '+12%' }
+                },
+                {
+                    icon: '✅',
+                    iconBg: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2))',
+                    color: '#6ee7b7',
+                    value: paidInstallments,
+                    label: 'أقساط مدفوعة',
+                    subtitle: `${paidAmount.toLocaleString('ar-SA')} ر.س`,
+                    trend: { type: 'up', value: '+8%' }
+                },
+                {
+                    icon: '⏳',
+                    iconBg: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.2))',
+                    color: '#fcd34d',
+                    value: totalInstallments - paidInstallments - overdueInstallments,
+                    label: 'أقساط معلقة',
+                    subtitle: 'قيد الانتظار',
+                    trend: { type: 'down', value: '-3%' }
+                },
+                {
+                    icon: '⚠️',
+                    iconBg: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2))',
+                    color: '#fca5a5',
+                    value: overdueInstallments,
+                    label: 'أقساط متأخرة',
+                    subtitle: 'تحتاج متابعة',
+                    trend: { type: 'down', value: '+5%' }
+                },
+                {
+                    icon: '👥',
+                    iconBg: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2))',
+                    color: '#60a5fa',
+                    value: data.customers.length,
+                    label: 'إجمالي العملاء',
+                    subtitle: 'عميل نشط',
+                    trend: { type: 'up', value: '+15%' }
+                },
+                {
+                    icon: '🎯',
+                    iconBg: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(147, 51, 234, 0.2))',
+                    color: '#c084fc',
+                    value: activeLoans,
+                    label: 'قروض نشطة',
+                    subtitle: 'قيد السداد',
+                    trend: { type: 'up', value: '+10%' }
+                }
+            ];
+
+            document.getElementById('kpiGrid').innerHTML = kpis.map(kpi => `
+        <div class="kpi-card" style="color: ${kpi.color};">
+          <div class="kpi-header">
+            <div class="kpi-icon" style="background: ${kpi.iconBg};">
+              ${kpi.icon}
+            </div>
+            <div class="kpi-trend ${kpi.trend.type}">
+              ${kpi.trend.type === 'up' ? '↗' : '↘'} ${kpi.trend.value}
+            </div>
+          </div>
+          <div class="kpi-value">${kpi.value.toLocaleString('ar-SA')}</div>
+          <div class="kpi-label">${kpi.label}</div>
+          <div class="kpi-subtitle">${kpi.subtitle}</div>
+        </div>
+      `).join('');
+        }
+
+        function renderCharts(data) {
+            const chartsHTML = `
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">📊 توزيع القروض حسب الحالة</h3>
+            <div class="chart-actions">
+              <button class="chart-btn" onclick="refreshChart('loans')">🔄 تحديث</button>
+            </div>
+          </div>
+          <canvas id="loansChart" height="300"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">💵 الأقساط - المدفوع vs المتأخر</h3>
+            <div class="chart-actions">
+              <button class="chart-btn" onclick="refreshChart('installments')">🔄 تحديث</button>
+            </div>
+          </div>
+          <canvas id="installmentsChart" height="300"></canvas>
+        </div>
+      `;
+
+            document.getElementById('chartsGrid').innerHTML = chartsHTML;
+
+            // Render charts using Chart.js
+            setTimeout(() => {
+                renderLoansChart(data);
+                renderInstallmentsChart(data);
+            }, 100);
+        }
+
+        function renderLoansChart(data) {
+            const ctx = document.getElementById('loansChart');
+            if (!ctx) return;
+
+            const activeLoans = data.loans.filter(l => l.status === 'Active').length;
+            const completedLoans = data.loans.filter(l => l.status === 'Completed').length;
+            const defaultedLoans = data.loans.filter(l => l.status === 'Defaulted').length;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['نشط', 'مكتمل', 'متعثر'],
+                    datasets: [{
+                        data: [activeLoans, completedLoans, defaultedLoans],
+                        backgroundColor: [
+                            'rgba(99, 102, 241, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(99, 102, 241, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: { size: 14 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderInstallmentsChart(data) {
+            const ctx = document.getElementById('installmentsChart');
+            if (!ctx) return;
+
+            const paidCount = data.installments.filter(i => i.status === 'Paid').length;
+            const pendingCount = data.installments.filter(i => i.status === 'Pending').length;
+            const overdueCount = data.installments.filter(i => i.status === 'Overdue').length;
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['مدفوع', 'معلق', 'متأخر'],
+                    datasets: [{
+                        label: 'عدد الأقساط',
+                        data: [paidCount, pendingCount, overdueCount],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                precision: 0
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderRankings(data, sortBy) {
+            let rankings = [];
+
+            // Top customers by payment
+            const customerStats = {};
+            data.installments.forEach(inst => {
+                const customerId = inst.loan?.customer?.customerId;
+                if (!customerId) return;
+
+                if (!customerStats[customerId]) {
+                    customerStats[customerId] = {
+                        customer: inst.loan.customer,
+                        totalPaid: 0,
+                        paidCount: 0
+                    };
+                }
+
+                if (inst.status === 'Paid') {
+                    customerStats[customerId].totalPaid += inst.amount || 0;
+                    customerStats[customerId].paidCount++;
+                }
+            });
+
+            const topCustomers = Object.values(customerStats)
+                .sort((a, b) => b.totalPaid - a.totalPaid)
+                .slice(0, 10);
+
+            const totalPaid = topCustomers.reduce((sum, c) => sum + c.totalPaid, 0);
+
+            const rankingsHTML = `
+        <div class="ranking-card">
+          <div class="ranking-header">
+            <h3 style="color: white; font-size: 1.35rem; font-weight: 800; margin: 0;">
+              🏆 أفضل العملاء - الأعلى سداداً
+            </h3>
+            <span style="color: rgba(255, 255, 255, 0.6); font-size: 0.95rem;">
+              أفضل 10 عملاء
+            </span>
+          </div>
+          <div class="ranking-list">
+            ${topCustomers.map((stat, index) => `
+              <div class="ranking-item">
+                <div class="ranking-position ${index === 0 ? 'top-1' : index === 1 ? 'top-2' : index === 2 ? 'top-3' : 'other'}">
+                  ${index + 1}
+                </div>
+                <div class="ranking-info">
+                  <div class="ranking-name">${stat.customer.name}</div>
+                  <div class="ranking-meta">${stat.paidCount} قسط مدفوع</div>
+                </div>
+                <div class="ranking-value">
+                  <div class="ranking-amount">${stat.totalPaid.toLocaleString('ar-SA')} ر.س</div>
+                  <div class="ranking-percentage">${((stat.totalPaid / totalPaid) * 100).toFixed(1)}%</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+            document.getElementById('rankingsSection').innerHTML = rankingsHTML;
+        }
+
+        function renderLoansReport(data, sortBy) {
+            // Implementation for detailed loans report
+            console.log('Rendering loans report', data, sortBy);
+        }
+
+        function renderInstallmentsReport(data, sortBy) {
+            // Implementation for detailed installments report
+            console.log('Rendering installments report', data, sortBy);
+        }
+
+        function renderCustomersReport(data, sortBy) {
+            // Implementation for detailed customers report
+            console.log('Rendering customers report', data, sortBy);
+        }
+
+        function renderRisksReport(data, sortBy) {
+            // Implementation for risks report
+            console.log('Rendering risks report', data, sortBy);
+        }
+
+        function exportToPDF() {
+            showToast('جاري تصدير PDF...', 'info');
+            // PDF export implementation
+            setTimeout(() => {
+                showToast('تم التصدير بنجاح!', 'success');
+            }, 1000);
+        }
+
+        function exportToExcel() {
+            showToast('جاري تصدير Excel...', 'info');
+            // Excel export implementation
+            setTimeout(() => {
+                showToast('تم التصدير بنجاح!', 'success');
+            }, 1000);
+        }
+
+        function exportToCSV() {
+            showToast('جاري تصدير CSV...', 'info');
+            // CSV export implementation
+            setTimeout(() => {
+                showToast('تم التصدير بنجاح!', 'success');
+            }, 1000);
+        }
+
+        function refreshChart(type) {
+            showToast('جاري تحديث الرسم البياني...', 'info');
+            applyFilters();
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // Initialize
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
+    </script>
+</body>
+
+</html>

@@ -1,20 +1,35 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Institution } from '../../entities/institution.entity';
-import { User } from '../../entities/user.entity';
-import { Customer } from '../../entities/customer.entity';
-import { Loan } from '../../entities/loan.entity';
-import { Branch } from '../../entities/branch.entity';
-import { UsersService } from '../users/users.service';
-import { CreateInstitutionDto } from './dto/create-institution.dto';
-import { UpdateInstitutionDto } from './dto/update-institution.dto';
-import { PaginationDto, PaginatedResult } from '../../common/dto/pagination.dto';
-import { SubscriptionRequest, RequesterType, SubscriptionRequestStatus } from '../../entities/subscription-request.entity';
-import { SubscriptionPlan } from '../../entities/subscription-plan.entity';
-import { CashBox, CashBoxType } from '../../entities/cash-box.entity';
-import { CashBoxTransaction, TransactionType } from '../../entities/cash-box-transaction.entity';
-import { DataSource } from 'typeorm';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Institution } from "../../entities/institution.entity";
+import { User } from "../../entities/user.entity";
+import { Customer } from "../../entities/customer.entity";
+import { Loan } from "../../entities/loan.entity";
+import { Branch } from "../../entities/branch.entity";
+import { UsersService } from "../users/users.service";
+import { CreateInstitutionDto } from "./dto/create-institution.dto";
+import { UpdateInstitutionDto } from "./dto/update-institution.dto";
+import {
+  PaginationDto,
+  PaginatedResult,
+} from "../../common/dto/pagination.dto";
+import {
+  SubscriptionRequest,
+  RequesterType,
+  SubscriptionRequestStatus,
+} from "../../entities/subscription-request.entity";
+import { SubscriptionPlan } from "../../entities/subscription-plan.entity";
+import { CashBox, CashBoxType } from "../../entities/cash-box.entity";
+import {
+  CashBoxTransaction,
+  TransactionType,
+} from "../../entities/cash-box-transaction.entity";
+import { DataSource } from "typeorm";
+import { TelegramService } from "../telegram/telegram.service";
 
 @Injectable()
 export class InstitutionsService {
@@ -39,32 +54,43 @@ export class InstitutionsService {
     private transactionRepository: Repository<CashBoxTransaction>,
     private usersService: UsersService,
     private dataSource: DataSource,
-  ) { }
+    private telegramService: TelegramService,
+  ) {}
 
   async create(createInstitutionDto: CreateInstitutionDto): Promise<any> {
+    console.log(
+      "[InstitutionsService] Received registration request for:",
+      createInstitutionDto.name,
+    );
     const { planId, ...institutionData } = createInstitutionDto;
 
     // Check if taxId already exists in institutions
     if (institutionData.taxId) {
       const existingInstitution = await this.institutionsRepository.findOne({
-        where: { taxId: institutionData.taxId }
+        where: { taxId: institutionData.taxId },
       });
       if (existingInstitution) {
-        throw new BadRequestException('رقم السجل التجاري مسجل مسبقاً في مؤسسة أخرى');
+        throw new BadRequestException(
+          "رقم السجل التجاري مسجل مسبقاً في مؤسسة أخرى",
+        );
       }
 
       // Check if taxId exists in pending subscription requests
       const pendingRequests = await this.requestsRepository
-        .createQueryBuilder('request')
-        .where('request.status = :status', { status: SubscriptionRequestStatus.PENDING })
-        .andWhere('request.pending_data IS NOT NULL')
+        .createQueryBuilder("request")
+        .where("request.status = :status", {
+          status: SubscriptionRequestStatus.PENDING,
+        })
+        .andWhere("request.pending_data IS NOT NULL")
         .getMany();
 
       for (const req of pendingRequests) {
         try {
-          const pendingData = JSON.parse(req.pendingData || '{}');
+          const pendingData = JSON.parse(req.pendingData || "{}");
           if (pendingData.taxId === institutionData.taxId) {
-            throw new BadRequestException('رقم السجل التجاري مستخدم في طلب اشتراك قيد المراجعة');
+            throw new BadRequestException(
+              "رقم السجل التجاري مستخدم في طلب اشتراك قيد المراجعة",
+            );
           }
         } catch (e) {
           // Skip if pendingData is not valid JSON
@@ -75,10 +101,12 @@ export class InstitutionsService {
     // Check if admin email is already taken in the system
     if (createInstitutionDto.adminEmail) {
       const existingUser = await this.usersRepository.findOne({
-        where: { email: createInstitutionDto.adminEmail.trim() }
+        where: { email: createInstitutionDto.adminEmail.trim() },
       });
       if (existingUser) {
-        throw new BadRequestException('البريد الإلكتروني لمدير المؤسسة مسجل مسبقاً في النظام');
+        throw new BadRequestException(
+          "البريد الإلكتروني لمدير المؤسسة مسجل مسبقاً في النظام",
+        );
       }
     }
 
@@ -87,10 +115,10 @@ export class InstitutionsService {
     if (planId) {
       plan = await this.plansRepository.findOne({ where: { id: planId } });
       if (!plan) {
-        throw new BadRequestException('Invalid subscription plan ID');
+        throw new BadRequestException("Invalid subscription plan ID");
       }
     } else {
-      throw new BadRequestException('Subscription Plan is required');
+      throw new BadRequestException("Subscription Plan is required");
     }
 
     // Calculate dates
@@ -108,45 +136,108 @@ export class InstitutionsService {
       requestedStartDate: startDate,
       requestedEndDate: endDate,
       notes: `طلب اشتراك جديد لمؤسسة: ${institutionData.name}`,
-      pendingData: JSON.stringify(createInstitutionDto) // Store full data
+      pendingData: JSON.stringify(createInstitutionDto), // Store full data
     });
 
-    return await this.requestsRepository.save(request);
+    const savedRequest = await this.requestsRepository.save(request);
+
+    // Send Telegram notification for new institution requests
+    try {
+      await this.telegramService.sendNewRequestNotification({
+        requestId: savedRequest.id,
+        requestType: "new_institution",
+        entityName: institutionData.name,
+        entityType: "Institution",
+        taxId: institutionData.taxId,
+        entityEmail: institutionData.email,
+        entityPhone: institutionData.phoneNumber,
+        amount: plan.price,
+        planName: plan.name,
+        duration: plan.durationMonths,
+        adminName: createInstitutionDto.adminName,
+        adminEmail: createInstitutionDto.adminEmail,
+        adminPhone: createInstitutionDto.adminPhoneNumber,
+        customerNotes: `طلب تسجيل مؤسسة جديدة: ${institutionData.name}`,
+        email: createInstitutionDto.adminEmail,
+        phoneNumber: createInstitutionDto.adminPhoneNumber,
+      });
+    } catch (telegramError) {
+      console.error(
+        "Failed to send Telegram notification for new institution:",
+        telegramError,
+      );
+    }
+
+    return savedRequest;
   }
 
-  async findAll(paginationDto: PaginationDto): Promise<PaginatedResult<Institution>> {
+  /**
+   * Get all institutions with pagination
+   * OPTIMIZED: Uses Raw SQL for better performance
+   */
+  async findAll(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResult<Institution>> {
     const { page = 1, limit = 10 } = paginationDto;
-    const skip = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
-    const [institutions, total] = await this.institutionsRepository.findAndCount({
-      relations: ['branches'],
-      skip,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    const combinedQuery = `
+      WITH inst_data AS (
+        SELECT 
+          i.institution_id as "institutionId",
+          i.name,
+          i.tax_id as "taxId",
+          i.phone_number as "phoneNumber",
+          i.email,
+          i.max_users as "maxUsers",
+          i.can_create_branches as "canCreateBranches",
+          i.is_active as "isActive",
+          i.total_loans as "totalLoans",
+          i.maximum_loans as "maximumLoans",
+          i.expiration_date as "expirationDate",
+          i.created_at as "createdAt",
+          i.updated_at as "updatedAt",
+          (SELECT json_agg(json_build_object(
+            'branchId', b.branch_id,
+            'name', b.name,
+            'isActive', b.is_active
+          )) FROM branches b WHERE b.institution_id = i.institution_id) as branches
+        FROM institutions i
+      )
+      SELECT 
+        (SELECT COUNT(*) FROM inst_data) as total,
+        (SELECT json_agg(row_to_json(id)) FROM (
+          SELECT * FROM inst_data 
+          ORDER BY "createdAt" DESC
+          LIMIT ${limit} OFFSET ${offset}
+        ) id) as data
+    `;
+
+    const result = await this.dataSource.query(combinedQuery);
+    const row = result[0] || {};
 
     return {
-      data: institutions,
+      data: row.data || [],
       meta: {
-        total,
+        total: parseInt(row.total || 0),
         page,
         limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(parseInt(row.total || 0) / limit),
       },
     };
   }
 
   async search(searchTerm: string): Promise<Institution[]> {
     const queryBuilder = this.institutionsRepository
-      .createQueryBuilder('institution')
-      .leftJoinAndSelect('institution.branches', 'branches')
-      .orderBy('institution.createdAt', 'DESC');
+      .createQueryBuilder("institution")
+      .leftJoinAndSelect("institution.branches", "branches")
+      .orderBy("institution.createdAt", "DESC");
 
     if (searchTerm && searchTerm.trim()) {
       const term = `%${searchTerm.trim()}%`;
       queryBuilder.where(
-        '(institution.name ILIKE :term OR institution.phoneNumber ILIKE :term OR CAST(institution.institutionId AS TEXT) ILIKE :term)',
-        { term }
+        "(institution.name ILIKE :term OR institution.phoneNumber ILIKE :term OR CAST(institution.institutionId AS TEXT) ILIKE :term)",
+        { term },
       );
     }
 
@@ -156,7 +247,7 @@ export class InstitutionsService {
   async findOne(id: number): Promise<Institution> {
     const institution = await this.institutionsRepository.findOne({
       where: { institutionId: id },
-      relations: ['branches'],
+      relations: ["branches"],
     });
 
     if (!institution) {
@@ -166,18 +257,24 @@ export class InstitutionsService {
     return institution;
   }
 
-  async update(id: number, updateInstitutionDto: UpdateInstitutionDto): Promise<Institution> {
+  async update(
+    id: number,
+    updateInstitutionDto: UpdateInstitutionDto,
+  ): Promise<Institution> {
     const institution = await this.findOne(id);
 
     // If reducing maxUsers, check current user count
-    if (updateInstitutionDto.maxUsers !== undefined && updateInstitutionDto.maxUsers < institution.maxUsers) {
+    if (
+      updateInstitutionDto.maxUsers !== undefined &&
+      updateInstitutionDto.maxUsers < institution.maxUsers
+    ) {
       const userCount = await this.usersRepository.count({
         where: { institutionId: id },
       });
 
       if (userCount > updateInstitutionDto.maxUsers) {
         throw new BadRequestException(
-          `Cannot reduce max users to ${updateInstitutionDto.maxUsers}. Current user count: ${userCount}`
+          `Cannot reduce max users to ${updateInstitutionDto.maxUsers}. Current user count: ${userCount}`,
         );
       }
     }
@@ -190,21 +287,33 @@ export class InstitutionsService {
     const institution = await this.findOne(id);
 
     // Check for branches
-    const branchCount = await this.branchesRepository.count({ where: { institutionId: id } });
+    const branchCount = await this.branchesRepository.count({
+      where: { institutionId: id },
+    });
     if (branchCount > 0) {
-      throw new BadRequestException(`لا يمكن حذف المؤسسة لوجود ${branchCount} فروع مرتبطة بها. يرجى حذف الفروع أولاً.`);
+      throw new BadRequestException(
+        `لا يمكن حذف المؤسسة لوجود ${branchCount} فروع مرتبطة بها. يرجى حذف الفروع أولاً.`,
+      );
     }
 
     // Check for loans
-    const loanCount = await this.loansRepository.count({ where: { institutionId: id } });
+    const loanCount = await this.loansRepository.count({
+      where: { institutionId: id },
+    });
     if (loanCount > 0) {
-      throw new BadRequestException(`لا يمكن حذف المؤسسة لوجود سجلات قروض مرتبطة بها.`);
+      throw new BadRequestException(
+        `لا يمكن حذف المؤسسة لوجود سجلات قروض مرتبطة بها.`,
+      );
     }
 
     // Check for customers
-    const customerCount = await this.customersRepository.count({ where: { institutionId: id } });
+    const customerCount = await this.customersRepository.count({
+      where: { institutionId: id },
+    });
     if (customerCount > 0) {
-      throw new BadRequestException(`لا يمكن حذف المؤسسة لوجود عملاء مرتبطين بها.`);
+      throw new BadRequestException(
+        `لا يمكن حذف المؤسسة لوجود عملاء مرتبطين بها.`,
+      );
     }
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -214,14 +323,21 @@ export class InstitutionsService {
     try {
       // Find all paid approved requests to reverse their cash box effect
       const paidRequests = await queryRunner.manager.find(SubscriptionRequest, {
-        where: { institutionId: id, status: SubscriptionRequestStatus.APPROVED, isFree: false }
+        where: {
+          institutionId: id,
+          status: SubscriptionRequestStatus.APPROVED,
+          isFree: false,
+        },
       });
 
-      const totalRefund = paidRequests.reduce((sum, req) => sum + Number(req.amount), 0);
+      const totalRefund = paidRequests.reduce(
+        (sum, req) => sum + Number(req.amount),
+        0,
+      );
 
       if (totalRefund > 0) {
         const adminCashBox = await queryRunner.manager.findOne(CashBox, {
-          where: { boxType: CashBoxType.ADMIN }
+          where: { boxType: CashBoxType.ADMIN },
         });
 
         if (adminCashBox) {
@@ -245,7 +361,9 @@ export class InstitutionsService {
 
       // If we reach here, we can safely delete users and subscription requests first
       await queryRunner.manager.delete(User, { institutionId: id });
-      await queryRunner.manager.delete(SubscriptionRequest, { institutionId: id });
+      await queryRunner.manager.delete(SubscriptionRequest, {
+        institutionId: id,
+      });
 
       // Finally delete the institution
       await queryRunner.manager.remove(Institution, institution);
@@ -265,103 +383,94 @@ export class InstitutionsService {
     return await this.institutionsRepository.save(institution);
   }
 
+  /**
+   * Get institution statistics
+   * OPTIMIZED: Single Raw SQL query instead of 4+ queries
+   */
   async getStatistics(id: number) {
-    const institution = await this.findOne(id);
+    const statsQuery = `
+      SELECT
+        i.institution_id as "institutionId",
+        i.name,
+        i.max_users as "maxUsers",
+        i.is_active as "isActive",
+        (SELECT COUNT(*) FROM users u WHERE u.institution_id = $1 AND u.is_active = true) as "activeUsers",
+        (SELECT COUNT(*) FROM branches b WHERE b.institution_id = $1) as "totalBranches",
+        (SELECT COUNT(*) FROM customers c WHERE c.institution_id = $1) as "totalCustomers",
+        (SELECT COUNT(*) FROM loans l 
+          LEFT JOIN branches b ON l.branch_id = b.branch_id
+          WHERE b.institution_id = $1 OR l.institution_id = $1) as "totalLoans",
+        (SELECT COUNT(*) FROM loans l 
+          LEFT JOIN branches b ON l.branch_id = b.branch_id
+          WHERE (b.institution_id = $1 OR l.institution_id = $1) AND l.status = 'Active') as "activeLoans",
+        (SELECT COUNT(*) FROM loans l 
+          LEFT JOIN branches b ON l.branch_id = b.branch_id
+          WHERE (b.institution_id = $1 OR l.institution_id = $1) AND l.status = 'Late') as "lateLoans"
+      FROM institutions i
+      WHERE i.institution_id = $1
+    `;
 
-    // Count active users for this institution
-    const activeUsers = await this.usersRepository.count({
-      where: { institutionId: id, isActive: true },
-    });
+    const result = await this.dataSource.query(statsQuery, [id]);
 
-    // Count total branches for this institution
-    const totalBranches = institution.branches?.length || 0;
-
-    // Count total customers for this institution
-    const totalCustomers = await this.customersRepository.count({
-      where: { institutionId: id },
-    });
-
-    // Count total loans for this institution (through branches OR direct institution loans)
-    const branchIds = institution.branches?.map(b => b.branchId) || [];
-    let totalLoans = 0;
-    let activeLoans = 0;
-    let lateLoans = 0;
-
-    const loanQueryBuilder = this.loansRepository.createQueryBuilder('loan');
-
-    if (branchIds.length > 0) {
-      // Institution with branches: count both branch loans and direct institution loans
-      loanQueryBuilder.where(
-        '(loan.branchId IN (:...branchIds) OR loan.institutionId = :institutionId)',
-        { branchIds, institutionId: id }
-      );
-    } else {
-      // Institution without branches: count only direct institution loans
-      loanQueryBuilder.where('loan.institutionId = :institutionId', { institutionId: id });
+    if (!result || result.length === 0) {
+      throw new NotFoundException(`Institution with ID ${id} not found`);
     }
 
-    totalLoans = await loanQueryBuilder.getCount();
-
-    // Count active loans
-    activeLoans = await loanQueryBuilder
-      .clone()
-      .andWhere("loan.status = 'Active'")
-      .getCount();
-
-    // Count late loans
-    lateLoans = await loanQueryBuilder
-      .clone()
-      .andWhere("loan.status = 'Late'")
-      .getCount();
+    const stats = result[0];
+    const activeUsers = parseInt(stats.activeUsers || 0);
 
     return {
-      institutionId: institution.institutionId,
-      name: institution.name,
+      institutionId: stats.institutionId,
+      name: stats.name,
       activeUsers,
-      totalBranches,
-      totalCustomers,
-      totalLoans,
-      activeLoans,
-      lateLoans,
-      maxUsers: institution.maxUsers,
-      availableUserSlots: institution.maxUsers - activeUsers,
-      isActive: institution.isActive,
+      totalBranches: parseInt(stats.totalBranches || 0),
+      totalCustomers: parseInt(stats.totalCustomers || 0),
+      totalLoans: parseInt(stats.totalLoans || 0),
+      activeLoans: parseInt(stats.activeLoans || 0),
+      lateLoans: parseInt(stats.lateLoans || 0),
+      maxUsers: stats.maxUsers,
+      availableUserSlots: stats.maxUsers - activeUsers,
+      isActive: stats.isActive,
     };
   }
 
   /**
    * Check if a tax ID is already in use by an existing institution or pending request
    */
-  async checkTaxIdExists(taxId: string): Promise<{ exists: boolean; message?: string }> {
-    if (!taxId || taxId.trim() === '') {
+  async checkTaxIdExists(
+    taxId: string,
+  ): Promise<{ exists: boolean; message?: string }> {
+    if (!taxId || taxId.trim() === "") {
       return { exists: false };
     }
 
     // Check in existing institutions
     const existingInstitution = await this.institutionsRepository.findOne({
-      where: { taxId: taxId.trim() }
+      where: { taxId: taxId.trim() },
     });
     if (existingInstitution) {
       return {
         exists: true,
-        message: 'رقم السجل التجاري مسجل مسبقاً في مؤسسة أخرى'
+        message: "رقم السجل التجاري مسجل مسبقاً في مؤسسة أخرى",
       };
     }
 
     // Check in pending subscription requests
     const pendingRequests = await this.requestsRepository
-      .createQueryBuilder('request')
-      .where('request.status = :status', { status: SubscriptionRequestStatus.PENDING })
-      .andWhere('request.pending_data IS NOT NULL')
+      .createQueryBuilder("request")
+      .where("request.status = :status", {
+        status: SubscriptionRequestStatus.PENDING,
+      })
+      .andWhere("request.pending_data IS NOT NULL")
       .getMany();
 
     for (const req of pendingRequests) {
       try {
-        const pendingData = JSON.parse(req.pendingData || '{}');
+        const pendingData = JSON.parse(req.pendingData || "{}");
         if (pendingData.taxId && pendingData.taxId.trim() === taxId.trim()) {
           return {
             exists: true,
-            message: 'رقم السجل التجاري مستخدم في طلب اشتراك قيد المراجعة'
+            message: "رقم السجل التجاري مستخدم في طلب اشتراك قيد المراجعة",
           };
         }
       } catch (e) {

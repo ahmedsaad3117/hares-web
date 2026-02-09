@@ -1,4 +1,4 @@
-import { TrustStatus } from '../../../entities/trust-status.enum';
+import { TrustStatus } from "../../../entities/trust-status.enum";
 
 export class CustomerResponseDto {
   customerId: number;
@@ -17,4 +17,5 @@ export class CustomerResponseDto {
   deletedByName?: string;
   branchName?: string;
   isLinked?: boolean;
+  loans?: any[];
 }

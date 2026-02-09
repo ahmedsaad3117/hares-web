@@ -1,7 +1,6 @@
-
 const { Client } = require('pg');
 
-async function checkUser() {
+async function checkSettings() {
     const client = new Client({
         host: 'localhost',
         port: 5432,
@@ -12,13 +11,13 @@ async function checkUser() {
 
     try {
         await client.connect();
-        const res = await client.query("SELECT email, \"isActive\", \"activeSessionId\" FROM users WHERE email = 'test1@example.com'");
-        console.log(JSON.stringify(res.rows[0], null, 2));
+        const res = await client.query('SELECT * FROM telegram_settings');
+        console.log(JSON.stringify(res.rows, null, 2));
     } catch (err) {
-        console.error(err);
+        console.error('Error executing query', err.stack);
     } finally {
         await client.end();
     }
 }
 
-checkUser();
+checkSettings();

@@ -1,4 +1,12 @@
-import { IsOptional, IsString, IsNumber, IsBoolean, Min, IsDateString, IsEmail } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsBoolean,
+  Min,
+  IsDateString,
+  IsEmail,
+} from "class-validator";
 
 export class UpdateInstitutionDto {
   @IsOptional()
@@ -14,7 +22,7 @@ export class UpdateInstitutionDto {
   phoneNumber?: string;
 
   @IsOptional()
-  @IsEmail()
+  @IsEmail({}, { message: "البريد الإلكتروني المدخل غير صحيح" })
   email?: string;
 
   @IsOptional()

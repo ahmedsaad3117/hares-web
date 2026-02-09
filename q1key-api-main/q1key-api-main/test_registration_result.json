@@ -1,0 +1,37 @@
+{
+  "status": 201,
+  "data": {
+    "requesterType": "Institution",
+    "planId": 1,
+    "amount": "185.00",
+    "status": "Pending",
+    "requestedStartDate": "2026-02-03T09:13:59.413Z",
+    "requestedEndDate": "2026-03-03T09:13:59.413Z",
+    "notes": "طلب اشتراك جديد لمؤسسة: مؤسسة بدون أزرار 1770110039314",
+    "pendingData": "{\"name\":\"مؤسسة بدون أزرار 1770110039314\",\"taxId\":\"T1770110039314\",\"phoneNumber\":\"0501234567\",\"email\":\"test1770110039314@example.com\",\"adminName\":\"مدير النظام\",\"adminEmail\":\"admin1770110039314@example.com\",\"adminPassword\":\"password123\",\"adminPhoneNumber\":\"0501234567\",\"adminNationalId\":\"ID1770110039314\",\"planId\":1}",
+    "institutionId": null,
+    "branchId": null,
+    "customDurationMonths": null,
+    "freeReason": null,
+    "adminNotes": null,
+    "processedBy": null,
+    "processedAt": null,
+    "cashBoxTransactionId": null,
+    "id": 47,
+    "isFree": false,
+    "createdAt": "2026-02-03T09:13:59.414Z",
+    "updatedAt": "2026-02-03T09:13:59.414Z"
+  },
+  "payload": {
+    "name": "مؤسسة بدون أزرار 1770110039314",
+    "taxId": "T1770110039314",
+    "phoneNumber": "0501234567",
+    "email": "test1770110039314@example.com",
+    "adminName": "مدير النظام",
+    "adminEmail": "admin1770110039314@example.com",
+    "adminPassword": "password123",
+    "adminPhoneNumber": "0501234567",
+    "adminNationalId": "ID1770110039314",
+    "planId": 1
+  }
+}

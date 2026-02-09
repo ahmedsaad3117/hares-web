@@ -1,15 +1,15 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
-import { CustomerNotesService } from './customer-notes.service';
-import { CustomerNote } from './entities/customer-note.entity';
-import { CreateCustomerNoteDto } from './dto/create-customer-note.dto';
-import { UpdateCustomerNoteDto } from './dto/update-customer-note.dto';
-import { NoteCategory } from './entities/note-category.enum';
-import { PaginationDto } from '../../common/dto/pagination.dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { NotFoundException } from "@nestjs/common";
+import { CustomerNotesService } from "./customer-notes.service";
+import { CustomerNote } from "./entities/customer-note.entity";
+import { CreateCustomerNoteDto } from "./dto/create-customer-note.dto";
+import { UpdateCustomerNoteDto } from "./dto/update-customer-note.dto";
+import { NoteCategory } from "./entities/note-category.enum";
+import { PaginationDto } from "../../common/dto/pagination.dto";
 
-describe('CustomerNotesService', () => {
+describe("CustomerNotesService", () => {
   let service: CustomerNotesService;
   let repository: Repository<CustomerNote>;
 
@@ -42,10 +42,10 @@ describe('CustomerNotesService', () => {
     jest.clearAllMocks();
   });
 
-  describe('create', () => {
+  describe("create", () => {
     const createDto: CreateCustomerNoteDto = {
       customer_id: 1,
-      note_text: 'Test note for customer',
+      note_text: "Test note for customer",
       category: NoteCategory.GENERAL,
       branch_id: 1,
     };
@@ -54,10 +54,10 @@ describe('CustomerNotesService', () => {
     const mockUser = {
       userId: 5,
       branchId: 1,
-      role: { roleName: 'Branch' },
+      role: { roleName: "Branch" },
     };
 
-    it('should create a customer note with auto-filled audit fields', async () => {
+    it("should create a customer note with auto-filled audit fields", async () => {
       const mockCreatedAt = new Date();
       const mockNote = {
         id: 1,
@@ -88,10 +88,10 @@ describe('CustomerNotesService', () => {
       expect(result.created_at).toBe(mockCreatedAt);
     });
 
-    it('should create note with default GENERAL category if not provided', async () => {
+    it("should create note with default GENERAL category if not provided", async () => {
       const dtoWithoutCategory = {
         customer_id: 1,
-        note_text: 'Test note without category',
+        note_text: "Test note without category",
       };
 
       const mockNote = {
@@ -107,21 +107,24 @@ describe('CustomerNotesService', () => {
       mockRepository.create.mockReturnValue(mockNote);
       mockRepository.save.mockResolvedValue(mockNote);
 
-      const result = await service.create(dtoWithoutCategory as CreateCustomerNoteDto, mockUser);
+      const result = await service.create(
+        dtoWithoutCategory as CreateCustomerNoteDto,
+        mockUser,
+      );
 
       expect(result.category).toBe(NoteCategory.GENERAL);
     });
   });
 
-  describe('findAll', () => {
+  describe("findAll", () => {
     const pagination: PaginationDto = { page: 1, limit: 10 };
 
-    it('should return paginated customer notes with metadata', async () => {
+    it("should return paginated customer notes with metadata", async () => {
       const mockNotes = [
         {
           id: 1,
           customer_id: 1,
-          note_text: 'First note',
+          note_text: "First note",
           category: NoteCategory.GENERAL,
           created_by: 5,
           created_at: new Date(),
@@ -129,7 +132,7 @@ describe('CustomerNotesService', () => {
         {
           id: 2,
           customer_id: 2,
-          note_text: 'Second note',
+          note_text: "Second note",
           category: NoteCategory.FOLLOW_UP,
           created_by: 5,
           created_at: new Date(),
@@ -141,10 +144,10 @@ describe('CustomerNotesService', () => {
       const result = await service.findAll(pagination);
 
       expect(mockRepository.findAndCount).toHaveBeenCalledWith({
-        relations: ['customer', 'user', 'branch'],
+        relations: ["customer", "user", "branch"],
         skip: 0,
         take: 10,
-        order: { created_at: 'DESC' },
+        order: { created_at: "DESC" },
       });
       expect(result.data).toEqual(mockNotes);
       expect(result.meta).toEqual({
@@ -155,22 +158,22 @@ describe('CustomerNotesService', () => {
       });
     });
 
-    it('should handle pagination correctly for page 2', async () => {
+    it("should handle pagination correctly for page 2", async () => {
       const paginationPage2: PaginationDto = { page: 2, limit: 10 };
       mockRepository.findAndCount.mockResolvedValue([[], 15]);
 
       const result = await service.findAll(paginationPage2);
 
       expect(mockRepository.findAndCount).toHaveBeenCalledWith({
-        relations: ['customer', 'user', 'branch'],
+        relations: ["customer", "user", "branch"],
         skip: 10,
         take: 10,
-        order: { created_at: 'DESC' },
+        order: { created_at: "DESC" },
       });
       expect(result.meta.totalPages).toBe(2);
     });
 
-    it('should return empty array when no notes exist', async () => {
+    it("should return empty array when no notes exist", async () => {
       mockRepository.findAndCount.mockResolvedValue([[], 0]);
 
       const result = await service.findAll(pagination);
@@ -181,16 +184,16 @@ describe('CustomerNotesService', () => {
     });
   });
 
-  describe('findOne', () => {
-    it('should return a customer note by id with relations', async () => {
+  describe("findOne", () => {
+    it("should return a customer note by id with relations", async () => {
       const mockNote = {
         id: 1,
         customer_id: 1,
-        note_text: 'Test note',
+        note_text: "Test note",
         category: NoteCategory.GENERAL,
-        customer: { customerId: 1, name: 'John Doe' },
-        user: { userId: 5, name: 'Admin User' },
-        branch: { branchId: 1, name: 'Main Branch' },
+        customer: { customerId: 1, name: "John Doe" },
+        user: { userId: 5, name: "Admin User" },
+        branch: { branchId: 1, name: "Main Branch" },
       };
 
       mockRepository.findOne.mockResolvedValue(mockNote);
@@ -199,37 +202,37 @@ describe('CustomerNotesService', () => {
 
       expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['customer', 'user', 'branch'],
+        relations: ["customer", "user", "branch"],
       });
       expect(result).toEqual(mockNote);
     });
 
-    it('should throw NotFoundException when note does not exist', async () => {
+    it("should throw NotFoundException when note does not exist", async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
       await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
       await expect(service.findOne(999)).rejects.toThrow(
-        'Customer note with ID 999 not found',
+        "Customer note with ID 999 not found",
       );
     });
   });
 
-  describe('findByCustomer', () => {
+  describe("findByCustomer", () => {
     const customerId = 1;
     const pagination: PaginationDto = { page: 1, limit: 10 };
 
-    it('should return paginated notes for specific customer', async () => {
+    it("should return paginated notes for specific customer", async () => {
       const mockNotes = [
         {
           id: 1,
           customer_id: customerId,
-          note_text: 'First note for customer',
+          note_text: "First note for customer",
           category: NoteCategory.GENERAL,
         },
         {
           id: 2,
           customer_id: customerId,
-          note_text: 'Second note for customer',
+          note_text: "Second note for customer",
           category: NoteCategory.COMPLAINT,
         },
       ];
@@ -240,16 +243,16 @@ describe('CustomerNotesService', () => {
 
       expect(mockRepository.findAndCount).toHaveBeenCalledWith({
         where: { customer_id: customerId },
-        relations: ['customer', 'user', 'branch'],
+        relations: ["customer", "user", "branch"],
         skip: 0,
         take: 10,
-        order: { created_at: 'DESC' },
+        order: { created_at: "DESC" },
       });
       expect(result.data).toEqual(mockNotes);
       expect(result.meta.total).toBe(2);
     });
 
-    it('should return empty array when customer has no notes', async () => {
+    it("should return empty array when customer has no notes", async () => {
       mockRepository.findAndCount.mockResolvedValue([[], 0]);
 
       const result = await service.findByCustomer(customerId, pagination);
@@ -259,22 +262,22 @@ describe('CustomerNotesService', () => {
     });
   });
 
-  describe('update', () => {
+  describe("update", () => {
     const noteId = 1;
     const userId = 5;
     const updateDto: UpdateCustomerNoteDto = {
-      note_text: 'Updated note text',
+      note_text: "Updated note text",
       category: NoteCategory.FOLLOW_UP,
     };
 
-    it('should update note with auto-filled audit fields', async () => {
+    it("should update note with auto-filled audit fields", async () => {
       const existingNote = {
         id: noteId,
         customer_id: 1,
-        note_text: 'Original text',
+        note_text: "Original text",
         category: NoteCategory.GENERAL,
         created_by: 3,
-        created_at: new Date('2025-01-01'),
+        created_at: new Date("2025-01-01"),
         last_edited_by: null,
         edited_at: null,
       };
@@ -305,7 +308,7 @@ describe('CustomerNotesService', () => {
       expect(result.edited_at).toBe(mockEditedAt);
     });
 
-    it('should throw NotFoundException when note does not exist', async () => {
+    it("should throw NotFoundException when note does not exist", async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
       await expect(service.update(999, updateDto, userId)).rejects.toThrow(
@@ -313,18 +316,18 @@ describe('CustomerNotesService', () => {
       );
     });
 
-    it('should update only provided fields', async () => {
+    it("should update only provided fields", async () => {
       const existingNote = {
         id: noteId,
         customer_id: 1,
-        note_text: 'Original text',
+        note_text: "Original text",
         category: NoteCategory.GENERAL,
         created_by: 3,
-        created_at: new Date('2025-01-01'),
+        created_at: new Date("2025-01-01"),
       };
 
       const partialUpdate: UpdateCustomerNoteDto = {
-        note_text: 'Only text updated',
+        note_text: "Only text updated",
       };
 
       mockRepository.findOne.mockResolvedValue(existingNote);
@@ -342,12 +345,12 @@ describe('CustomerNotesService', () => {
     });
   });
 
-  describe('remove', () => {
-    it('should delete a customer note', async () => {
+  describe("remove", () => {
+    it("should delete a customer note", async () => {
       const mockNote = {
         id: 1,
         customer_id: 1,
-        note_text: 'Note to be deleted',
+        note_text: "Note to be deleted",
       };
 
       mockRepository.findOne.mockResolvedValue(mockNote);
@@ -359,7 +362,7 @@ describe('CustomerNotesService', () => {
       expect(mockRepository.remove).toHaveBeenCalledWith(mockNote);
     });
 
-    it('should throw NotFoundException when note does not exist', async () => {
+    it("should throw NotFoundException when note does not exist", async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
       await expect(service.remove(999)).rejects.toThrow(NotFoundException);

@@ -119,7 +119,8 @@
             currentFilters.customerId,
             page,
             pageSize,
-            currentFilters.searchType
+            currentFilters.searchType,
+            currentFilters.search
           );
         } else {
           response = await api.searchLogs.getAll(
@@ -176,10 +177,10 @@
       }
 
       const typeColors = {
-        view: '#3b82f6',
-        search: '#8b5cf6',
-        edit: '#f59e0b',
-        list: '#10b981'
+        view: '#0284c7',   // أزرق قوي
+        search: '#7c3aed', // بنفسجي ملكي
+        edit: '#d97706',   // برتقالي دافئ
+        list: '#059669'    // أخضر زمردي
       };
 
       const logsHTML = logs.map(log => {
@@ -213,7 +214,7 @@
             </div>
           </td>
           <td>
-            <span style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: ${typeColor}20; color: ${typeColor}; border: 1px solid ${typeColor}40;">
+            <span style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: ${typeColor}; color: white; border: 1px solid ${typeColor};">
               ${t('search_logs.' + log.searchType) || log.searchType}
             </span>
           </td>
@@ -280,8 +281,8 @@
 
     function formatDate(dateString) {
       const date = new Date(dateString);
-      return date.toLocaleString('en-US', {
-        month: 'short',
+      return date.toLocaleString('ar-SA', {
+        month: 'long',
         day: 'numeric',
         year: 'numeric',
         hour: '2-digit',

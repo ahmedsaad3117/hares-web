@@ -1,157 +1,590 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Installments | Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css?v=11">
+  <title>الأقساط | منصة Q1KEY</title>
+  <link rel="stylesheet" href="../css/styles.css?v=12">
   <script src="../js/i18n.js"></script>
+  <script>
+    (function () {
+      var lang = localStorage.getItem('locale') || 'ar';
+      document.documentElement.setAttribute('lang', lang);
+      document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+      if (lang === 'ar') document.documentElement.classList.add('rtl');
+    })();
+  </script>
+
+  <style>
+    /* Custom Premium Styles for Installments Page */
+    .installments-hero {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 24px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .installments-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(40px);
+    }
+
+    .installments-hero h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Stats Cards with Modern Design */
+    .stats-grid-premium {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card-premium {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-card-premium:hover {
+      transform: translateY(-6px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 20px 40px rgba(99, 102, 241, 0.25);
+    }
+
+    .stat-card-premium::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, currentColor, transparent);
+      opacity: 0.5;
+    }
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-icon::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.1));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .stat-card-premium:hover .stat-icon::before {
+      opacity: 1;
+    }
+
+    .stat-value {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-bottom: 0.25rem;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 500;
+    }
+
+    /* Search and Filter Section */
+    .filter-section {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-box-premium {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-box-premium input {
+      width: 100%;
+      padding: 1rem 1.25rem 1rem 3.5rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1.5px solid rgba(99, 102, 241, 0.25);
+      border-radius: 16px;
+      color: white;
+      font-size: 0.975rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .search-box-premium input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 8px 24px rgba(99, 102, 241, 0.2);
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .search-box-premium .search-icon {
+      position: absolute;
+      left: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(99, 102, 241, 0.7);
+      font-size: 1.25rem;
+      pointer-events: none;
+      transition: color 0.3s;
+    }
+
+    .search-box-premium input:focus+.search-icon {
+      color: #6366f1;
+    }
+
+    /* Modern Filter Buttons */
+    .filter-buttons {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+      color: white;
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
+      border-color: #6366f1;
+      color: white;
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    /* Installments Grid (replacing table) */
+    .installments-grid {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .installment-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .installment-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .installment-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 6px;
+      height: 100%;
+      background: linear-gradient(180deg, currentColor 0%, transparent 100%);
+    }
+
+    .installment-card.status-paid::before {
+      color: #10b981;
+    }
+
+    .installment-card.status-pending::before {
+      color: #f59e0b;
+    }
+
+    .installment-card.status-overdue::before {
+      color: #ef4444;
+    }
+
+    .installment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.25rem;
+      gap: 1rem;
+    }
+
+    .installment-customer {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .customer-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1.15rem;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+      flex-shrink: 0;
+    }
+
+    .customer-info h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: white;
+      margin: 0;
+      margin-bottom: 0.25rem;
+    }
+
+    .customer-meta {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-badge-premium {
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .status-badge-premium.paid {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.25) 100%);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .status-badge-premium.pending {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(251, 191, 36, 0.25) 100%);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .status-badge-premium.overdue {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.25) 100%);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .installment-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      padding: 1.25rem 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .detail-label {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+      font-size: 1rem;
+      color: white;
+      font-weight: 600;
+    }
+
+    .detail-value.amount {
+      font-size: 1.35rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .installment-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      flex: 1;
+      min-width: 140px;
+      padding: 0.875rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border: none;
+      white-space: nowrap;
+    }
+
+    .action-btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .action-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .action-btn-secondary {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .action-btn-secondary:hover {
+      background: rgba(99, 102, 241, 0.25);
+      border-color: #6366f1;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.3;
+    }
+
+    /* Loading Animation */
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+      }
+    }
+
+    .loading-card {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    /* Pagination Premium */
+    .pagination-premium {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 2rem;
+      padding: 1.5rem 0;
+    }
+
+    .pagination-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+
+    .pagination-btn:hover:not(.active):not(:disabled) {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .pagination-btn.active {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-color: #6366f1;
+      color: white;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .installments-hero {
+        padding: 1.75rem;
+      }
+
+      .installments-hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .stats-grid-premium {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .installment-details {
+        grid-template-columns: 1fr;
+      }
+
+      .installment-actions {
+        flex-direction: column;
+      }
+
+      .action-btn {
+        min-width: 100%;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <div class="layout">
-    <!-- Sidebar -->
-    <div id="sidebarContainer"></div>
+  <div id="sidebar"></div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Header -->
-      <div id="headerContainer"></div>
+  <div class="main-content">
+    <div id="header"></div>
 
-      <!-- Page Content -->
-      <div class="page-wrapper">
-        <div class="container">
-          <!-- Page Header -->
-          <div class="flex items-center justify-between mb-6"
-            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div>
-              <h1 class="text-3xl font-bold text-white" data-i18n-key="installments.title">Payment Installments</h1>
-              <p class="text-muted mt-1" data-i18n-key="installments.subtitle">Track and manage loan payment schedules
+    <div class="page-content">
+      <div class="container">
+        <!-- Hero Section -->
+        <div class="installments-hero">
+          <h1 data-i18n-key="installments.title">💰 إدارة الأقساط</h1>
+          <p style="color: rgba(255, 255, 255, 0.8); font-size: 1.05rem; margin: 0; position: relative; z-index: 1;"
+            data-i18n-key="installments.subtitle">
+            تتبع وإدارة جميع جداول سداد القروض بسهولة
+          </p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid-premium" id="summaryCards">
+          <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="filter-section">
+          <div class="search-box-premium">
+            <input type="text" id="searchInput" placeholder="🔍 ابحث بالاسم، الهاتف، أو المبلغ..."
+              data-i18n-placeholder="installments.search_placeholder" />
+            <span class="search-icon">🔍</span>
+          </div>
+
+          <div class="filter-buttons">
+            <button id="filter-all" onclick="filterByStatus('all')" class="filter-btn active">
+              📋 <span data-i18n-key="installments.all_installments">جميع الأقساط</span>
+            </button>
+            <button id="filter-this-month" onclick="filterByStatus('this-month')" class="filter-btn">
+              📅 <span data-i18n-key="installments.due_this_month">هذا الشهر</span>
+            </button>
+            <button id="filter-pending" onclick="filterByStatus('pending')" class="filter-btn">
+              ⏳ <span data-i18n-key="installments.pending">معلق</span>
+            </button>
+            <button id="filter-paid" onclick="filterByStatus('paid')" class="filter-btn">
+              ✅ <span data-i18n-key="installments.paid">مدفوع</span>
+            </button>
+            <button id="filter-overdue" onclick="filterByStatus('overdue')" class="filter-btn">
+              ⚠️ <span data-i18n-key="installments.overdue">متأخر</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Installments Grid -->
+        <div class="installments-grid" id="installmentsGrid">
+          <!-- Loading State -->
+          <div class="installment-card loading-card">
+            <div style="text-align: center; padding: 2rem;">
+              <div class="spinner"></div>
+              <p style="margin-top: 1rem; color: rgba(255, 255, 255, 0.6);" data-i18n-key="installments.loading">
+                جاري تحميل الأقساط...
               </p>
             </div>
           </div>
-
-          <!-- Summary Cards -->
-          <div class="grid grid-cols-4 gap-4 mb-6" id="summaryCards">
-            <!-- Will be populated by JavaScript -->
-          </div>
-
-          <!-- Search and Filters -->
-          <div class="glass-card p-4 mb-6" style="padding: 1rem; margin-bottom: 1.5rem;">
-            <!-- Search Input -->
-            <div class="form-group" style="margin-bottom: 1rem;">
-              <input type="text" id="searchInput" data-i18n-placeholder="installments.search_placeholder"
-                placeholder="Search by customer name, phone, ID, or amount..." class="input" style="width: 100%;" />
-            </div>
-
-            <!-- Status Filters -->
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-              <button id="filter-all" onclick="filterByStatus('all')" class="btn"
-                style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #fff;">
-                📋 <span data-i18n-key="installments.all_installments">All Installments</span>
-              </button>
-              <button id="filter-this-month" onclick="filterByStatus('this-month')" class="btn"
-                style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-                📅 <span data-i18n-key="installments.due_this_month">Due This Month</span>
-              </button>
-              <button id="filter-pending" onclick="filterByStatus('Pending')" class="btn"
-                style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-                ⏳ <span data-i18n-key="installments.pending">Pending</span>
-              </button>
-              <button id="filter-paid" onclick="filterByStatus('Paid')" class="btn"
-                style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-                ✅ <span data-i18n-key="installments.paid">Paid</span>
-              </button>
-              <button id="filter-overdue" onclick="filterByStatus('Overdue')" class="btn"
-                style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff;">
-                ⚠️ <span data-i18n-key="installments.overdue">Overdue</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Installments Table -->
-          <div class="glass-card">
-            <div class="table-container">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th data-i18n-key="installments.loan">Loan</th>
-                    <th data-i18n-key="installments.customer">Customer</th>
-                    <th data-i18n-key="customers.table.phone">Phone</th>
-                    <th data-i18n-key="installments.branch">Branch</th>
-                    <th data-i18n-key="installments.amount">Amount</th>
-                    <th data-i18n-key="installments.due_date">Due Date</th>
-                    <th data-i18n-key="installments.status">Status</th>
-                    <th data-i18n-key="installments.paid_date">Paid Date</th>
-                    <th data-i18n-key="installments.actions">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="installmentsTableBody">
-                  <tr>
-                    <td colspan="10" style="text-align: center; padding: 3rem;">
-                      <div class="spinner"></div>
-                      <p class="text-muted mt-2" data-i18n-key="installments.loading">Loading installments...</p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Pagination -->
-            <div id="paginationContainer" class="pagination-container"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Payment Modal -->
-  <div id="paymentModal" class="modal-overlay" style="display: none;">
-    <div class="modal-content" style="max-width: 500px;">
-      <div class="modal-header">
-        <h2 class="modal-title" data-i18n-key="installments.process_payment">Process Payment</h2>
-        <button onclick="closePaymentModal()" class="modal-close">&times;</button>
-      </div>
-
-      <div class="modal-body">
-        <div id="errorMessage" class="alert alert-danger hidden"></div>
-
-        <div class="form-group">
-          <label class="label" data-i18n-key="installments.installment_details">Installment Details</label>
-          <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px; margin-bottom: 1rem;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span class="text-muted" data-i18n-key="installments.installment_number">Installment #</span>
-              <span class="text-white font-medium" id="modalInstallmentNumber"></span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span class="text-muted" data-i18n-key="installments.loan_id">Loan ID</span>
-              <span class="text-white font-medium" id="modalLoanId"></span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span class="text-muted" data-i18n-key="installments.customer">Customer</span>
-              <span class="text-white font-medium" id="modalCustomer"></span>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-              <span class="text-muted" data-i18n-key="installments.amount_due">Amount Due</span>
-              <span class="text-white font-semibold text-lg" id="modalAmount"></span>
-            </div>
-          </div>
         </div>
 
-        <div class="form-group">
-          <label class="label" data-i18n-key="installments.payment_date">Payment Date *</label>
-          <input type="date" id="paymentDate" class="input" required />
-          <div id="paymentDateError" class="error-text hidden"></div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" onclick="closePaymentModal()" class="btn btn-secondary"
-          data-i18n-key="installments.cancel">Cancel</button>
-        <button type="button" onclick="processPayment()" id="processPaymentBtn" class="btn btn-primary"
-          data-i18n-key="installments.process_payment">Process Payment</button>
+        <!-- Pagination -->
+        <div class="pagination-premium" id="paginationContainer"></div>
       </div>
     </div>
   </div>
@@ -162,21 +595,26 @@
   <!-- Scripts -->
   <script src="../components/header.js?v=3"></script>
   <script src="../components/sidebar.js?v=12"></script>
-  <script src="../components/pagination.js"></script>
   <script src="../js/ui-utils.js?v=3"></script>
   <script src="../js/api.js?v=4"></script>
 
   <script>
+    let allInstallments = [];
+    let filteredInstallments = [];
+    let currentFilter = 'all';
+    let currentPage = 1;
+    const itemsPerPage = 12;
+
     async function initPage() {
       await waitForI18n();
 
       // Authentication check
-      // Refresh profile to get latest subscription data
       try {
         await api.auth.getProfile();
       } catch (e) {
         console.error('Failed to refresh profile:', e);
       }
+
       const user = getCurrentUser();
       if (!user) {
         window.location.href = '../index.html';
@@ -184,494 +622,352 @@
       }
 
       // Load components
-      document.getElementById('sidebarContainer').innerHTML = createSidebar(user);
-      document.getElementById('headerContainer').innerHTML = createHeader(
-        t('installments.title')
+      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      document.getElementById('header').innerHTML = createHeader(
+        t('installments.title'),
+        t('installments.subtitle')
       );
       initializeLanguageSwitcher();
       setActiveNav('installments');
 
-      // Translate all static content with data-i18n-key attributes
+      // Translate page
       window.i18n.translatePage();
 
-      // Initialize page
-      loadInstallments();
-      setupSearch();
+      // Load data
+      await loadInstallments();
+
+      // Setup search
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        applyFilters();
+      });
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initPage);
-    } else {
-      initPage();
+    function applyFilters() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      filteredInstallments = allInstallments.filter(inst => {
+        // 1. Status/Period Filter
+        let matchesStatus = true;
+
+        if (currentFilter === 'this-month') {
+          const now = new Date();
+          const dueDate = new Date(inst.dueDate);
+          matchesStatus = dueDate.getMonth() === now.getMonth() && dueDate.getFullYear() === now.getFullYear();
+        } else if (currentFilter !== 'all') {
+          // Compare case-insensitively
+          matchesStatus = inst.status?.toLowerCase() === currentFilter.toLowerCase();
+        }
+
+        if (!matchesStatus) return false;
+
+        // 2. Search Filter
+        if (!query) return true;
+
+        const customer = (inst.customer?.name || '').toLowerCase();
+        const phone = (inst.customer?.phoneNumber || '').toLowerCase();
+        const amount = (inst.amount || '').toString();
+        const loanId = (inst.loan?.loanId || '').toString();
+        const instId = (inst.id || '').toString();
+
+        return customer.includes(query) ||
+          phone.includes(query) ||
+          amount.includes(query) ||
+          loanId.includes(query) ||
+          instId.includes(query);
+      });
+
+      currentPage = 1;
+      renderInstallments();
+      updateStats();
     }
 
-    // State
-    let currentPage = 1;
-    let totalPages = 1;
-    const pageSize = 20;
-    let currentFilter = 'all';
-    let allInstallments = [];
-    let filteredInstallments = [];
-    let searchTerm = '';
-    let searchTimeout = null;
+    async function loadInstallments() {
+      try {
+        console.log('Loading installments...');
+        const user = getCurrentUser();
 
-    // Toast notification
+        // Use the search endpoint which is optimized with joins
+        // Passing an empty query to get all items
+        const results = await api.installments.search('');
+
+        // The API might return an array directly
+        const rawData = Array.isArray(results) ? results : (results && results.data ? results.data : []);
+
+        console.log(`Fetched ${rawData.length} raw installments`);
+
+        allInstallments = rawData.filter(inst => {
+          if (!inst) return false;
+
+          // Role-based filtering (Deep check)
+          if (user.roleName === 'Super Admin') return true;
+
+          // Get IDs from installment, loan, or branch
+          const instInstId = inst.institutionId || inst.loan?.institutionId || inst.loan?.branch?.institutionId;
+          const instBranchId = inst.branchId || inst.loan?.branchId;
+
+          if (user.roleName === 'Institution') {
+            return instInstId == user.institutionId;
+          }
+          if (user.roleName === 'Branch') {
+            return instBranchId == user.branchId;
+          }
+
+          return false;
+        }).map(inst => {
+          // Map to the structure expected by the template
+          return {
+            ...inst,
+            id: inst.id, // Primary key from DB
+            status: inst.status,
+            amount: inst.amount,
+            installmentNumber: inst.installmentNumber,
+            dueDate: inst.dueDate,
+            paidDate: inst.paymentDate, // Template uses 'paidDate', backend uses 'paymentDate'
+            customer: inst.customer || inst.loan?.customer || { name: 'غير محدد' },
+            branch: inst.branch || inst.loan?.branch || { name: 'غير محدد' },
+            loan: inst.loan || { loanId: inst.loanId }
+          };
+        });
+
+        console.log(`Displaying ${allInstallments.length} installments after filtering`);
+
+        // الترتيب حسب المعرّف (الأحدث أولاً) لكي يظهر القسط الجديد في المقدمة
+        allInstallments.sort((a, b) => (b.id || 0) - (a.id || 0));
+
+        filteredInstallments = [...allInstallments];
+        renderInstallments();
+        updateStats();
+      } catch (error) {
+        console.error('Error loading installments:', error);
+        showToast(t('installments.error_loading'), 'error');
+        document.getElementById('installmentsGrid').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚠️</div>
+            <h3 style="color: white; margin-bottom: 0.5rem;">${t('installments.failed_to_load')}</h3>
+            <p>${t('installments.error_loading_desc') || 'حدث خطأ أثناء تحميل الأقساط. يرجى المحاولة مرة أخرى.'}</p>
+          </div>
+        `;
+      }
+    }
+
+    function updateStats() {
+      const stats = {
+        total: filteredInstallments.length,
+        paid: filteredInstallments.filter(i => i.status === 'Paid').length,
+        pending: filteredInstallments.filter(i => i.status === 'Pending').length,
+        overdue: filteredInstallments.filter(i => i.status === 'Overdue').length,
+        totalAmount: filteredInstallments.reduce((sum, i) => sum + (i.amount || 0), 0)
+      };
+
+      document.getElementById('summaryCards').innerHTML = `
+        <div class="stat-card-premium" style="color: #818cf8;">
+          <div class="stat-icon" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));">
+            📊
+          </div>
+          <div class="stat-value">${stats.total}</div>
+          <div class="stat-label">${t('installments.total_installments')}</div>
+        </div>
+        
+        <div class="stat-card-premium" style="color: #6ee7b7;">
+          <div class="stat-icon" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2));">
+            ✅
+          </div>
+          <div class="stat-value">${stats.paid}</div>
+          <div class="stat-label">${t('installments.paid_installments')}</div>
+        </div>
+        
+        <div class="stat-card-premium" style="color: #fcd34d;">
+          <div class="stat-icon" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.2));">
+            ⏳
+          </div>
+          <div class="stat-value">${stats.pending}</div>
+          <div class="stat-label">${t('installments.pending_installments')}</div>
+        </div>
+        
+        <div class="stat-card-premium" style="color: #fca5a5;">
+          <div class="stat-icon" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));">
+            ⚠️
+          </div>
+          <div class="stat-value">${stats.overdue}</div>
+          <div class="stat-label">${t('installments.overdue_installments')}</div>
+        </div>
+      `;
+    }
+
+    function renderInstallments() {
+      const grid = document.getElementById('installmentsGrid');
+
+      if (filteredInstallments.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h3 style="color: white; margin-bottom: 0.5rem;">${t('installments.no_installments_found')}</h3>
+            <p>${t('installments.no_results_found')}</p>
+          </div>
+        `;
+        document.getElementById('paginationContainer').innerHTML = '';
+        return;
+      }
+
+      // Pagination
+      const totalPages = Math.ceil(filteredInstallments.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageInstallments = filteredInstallments.slice(startIndex, endIndex);
+
+      grid.innerHTML = pageInstallments.map(inst => {
+        const statusClass = inst.status === 'Paid' ? 'paid' :
+          inst.status === 'Overdue' ? 'overdue' : 'pending';
+        const statusText = inst.status === 'Paid' ? t('installments.paid') :
+          inst.status === 'Overdue' ? t('installments.overdue') : t('installments.pending');
+        const statusIcon = inst.status === 'Paid' ? '✅' :
+          inst.status === 'Overdue' ? '⚠️' : '⏳';
+
+        const customerName = inst.customer?.name || t('common.message.na');
+        const customerPhone = inst.customer?.phoneNumber || '';
+        const branchName = inst.branch?.name || t('common.message.na');
+        const locale = localStorage.getItem('locale') || 'ar';
+        const dueDate = inst.dueDate ? new Date(inst.dueDate).toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US') : '';
+        const paidDate = inst.paidDate ? new Date(inst.paidDate).toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US') : '-';
+
+        return `
+          <div class="installment-card status-${statusClass}">
+            <div class="installment-header">
+              <div class="installment-customer">
+                <div class="customer-avatar">${customerName.charAt(0).toUpperCase()}</div>
+                <div class="customer-info">
+                  <h3>${customerName}</h3>
+                  <div class="customer-meta">
+                    ${customerPhone ? `<span>📞 ${customerPhone}</span>` : ''}
+                    <div style="display: flex; align-items: center; gap: 0.25rem;">
+                      <span style="opacity: 0.8;">• ${inst.loan?.branch ? `${inst.loan.branch.name} (${inst.loan.branch.institution?.name || ''})` : (inst.loan?.institution?.name || '-')}</span>
+                      ${(inst.loan?.branch?.phoneNumber || inst.loan?.institution?.phoneNumber) ? `
+                        <button onclick="openWhatsapp('${inst.loan.branch?.phoneNumber || inst.loan.institution?.phoneNumber}')" class="btn-whatsapp" style="padding: 1px 4px; font-size: 0.65rem;" title="${t('help.contact_whatsapp')}">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                        </button>
+                      ` : ''}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="status-badge-premium ${statusClass}">
+                ${statusIcon} ${statusText}
+              </div>
+            </div>
+
+            <div class="installment-details">
+              <div class="detail-item">
+                <span class="detail-label">${t('installments.installment_number')}</span>
+                <span class="detail-value">#${inst.installmentNumber || '-'}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">${t('installments.loan_id')}</span>
+                <span class="detail-value">#${inst.loan?.loanId || '-'}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">${t('installments.due_date')}</span>
+                <span class="detail-value">${dueDate}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">${t('installments.amount')}</span>
+                <span class="detail-value amount">${inst.amount?.toLocaleString(locale === 'ar' ? 'ar-SA' : 'en-US')} ${t('my_subscription.currency')}</span>
+              </div>
+              ${inst.status === 'Paid' ? `
+                <div class="detail-item">
+                  <span class="detail-label">${t('installments.payment_date')}</span>
+                  <span class="detail-value">${paidDate}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="installment-actions">
+              <a href="installments-view.html?id=${inst.id}" class="action-btn action-btn-secondary">
+                👁️ ${t('installments.view')}
+              </a>
+              ${inst.status !== 'Paid' ? `
+                <button onclick="processPayment(${inst.id})" class="action-btn action-btn-primary">
+                  💰 ${t('installments.pay')}
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Render pagination
+      renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+      const container = document.getElementById('paginationContainer');
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = `
+        <button class="pagination-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+          ←
+        </button>
+      `;
+
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+          html += `
+            <button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
+              ${i}
+            </button>
+          `;
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+          html += `<span style="color: rgba(255, 255, 255, 0.4);">...</span>`;
+        }
+      }
+
+      html += `
+        <button class="pagination-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+          →
+        </button>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function changePage(page) {
+      if (page < 1 || page > Math.ceil(filteredInstallments.length / itemsPerPage)) return;
+      currentPage = page;
+      renderInstallments();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function filterByStatus(status) {
+      currentFilter = status;
+
+      // Update active button - use lowercase ID lookup
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      const btn = document.getElementById(`filter-${status.toLowerCase()}`);
+      if (btn) btn.classList.add('active');
+
+      applyFilters();
+    }
+
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
+      if (!toast) return;
       toast.textContent = message;
       toast.className = `toast show ${type === 'success' ? 'toast-success' : type === 'error' ? 'toast-error' : 'toast-info'}`;
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // Setup search with debounce
-    function setupSearch() {
-      const searchInput = document.getElementById('searchInput');
-      searchInput.addEventListener('input', (e) => {
-        const value = e.target.value.trim();
-
-        // Clear existing timeout
-        if (searchTimeout) {
-          clearTimeout(searchTimeout);
-        }
-
-        // Set new timeout for 1 second
-        searchTimeout = setTimeout(() => {
-          searchTerm = value;
-          performSearch();
-        }, 1000);
-      });
+    function processPayment(installmentId) {
+      window.location.href = `installments-view.html?id=${installmentId}`;
     }
 
-    // Date formatting
-    function formatDate(dateString) {
-      if (!dateString) return 'N/A';
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    // Initialize
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
     }
-
-    // Currency formatting
-    function formatCurrency(amount) {
-      const num = parseFloat(amount);
-      if (isNaN(num)) return '0.00 ر.س.';
-      return new Intl.NumberFormat('ar-SA', {
-        style: 'currency',
-        currency: 'SAR',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(num);
-    }
-
-    // Check if installment is overdue
-    function isOverdue(installment) {
-      if (installment.status === 'Paid') return false;
-      const dueDate = new Date(installment.dueDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return dueDate < today;
-    }
-
-    // Load installments from all loans OR from search
-    async function performSearch() {
-      if (searchTerm) {
-        // Show loading
-        document.getElementById('installmentsTableBody').innerHTML =
-          '<tr><td colspan="10" style="text-align: center; padding: 3rem;"><div class="spinner"></div><p class="text-muted mt-2">Searching...</p></td></tr>';
-
-        // Perform search via API
-        try {
-          const searchResults = await api.installments.search(searchTerm);
-
-          // Normalize the structure - backend returns loan.customer and loan.branch
-          allInstallments = searchResults.map(inst => ({
-            ...inst,
-            customer: inst.loan.customer,
-            branch: inst.loan.branch
-          }));
-
-          // Update summary cards with search results
-          updateSummaryCards();
-
-          filterAndRenderInstallments();
-        } catch (error) {
-          console.error('Search failed:', error);
-          showToast('Search failed', 'error');
-          document.getElementById('installmentsTableBody').innerHTML =
-            '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #ef4444;">Search failed</td></tr>';
-        }
-      } else {
-        // Load all installments
-        loadInstallments();
-      }
-    }
-
-    // Load installments from all loans
-    async function loadInstallments() {
-      try {
-        // Get all loans with installments (paginated to get all)
-        let allLoansData = [];
-        let currentPage = 1;
-        let hasMore = true;
-
-        while (hasMore) {
-          const loansResponse = await api.loans.getAll(currentPage, 100);
-          allLoansData = allLoansData.concat(loansResponse.data || []);
-
-          if (currentPage >= loansResponse.meta.totalPages) {
-            hasMore = false;
-          } else {
-            currentPage++;
-          }
-        }
-
-        // Collect all installments from all loans
-        allInstallments = [];
-        for (const loan of allLoansData) {
-          const installments = await api.loans.getInstallments(loan.loanId);
-          installments.forEach(inst => {
-            allInstallments.push({
-              ...inst,
-              loan: loan,
-              customer: loan.customer,
-              branch: loan.branch
-            });
-          });
-        }
-
-        // Sort by due date
-        allInstallments.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-
-        // Update summary cards
-        updateSummaryCards();
-
-        filterAndRenderInstallments();
-      } catch (error) {
-        console.error('Failed to load installments:', error);
-        showToast('Failed to load installments', 'error');
-        document.getElementById('installmentsTableBody').innerHTML =
-          '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load installments</td></tr>';
-      }
-    }
-
-    // Update summary cards
-    function updateSummaryCards() {
-      const totalInstallments = allInstallments.length;
-      const paidCount = allInstallments.filter(i => i.status === 'Paid').length;
-      const pendingCount = allInstallments.filter(i => i.status === 'Pending').length;
-      const overdueCount = allInstallments.filter(i => isOverdue(i)).length;
-
-      // This month
-      const now = new Date();
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
-      const thisMonthCount = allInstallments.filter(inst => {
-        const dueDate = new Date(inst.dueDate);
-        return dueDate.getMonth() === currentMonth &&
-          dueDate.getFullYear() === currentYear &&
-          inst.status !== 'Paid';
-      }).length;
-
-      const totalAmount = allInstallments.reduce((sum, i) => sum + Number(i.amount), 0);
-      const paidAmount = allInstallments.filter(i => i.status === 'Paid').reduce((sum, i) => sum + Number(i.amount), 0);
-
-      const summaryHTML = `
-        <div class="glass-card p-4" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.paid')}</span>
-            <span style="font-size: 1.5rem;">✅</span>
-          </div>
-          <div class="text-white font-bold" style="font-size: 1.75rem; margin-bottom: 0.25rem;">${paidCount}</div>
-          <div class="text-success" style="font-size: 0.85rem; color: #10b981;">${formatCurrency(paidAmount)}</div>
-        </div>
-        
-        <div class="glass-card p-4" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.pending')}</span>
-            <span style="font-size: 1.5rem;">⏳</span>
-          </div>
-          <div class="text-white font-bold" style="font-size: 1.75rem;">${pendingCount}</div>
-        </div>
-        
-        <div class="glass-card p-4" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.overdue')}</span>
-            <span style="font-size: 1.5rem;">⚠️</span>
-          </div>
-          <div class="text-white font-bold" style="font-size: 1.75rem;">${overdueCount}</div>
-        </div>
-        
-        <div class="glass-card p-4" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-            <span class="text-muted" style="font-size: 0.875rem;">${t('installments.due_this_month')}</span>
-            <span style="font-size: 1.5rem;">📅</span>
-          </div>
-          <div class="text-white font-bold" style="font-size: 1.75rem;">${thisMonthCount}</div>
-        </div>
-      `;
-
-      document.getElementById('summaryCards').innerHTML = summaryHTML;
-    }
-
-    // Filter by status
-    function filterByStatus(status) {
-      currentFilter = status;
-
-      // Update active filter button
-      document.querySelectorAll('[id^="filter-"]').forEach(btn => {
-        btn.style.background = 'rgba(255, 255, 255, 0.05)';
-        btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-      });
-      const buttonId = `filter-${status.toLowerCase()}`;
-      const activeButton = document.getElementById(buttonId);
-      if (activeButton) {
-        activeButton.style.background = 'rgba(99, 102, 241, 0.2)';
-        activeButton.style.borderColor = 'rgba(99, 102, 241, 0.4)';
-      }
-
-      filterAndRenderInstallments();
-    }
-
-    // Change page
-    function changePage(page) {
-      currentPage = page;
-      renderInstallments();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Filter and render installments
-    function filterAndRenderInstallments() {
-      let filtered = allInstallments;
-
-      if (currentFilter === 'this-month') {
-        // Filter for unpaid installments due this month
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-
-        filtered = allInstallments.filter(inst => {
-          const dueDate = new Date(inst.dueDate);
-          return dueDate.getMonth() === currentMonth &&
-            dueDate.getFullYear() === currentYear &&
-            inst.status !== 'Paid';
-        });
-      } else if (currentFilter === 'Overdue') {
-        // Show all overdue installments (not paid and past due date)
-        filtered = allInstallments.filter(inst => isOverdue(inst));
-      } else if (currentFilter === 'Pending') {
-        // Show all pending installments (status === 'Pending')
-        filtered = allInstallments.filter(inst => inst.status === 'Pending');
-      } else if (currentFilter === 'Paid') {
-        // Show all paid installments
-        filtered = allInstallments.filter(inst => inst.status === 'Paid');
-      } else if (currentFilter !== 'all') {
-        // Default: filter by status
-        filtered = allInstallments.filter(inst => inst.status === currentFilter);
-      }
-
-      // Sort by due date (ascending - earliest first)
-      filtered.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-
-      filteredInstallments = filtered;
-      currentPage = 1;
-      renderInstallments();
-    }
-
-    // Render installments table
-    function renderInstallments() {
-      const tbody = document.getElementById('installmentsTableBody');
-
-      if (filteredInstallments.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('installments.no_installments_found')}</td></tr>`;
-        document.getElementById('paginationContainer').innerHTML = '';
-        return;
-      }
-
-      // Calculate pagination
-      totalPages = Math.ceil(filteredInstallments.length / pageSize);
-      const startIndex = (currentPage - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const pageInstallments = filteredInstallments.slice(startIndex, endIndex);
-
-      const installmentsHTML = pageInstallments.map(inst => {
-        const overdue = isOverdue(inst);
-        const statusBadge =
-          inst.status === 'Paid' ? 'badge-success' :
-            overdue ? 'badge-danger' :
-              'badge-warning';
-
-        const statusText = inst.status === 'Paid'
-          ? `✅ ${t('installments.paid')}`
-          : overdue
-            ? `⚠️ ${t('installments.overdue')}`
-            : `⏳ ${t('installments.pending')}`;
-
-        // Check days until/past due
-        const today = new Date();
-        const dueDate = new Date(inst.dueDate);
-        const daysDiff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-        let dueDateClass = '';
-        if (inst.status !== 'Paid') {
-          if (daysDiff < 0) dueDateClass = 'style="color: #ef4444;"'; // overdue - red
-          else if (daysDiff <= 7) dueDateClass = 'style="color: #f59e0b;"'; // due soon - orange
-        }
-
-        return `
-          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-            <td style="padding: 1rem 0.5rem;">
-              <span class="font-semibold text-white" style="font-size: 0.95rem;">#${inst.installmentNumber}</span>
-            </td>
-            <td style="padding: 1rem 0.5rem;">
-              <a href="loans-view.html?id=${inst.loan.loanId}" class="text-white font-medium" style="color: #fff; text-decoration: underline; font-size: 0.95rem;">
-                #${inst.loan.loanId}
-              </a>
-            </td>
-            <td style="padding: 1rem 0.75rem;">
-              <div>
-                <div class="text-white font-medium" style="font-size: 0.95rem; margin-bottom: 0.125rem;">${inst.customer.name}</div>
-                <div class="text-muted" style="font-size: 0.8rem;">ID: ${inst.customer.customerId}</div>
-              </div>
-            </td>
-            <td style="padding: 1rem 0.75rem;">
-              <span class="text-secondary" style="font-size: 0.9rem;">${inst.customer.phoneNumber || '-'}</span>
-            </td>
-            <td style="padding: 1rem 0.75rem;">
-              <span class="text-secondary" style="font-size: 0.9rem;">${inst.branch ? inst.branch.name : (inst.institution ? inst.institution.name : 'N/A')}</span>
-            </td>
-            <td style="padding: 1rem 0.75rem;">
-              <span class="text-white font-semibold" style="font-size: 1rem;">${formatCurrency(inst.amount)}</span>
-            </td>
-            <td ${dueDateClass} style="padding: 1rem 0.5rem;">
-              <div style="font-size: 0.9rem;">${formatDate(inst.dueDate)}</div>
-              ${inst.status !== 'Paid' && daysDiff <= 7 && daysDiff >= 0 ?
-            `<div style="font-size: 0.75rem; color: #f59e0b; margin-top: 0.125rem;">${daysDiff} day${daysDiff !== 1 ? 's' : ''} left</div>` :
-            inst.status !== 'Paid' && daysDiff < 0 ?
-              `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.125rem;">${Math.abs(daysDiff)} day${Math.abs(daysDiff) !== 1 ? 's' : ''} late</div>` : ''}
-            </td>
-            <td style="padding: 1rem 0.5rem;">
-              <span class="badge ${statusBadge}" style="font-size: 0.85rem; white-space: nowrap;">${statusText}</span>
-            </td>
-            <td style="padding: 1rem 0.5rem;">
-              <span class="text-secondary" style="font-size: 0.9rem;">${inst.paymentDate ? formatDate(inst.paymentDate) : '-'}</span>
-            </td>
-            <td style="padding: 1rem 0.5rem;">
-              <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: center;">
-                <a href="installments-view.html?id=${inst.id}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
-                  ${t('installments.view')}
-                </a>
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
-
-      tbody.innerHTML = installmentsHTML;
-
-      // Render pagination
-      totalPages = Math.ceil(filteredInstallments.length / pageSize);
-      const paginationContainer = document.getElementById('paginationContainer');
-      if (paginationContainer && totalPages > 1) {
-        paginationContainer.innerHTML = createPagination(currentPage, totalPages, changePage);
-      } else if (paginationContainer) {
-        paginationContainer.innerHTML = '';
-      }
-    }
-
-    // Change page
-    function changePage(page) {
-      if (page < 1 || page > Math.ceil(filteredInstallments.length / pageSize)) return;
-      currentPage = page;
-      renderInstallments();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Payment modal
-    let currentInstallmentId = null;
-
-    async function openPaymentModal(installmentId) {
-      const installment = allInstallments.find(i => i.id === installmentId);
-      if (!installment) return;
-
-      // Check if previous installments are paid
-      if (installment.installmentNumber > 1) {
-        const loanInstallments = allInstallments.filter(i => i.loan.loanId === installment.loan.loanId);
-        loanInstallments.sort((a, b) => a.installmentNumber - b.installmentNumber);
-
-        const unpaidPrevious = loanInstallments.find(
-          i => i.installmentNumber < installment.installmentNumber && i.status !== 'Paid'
-        );
-
-        if (unpaidPrevious) {
-          showToast(`Cannot pay installment #${installment.installmentNumber}. Please pay installment #${unpaidPrevious.installmentNumber} first.`, 'error');
-          return;
-        }
-      }
-
-      currentInstallmentId = installmentId;
-
-      document.getElementById('modalInstallmentNumber').textContent = `#${installment.installmentNumber}`;
-      document.getElementById('modalLoanId').textContent = `#${installment.loan.loanId}`;
-      document.getElementById('modalCustomer').textContent = installment.customer.name;
-      document.getElementById('modalAmount').textContent = formatCurrency(installment.amount);
-      document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
-
-      document.getElementById('errorMessage').classList.add('hidden');
-      document.getElementById('paymentDateError').classList.add('hidden');
-
-      const modal = document.getElementById('paymentModal');
-      modal.style.display = 'flex';
-      // Small delay to ensure display:flex applies before adding class for transition
-      setTimeout(() => modal.classList.add('show'), 10);
-    }
-
-    function closePaymentModal() {
-      const modal = document.getElementById('paymentModal');
-      modal.classList.remove('show');
-      setTimeout(() => {
-        modal.style.display = 'none';
-        currentInstallmentId = null;
-      }, 300); // Match CSS transition duration
-    }
-
-    async function processPayment() {
-      const paymentDate = document.getElementById('paymentDate').value;
-
-      // Clear previous errors
-      document.getElementById('errorMessage').classList.add('hidden');
-      document.getElementById('paymentDateError').classList.add('hidden');
-
-      // Validate
-      if (!paymentDate) {
-        document.getElementById('paymentDateError').textContent = 'Payment date is required';
-        document.getElementById('paymentDateError').classList.remove('hidden');
-        return;
-      }
-
-      try {
-        const btn = document.getElementById('processPaymentBtn');
-        btn.disabled = true;
-        btn.textContent = 'Processing...';
-
-        await api.installments.payInstallment(currentInstallmentId, paymentDate);
-
-        showToast('Payment processed successfully', 'success');
-        closePaymentModal();
-
-        // Reload installments
-        await loadInstallments();
-
-      } catch (error) {
-        console.error('Payment failed:', error);
-        const errorMsg = error.error || error.message || 'Failed to process payment';
-        document.getElementById('errorMessage').textContent = errorMsg;
-        document.getElementById('errorMessage').classList.remove('hidden');
-      } finally {
-        const btn = document.getElementById('processPaymentBtn');
-        btn.disabled = false;
-        btn.textContent = 'Process Payment';
-      }
-    }
-
-    // Initialize with all filter
-    document.getElementById('filter-all').click();
   </script>
 </body>
 

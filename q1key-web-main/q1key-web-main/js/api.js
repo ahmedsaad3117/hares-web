@@ -56,22 +56,39 @@ function isAuthenticated() {
  * @returns {boolean}
  */
 function isSubscriptionExpired(expirationDate) {
-  if (!expirationDate) return false;
-  const now = new Date();
-  const exp = new Date(expirationDate);
+  // Super Admin check is usually done outside, but let's be safe
+  if (!expirationDate) {
+    // If no expiration date is provided for a non-super-admin, 
+    // it could be a newly created account without a plan yet.
+    // We should treat this based on our business logic. 
+    // For now, let's assume no date = not expired yet (to prevent blocking new users)
+    // BUT we should log this.
+    return false;
+  }
 
-  // Match backend logic precisely:
-  // expirationDate (future) - now (current)
-  const diffTime = exp.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  try {
+    const now = new Date();
+    const exp = new Date(expirationDate);
 
-  // It is only expired if days remaining is 0 or less
-  const isExpired = diffDays <= 0;
+    // Check for invalid date
+    if (isNaN(exp.getTime())) {
+      console.warn('Invalid expiration date format:', expirationDate);
+      return false;
+    }
 
-  // Debug log for troubleshooting (will show in browser console)
-  // console.log(`[SubscriptionCheck] Exp: ${expirationDate}, Days Left: ${diffDays}, Result: ${isExpired}`);
+    // Set time to end of day for expiration date to be generous
+    // This ensures "Expires on 2026-01-23" means valid UNTIL the end of that day
+    exp.setHours(23, 59, 59, 999);
 
-  return isExpired;
+    const isExpired = now.getTime() > exp.getTime();
+    if (isExpired) {
+      console.log(`Subscription check: EXPIRED (Now: ${now.toISOString()}, Exp: ${exp.toISOString()})`);
+    }
+    return isExpired;
+  } catch (e) {
+    console.error('Error during subscription check:', e);
+    return false;
+  }
 }
 
 function requireAuth() {
@@ -81,8 +98,21 @@ function requireAuth() {
     return false;
   }
 
-  // Note: Local subscription enforcement is handled at Entry Points (Login)
-  // to allow the current active session to finish without interruption.
+  // --- ADDED: Strict Subscription Check in requirement ---
+  const user = getCurrentUser();
+  if (user && user.roleName !== 'Super Admin') {
+    const isExpired = isSubscriptionExpired(user.expirationDate);
+    const path = window.location.pathname.toLowerCase();
+    const isSubscriptionPage = path.endsWith('/my-subscription.html');
+
+    if (isExpired && !isSubscriptionPage) {
+      console.warn('Blocking access: Subscription expired for', user.email);
+      const isInsidePages = window.location.pathname.includes('/pages/');
+      window.location.href = isInsidePages ? 'my-subscription.html' : 'pages/my-subscription.html';
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -92,31 +122,52 @@ function saveAuthData(token, user, refreshToken) {
   if (refreshToken) {
     localStorage.setItem('refresh_token', refreshToken);
   }
+
+  // LOGIC PLAN 11: Set Session Validity Flag
+  // If subscription is valid NOW, gave a "Pass" for the entire session
+  const isExpired = user.roleName !== 'Super Admin' && isSubscriptionExpired(user.expirationDate);
+  if (!isExpired) {
+    localStorage.setItem('session_valid', 'true');
+  } else {
+    localStorage.removeItem('session_valid');
+  }
 }
 
 function clearAuthData() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
   localStorage.removeItem('refresh_token');
+  // LOGIC PLAN 11: Revoke Session Pass on Logout
+  localStorage.removeItem('session_valid');
 }
 
 // Global check for session and subscription validity
 (function startSessionObserver() {
-  // 1. Inactivity Monitor - Auto logout after 15 minutes of inactivity
+  // 1. Inactivity Monitor - Auto logout after 1 minute of inactivity
   let inactivityTimer;
-  const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes
+  const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 minutes in milliseconds
 
   function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
     if (isAuthenticated()) {
       inactivityTimer = setTimeout(() => {
         console.warn('Inactivity limit reached. Logging out...');
-        // Only log out if not on a vital page or let it be global
-        clearAuthData();
-        const isInsidePages = window.location.pathname.includes('/pages/');
-        window.location.href = isInsidePages ? '../index.html' : 'index.html';
+        handleInactivityLogout();
       }, INACTIVITY_LIMIT);
     }
+  }
+
+  async function handleInactivityLogout() {
+    try {
+      // Also try to logout from server to invalidate session
+      await api.auth.logout();
+    } catch (e) {
+      console.error('Logout error during inactivity:', e);
+    }
+    clearAuthData();
+    const isInsidePages = window.location.pathname.includes('/pages/');
+    const redirectUrl = isInsidePages ? '../index.html?reason=inactivity' : 'index.html?reason=inactivity';
+    window.location.href = redirectUrl;
   }
 
   // Register activity events to reset timer
@@ -129,20 +180,32 @@ function clearAuthData() {
   resetInactivityTimer();
 
   setInterval(async () => {
-    // Only monitor if authenticated and NOT on index/login page
+    // Only monitor if authenticated
     if (!isAuthenticated()) return;
 
     const path = window.location.pathname.toLowerCase();
-    if (path.endsWith('index.html') || path === '/' || path.endsWith('/') || path.endsWith('login.html')) return;
+    const isPublicPage = path.endsWith('index.html') || path === '/' || path.endsWith('/') || path.endsWith('login.html');
 
     try {
-      // 1. Check Session Validity (Forced Logout) via server
-      await api.auth.verifySession();
+      // Get current status BEFORE sync
+      const userBefore = getCurrentUser();
+      const expiredBefore = userBefore && userBefore.roleName !== 'Super Admin' ? isSubscriptionExpired(userBefore.expirationDate) : false;
 
-      // Note: We REMOVED the strict local subscription check here 
-      // to allow the user to continue their current session until manual logout or 15min inactivity,
-      // as requested by the user.
+      // RADICAL FIX: Sync local data with server (updates localStorage)
+      await api.auth.getProfile();
 
+      // Get status AFTER sync
+      const userAfter = getCurrentUser();
+      const expiredAfter = userAfter && userAfter.roleName !== 'Super Admin' ? isSubscriptionExpired(userAfter.expirationDate) : false;
+
+      // 1. AUTO-UNLOCK: If it was expired and now it's valid -> Reload to unlock UI
+      // 2. AUTO-LOCK: If it's expired and we are not on subscription page -> Redirect
+      if (expiredAfter && !isPublicPage && !path.endsWith('/my-subscription.html')) {
+        console.warn('Subscription expired detected for user:', userAfter.email);
+        const isInsidePages = window.location.pathname.includes('/pages/');
+        window.location.href = isInsidePages ? 'my-subscription.html' : 'pages/my-subscription.html';
+        return;
+      }
     } catch (error) {
       // If error is 401 (Unauthorized), it means user session was invalidated (Forced Logout)
       if (error.status === 401) {
@@ -152,7 +215,7 @@ function clearAuthData() {
         window.location.href = isInsidePages ? '../index.html' : 'index.html';
       }
     }
-  }, 15000); // Check every 15 seconds for session validity (Force Logout)
+  }, 10000); // Sync/check every 10 seconds for radical consistency
 })();
 
 // ============================================== //
@@ -180,6 +243,16 @@ function handleApiError(response, endpoint, errorData) {
           msg = 'تم تجاوز الحد الأقصى للمبلغ المسموح به لهذا الفرع';
         } else if (msg.includes('Institution capacity exceeded')) {
           msg = 'تم تجاوز الحد الأقصى للمبلغ المسموح به لهذه المؤسسة';
+        } else if (msg.includes('This installment has already been paid')) {
+          msg = 'هذا القسط مدفوع بالفعل';
+        } else if (msg.includes('Please pay installment') && msg.includes('first')) {
+          // Attempt to extract numbers if possible, or just provide a general Arabic message
+          const matches = msg.match(/#(\d+)/g);
+          if (matches && matches.length >= 2) {
+            msg = `لا يمكن دفع القسط رقم ${matches[1]}. يرجى دفع القسط رقم ${matches[0]} أولاً.`;
+          } else {
+            msg = 'يرجى دفع الأقساط السابقة أولاً قبل دفع هذا القسط.';
+          }
         } else {
           msg = msg || 'طلب غير صالح';
         }
@@ -197,10 +270,16 @@ function handleApiError(response, endpoint, errorData) {
         }
 
         let customMsg = errorData?.message || '';
-        if (customMsg.includes('Account is deactivated')) {
+        // Debug: Log the error for the developer to see it in console
+        console.log('[API Auth Error] Raw Message:', customMsg);
+
+        if (typeof customMsg === 'string' && customMsg.includes('Account is deactivated')) {
           error.message = isAr ? 'هذا الحساب غير نشط حالياً، يرجى مراجعة الإدارة' : 'This account is currently inactive, please contact administration';
         } else if (customMsg.includes('Session expired or terminated')) {
           error.message = isAr ? 'انتهت الجلسة أو تم إنهاؤها من قبل المسؤول' : 'Session expired or terminated by administrator';
+        } else if (typeof customMsg === 'string' && customMsg.includes('ACTIVE_SESSION_EXISTS')) {
+          // Keep it raw so homepage.js can catch and style it specially
+          error.message = 'ACTIVE_SESSION_EXISTS';
         } else {
           error.message = isAr ? 'بيانات الدخول غير صحيحة' : 'Invalid credentials';
         }
@@ -295,16 +374,18 @@ function onTokenRefreshed(token) {
 
 async function apiRequest(endpoint, options = {}) {
   // --- STRICT SUBSCRIPTION ENFORCEMENT ---
-  // Block any API request if subscription is expired, unless it's an auth request or on subscription page
+  // If subscription is expired, redirect non-super-admins to the subscription page
   const user = getCurrentUser();
-  if (user && user.roleName !== 'Super Admin' && !endpoint.includes('/auth/login')) {
+  const isProfileReq = endpoint.includes('/users/me');
+  const isAuthReq = endpoint.includes('/auth/login') || endpoint.includes('/auth/verify-session') || endpoint.includes('/auth/refresh');
+
+  if (user && user.roleName !== 'Super Admin' && !isProfileReq && !isAuthReq) {
     const isExpired = isSubscriptionExpired(user.expirationDate);
     const path = window.location.pathname.toLowerCase();
     const isSubscriptionPage = path.endsWith('/my-subscription.html');
 
     if (isExpired && !isSubscriptionPage) {
       console.warn('Blocking API request due to expired subscription:', endpoint);
-      // DO NOT clearAuthData here, just redirect
       const isInsidePages = window.location.pathname.includes('/pages/');
       window.location.href = isInsidePages ? 'my-subscription.html' : 'pages/my-subscription.html';
       return Promise.reject(new Error('Subscription expired'));
@@ -342,7 +423,9 @@ async function apiRequest(endpoint, options = {}) {
     }
 
     const timeout = options.timeout || API_TIMEOUT;
+    console.log(`[API] Sending ${options.method || 'GET'} to ${fullEndpoint}`);
     const response = await fetchWithTimeout(`${API_BASE_URL}${fullEndpoint}`, config, timeout);
+    console.log(`[API] Received response from ${fullEndpoint}: ${response.status}`);
 
     // Handle error responses
     if (!response.ok) {
@@ -523,8 +606,16 @@ const api = {
     getProfile: async () => {
       const user = await apiRequest('/users/me');
       if (user) {
+        // SYNC: Overwrite stored user data to ensure expirationDate is correctly reflected
+        // We use spread but ensure user object from server takes priority for critical fields
         const stored = JSON.parse(localStorage.getItem('user') || '{}');
-        localStorage.setItem('user', JSON.stringify({ ...stored, ...user }));
+        const updatedUser = {
+          ...stored,
+          ...user,
+          expirationDate: user.expirationDate // Explicitly take server value
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        console.log('User profile synced with server:', updatedUser.email, 'Expires:', updatedUser.expirationDate);
       }
       return user;
     },
@@ -717,10 +808,10 @@ const api = {
       if (search) url += `&search=${encodeURIComponent(search)}`;
       return apiRequest(url);
     },
-    getByCustomer: (customerId, page = 1, limit = 10, searchType = '') => {
-      const url = searchType
-        ? `/search-logs/customer/${customerId}?page=${page}&limit=${limit}&searchType=${encodeURIComponent(searchType)}`
-        : `/search-logs/customer/${customerId}?page=${page}&limit=${limit}`;
+    getByCustomer: (customerId, page = 1, limit = 10, searchType = '', search = '') => {
+      let url = `/search-logs/customer/${customerId}?page=${page}&limit=${limit}`;
+      if (searchType) url += `&searchType=${encodeURIComponent(searchType)}`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
       return apiRequest(url);
     },
     getByUser: (userId, page = 1, limit = 10) => apiRequest(`/search-logs/user/${userId}?page=${page}&limit=${limit}`),
@@ -782,10 +873,16 @@ const api = {
       body: JSON.stringify(data),
     }),
 
-    // Get transactions
+    // Get transations with cleaned filters
     getTransactions: (filter = {}) => {
-      const params = new URLSearchParams(filter).toString();
+      const params = new URLSearchParams(api.reports._cleanFilters(filter)).toString();
       return apiRequest(`/cash-box/transactions?${params}`);
+    },
+
+    // Get unified data (Metadata + Report + Transactions)
+    getUnifiedData: (filter = {}) => {
+      const params = new URLSearchParams(api.reports._cleanFilters(filter)).toString();
+      return apiRequest(`/cash-box/unified?${params}`);
     },
 
     // Get transactions for specific cash box
@@ -843,7 +940,13 @@ const api = {
       const cleanedFilters = api.reports._cleanFilters(filters);
       const params = new URLSearchParams(cleanedFilters).toString();
       return apiRequest(`/reports/unified?${params}`);
-    }
+    },
+    getDashboardData: (filters = {}) => {
+      const cleanedFilters = api.reports._cleanFilters(filters);
+      const params = new URLSearchParams(cleanedFilters).toString();
+      return apiRequest(`/reports/dashboard-summary?${params}`);
+    },
+    getComparisonsData: () => apiRequest('/reports/comparisons')
   },
 
   // Settings (Support Info)
@@ -876,6 +979,26 @@ const api = {
     }),
 
     // Requests
+    getUnifiedData: (params = {}) => {
+      const queryParams = new URLSearchParams();
+      if (params.status && params.status !== 'all') queryParams.append('status', params.status);
+      if (params.search) queryParams.append('search', params.search);
+      if (params.page) queryParams.append('page', params.page);
+      if (params.limit) queryParams.append('limit', params.limit);
+      return apiRequest(`/subscriptions/unified?${queryParams.toString()}`);
+    },
+
+    // Unified Subscription Data (for subscriptions list)
+    getUnifiedSubscriptions: (params = {}) => {
+      const queryParams = new URLSearchParams();
+      if (params.type && params.type !== '') queryParams.append('type', params.type);
+      if (params.status && params.status !== '') queryParams.append('status', params.status);
+      if (params.search) queryParams.append('search', params.search);
+      if (params.page) queryParams.append('page', params.page);
+      if (params.limit) queryParams.append('limit', params.limit);
+      return apiRequest(`/subscriptions/unified-subscriptions?${queryParams.toString()}`);
+    },
+
     getRequests: (status = '', page = 1, limit = 20) => {
       let url = `/subscriptions/requests?page=${page}&limit=${limit}`;
       if (status) url += `&status=${status}`;
@@ -1011,13 +1134,18 @@ function showToast(message, type = 'info') {
 // Format currency
 function formatCurrency(amount) {
   const num = parseFloat(amount);
-  if (isNaN(num)) return '0.00 ر.س.';
+  const locale = localStorage.getItem('locale') || 'ar';
 
-  return new Intl.NumberFormat('ar-SA', {
+  if (isNaN(num)) {
+    return locale === 'ar' ? '0.00 ر.س.' : '0.00 SAR';
+  }
+
+  return new Intl.NumberFormat(locale === 'ar' ? 'ar-SA' : 'en-US', {
     style: 'currency',
     currency: 'SAR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+    numberingSystem: 'latn' // Force Latin (English) digits
   }).format(num);
 }
 
@@ -1037,7 +1165,12 @@ function formatDate(dateString) {
 
 // Format datetime
 function formatDateTime(dateString) {
-  return new Date(dateString).toLocaleString('en-US', {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '-';
+
+  const locale = localStorage.getItem('locale') || 'ar';
+  return date.toLocaleString(locale === 'ar' ? 'ar-SA' : 'en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -1056,10 +1189,21 @@ function formatRelativeTime(dateString) {
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffSecs < 60) return 'just now';
-  if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  const isAr = (localStorage.getItem('locale') || 'ar') === 'ar';
+
+  if (diffSecs < 60) return isAr ? 'الآن' : 'just now';
+  if (diffMins < 60) {
+    if (isAr) return `منذ ${diffMins} دقيقة`;
+    return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+  }
+  if (diffHours < 24) {
+    if (isAr) return `منذ ${diffHours} ساعة`;
+    return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  }
+  if (diffDays < 7) {
+    if (isAr) return `منذ ${diffDays} أيام`;
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  }
   return formatDate(dateString);
 }
 

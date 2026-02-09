@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | منصة Q1KEY</title>
+    <link rel="stylesheet" href="../css/styles.css?v=13">
+    <script src="../js/i18n.js"></script>
+
+    <script>
+        (function () {
+            var lang = localStorage.getItem('locale') || 'ar';
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            if (lang === 'ar') document.documentElement.classList.add('rtl');
+        })();
+    </script>
+
+    <style>
+        /* Dashboard Styles */
+        .dashboard-wrapper {
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Top KPI Cards - 5 cards in a row */
+        .top-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .top-kpi-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .top-kpi-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .top-kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            position: relative;
+        }
+
+        .top-kpi-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: rgba(99, 102, 241, 0.9);
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .top-kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1;
+        }
+
+        .top-kpi-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        /* Report Section */
+        .report-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .report-filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .date-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .date-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .date-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        .filter-btn {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.25rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Main Stats Cards - 4 colored cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: inherit;
+            opacity: 0.1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card.danger {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(185, 28, 28, 0.2));
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(180, 83, 9, 0.2));
+            border: 1px solid rgba(217, 119, 6, 0.3);
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.2), rgba(4, 120, 87, 0.2));
+            border: 1px solid rgba(5, 150, 105, 0.3);
+        }
+
+        .stat-card.info {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(29, 78, 216, 0.2));
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card.danger .stat-icon {
+            background: rgba(220, 38, 38, 0.2);
+        }
+
+        .stat-card.warning .stat-icon {
+            background: rgba(217, 119, 6, 0.2);
+        }
+
+        .stat-card.success .stat-icon {
+            background: rgba(5, 150, 105, 0.2);
+        }
+
+        .stat-card.info .stat-icon {
+            background: rgba(37, 99, 235, 0.2);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card.danger .stat-label {
+            color: #fca5a5;
+        }
+
+        .stat-card.warning .stat-label {
+            color: #fcd34d;
+        }
+
+        .stat-card.success .stat-label {
+            color: #6ee7b7;
+        }
+
+        .stat-card.info .stat-label {
+            color: #93c5fd;
+        }
+
+        .stat-subtitle {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Bottom Section */
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 1.5rem;
+        }
+
+        .activity-card,
+        .quick-actions-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s;
+        }
+
+        .activity-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+
+        .quick-action-btn {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateX(-4px);
+        }
+
+        .action-icon {
+            font-size: 1.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .top-kpi-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .bottom-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-filters {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sidebar"></div>
+
+    <div class="main-content">
+        <div id="header"></div>
+
+        <div class="page-content">
+            <div class="dashboard-wrapper">
+                <!-- Top KPI Cards -->
+                <div class="top-kpi-grid">
+                    <div class="top-kpi-card">
+                        <div class="top-kpi-icon" style="background: rgba(220, 38, 38, 0.2);">
+                            ⚠️
+                            <div class="top-kpi-badge" id="overdueCount">0</div>
+                        </div>
+                        <div class="top-kpi-value" id="overdueValue">0</div>
+                        <div class="top-kpi-label">القروض المتأخرة</div>
+                    </div>
+
+                    <div class="top-kpi-card">
+                        <div class="top-kpi-icon" style="background: rgba(245, 158, 11, 0.2);">
+                            💰
+                            <div class="top-kpi-badge" id="totalLoansCount">0</div>
+                        </div>
+                        <div class="top-kpi-value" id="totalLoans">0</div>
+                        <div class="top-kpi-label">إجمالي القروض</div>
+                    </div>
+
+                    <div class="top-kpi-card">
+                        <div class="top-kpi-icon" style="background: rgba(16, 185, 129, 0.2);">
+                            👥
+                            <div class="top-kpi-badge" id="customersCount">0</div>
+                        </div>
+                        <div class="top-kpi-value" id="totalCustomers">3</div>
+                        <div class="top-kpi-label">إجمالي العملاء</div>
+                    </div>
+
+                    <div class="top-kpi-card">
+                        <div class="top-kpi-icon" style="background: rgba(59, 130, 246, 0.2);">
+                            🏢
+                            <div class="top-kpi-badge" id="branchesCount">0</div>
+                        </div>
+                        <div class="top-kpi-value" id="totalBranches">2</div>
+                        <div class="top-kpi-label">إجمالي الفروع</div>
+                    </div>
+
+                    <div class="top-kpi-card">
+                        <div class="top-kpi-icon" style="background: rgba(139, 92, 246, 0.2);">
+                            🏛️
+                            <div class="top-kpi-badge" id="institutionsCount">0</div>
+                        </div>
+                        <div class="top-kpi-value" id="totalInstitutions">4</div>
+                        <div class="top-kpi-label">إجمالي المؤسسات</div>
+                    </div>
+                </div>
+
+                <!-- Report Section -->
+                <div class="report-section">
+                    <div class="report-header">
+                        <h2 class="report-title">تقرير الأقساط</h2>
+                        <div class="report-filters">
+                            <div class="date-input-group">
+                                <span class="date-label">تاريخ من:</span>
+                                <input type="date" class="date-input" id="dateFrom">
+                            </div>
+                            <div class="date-input-group">
+                                <span class="date-label">تاريخ إلى:</span>
+                                <input type="date" class="date-input" id="dateTo">
+                            </div>
+                            <button class="filter-btn" onclick="applyFilter()">فلترة</button>
+                        </div>
+                    </div>
+
+                    <!-- Main Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card danger">
+                            <div class="stat-icon">⚠️</div>
+                            <div class="stat-value" id="dangerValue">0</div>
+                            <div class="stat-label">محذر</div>
+                            <div class="stat-subtitle">0.00 ر.س</div>
+                        </div>
+
+                        <div class="stat-card warning">
+                            <div class="stat-icon">⏳</div>
+                            <div class="stat-value" id="pendingValue">0</div>
+                            <div class="stat-label">تحت الإنتظار</div>
+                            <div class="stat-subtitle">0.00 ر.س</div>
+                        </div>
+
+                        <div class="stat-card success">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-value" id="paidValue">0</div>
+                            <div class="stat-label">المدفوع</div>
+                            <div class="stat-subtitle">0.00 ر.س</div>
+                        </div>
+
+                        <div class="stat-card info">
+                            <div class="stat-icon">📋</div>
+                            <div class="stat-value" id="reviewValue">0</div>
+                            <div class="stat-label">تحت المراجعة</div>
+                            <div class="stat-subtitle">0.00 ر.س</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Section -->
+                <div class="bottom-section">
+                    <!-- Recent Activity -->
+                    <div class="activity-card">
+                        <h3 class="section-title">النشاط الأخير</h3>
+                        <div id="activityList">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions-card">
+                        <h3 class="section-title">إجراءات سريعة</h3>
+                        <button class="quick-action-btn" onclick="window.location.href='customers-new.html'">
+                            <span class="action-icon">👤</span>
+                            <span>إضافة عميل جديد</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="window.location.href='loans-new.html'">
+                            <span class="action-icon">💰</span>
+                            <span>إنشاء قرض جديد</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="window.location.href='branches-new.html'">
+                            <span class="action-icon">🏢</span>
+                            <span>إضافة فرع جديد</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="window.location.href='institutions-new.html'">
+                            <span class="action-icon">🏛️</span>
+                            <span>إضافة مؤسسة</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/ui-utils.js"></script>
+    <script src="../components/sidebar.js"></script>
+    <script src="../components/header.js"></script>
+
+    <script>
+        let currentUser = null;
+        let dashboardData = {
+            loans: [],
+            installments: [],
+            customers: [],
+            branches: [],
+            institutions: []
+        };
+
+        async function init() {
+            try {
+                checkAuth();
+                currentUser = await api.auth.getProfile();
+
+                // Correct injection of sidebar and header
+                const user = currentUser;
+                document.getElementById('sidebar').innerHTML = createSidebar(user);
+                document.getElementById('header').innerHTML = createHeader(t('navigation.dashboard') || 'لوحة التحكم', t('dashboard.welcome_back') + ', ' + user.name);
+
+                // Initialize language switcher
+                if (typeof initializeLanguageSwitcher === 'function') {
+                    initializeLanguageSwitcher();
+                }
+
+                setActiveNav('dashboard');
+
+                // Translate page
+                if (typeof i18n !== 'undefined' && i18n.translatePage) {
+                    i18n.translatePage();
+                }
+
+                // Set default dates (last month to today)
+                const today = new Date();
+                const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+                document.getElementById('dateTo').value = today.toISOString().split('T')[0];
+                document.getElementById('dateFrom').value = lastMonth.toISOString().split('T')[0];
+
+                await loadDashboardData();
+                updateDashboard();
+            } catch (error) {
+                console.error('Init error:', error);
+                showToast('حدث خطأ في تحميل لوحة التحكم', 'error');
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load all data based on user role
+                const loansResponse = await api.loans.getAll(1, 1000);
+                dashboardData.loans = loansResponse.data || [];
+
+                // Load installments for all loans
+                const installmentPromises = dashboardData.loans.map(loan =>
+                    api.loans.getInstallments(loan.loanId).then(insts =>
+                        insts.map(inst => ({ ...inst, loan }))
+                    ).catch(() => [])
+                );
+                const installmentResults = await Promise.all(installmentPromises);
+                dashboardData.installments = installmentResults.flat();
+
+                const customersResponse = await api.customers.getAll(1, 1000);
+                dashboardData.customers = customersResponse.data || [];
+
+                const branchesResponse = await api.branches.getAll(1, 1000);
+                dashboardData.branches = branchesResponse.data || [];
+
+                if (currentUser.role === 'SuperAdmin') {
+                    const institutionsResponse = await api.institutions.getAll(1, 1000);
+                    dashboardData.institutions = institutionsResponse.data || [];
+                }
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showToast('حدث خطأ في تحميل البيانات', 'error');
+            }
+        }
+
+        function updateDashboard() {
+            // Update top KPI cards
+            const overdueLoans = dashboardData.loans.filter(l => l.status === 'Overdue').length;
+            document.getElementById('overdueValue').textContent = overdueLoans;
+            document.getElementById('overdueCount').textContent = overdueLoans;
+
+            document.getElementById('totalLoans').textContent = dashboardData.loans.length;
+            document.getElementById('totalLoansCount').textContent = dashboardData.loans.length;
+
+            document.getElementById('totalCustomers').textContent = dashboardData.customers.length;
+            document.getElementById('customersCount').textContent = dashboardData.customers.length;
+
+            document.getElementById('totalBranches').textContent = dashboardData.branches.length;
+            document.getElementById('branchesCount').textContent = dashboardData.branches.length;
+
+            document.getElementById('totalInstitutions').textContent = dashboardData.institutions.length;
+            document.getElementById('institutionsCount').textContent = dashboardData.institutions.length;
+
+            // Update installment stats
+            applyFilter();
+
+            // Update recent activity
+            updateRecentActivity();
+        }
+
+        function applyFilter() {
+            const dateFrom = new Date(document.getElementById('dateFrom').value);
+            const dateTo = new Date(document.getElementById('dateTo').value);
+
+            const filteredInstallments = dashboardData.installments.filter(inst => {
+                const dueDate = new Date(inst.dueDate);
+                return dueDate >= dateFrom && dueDate <= dateTo;
+            });
+
+            // Calculate stats
+            const overdue = filteredInstallments.filter(i => i.status === 'Overdue');
+            const pending = filteredInstallments.filter(i => i.status === 'Pending');
+            const paid = filteredInstallments.filter(i => i.status === 'Paid');
+            const review = filteredInstallments.filter(i => i.status === 'PartiallyPaid');
+
+            const overdueAmount = overdue.reduce((sum, i) => sum + (i.amount || 0), 0);
+            const pendingAmount = pending.reduce((sum, i) => sum + (i.amount || 0), 0);
+            const paidAmount = paid.reduce((sum, i) => sum + (i.amount || 0), 0);
+            const reviewAmount = review.reduce((sum, i) => sum + (i.amount || 0), 0);
+
+            // Update UI
+            document.getElementById('dangerValue').textContent = overdue.length;
+            document.querySelector('.stat-card.danger .stat-subtitle').textContent =
+                `${overdueAmount.toLocaleString('ar-SA')} ر.س`;
+
+            document.getElementById('pendingValue').textContent = pending.length;
+            document.querySelector('.stat-card.warning .stat-subtitle').textContent =
+                `${pendingAmount.toLocaleString('ar-SA')} ر.س`;
+
+            document.getElementById('paidValue').textContent = paid.length;
+            document.querySelector('.stat-card.success .stat-subtitle').textContent =
+                `${paidAmount.toLocaleString('ar-SA')} ر.س`;
+
+            document.getElementById('reviewValue').textContent = review.length;
+            document.querySelector('.stat-card.info .stat-subtitle').textContent =
+                `${reviewAmount.toLocaleString('ar-SA')} ر.س`;
+        }
+
+        function updateRecentActivity() {
+            const activities = [];
+
+            // Get recent loans (last 3)
+            const recentLoans = [...dashboardData.loans]
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, 3);
+
+            recentLoans.forEach(loan => {
+                const customer = dashboardData.customers.find(c => c.customerId === loan.customerId);
+                const customerName = customer ? customer.name : 'عميل غير معروف';
+                const timeAgo = getTimeAgo(loan.createdAt);
+
+                activities.push({
+                    icon: '💰',
+                    text: `تمت إضافة قرض جديد: ${customerName} - ${loan.amount.toLocaleString('ar-SA')} ر.س`,
+                    time: timeAgo
+                });
+            });
+
+            const activityHTML = activities.length > 0 ? activities.map(act => `
+                <div class="activity-item">
+                    <div class="activity-icon">${act.icon}</div>
+                    <div class="activity-content">
+                        <div class="activity-text">${act.text}</div>
+                        <div class="activity-time">${act.time}</div>
+                    </div>
+                </div>
+            `).join('') : '<p style="color: rgba(255,255,255,0.5); text-align: center;">لا توجد أنشطة حديثة</p>';
+
+            document.getElementById('activityList').innerHTML = activityHTML;
+        }
+
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) return `منذ ${days} ${days === 1 ? 'يوم' : 'أيام'}`;
+            if (hours > 0) return `منذ ${hours} ${hours === 1 ? 'ساعة' : 'ساعات'}`;
+            if (minutes > 0) return `منذ ${minutes} ${minutes === 1 ? 'دقيقة' : 'دقائق'}`;
+            return 'للتو';
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

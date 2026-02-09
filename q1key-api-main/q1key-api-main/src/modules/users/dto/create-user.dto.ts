@@ -1,4 +1,13 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, MaxLength, IsOptional, IsNumber, IsBoolean } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  MaxLength,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+} from "class-validator";
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -18,8 +27,8 @@ export class CreateUserDto {
   @MaxLength(100)
   name: string;
 
-  @IsNotEmpty()
-  @IsEmail()
+  @IsNotEmpty({ message: "البريد الإلكتروني مطلوب" })
+  @IsEmail({}, { message: "يرجى إدخال بريد إلكتروني صحيح" })
   @MaxLength(100)
   email: string;
 
@@ -27,6 +36,11 @@ export class CreateUserDto {
   @IsString()
   @MaxLength(20)
   phoneNumber?: string;
+
+  @IsNotEmpty({ message: "رقم الهوية مطلوب" })
+  @IsString()
+  @MaxLength(20)
+  nationalId: string;
 
   @IsNotEmpty()
   @IsString()

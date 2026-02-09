@@ -167,16 +167,8 @@
         // If we are searching, we might get users from other institutions if backend isn't secured?
         // UsersService.findAll currently doesn't restrict by institutionId for non-super-admins.
         // This is a security gap if not handled in Controller/Service, but I will maintain frontend filter as legacy logic for now
-        // HOWEVER, with search on backend, frontend filtering is dangerous/broken (pagination will be wrong).
-        // Assuming Super Admin sees all. Institution should only see theirs.
-        // The service update I made didn't add Institution scope.
-        // I will stick to what was there, but it's risky. 
-        // Ah, the user didn't ask to fix tenancy security yet.
-
+        // Server-side filtering is now correctly implemented for Institution admins.
         let users = response.data;
-        if (user.roleName === 'Institution' && user.institutionId) {
-          users = users.filter(u => u.institutionId === user.institutionId);
-        }
 
         // console.log('Loaded users:', users);
         console.log('Current User Role:', user.roleName);
@@ -233,7 +225,7 @@
               
               ${(user.roleName === 'Super Admin' || user.roleName === 'Institution') ? `
                 ${(usr.userId !== user.userId || user.email === 'admin@q1key.com') ? `
-                <button onclick="forceLogoutUser(${usr.userId}, '${usr.name.replace(/'/g, "\\'")}')" class="btn btn-icon" title="${t('users.force_logout') || 'خروج إجباري'}" style="background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2);">
+                <button onclick="forceLogoutUser(${usr.userId}, '${usr.name.replace(/'/g, "\\'")}')" class="btn btn-icon" title="${t('users.force_logout')}" style="background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2);">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                     <polyline points="16 17 21 12 16 7"></polyline>
@@ -275,7 +267,7 @@
     async function toggleActive(id, currentStatus) {
       const action = currentStatus ? 'deactivate' : 'activate';
       const confirmKey = currentStatus ? 'users.deactivate_confirm' : 'users.activate_confirm';
-      const actionText = currentStatus ? t('users.deactivate') || 'تعطيل' : t('users.activate') || 'تفعيل';
+      const actionText = currentStatus ? t('users.deactivate') : t('users.activate');
 
       showConfirmModal({
         title: actionText + ' ' + (t('users.user') || 'المستخدم'),
@@ -299,19 +291,19 @@
 
     async function forceLogoutUser(id, name) {
       showConfirmModal({
-        title: t('users.force_logout') || 'خروج إجباري',
-        message: `${t('users.force_logout_confirm') || 'هل أنت متأكد من تسجيل خروج'} ${name}؟`,
-        subMessage: t('users.force_logout_desc') || 'سيتم إنهاء الجلسة الحالية للمستخدم فوراً.',
-        confirmText: t('users.confirm_logout') || 'تسجيل خروج',
+        title: t('users.force_logout'),
+        message: `${t('users.force_logout_confirm')} ${name}؟`,
+        subMessage: t('users.force_logout_desc'),
+        confirmText: t('users.confirm_logout'),
         icon: '🔌',
         btnClass: 'btn-warning',
         onConfirm: async () => {
           try {
             await api.users.forceLogout(id);
-            showToast(t('users.logout_success') || 'تم تسجيل خروج المستخدم بنجاح', 'success');
+            showToast(t('users.logout_success'), 'success');
           } catch (error) {
             console.error('Error logging out user:', error);
-            showToast(error.message || t('users.logout_failed') || 'فشل في تسجيل خروج المستخدم', 'error');
+            showToast(error.message || t('users.logout_failed'), 'error');
           }
         }
       });
@@ -319,10 +311,10 @@
 
     async function deleteUser(id) {
       showDeleteModal({
-        title: t('users.delete_confirm_title') || 'حذف المستخدم',
+        title: t('users.delete_confirm_title'),
         itemName: `#${id}`,
-        warningText: t('users.delete_confirm') || 'هل أنت متأكد من حذف هذا المستخدم؟',
-        confirmText: t('common.button.delete') || 'حذف',
+        warningText: t('users.delete_confirm'),
+        confirmText: t('common.button.delete'),
         onConfirm: async () => {
           try {
             await api.users.delete(id);

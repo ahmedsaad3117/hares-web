@@ -30,6 +30,8 @@
             padding: 1.25rem 1.5rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .tool-tab:hover {
@@ -507,15 +509,23 @@
             font-weight: 500;
         }
     </style>
+    <script>
+        (function () {
+            var lang = localStorage.getItem('locale') || 'ar';
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            if (lang === 'ar') document.documentElement.classList.add('rtl');
+        })();
+    </script>
 </head>
 
 <body>
-    <div class="layout">
-        <div id="sidebar"></div>
+    <div id="sidebar"></div>
 
-        <div class="main-content">
-            <div id="header"></div>
+    <div class="main-content">
+        <div id="header"></div>
 
+        <div class="page-content">
             <div class="page-container">
                 <!-- Tools Tabs -->
                 <div class="tools-tabs">
@@ -579,6 +589,21 @@
                         <div>
                             <h3 data-i18n-key="tools.tabs.quicklinks">إدارة الروابط</h3>
                             <p data-i18n-key="tools.tabs.quicklinks_desc">إضافة روابط سريعة للوحة التحكم</p>
+                        </div>
+                    </div>
+
+                    <div class="tool-tab" id="tab-telegram" onclick="switchTab('telegram')">
+                        <div class="tool-tab-icon"
+                            style="background: linear-gradient(135deg, rgba(0, 136, 204, 0.2), rgba(29, 161, 242, 0.2)); color: #1da1f2;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path
+                                    d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-8.609 3.33c-2.068.8-4.133 1.598-5.724 2.21a405.15 405.15 0 0 1-2.849 1.09c-.42.147-.99.332-1.473.901-.728.855-.749 1.957-.22 2.89.485.855 1.324 1.313 1.857 1.54.614.261 1.312.49 1.907.686l.025.008c.586.192 1.173.385 1.759.578l1.072 3.22c.203.609.572 1.04 1.079 1.241.506.2 1.048.15 1.523-.155l2.403-1.542 2.904 2.203c.458.349 1.011.539 1.592.539 1.098 0 2.045-.726 2.343-1.796l2.733-12.29c.08-.364.116-.738.108-1.11-.016-.747-.208-1.5-.764-2.116a2.392 2.392 0 0 0-1.644-.642z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 data-i18n-key="tools.tabs.telegram">إعدادات التلجرام</h3>
+                            <p data-i18n-key="tools.tabs.telegram_desc">ربط إشعارات الطلبات مع بوت التلجرام</p>
                         </div>
                     </div>
                 </div>
@@ -823,7 +848,7 @@
                                         <polyline points="15 3 21 3 21 9" />
                                         <line x1="10" y1="14" x2="21" y2="3" />
                                     </svg>
-                                    معاينة
+                                    <span data-i18n-key="tools.homepage.preview">معاينة</span>
                                 </a>
                                 <button class="btn btn-primary" onclick="saveHomepageSettings()">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -832,7 +857,7 @@
                                         <polyline points="17 21 17 13 7 13 7 21" />
                                         <polyline points="7 3 7 8 15 8" />
                                     </svg>
-                                    حفظ التغييرات
+                                    <span data-i18n-key="tools.homepage.save">حفظ التغييرات</span>
                                 </button>
                             </div>
                         </div>
@@ -842,25 +867,25 @@
                             <!-- Sidebar -->
                             <div class="settings-sidebar">
                                 <button class="settings-nav-item active" onclick="switchSettingsTab('hero', this)">
-                                    ✨ قسم الهيرو
+                                    ✨ <span data-i18n-key="tools.homepage.hero_section">قسم الهيرو</span>
                                 </button>
                                 <button class="settings-nav-item" onclick="switchSettingsTab('buttons', this)">
-                                    🔘 الأزرار
+                                    🔘 <span data-i18n-key="tools.homepage.buttons_section">الأزرار</span>
                                 </button>
                                 <button class="settings-nav-item" onclick="switchSettingsTab('features', this)">
-                                    ⭐ المميزات
+                                    ⭐ <span data-i18n-key="tools.homepage.features_section">المميزات</span>
                                 </button>
                                 <button class="settings-nav-item" onclick="switchSettingsTab('plans', this)">
-                                    💎 الباقات
+                                    💎 <span data-i18n-key="tools.homepage.plans_section">الباقات</span>
                                 </button>
                                 <button class="settings-nav-item" onclick="switchSettingsTab('about', this)">
-                                    ℹ️ من نحن
+                                    ℹ️ <span data-i18n-key="tools.homepage.about_section">من نحن</span>
                                 </button>
                                 <button class="settings-nav-item" onclick="switchSettingsTab('contact', this)">
-                                    📞 التواصل
+                                    📞 <span data-i18n-key="tools.homepage.contact_section">التواصل</span>
                                 </button>
                                 <button class="settings-nav-item" onclick="switchSettingsTab('footer', this)">
-                                    🦶 الفوتر
+                                    🦶 <span data-i18n-key="tools.homepage.footer_section">الفوتر</span>
                                 </button>
                             </div>
 
@@ -868,27 +893,32 @@
                             <div class="settings-content-area">
                                 <!-- Hero Tab -->
                                 <div id="tab-hero" class="settings-tab-pane active">
-                                    <h3 class="input-group-title">إعدادات قسم البداية (Hero Section)</h3>
+                                    <h3 class="input-group-title" data-i18n-key="tools.homepage.hero_settings">إعدادات
+                                        قسم البداية (Hero Section)</h3>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>العنوان الرئيسي (عربي)</label>
+                                            <label data-i18n-key="tools.homepage.title_ar">العنوان الرئيسي
+                                                (عربي)</label>
                                             <input type="text" id="hp_heroTitleAr" class="input"
                                                 placeholder="منصة Q1Key لإدارة القروض">
                                         </div>
                                         <div class="form-group">
-                                            <label>العنوان الرئيسي (إنجليزي)</label>
+                                            <label data-i18n-key="tools.homepage.title_en">العنوان الرئيسي
+                                                (إنجليزي)</label>
                                             <input type="text" id="hp_heroTitleEn" class="input"
                                                 placeholder="Q1Key Loan Management Platform">
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>العنوان الفرعي (عربي)</label>
+                                            <label data-i18n-key="tools.homepage.subtitle_ar">العنوان الفرعي
+                                                (عربي)</label>
                                             <textarea id="hp_heroSubtitleAr" rows="3" class="input"
                                                 placeholder="الحل الأمثل لإدارة مؤسستك المالية"></textarea>
                                         </div>
                                         <div class="form-group">
-                                            <label>العنوان الفرعي (إنجليزي)</label>
+                                            <label data-i18n-key="tools.homepage.subtitle_en">العنوان الفرعي
+                                                (إنجليزي)</label>
                                             <textarea id="hp_heroSubtitleEn" rows="3" class="input"
                                                 placeholder="The Ultimate Solution"></textarea>
                                         </div>
@@ -897,14 +927,16 @@
 
                                 <!-- Buttons Tab -->
                                 <div id="tab-buttons" class="settings-tab-pane">
-                                    <h3 class="input-group-title">إعدادات الأزرار الرئيسية</h3>
+                                    <h3 class="input-group-title" data-i18n-key="tools.homepage.buttons_section">إعدادات
+                                        الأزرار الرئيسية</h3>
 
                                     <!-- Login Button -->
                                     <div class="settings-card" style="margin-bottom: 1.5rem;">
                                         <div class="settings-row"
                                             style="border: none; padding: 0; margin-bottom: 1rem;">
                                             <div class="settings-label">
-                                                <span>زر "تسجيل الدخول"</span>
+                                                <span data-i18n-key="tools.homepage.login_button">زر "تسجيل
+                                                    الدخول"</span>
                                             </div>
                                             <label class="toggle-switch">
                                                 <input type="checkbox" id="hp_loginBtnVisible">
@@ -913,12 +945,12 @@
                                         </div>
                                         <div class="form-row">
                                             <div class="form-group">
-                                                <label>النص (عربي)</label>
+                                                <label data-i18n-key="tools.homepage.btn_text_ar">النص (عربي)</label>
                                                 <input type="text" id="hp_loginBtnTextAr" class="input"
                                                     placeholder="تسجيل الدخول">
                                             </div>
                                             <div class="form-group">
-                                                <label>النص (إنجليزي)</label>
+                                                <label data-i18n-key="tools.homepage.btn_text_en">النص (إنجليزي)</label>
                                                 <input type="text" id="hp_loginBtnTextEn" class="input"
                                                     placeholder="Login">
                                             </div>
@@ -930,7 +962,8 @@
                                         <div class="settings-row"
                                             style="border: none; padding: 0; margin-bottom: 1rem;">
                                             <div class="settings-label">
-                                                <span>زر "حساب جديد"</span>
+                                                <span data-i18n-key="tools.homepage.register_button">زر "حساب
+                                                    جديد"</span>
                                             </div>
                                             <label class="toggle-switch">
                                                 <input type="checkbox" id="hp_registerBtnVisible">
@@ -939,12 +972,12 @@
                                         </div>
                                         <div class="form-row">
                                             <div class="form-group">
-                                                <label>النص (عربي)</label>
+                                                <label data-i18n-key="tools.homepage.btn_text_ar">النص (عربي)</label>
                                                 <input type="text" id="hp_registerBtnTextAr" class="input"
                                                     placeholder="اشترك معنا">
                                             </div>
                                             <div class="form-group">
-                                                <label>النص (إنجليزي)</label>
+                                                <label data-i18n-key="tools.homepage.btn_text_en">النص (إنجليزي)</label>
                                                 <input type="text" id="hp_registerBtnTextEn" class="input"
                                                     placeholder="Register Now">
                                             </div>
@@ -956,7 +989,8 @@
                                 <div id="tab-features" class="settings-tab-pane">
                                     <div class="settings-row" style="margin-bottom: 1.5rem;">
                                         <div class="settings-label">
-                                            <h3 class="input-group-title" style="margin: 0; border: none;">إظهار قسم
+                                            <h3 class="input-group-title" style="margin: 0; border: none;"
+                                                data-i18n-key="tools.homepage.show_features">إظهار قسم
                                                 المميزات</h3>
                                         </div>
                                         <label class="toggle-switch">
@@ -967,11 +1001,13 @@
 
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>عنوان القسم (عربي)</label>
+                                            <label data-i18n-key="tools.homepage.section_title_ar">عنوان القسم
+                                                (عربي)</label>
                                             <input type="text" id="hp_featuresTitleAr" class="input">
                                         </div>
                                         <div class="form-group">
-                                            <label>عنوان القسم (إنجليزي)</label>
+                                            <label data-i18n-key="tools.homepage.section_title_en">عنوان القسم
+                                                (إنجليزي)</label>
                                             <input type="text" id="hp_featuresTitleEn" class="input">
                                         </div>
                                     </div>
@@ -981,7 +1017,8 @@
                                 <div id="tab-plans" class="settings-tab-pane">
                                     <div class="settings-row" style="margin-bottom: 1.5rem;">
                                         <div class="settings-label">
-                                            <h3 class="input-group-title" style="margin: 0; border: none;">إظهار قسم
+                                            <h3 class="input-group-title" style="margin: 0; border: none;"
+                                                data-i18n-key="tools.homepage.show_plans">إظهار قسم
                                                 الباقات</h3>
                                         </div>
                                         <label class="toggle-switch">
@@ -992,11 +1029,13 @@
 
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>عنوان القسم (عربي)</label>
+                                            <label data-i18n-key="tools.homepage.section_title_ar">عنوان القسم
+                                                (عربي)</label>
                                             <input type="text" id="hp_plansTitleAr" class="input">
                                         </div>
                                         <div class="form-group">
-                                            <label>عنوان القسم (إنجليزي)</label>
+                                            <label data-i18n-key="tools.homepage.section_title_en">عنوان القسم
+                                                (إنجليزي)</label>
                                             <input type="text" id="hp_plansTitleEn" class="input">
                                         </div>
                                     </div>
@@ -1006,7 +1045,8 @@
                                 <div id="tab-about" class="settings-tab-pane">
                                     <div class="settings-row" style="margin-bottom: 1.5rem;">
                                         <div class="settings-label">
-                                            <h3 class="input-group-title" style="margin: 0; border: none;">إظهار قسم من
+                                            <h3 class="input-group-title" style="margin: 0; border: none;"
+                                                data-i18n-key="tools.homepage.show_about">إظهار قسم من
                                                 نحن</h3>
                                         </div>
                                         <label class="toggle-switch">
@@ -1017,21 +1057,22 @@
 
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>العنوان (عربي)</label>
+                                            <label data-i18n-key="tools.homepage.about_title_ar">العنوان (عربي)</label>
                                             <input type="text" id="hp_aboutTitleAr" class="input">
                                         </div>
                                         <div class="form-group">
-                                            <label>العنوان (إنجليزي)</label>
+                                            <label data-i18n-key="tools.homepage.about_title_en">العنوان
+                                                (إنجليزي)</label>
                                             <input type="text" id="hp_aboutTitleEn" class="input">
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>المحتوى (عربي)</label>
+                                            <label data-i18n-key="tools.homepage.content_ar">المحتوى (عربي)</label>
                                             <textarea id="hp_aboutContentAr" rows="5" class="input"></textarea>
                                         </div>
                                         <div class="form-group">
-                                            <label>المحتوى (إنجليزي)</label>
+                                            <label data-i18n-key="tools.homepage.content_en">المحتوى (إنجليزي)</label>
                                             <textarea id="hp_aboutContentEn" rows="5" class="input"></textarea>
                                         </div>
                                     </div>
@@ -1041,7 +1082,8 @@
                                 <div id="tab-contact" class="settings-tab-pane">
                                     <div class="settings-row" style="margin-bottom: 1.5rem;">
                                         <div class="settings-label">
-                                            <h3 class="input-group-title" style="margin: 0; border: none;">إظهار قسم
+                                            <h3 class="input-group-title" style="margin: 0; border: none;"
+                                                data-i18n-key="tools.homepage.show_contact">إظهار قسم
                                                 التواصل</h3>
                                         </div>
                                         <label class="toggle-switch">
@@ -1052,54 +1094,61 @@
 
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>عنوان القسم (عربي)</label>
+                                            <label data-i18n-key="tools.homepage.section_title_ar">عنوان القسم
+                                                (عربي)</label>
                                             <input type="text" id="hp_contactTitleAr" class="input">
                                         </div>
                                         <div class="form-group">
-                                            <label>عنوان القسم (إنجليزي)</label>
+                                            <label data-i18n-key="tools.homepage.section_title_en">عنوان القسم
+                                                (إنجليزي)</label>
                                             <input type="text" id="hp_contactTitleEn" class="input">
                                         </div>
                                     </div>
-                                    <div class="form-row"
-                                        style="margin-top: 1rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+
+                                    <div class="form-row" style="margin-top: 1rem;">
                                         <div class="form-group">
-                                            <label>رقم الواتساب (للتواصل)</label>
+                                            <label data-i18n-key="tools.homepage.whatsapp_label">رقم الواتساب
+                                                (للتواصل)</label>
                                             <input type="text" id="hp_whatsappNumber" class="input"
-                                                placeholder="مثال: 9665xxxxxxxx" dir="ltr" style="text-align: right;">
+                                                placeholder="966...">
                                         </div>
                                         <div class="form-group">
-                                            <label>البريد الإلكتروني للدعم</label>
+                                            <label data-i18n-key="tools.homepage.email_label">البريد الإلكتروني
+                                                للدعم</label>
                                             <input type="email" id="hp_supportEmail" class="input"
-                                                placeholder="support@example.com" dir="ltr" style="text-align: right;">
+                                                placeholder="support@example.com">
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Footer Tab -->
                                 <div id="tab-footer" class="settings-tab-pane">
-                                    <h3 class="input-group-title">إعدادات الفوتر</h3>
+                                    <h3 class="input-group-title" data-i18n-key="tools.homepage.footer_settings">إعدادات
+                                        الفوتر</h3>
+
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>نص الحقوق (عربي)</label>
-                                            <input type="text" id="hp_footerTextAr" class="input"
-                                                placeholder="جميع الحقوق محفوظة">
+                                            <label data-i18n-key="tools.homepage.copyright_ar">نص الحقوق (عربي)</label>
+                                            <input type="text" id="hp_footerTextAr" class="input">
                                         </div>
                                         <div class="form-group">
-                                            <label>نص الحقوق (إنجليزي)</label>
-                                            <input type="text" id="hp_footerTextEn" class="input"
-                                                placeholder="All rights reserved">
+                                            <label data-i18n-key="tools.homepage.copyright_en">نص الحقوق
+                                                (إنجليزي)</label>
+                                            <input type="text" id="hp_footerTextEn" class="input">
                                         </div>
                                     </div>
 
-                                    <h3 class="input-group-title"
-                                        style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
-                                        الروابط السريعة</h3>
-                                    <div id="hp_quickLinksList"
-                                        style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
-                                    <button class="btn btn-secondary" onclick="addQuickLinkUI()"
-                                        style="margin-top: 1rem; width: 100%; border-style: dashed;">
-                                        + إضافة رابط جديد
-                                    </button>
+                                    <div style="margin-top: 2rem;">
+                                        <h3 class="input-group-title" data-i18n-key="tools.homepage.quick_links">الروابط
+                                            السريعة</h3>
+                                        <div id="footerLinksContainer">
+                                            <!-- Managed via JS -->
+                                        </div>
+                                        <button class="btn btn-secondary btn-block" onclick="addFooterLink()"
+                                            style="margin-top: 1rem;" data-i18n-key="tools.homepage.add_link_btn">
+                                            + إضافة رابط جديد
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1139,6 +1188,174 @@
                             <div class="loading-overlay">
                                 <div class="spinner"></div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Telegram Settings Section -->
+                <div class="tab-content" id="content-telegram">
+                    <div class="glass-card" id="telegramSection">
+                        <div class="section-header">
+                            <h2>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-8.609 3.33c-2.068.8-4.133 1.598-5.724 2.21a405.15 405.15 0 0 1-2.849 1.09c-.42.147-.99.332-1.473.901-.728.855-.749 1.957-.22 2.89.485.855 1.324 1.313 1.857 1.54.614.261 1.312.49 1.907.686l.025.008c.586.192 1.173.385 1.759.578l1.072 3.22c.203.609.572 1.04 1.079 1.241.506.2 1.048.15 1.523-.155l2.403-1.542 2.904 2.203c.458.349 1.011.539 1.592.539 1.098 0 2.045-.726 2.343-1.796l2.733-12.29c.08-.364.116-.738.108-1.11-.016-.747-.208-1.5-.764-2.116a2.392 2.392 0 0 0-1.644-.642z" />
+                                </svg>
+                                <span data-i18n-key="tools.telegram.title">إعدادات التلجرام</span>
+                            </h2>
+                        </div>
+
+                        <p style="color: #94a3b8; margin-bottom: 1.5rem;" data-i18n-key="tools.telegram.description">
+                            اربط النظام مع بوت تلجرام لتلقي إشعارات فورية عند ورود طلبات الاشتراك الجديدة.
+                        </p>
+
+                        <!-- Connection Status -->
+                        <div id="telegramStatus" class="settings-card" style="margin-bottom: 1.5rem;">
+                            <div class="settings-row" style="border: none;">
+                                <div class="settings-label">
+                                    <span style="font-size: 1.1rem; font-weight: 600;">📡 <span
+                                            data-i18n-key="tools.telegram.connection_status">Connection
+                                            Status</span></span>
+                                    <small id="telegramStatusText" style="color: #94a3b8;"
+                                        data-i18n-key="tools.telegram.checking">Checking...</small>
+                                </div>
+                                <div id="telegramStatusBadge" class="status-badge inactive"
+                                    data-i18n-key="tools.telegram.not_connected">
+                                    Not Connected
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bot Token -->
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label style="color: white; font-weight: 600; margin-bottom: 0.5rem; display: block;">
+                                🤖 <span data-i18n-key="tools.telegram.bot_token">Bot Token</span>
+                            </label>
+                            <small style="color: #94a3b8; display: block; margin-bottom: 0.75rem;"
+                                data-i18n-key="tools.telegram.bot_token_help">
+                                Get it from @BotFather on Telegram
+                            </small>
+                            <input type="password" id="telegramBotToken" class="input"
+                                placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
+                                style="font-family: monospace; direction: ltr; text-align: left;">
+                        </div>
+
+                        <!-- Chat ID -->
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label style="color: white; font-weight: 600; margin-bottom: 0.5rem; display: block;">
+                                💬 <span data-i18n-key="tools.telegram.chat_id">Chat ID</span>
+                            </label>
+                            <small style="color: #94a3b8; display: block; margin-bottom: 0.75rem;"
+                                data-i18n-key="tools.telegram.chat_id_help">
+                                ID of the person or group that will receive notifications
+                            </small>
+                            <input type="text" id="telegramChatId" class="input" placeholder="-1001234567890"
+                                style="font-family: monospace; direction: ltr; text-align: left;">
+                        </div>
+
+                        <!-- Notification Settings -->
+                        <div class="settings-card" style="margin-bottom: 1.5rem;">
+                            <h3 style="color: white; margin-bottom: 1rem; font-size: 1rem;">⚙️ <span
+                                    data-i18n-key="tools.telegram.notification_settings">Notification Settings</span>
+                            </h3>
+
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <span data-i18n-key="tools.telegram.enable_notifications">Enable Telegram
+                                        Notifications</span>
+                                    <small data-i18n-key="tools.telegram.enable_notifications_desc">Turn on/off all
+                                        notifications</small>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="telegramEnabled">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <span>🆕 <span data-i18n-key="tools.telegram.notify_new_requests">New Registration
+                                            Requests</span></span>
+                                    <small data-i18n-key="tools.telegram.notify_new_requests_desc">Notify when a new
+                                        institution or branch registers</small>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="telegramNotifyNew" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="settings-row" style="border: none;">
+                                <div class="settings-label">
+                                    <span>🔄 <span data-i18n-key="tools.telegram.notify_renewals">Renewal
+                                            Requests</span></span>
+                                    <small data-i18n-key="tools.telegram.notify_renewals_desc">Notify when a
+                                        subscription renewal is requested</small>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="telegramNotifyRenewals" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="settings-row" style="border: none;">
+                                <div class="settings-label">
+                                    <span>🔘 <span data-i18n-key="tools.telegram.allow_action_buttons">التفاعل مع
+                                            الإشعارات</span></span>
+                                    <small data-i18n-key="tools.telegram.allow_action_buttons_desc">دعم أزرار القبول
+                                        والرفض التفاعلية في تلجرام</small>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="telegramAllowActions" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button class="btn btn-secondary" onclick="testTelegramConnection()" id="testTelegramBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg>
+                                <span data-i18n-key="tools.telegram.test_connection">Test Connection</span>
+                            </button>
+                            <button class="btn btn-primary" onclick="saveTelegramSettings()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                    <polyline points="17 21 17 13 7 13 7 21" />
+                                    <polyline points="7 3 7 8 15 8" />
+                                </svg>
+                                <span data-i18n-key="tools.telegram.save_settings">Save Settings</span>
+                            </button>
+                        </div>
+
+                        <!-- Help Section -->
+                        <div
+                            style="margin-top: 2rem; padding: 1.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                            <h4 style="color: #60a5fa; margin-bottom: 1rem;">📖 <span
+                                    data-i18n-key="tools.telegram.help_title">How to set up the bot</span></h4>
+                            <ol style="color: #94a3b8; padding-inline-start: 1.5rem; line-height: 1.8;">
+                                <li><span data-i18n-key="tools.telegram.help_step1">Open Telegram and search for</span>
+                                    <code
+                                        style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">@BotFather</code>
+                                </li>
+                                <li><span data-i18n-key="tools.telegram.help_step2">Send the command</span> <code
+                                        style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">/newbot</code>
+                                </li>
+                                <li data-i18n-key="tools.telegram.help_step3">Copy the token you receive and paste it in
+                                    the field above</li>
+                                <li><span data-i18n-key="tools.telegram.help_step4">To get the Chat ID, send a message
+                                        to the bot then use</span> <code
+                                        style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">@userinfobot</code>
+                                </li>
+                                <li data-i18n-key="tools.telegram.help_step5">Click Test Connection to verify the
+                                    settings</li>
+                            </ol>
                         </div>
                     </div>
                 </div>
@@ -1213,7 +1430,8 @@
                     <input type="checkbox" id="announcementIsActive">
                     <span class="toggle-slider"></span>
                 </label>
-                <label style="color: white; margin: 0;" data-i18n-key="tools.announcements.activate_now">تفعيل الإعلان
+                <label style="color: white; margin: 0;" data-i18n-key="tools.announcements.activate_now">تفعيل
+                    الإعلان
                     فوراً</label>
             </div>
 
@@ -1307,7 +1525,7 @@
             if (typeof initializeLanguageSwitcher === 'function') initializeLanguageSwitcher();
             setActiveNav('tools');
 
-            await Promise.all([loadPlans(), loadAnnouncements(), loadHomepageSettings(), loadQuickLinksAdmin()]);
+            await Promise.all([loadPlans(), loadAnnouncements(), loadHomepageSettings(), loadQuickLinksAdmin(), loadTelegramSettings()]);
         }
 
         // Add event listener for language changes to re-render dynamic content
@@ -1422,19 +1640,25 @@
                 document.getElementById('hp_contactTitleEn').value = settings.contactTitleEn || '';
 
             if (document.getElementById('hp_whatsappNumber'))
-                document.getElementById('hp_whatsappNumber').value = settings.whatsappNumber || '';
+                document.getElementById('hp_whatsappNumber').value = settings.whatsappNumber || settings.whatsapp_number || '';
             if (document.getElementById('hp_supportEmail'))
-                document.getElementById('hp_supportEmail').value = settings.supportEmail || '';
+                document.getElementById('hp_supportEmail').value = settings.supportEmail || settings.support_email || '';
 
             // About
-            document.getElementById('hp_aboutTitleAr').value = settings.aboutTitleAr || '';
-            document.getElementById('hp_aboutTitleEn').value = settings.aboutTitleEn || '';
-            document.getElementById('hp_aboutContentAr').value = settings.aboutContentAr || '';
-            document.getElementById('hp_aboutContentEn').value = settings.aboutContentEn || '';
+            if (document.getElementById('hp_aboutTitleAr'))
+                document.getElementById('hp_aboutTitleAr').value = settings.aboutTitleAr || '';
+            if (document.getElementById('hp_aboutTitleEn'))
+                document.getElementById('hp_aboutTitleEn').value = settings.aboutTitleEn || '';
+            if (document.getElementById('hp_aboutContentAr'))
+                document.getElementById('hp_aboutContentAr').value = settings.aboutContentAr || '';
+            if (document.getElementById('hp_aboutContentEn'))
+                document.getElementById('hp_aboutContentEn').value = settings.aboutContentEn || '';
 
             // Footer
-            document.getElementById('hp_footerTextAr').value = settings.footerTextAr || '';
-            document.getElementById('hp_footerTextEn').value = settings.footerTextEn || '';
+            if (document.getElementById('hp_footerTextAr'))
+                document.getElementById('hp_footerTextAr').value = settings.footerTextAr || '';
+            if (document.getElementById('hp_footerTextEn'))
+                document.getElementById('hp_footerTextEn').value = settings.footerTextEn || '';
 
             // Quick Links
             if (settings.quickLinks) {
@@ -1549,7 +1773,7 @@
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8;">
-                            لا توجد باقات. قم بإضافة باقة جديدة.
+                            ${t('tools.plans.table.empty') || 'لا توجد باقات. قم بإضافة باقة جديدة.'}
                         </td>
                     </tr>
                 `;
@@ -1774,7 +1998,7 @@
             if (!announcements || announcements.length === 0) {
                 container.innerHTML = `
                     <p style="color: #94a3b8; text-align: center; padding: 2rem;">
-                        لا توجد إعلانات. قم بإنشاء إعلان جديد.
+                        ${t('tools.announcements.list_empty') || 'لا توجد إعلانات. قم بإنشاء إعلان جديد.'}
                     </p>
                 `;
                 return;
@@ -1991,7 +2215,7 @@
                             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                         </svg>
-                        <p>لا توجد روابط سريعة. قم بإضافة رابط جديد.</p>
+                        <p>${t('tools.quicklinks.list_empty') || 'لا توجد روابط سريعة. قم بإضافة رابط جديد.'}</p>
                     </div>
                 `;
                 return;
@@ -2137,6 +2361,221 @@
             // Show active pane
             const pane = document.getElementById(`tab-${tabName}`);
             if (pane) pane.classList.add('active');
+        }
+
+        // ==================== TELEGRAM SETTINGS ====================
+        let telegramSettings = null;
+
+        async function loadTelegramSettings() {
+            try {
+                const response = await fetch(`${window.API_CONFIG.baseUrl}/telegram/settings`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    console.error('[Telegram] Error response:', data);
+                    throw new Error(data.error || 'Failed to load telegram settings');
+                }
+
+                // Check if we got an error object instead of settings
+                if (data.error || data.statusCode) {
+                    console.error('[Telegram] API returned error:', data);
+                    updateTelegramStatus({ lastTestSuccess: false, lastTestAt: null });
+                    return;
+                }
+
+                telegramSettings = data;
+                populateTelegramForm(telegramSettings);
+                updateTelegramStatus(telegramSettings);
+            } catch (error) {
+                console.error('Error loading telegram settings:', error);
+                updateTelegramStatus({ lastTestSuccess: false, lastTestAt: null });
+            }
+        }
+
+        function populateTelegramForm(settings) {
+            if (!settings) return;
+
+            // Only populate token if it exists (it will be masked from server)
+            if (settings.botToken) {
+                document.getElementById('telegramBotToken').value = settings.botToken;
+                document.getElementById('telegramBotToken').placeholder = 'التوكن محفوظ (أدخل توكن جديد للتغيير)';
+            }
+
+            document.getElementById('telegramChatId').value = settings.chatId || '';
+            document.getElementById('telegramEnabled').checked = settings.isEnabled || false;
+            document.getElementById('telegramNotifyNew').checked = settings.notifyNewRequests !== false;
+            document.getElementById('telegramNotifyRenewals').checked = settings.notifyRenewals !== false;
+            document.getElementById('telegramAllowActions').checked = settings.allowActionButtons !== false;
+        }
+
+        function updateTelegramStatus(settings) {
+            const statusBadge = document.getElementById('telegramStatusBadge');
+            const statusText = document.getElementById('telegramStatusText');
+
+            if (settings && settings.lastTestSuccess) {
+                statusBadge.className = 'status-badge active';
+                statusBadge.textContent = '✓ متصل';
+
+                if (settings.lastTestAt) {
+                    const lastTest = new Date(settings.lastTestAt);
+                    statusText.textContent = `آخر اختبار ناجح: ${lastTest.toLocaleDateString('ar-SA')} ${lastTest.toLocaleTimeString('ar-SA')}`;
+                }
+            } else {
+                statusBadge.className = 'status-badge inactive';
+                statusBadge.textContent = 'غير متصل';
+
+                if (settings && settings.lastTestError) {
+                    statusText.textContent = `خطأ: ${settings.lastTestError}`;
+                } else if (settings && !settings.botToken) {
+                    statusText.textContent = 'لم يتم إعداد البوت بعد';
+                } else {
+                    statusText.textContent = 'يرجى اختبار الاتصال';
+                }
+            }
+        }
+
+        async function saveTelegramSettings() {
+            const botToken = document.getElementById('telegramBotToken').value.trim();
+            const chatId = document.getElementById('telegramChatId').value.trim();
+            const isEnabled = document.getElementById('telegramEnabled').checked;
+            const notifyNewRequests = document.getElementById('telegramNotifyNew').checked;
+            const notifyRenewals = document.getElementById('telegramNotifyRenewals').checked;
+            const allowActionButtons = document.getElementById('telegramAllowActions').checked;
+
+            // Validate before showing confirmation
+            if (isEnabled && (!botToken || botToken.startsWith('••')) && !telegramSettings?.botTokenExists) {
+                showToast(t('tools.telegram.enter_token') || 'Please enter the bot token', 'error');
+                return;
+            }
+
+            if (isEnabled && !chatId) {
+                showToast(t('tools.telegram.enter_chat_id') || 'Please enter the chat ID', 'error');
+                return;
+            }
+
+            // Show confirmation modal
+            showConfirmModal({
+                title: t('tools.telegram.save_confirm_title') || 'Save Telegram Settings',
+                message: t('tools.telegram.save_confirm_message') || 'Are you sure you want to save these Telegram settings?',
+                confirmText: t('tools.telegram.save_settings') || 'Save Settings',
+                icon: '💾',
+                btnClass: 'btn-primary',
+                onConfirm: async () => {
+                    await performSaveTelegramSettings(botToken, chatId, isEnabled, notifyNewRequests, notifyRenewals, allowActionButtons);
+                }
+            });
+        }
+
+        async function performSaveTelegramSettings(botToken, chatId, isEnabled, notifyNewRequests, notifyRenewals, allowActionButtons) {
+            try {
+                const body = {
+                    chatId: chatId,
+                    isEnabled: isEnabled,
+                    notifyNewRequests: notifyNewRequests,
+                    notifyRenewals: notifyRenewals,
+                    allowActionButtons: allowActionButtons
+                };
+
+                // Only send token if it's not masked or empty
+                if (botToken && !botToken.includes('***') && !botToken.includes('••')) {
+                    body.botToken = botToken;
+                }
+
+                const response = await fetch(`${window.API_CONFIG.baseUrl}/telegram/settings`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showToast(t('tools.telegram.save_success') || 'Settings saved successfully', 'success');
+                    await loadTelegramSettings();
+                } else {
+                    console.error('[Telegram] Save failed:', result);
+                    showToast(result.error || t('tools.telegram.save_failed') || 'Failed to save settings', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving telegram settings:', error);
+                showToast(t('tools.telegram.save_failed') || 'Failed to save settings', 'error');
+            }
+        }
+
+        async function testTelegramConnection() {
+            const btn = document.getElementById('testTelegramBtn');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<span class="spinner" style="width: 16px; height: 16px;"></span> جاري الاختبار...';
+            btn.disabled = true;
+
+            try {
+                // First save the settings
+                const botToken = document.getElementById('telegramBotToken').value.trim();
+                const chatId = document.getElementById('telegramChatId').value.trim();
+
+                if (!botToken || (!telegramSettings?.botTokenExists && botToken.startsWith('••'))) {
+                    showToast('يرجى إدخال توكن البوت أولاً', 'error');
+                    return;
+                }
+
+                if (!chatId) {
+                    showToast('يرجى إدخال معرف المحادثة', 'error');
+                    return;
+                }
+
+                // Save first
+                const body = { chatId: chatId };
+                if (botToken && !botToken.includes('***') && !botToken.includes('••')) {
+                    body.botToken = botToken;
+                }
+
+                await fetch(`${window.API_CONFIG.baseUrl}/telegram/settings`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                // Then test
+                const response = await fetch(`${window.API_CONFIG.baseUrl}/telegram/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('✅ تم إرسال رسالة الاختبار بنجاح! تحقق من التلجرام', 'success');
+                    updateTelegramStatus({ lastTestSuccess: true, lastTestAt: new Date() });
+                } else {
+                    showToast(`❌ فشل الاختبار: ${result.message}`, 'error');
+                    updateTelegramStatus({ lastTestSuccess: false, lastTestError: result.message });
+                }
+
+                // Reload settings to get updated status
+                await loadTelegramSettings();
+            } catch (error) {
+                console.error('Error testing telegram:', error);
+                showToast('فشل في اختبار الاتصال', 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         // Initialize

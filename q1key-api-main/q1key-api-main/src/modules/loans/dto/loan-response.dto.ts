@@ -1,5 +1,5 @@
-import { LoanStatus } from '../../../entities/loan.entity';
-import { InstallmentStatus } from '../../../entities/installment-status.enum';
+import { LoanStatus } from "../../../entities/loan.entity";
+import { InstallmentStatus } from "../../../entities/installment-status.enum";
 
 export class LoanResponseDto {
   loanId: number;
@@ -26,14 +26,17 @@ export class LoanResponseDto {
   branch?: {
     branchId: number;
     name: string;
+    phoneNumber?: string;
     institution?: {
       institutionId: number;
       name: string;
+      phoneNumber?: string;
     };
   };
   institution?: {
     institutionId: number;
     name: string;
+    phoneNumber?: string;
   };
   product?: {
     productId: number;

@@ -1,28 +1,28 @@
 import {
-    Entity,
-    Column,
-    PrimaryGeneratedColumn,
-    CreateDateColumn,
-    UpdateDateColumn,
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 
 @Entity("system_settings")
 export class SystemSetting {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({ unique: true, length: 100 })
-    key: string;
+  @Column({ unique: true, length: 100 })
+  key: string;
 
-    @Column({ type: "text", nullable: true })
-    value: string;
+  @Column({ type: "text", nullable: true })
+  value: string;
 
-    @Column({ type: "text", nullable: true })
-    description: string;
+  @Column({ type: "text", nullable: true })
+  description: string;
 
-    @CreateDateColumn({ name: "created_at" })
-    createdAt: Date;
+  @CreateDateColumn({ name: "created_at" })
+  createdAt: Date;
 
-    @UpdateDateColumn({ name: "updated_at" })
-    updatedAt: Date;
+  @UpdateDateColumn({ name: "updated_at" })
+  updatedAt: Date;
 }

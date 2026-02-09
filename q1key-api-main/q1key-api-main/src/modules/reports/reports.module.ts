@@ -1,12 +1,12 @@
-import { Module } from '@nestjs/common';
-import { ReportsController } from './reports.controller';
-import { ReportsService } from './reports.service';
-import { AuthModule } from '../auth/auth.module'; // Adjust path if needed
+import { Module } from "@nestjs/common";
+import { ReportsController } from "./reports.controller";
+import { ReportsService } from "./reports.service";
+import { AuthModule } from "../auth/auth.module"; // Adjust path if needed
 
 @Module({
-    imports: [AuthModule],
-    controllers: [ReportsController],
-    providers: [ReportsService],
-    exports: [ReportsService],
+  imports: [AuthModule],
+  controllers: [ReportsController],
+  providers: [ReportsService],
+  exports: [ReportsService],
 })
-export class ReportsModule { }
+export class ReportsModule {}

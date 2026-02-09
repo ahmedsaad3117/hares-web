@@ -6,17 +6,26 @@ function translateRole(roleName) {
     'Super Admin': 'users.roles.super_admin',
     'admin': 'users.roles.super_admin', // Handle 'admin' role from DB
     'Institution': 'users.roles.institution',
-    'Branch': 'users.roles.branch'
+    'Branch': 'users.roles.branch',
+    'Guest': 'users.roles.guest'
   };
-  return t(roleMap[roleName] || roleName || 'Guest');
+  return t(roleMap[roleName] || roleName || 'users.roles.guest');
 }
 
 // function isSubscriptionExpired is now globally defined in api.js
 
 function createSidebar(user) {
-  const isExpired = user.roleName !== 'Super Admin' && isSubscriptionExpired(user.expirationDate);
+  const isStrictlyExpired = user.roleName !== 'Super Admin' && isSubscriptionExpired(user.expirationDate);
+
+  // LOGIC: Strict Enforcement - No more "session_valid" bypass. 
+  // If it's expired in DB, it's expired in UI.
+  let isExpiredForUI = isStrictlyExpired;
+
   console.log('Sidebar user:', user);
-  console.log('Subscription expired status:', isExpired);
+  console.log('Subscription Status:', { strict: isStrictlyExpired, finalUI: isExpiredForUI });
+
+  const isExpired = isExpiredForUI;
+
 
   const sidebarHTML = `
     <div class="sidebar ${isExpired ? 'subscription-expired' : ''}">
@@ -156,6 +165,17 @@ function createSidebar(user) {
           </li>
           
           <li class="sidebar-nav-item ${isExpired ? 'expired' : ''}">
+            <a href="comparisons.html" class="sidebar-nav-link" id="nav-comparisons">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+              <span data-i18n-key="navigation.comparisons">${t('navigation.comparisons')}</span>
+            </a>
+          </li>
+          
+          <li class="sidebar-nav-item ${isExpired ? 'expired' : ''}">
             <a href="products.html" class="sidebar-nav-link" id="nav-products">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -182,11 +202,7 @@ function createSidebar(user) {
           <li class="sidebar-nav-item">
             <a href="search-logs.html" class="sidebar-nav-link" id="nav-search-logs">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
               </svg>
               <span data-i18n-key="navigation.search_logs">${t('navigation.search_logs')}</span>
             </a>
@@ -234,7 +250,7 @@ function createSidebar(user) {
       <div style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
         <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; margin-bottom: 0.5rem;">
           <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #4f46e5); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px;">
-            ${user.name.charAt(0).toUpperCase()}
+            ${(user.name || 'U').charAt(0).toUpperCase()}
           </div>
           <div style="flex: 1; min-width: 0;">
             <div style="font-weight: 600; color: white; font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">

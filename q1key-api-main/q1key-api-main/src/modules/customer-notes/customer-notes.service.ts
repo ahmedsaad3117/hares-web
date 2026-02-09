@@ -1,17 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CustomerNote } from './entities/customer-note.entity';
-import { CreateCustomerNoteDto } from './dto/create-customer-note.dto';
-import { UpdateCustomerNoteDto } from './dto/update-customer-note.dto';
-import { PaginationDto, PaginatedResult } from '../../common/dto/pagination.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { CustomerNote } from "./entities/customer-note.entity";
+import { CreateCustomerNoteDto } from "./dto/create-customer-note.dto";
+import { UpdateCustomerNoteDto } from "./dto/update-customer-note.dto";
+import {
+  PaginationDto,
+  PaginatedResult,
+} from "../../common/dto/pagination.dto";
 
 @Injectable()
 export class CustomerNotesService {
   constructor(
     @InjectRepository(CustomerNote)
     private customerNotesRepository: Repository<CustomerNote>,
-  ) { }
+  ) {}
 
   async create(
     createDto: CreateCustomerNoteDto,
@@ -23,8 +26,8 @@ export class CustomerNotesService {
     // Allow admin override if branch_id provided
     if (
       createDto.branch_id &&
-      (user.role?.roleName === 'Institution' ||
-        user.role?.roleName === 'Super Admin')
+      (user.role?.roleName === "Institution" ||
+        user.role?.roleName === "Super Admin")
     ) {
       branch_id = createDto.branch_id;
     }
@@ -41,15 +44,17 @@ export class CustomerNotesService {
     return this.customerNotesRepository.save(note);
   }
 
-  async findAll(pagination: PaginationDto): Promise<PaginatedResult<CustomerNote>> {
+  async findAll(
+    pagination: PaginationDto,
+  ): Promise<PaginatedResult<CustomerNote>> {
     const { page = 1, limit = 10 } = pagination;
     const skip = (page - 1) * limit;
 
     const [data, total] = await this.customerNotesRepository.findAndCount({
-      relations: ['customer', 'user', 'branch'],
+      relations: ["customer", "user", "branch"],
       skip,
       take: limit,
-      order: { created_at: 'DESC' },
+      order: { created_at: "DESC" },
     });
 
     return {
@@ -66,7 +71,7 @@ export class CustomerNotesService {
   async findOne(id: number): Promise<CustomerNote> {
     const note = await this.customerNotesRepository.findOne({
       where: { id },
-      relations: ['customer', 'user', 'branch'],
+      relations: ["customer", "user", "branch"],
     });
 
     if (!note) {
@@ -86,15 +91,15 @@ export class CustomerNotesService {
     const [data, total] = await this.customerNotesRepository.findAndCount({
       where: { customer_id: customerId },
       relations: [
-        'customer',
-        'user',
-        'user.institution', // To get institution details for institution users
-        'branch',
-        'branch.institution' // To get institution details for branch users
+        "customer",
+        "user",
+        "user.institution", // To get institution details for institution users
+        "branch",
+        "branch.institution", // To get institution details for branch users
       ],
       skip,
       take: limit,
-      order: { created_at: 'DESC' },
+      order: { created_at: "DESC" },
     });
 
     return {

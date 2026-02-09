@@ -1,5 +1,5 @@
-import { IsInt, IsOptional, Min, IsEnum } from 'class-validator';
-import { InstallmentStatus } from '../../../entities/installment-status.enum';
+import { IsInt, IsOptional, Min, IsEnum } from "class-validator";
+import { InstallmentStatus } from "../../../entities/installment-status.enum";
 
 export class CreateInstallmentDto {
   @IsInt()

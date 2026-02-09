@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Customer - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css?v=12">
+  <link rel="stylesheet" href="../css/styles.css?v=18">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -37,8 +37,8 @@
         <form id="customerForm">
           <!-- Name -->
           <div class="form-group">
-            <label class="label" data-i18n-key="customers.form.name_label">Customer Name</label> <span
-              data-i18n-key="customers.form.name_required">*</span>
+            <label class="label"><span data-i18n-key="customers.form.name_label">Customer Name</span> <span
+                data-i18n-key="customers.form.name_required" class="required-star">*</span></label>
             <input type="text" id="name" name="name" class="input"
               data-i18n-placeholder="customers.form.name_placeholder" placeholder="Enter customer name" required />
             <div id="nameError" class="error-text hidden"></div>
@@ -46,8 +46,8 @@
 
           <!-- National ID -->
           <div class="form-group">
-            <label class="label" data-i18n-key="customers.form.national_id_label">National ID</label> <span
-              data-i18n-key="customers.form.national_id_required">*</span>
+            <label class="label"><span data-i18n-key="customers.form.national_id_label">National ID</span> <span
+                data-i18n-key="customers.form.national_id_required" class="required-star">*</span></label>
             <input type="text" id="nationalId" name="nationalId" class="input"
               data-i18n-placeholder="customers.form.national_id_placeholder" placeholder="Enter national ID" required />
             <div id="nationalIdError" class="error-text hidden"></div>
@@ -55,8 +55,8 @@
 
           <!-- Phone Number -->
           <div class="form-group">
-            <label class="label" data-i18n-key="customers.form.phone_label">Phone Number</label> <span
-              data-i18n-key="customers.form.phone_required">*</span>
+            <label class="label"><span data-i18n-key="customers.form.phone_label">Phone Number</span> <span
+                data-i18n-key="customers.form.phone_required" class="required-star">*</span></label>
             <input type="tel" id="phoneNumber" name="phoneNumber" class="input"
               data-i18n-placeholder="customers.form.phone_placeholder" placeholder="+1234567890" required />
             <div id="phoneNumberError" class="error-text hidden"></div>

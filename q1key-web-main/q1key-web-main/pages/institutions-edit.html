@@ -10,7 +10,7 @@
   <style>
     /* Premium Cyber-Minimalist Design System */
     :root {
-      --neon-primary: #818cf8;
+      --neon-primary: #ef4444;
       --card-bg: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(255, 255, 255, 0.12);
     }
@@ -95,7 +95,7 @@
     .btn-create-ultra {
       width: 100%;
       height: 56px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+      background: linear-gradient(135deg, #ef4444, #dc2626) !important;
       color: white !important;
       border: none;
       border-radius: 16px;
@@ -207,7 +207,7 @@
   </div>
 
   <script src="../js/api.js?v=4"></script>
-  <script src="../js/ui-utils.js?v=5"></script>
+  <script src="../js/ui-utils.js?v=9"></script>
   <script src="../components/sidebar.js?v=12"></script>
   <script src="../components/header.js?v=3"></script>
   <script>
@@ -256,6 +256,7 @@
           subMessage: document.getElementById('name').value.trim(),
           confirmText: 'حفظ التعديلات',
           icon: '📝',
+          btnClass: 'btn-danger',
           onConfirm: async () => {
             submitButton.disabled = true;
             submitButton.innerHTML = `<div class='spinner' style='width:20px;height:20px;margin:auto;border-color:white'></div>`;

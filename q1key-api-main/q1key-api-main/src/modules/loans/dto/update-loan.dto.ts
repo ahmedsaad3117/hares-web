@@ -1,5 +1,5 @@
-import { IsNumber, IsOptional, IsDateString, IsEnum } from 'class-validator';
-import { LoanStatus } from '../../../entities/loan.entity';
+import { IsNumber, IsOptional, IsDateString, IsEnum } from "class-validator";
+import { LoanStatus } from "../../../entities/loan.entity";
 
 export class UpdateLoanDto {
   @IsNumber()

@@ -7,6 +7,14 @@
   <title>Loans - Q1KEY Platform</title>
   <link rel="stylesheet" href="../css/styles.css?v=11">
   <script src="../js/i18n.js"></script>
+  <script>
+    (function () {
+      var lang = localStorage.getItem('locale') || 'ar';
+      document.documentElement.setAttribute('lang', lang);
+      document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+      if (lang === 'ar') document.documentElement.classList.add('rtl');
+    })();
+  </script>
 </head>
 
 <body>
@@ -154,8 +162,8 @@
       // Translate all static content with data-i18n-key attributes
       window.i18n.translatePage();
 
-      // Load loans with pagination
-      loadLoans();
+      // Load loans with pagination and set initial filter
+      filterByStatus('all');
       setupSearch();
     }
 
@@ -242,7 +250,8 @@
       } catch (error) {
         console.error('Error loading loans:', error);
         showToast(t('loans.failed_to_load'), 'error');
-        document.getElementById('loansTableBody').innerHTML = `<tr><td colspan="${user.roleName === 'Super Admin' ? 10 : 9}" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('loans.failed_to_load')}</td></tr>`;
+        const colspan = (user && user.roleName === 'Super Admin') ? 10 : 9;
+        document.getElementById('loansTableBody').innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('loans.failed_to_load')}</td></tr>`;
       }
     }
 
@@ -284,19 +293,22 @@
     }
 
     function renderLoans(loans) {
+      if (!user) user = getCurrentUser() || {}; // Safety check
+
       const tbody = document.getElementById('loansTableBody');
 
       if (loans.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${user.roleName === 'Super Admin' ? 10 : 9}" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('loans.no_loans_found')}</td></tr>`;
+        const colspan = (user.roleName === 'Super Admin') ? 10 : 9;
+        tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('loans.no_loans_found')}</td></tr>`;
         return;
       }
 
       const loansHTML = loans.map(loan => {
         const statusBadge =
-          loan.status === 'Active' ? 'badge-success' :
-            loan.status === 'Late' ? 'badge-warning' :
-              loan.status === 'Paid' ? 'badge-info' :
-                'badge-info';
+          loan.status.toLowerCase() === 'active' ? 'badge-success' :
+            (loan.status.toLowerCase() === 'late' || loan.status.toLowerCase() === 'overdue') ? 'badge-danger' :
+              (loan.status.toLowerCase() === 'paid' || loan.status.toLowerCase() === 'finished') ? 'badge-info' :
+                'badge-warning';
 
         // Calculate payment progress
         const paymentPlan = loan.paymentPlanMonths || 1;
@@ -318,7 +330,19 @@
               </div>
             </td>
             ${user.roleName === 'Super Admin' ? `<td class="text-secondary">${institutionName}</td>` : ''}
-            <td class="text-secondary">${branchName}</td>
+            <td class="text-secondary">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div>
+                  <div class="text-white">${loan.branch ? loan.branch.name : (loan.institution?.name || '-')}</div>
+                  ${loan.branch ? `<div class="text-xs text-muted">${loan.branch.institution?.name || ''}</div>` : ''}
+                </div>
+                ${(loan.branch?.phoneNumber || loan.institution?.phoneNumber) ? `
+                  <button onclick="openWhatsapp('${loan.branch?.phoneNumber || loan.institution?.phoneNumber}')" class="btn-whatsapp" style="padding: 2px 5px; font-size: 0.65rem;" title="${t('help.contact_whatsapp')}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                  </button>
+                ` : ''}
+              </div>
+            </td>
             <td class="text-secondary">${loan.product.name}</td>
             <td class="text-white font-semibold">${formatCurrency(loan.principalAmount)}</td>
             <td>
@@ -334,7 +358,11 @@
                 ` : `<div class="text-muted text-sm">${t('loans.single_payment')}</div>`}
               </div>
             </td>
-            <td><span class="badge ${statusBadge}">${loan.status === 'Active' ? t('loans.active') : loan.status === 'Late' ? t('loans.late') : loan.status === 'Paid' ? t('loans.paid') : loan.status === 'Finished' ? t('loans.finished') : loan.status}</span></td>
+            <td><span class="badge ${statusBadge}">${loan.status.toLowerCase() === 'active' ? t('loans.active') :
+            (loan.status.toLowerCase() === 'late' || loan.status.toLowerCase() === 'overdue') ? t('loans.late') :
+              (loan.status.toLowerCase() === 'paid' || loan.status.toLowerCase() === 'finished') ? t('loans.paid') :
+                loan.status
+          }</span></td>
             <td class="text-secondary">${loan.dueDate ? formatDate(loan.dueDate) : 'N/A'}</td>
             <td>
               <div class="flex items-center gap-2" style="display: flex; gap: 0.5rem;">
@@ -361,7 +389,8 @@
     }
 
     // Initialize with all filter
-    document.getElementById('filter-all').click();
+    // document.getElementById('filter-all').click(); // REMOVED: Causes error because user is not yet initialized
+
   </script>
 </body>
 

@@ -4,8 +4,8 @@ import {
   ExecutionContext,
   ForbiddenException,
   NotFoundException,
-} from '@nestjs/common';
-import { CustomerNotesService } from '../customer-notes.service';
+} from "@nestjs/common";
+import { CustomerNotesService } from "../customer-notes.service";
 
 @Injectable()
 export class NotePermissionGuard implements CanActivate {
@@ -17,7 +17,7 @@ export class NotePermissionGuard implements CanActivate {
     const noteId = parseInt(request.params.id, 10);
 
     if (!user) {
-      throw new ForbiddenException('User not authenticated');
+      throw new ForbiddenException("User not authenticated");
     }
 
     // Fetch the note to check ownership
@@ -33,15 +33,15 @@ export class NotePermissionGuard implements CanActivate {
 
     // Check permissions
     const isCreator = user.userId === note.created_by;
-    const isInstitutionAdmin = user.role?.roleName === 'Institution';
-    const isSuperAdmin = user.role?.roleName === 'Super Admin';
+    const isInstitutionAdmin = user.role?.roleName === "Institution";
+    const isSuperAdmin = user.role?.roleName === "Super Admin";
 
     if (isCreator || isInstitutionAdmin || isSuperAdmin) {
       return true;
     }
 
     throw new ForbiddenException(
-      'You do not have permission to modify this note',
+      "You do not have permission to modify this note",
     );
   }
 }

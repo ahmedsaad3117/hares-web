@@ -483,169 +483,163 @@
 </head>
 
 <body>
-    <div class="layout">
-        <div id="sidebar"></div>
+    <div id="sidebar"></div>
 
-        <div class="main-content">
-            <div id="header"></div>
+    <div class="main-content">
+        <div id="header"></div>
 
-            <div class="subscriptions-container">
-                <!-- Stats -->
-                <div class="stats-row grid-responsive-sm" id="statsRow">
-                    <div class="stat-card primary">
-                        <div class="stat-icon-wrapper">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
-                                <path d="M9 22v-4h6v4" />
-                                <path d="M8 6h.01" />
-                                <path d="M16 6h.01" />
-                                <path d="M8 10h.01" />
-                                <path d="M16 10h.01" />
-                                <path d="M8 14h.01" />
-                                <path d="M16 14h.01" />
-                                <path d="M8 18h.01" />
-                                <path d="M16 18h.01" />
-                            </svg>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value" id="totalInstitutions">-</div>
-                            <div class="stat-label" data-i18n-key="subscriptions.stats.total_institutions">Total
-                                Institutions</div>
-                        </div>
+        <div class="subscriptions-container">
+            <!-- Stats -->
+            <div class="stats-row grid-responsive-sm" id="statsRow">
+                <div class="stat-card primary">
+                    <div class="stat-icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+                            <path d="M9 22v-4h6v4" />
+                            <path d="M8 6h.01" />
+                            <path d="M16 6h.01" />
+                            <path d="M8 10h.01" />
+                            <path d="M16 10h.01" />
+                            <path d="M8 14h.01" />
+                            <path d="M16 14h.01" />
+                            <path d="M8 18h.01" />
+                            <path d="M16 18h.01" />
+                        </svg>
                     </div>
-                    <div class="stat-card success">
-                        <div class="stat-icon-wrapper">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-                                <path d="m9 12 2 2 4-4" />
-                            </svg>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value" id="activeCount">-</div>
-                            <div class="stat-label" data-i18n-key="subscriptions.stats.active_subscriptions">Active
-                                Subscriptions</div>
-                        </div>
-                    </div>
-                    <div class="stat-card warning">
-                        <div class="stat-icon-wrapper">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <line x1="10" x2="14" y1="2" y2="2" />
-                                <line x1="12" x2="15" y1="14" y2="11" />
-                                <circle cx="12" cy="14" r="8" />
-                            </svg>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value" id="expiringCount">-</div>
-                            <div class="stat-label" data-i18n-key="subscriptions.stats.expiring_soon">Expiring Soon (30
-                                days)</div>
-                        </div>
-                    </div>
-                    <div class="stat-card danger">
-                        <div class="stat-icon-wrapper">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10" />
-                                <path d="m15 9-6 6" />
-                                <path d="m9 9 6 6" />
-                            </svg>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-value" id="expiredCount">-</div>
-                            <div class="stat-label" data-i18n-key="subscriptions.stats.expired">Expired</div>
-                        </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalInstitutions">-</div>
+                        <div class="stat-label" data-i18n-key="subscriptions.stats.total_institutions">Total
+                            Institutions</div>
                     </div>
                 </div>
-
-                <!-- Filter Bar -->
-                <div class="glass-card p-4 mb-4">
-                    <div class="filter-bar">
-                        <!-- Search Input with Icon -->
-                        <div class="search-input">
-                            <input type="text" id="searchInput" name="subscription_search_query" autocomplete="off"
-                                data-i18n-placeholder="subscriptions.search.placeholder"
-                                placeholder="🔍  Search by name, email, or institution name..." onkeyup="filterTable()">
-                        </div>
-
-                        <!-- Visual Divider -->
-                        <div class="filter-divider"></div>
-
-                        <!-- Status Filter -->
-                        <div class="filter-group">
-                            <select id="filterStatus" onchange="filterTable()">
-                                <option value="" data-i18n-key="subscriptions.search.status_all">📊 All Statuses
-                                </option>
-                                <option value="active" data-i18n-key="subscriptions.search.status_active">✅ Active
-                                </option>
-                                <option value="expiring" data-i18n-key="subscriptions.search.status_expiring">⚠️
-                                    Expiring Soon</option>
-                                <option value="expired" data-i18n-key="subscriptions.search.status_expired">❌ Expired
-                                </option>
-                                <option value="inactive" data-i18n-key="subscriptions.search.status_inactive">⭕ Inactive
-                                </option>
-                            </select>
-                        </div>
-
-                        <!-- Type Filter -->
-                        <div class="filter-group">
-                            <select id="filterType" onchange="filterTable()">
-                                <option value="" data-i18n-key="subscriptions.search.type_all">🏢 All Types</option>
-                                <option value="institution" data-i18n-key="subscriptions.search.type_institution">🏛️
-                                    Institutions Only</option>
-                                <option value="branch" data-i18n-key="subscriptions.search.type_branch">🏪 Branches Only
-                                </option>
-                            </select>
-                        </div>
-
-                        <!-- Refresh Button -->
-                        <button class="refresh-btn" onclick="loadSubscriptions()" title="تحديث البيانات">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path
-                                    d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
-                            </svg>
-                        </button>
+                <div class="stat-card success">
+                    <div class="stat-icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                            <path d="m9 12 2 2 4-4" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="activeCount">-</div>
+                        <div class="stat-label" data-i18n-key="subscriptions.stats.active_subscriptions">Active
+                            Subscriptions</div>
                     </div>
                 </div>
-
-                <!-- Table -->
-                <div class="glass-card">
-                    <div class="table-container">
-                        <table class="data-table" id="subscriptionsTable">
-                            <thead>
-                                <tr>
-                                    <th data-i18n-key="subscriptions.table.type">Type</th>
-                                    <th data-i18n-key="subscriptions.table.name">Name</th>
-                                    <th data-i18n-key="subscriptions.table.institution">Institution</th>
-                                    <th data-i18n-key="subscriptions.table.email">Email</th>
-                                    <th data-i18n-key="subscriptions.table.expiration_date">Expiration Date</th>
-                                    <th data-i18n-key="subscriptions.table.days_remaining">Days Remaining</th>
-                                    <th data-i18n-key="subscriptions.table.status">Status</th>
-                                    <th data-i18n-key="subscriptions.table.actions">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody">
-                                <tr>
-                                    <td colspan="8">
-                                        <div class="empty-state">
-                                            <div class="spinner"></div>
-                                            <p data-i18n-key="subscriptions.table.loading">Loading Data...</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="stat-card warning">
+                    <div class="stat-icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="10" x2="14" y1="2" y2="2" />
+                            <line x1="12" x2="15" y1="14" y2="11" />
+                            <circle cx="12" cy="14" r="8" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="expiringCount">-</div>
+                        <div class="stat-label" data-i18n-key="subscriptions.stats.expiring_soon">Expiring Soon (30
+                            days)</div>
+                    </div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="m15 9-6 6" />
+                            <path d="m9 9 6 6" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="expiredCount">-</div>
+                        <div class="stat-label" data-i18n-key="subscriptions.stats.expired">Expired</div>
                     </div>
                 </div>
             </div>
+
+            <!-- Filter Bar -->
+            <div class="glass-card p-4 mb-4">
+                <div class="filter-bar">
+                    <!-- Search Input with Icon -->
+                    <div class="search-input">
+                        <input type="text" id="searchInput" name="subscription_search_query" autocomplete="off"
+                            data-i18n-placeholder="subscriptions.search.placeholder"
+                            placeholder="🔍  Search by name, email, or institution name..." onkeyup="filterTable()">
+                    </div>
+
+                    <!-- Visual Divider -->
+                    <div class="filter-divider"></div>
+
+                    <!-- Status Filter -->
+                    <div class="filter-group">
+                        <select id="filterStatus" onchange="filterTable()">
+                            <option value="" data-i18n-key="subscriptions.search.status_all">📊 All Statuses
+                            </option>
+                            <option value="active" data-i18n-key="subscriptions.search.status_active">✅ Active
+                            </option>
+                            <option value="expiring" data-i18n-key="subscriptions.search.status_expiring">⚠️
+                                Expiring Soon</option>
+                            <option value="expired" data-i18n-key="subscriptions.search.status_expired">❌ Expired
+                            </option>
+                            <option value="inactive" data-i18n-key="subscriptions.search.status_inactive">⭕ Inactive
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Type Filter -->
+                    <div class="filter-group">
+                        <select id="filterType" onchange="filterTable()">
+                            <option value="" data-i18n-key="subscriptions.search.type_all">🏢 All Types</option>
+                            <option value="institution" data-i18n-key="subscriptions.search.type_institution">🏛️
+                                Institutions Only</option>
+                            <option value="branch" data-i18n-key="subscriptions.search.type_branch">🏪 Branches Only
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Refresh Button -->
+                    <button class="refresh-btn" onclick="loadSubscriptions()" title="تحديث البيانات">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="glass-card">
+                <div class="table-container">
+                    <table class="data-table" id="subscriptionsTable">
+                        <thead>
+                            <tr>
+                                <th data-i18n-key="subscriptions.table.type">Type</th>
+                                <th data-i18n-key="subscriptions.table.name">Name</th>
+                                <th data-i18n-key="subscriptions.table.institution">Institution</th>
+                                <th data-i18n-key="subscriptions.table.email">Email</th>
+                                <th data-i18n-key="subscriptions.table.expiration_date">Expiration Date</th>
+                                <th data-i18n-key="subscriptions.table.days_remaining">Days Remaining</th>
+                                <th data-i18n-key="subscriptions.table.status">Status</th>
+                                <th data-i18n-key="subscriptions.table.actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="8">
+                                    <div class="empty-state">
+                                        <div class="spinner"></div>
+                                        <p data-i18n-key="subscriptions.table.loading">Loading Data...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+    </div>
     </div>
 
     <!-- Extend Subscription Modal -->
@@ -682,8 +676,14 @@
     <script src="../components/sidebar.js?v=12"></script>
     <script src="../components/header.js?v=3"></script>
     <script>
-        let allData = [];
-        let currentExtendItem = null;
+        // Global state for filters
+        let currentFilters = {
+            type: '',
+            status: '',
+            search: '',
+            page: 1,
+            limit: 50
+        };
 
         async function initPage() {
             await waitForI18n();
@@ -712,140 +712,79 @@
         }
 
         async function loadSubscriptions() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <div class="spinner"></div>
+                            <p data-i18n-key="subscriptions.table.loading">${t('subscriptions.table.loading') || 'Loading Data...'}</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
             try {
-                // Load institutions
-                const instRes = await api.institutions.getAll(1, 500);
-                const institutions = instRes.data || [];
+                currentFilters.status = document.getElementById('filterStatus').value;
+                currentFilters.type = document.getElementById('filterType').value;
+                // Search handled by separate input with own handler, but we read it here
 
-                // Load all branches
-                const branchRes = await api.branches.getAll(1, 500);
-                const branches = branchRes.data || [];
+                const response = await api.subscriptions.getUnifiedSubscriptions(currentFilters);
 
-                allData = [];
-                const today = new Date();
+                // Update Stats
+                const stats = response.stats;
+                if (stats) {
+                    document.getElementById('totalInstitutions').textContent = stats.totalInstitutions;
+                    document.getElementById('activeCount').textContent = stats.activeSubscriptions;
+                    document.getElementById('expiringCount').textContent = stats.expiringSoon;
+                    document.getElementById('expiredCount').textContent = stats.expired;
+                }
 
-                // Process institutions
-                institutions.forEach(inst => {
-                    const expDate = inst.expirationDate ? new Date(inst.expirationDate) : null;
-                    const daysRemaining = expDate ? Math.ceil((expDate - today) / (1000 * 60 * 60 * 24)) : null;
-
-                    let status = 'active';
-                    if (!inst.isActive) {
-                        status = 'inactive';
-                    } else if (expDate) {
-                        if (daysRemaining <= 0) {
-                            status = 'expired';
-                        } else if (daysRemaining <= 30) {
-                            status = 'expiring';
-                        }
-                    }
-
-                    allData.push({
-                        type: 'institution',
-                        id: inst.institutionId,
-                        name: inst.name,
-                        parentName: '-',
-                        email: inst.email || '-',
-                        expirationDate: inst.expirationDate,
-                        daysRemaining: daysRemaining,
-                        status: status,
-                        isActive: inst.isActive
-                    });
-                });
-
-                // Process branches (inherit expiration from institution)
-                branches.forEach(branch => {
-                    const parentInst = institutions.find(i => i.institutionId === branch.institutionId);
-                    const expDate = parentInst?.expirationDate ? new Date(parentInst.expirationDate) : null;
-                    const daysRemaining = expDate ? Math.ceil((expDate - today) / (1000 * 60 * 60 * 24)) : null;
-
-                    let status = 'active';
-                    if (!branch.isActive) {
-                        status = 'inactive';
-                    } else if (expDate) {
-                        if (daysRemaining <= 0) {
-                            status = 'expired';
-                        } else if (daysRemaining <= 30) {
-                            status = 'expiring';
-                        }
-                    }
-
-                    allData.push({
-                        type: 'branch',
-                        id: branch.branchId,
-                        institutionId: branch.institutionId,
-                        name: branch.name,
-                        parentName: parentInst?.name || '-',
-                        email: branch.email || '-',
-                        expirationDate: parentInst?.expirationDate,
-                        daysRemaining: daysRemaining,
-                        status: status,
-                        isActive: branch.isActive
-                    });
-                });
-
-                // Update stats
-                const institutionsCount = institutions.length;
-                const activeCount = allData.filter(d => d.status === 'active').length;
-                const expiringCount = allData.filter(d => d.status === 'expiring').length;
-                const expiredCount = allData.filter(d => d.status === 'expired').length;
-
-                document.getElementById('totalInstitutions').textContent = institutionsCount;
-                document.getElementById('activeCount').textContent = activeCount;
-                document.getElementById('expiringCount').textContent = expiringCount;
-                document.getElementById('expiredCount').textContent = expiredCount;
-
-                renderTable();
-
+                allData = response.subscriptions.data || [];
+                renderTable(allData);
             } catch (error) {
                 console.error('Error loading subscriptions:', error);
-                showToast(t('my_subscription.load_failed') || 'Failed to load data', 'error');
+                showToast(t('errors.generic') || 'Error loading data', 'error');
+                tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">${error.message}</td></tr>`;
             }
         }
 
-        function renderTable() {
+        function filterTable() {
+            currentFilters.status = document.getElementById('filterStatus').value;
+            currentFilters.type = document.getElementById('filterType').value;
+            currentFilters.search = document.getElementById('searchInput').value;
+            currentFilters.page = 1; // Reset to page 1 on filter change
+
+            // Debounce search if needed, but for select change it's immediate
+            if (this.id === 'searchInput') {
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    loadSubscriptions();
+                }, 500);
+            } else {
+                loadSubscriptions();
+            }
+        }
+
+        // Expose filterTable to window for onclick/onchange handlers
+        window.filterTable = filterTable;
+
+        function renderTable(data) {
             const tbody = document.getElementById('tableBody');
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('filterStatus').value;
-            const typeFilter = document.getElementById('filterType').value;
 
-            let filtered = allData.filter(item => {
-                // Search filter
-                if (searchTerm && !item.name.toLowerCase().includes(searchTerm) &&
-                    !item.email.toLowerCase().includes(searchTerm) &&
-                    !item.parentName.toLowerCase().includes(searchTerm)) {
-                    return false;
-                }
-                // Status filter
-                if (statusFilter && item.status !== statusFilter) {
-                    return false;
-                }
-                // Type filter
-                if (typeFilter && item.type !== typeFilter) {
-                    return false;
-                }
-                return true;
-            });
-
-            // Sort by days remaining (ascending - most urgent first)
-            filtered.sort((a, b) => {
-                if (a.daysRemaining === null) return 1;
-                if (b.daysRemaining === null) return -1;
-                return a.daysRemaining - b.daysRemaining;
-            });
-
-            if (filtered.length === 0) {
+            if (data.length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="8">
                             <div class="empty-state">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                                    <line x1="16" y1="2" x2="16" y2="6"/>
-                                    <line x1="8" y1="2" x2="8" y2="6"/>
-                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.2; margin-bottom: 1rem;">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
                                 </svg>
-                                <p data-i18n-key="subscriptions.table.empty">No subscriptions match your search</p>
+                                <p data-i18n-key="subscriptions.table.empty">${t('subscriptions.table.empty') || 'No subscriptions found'}</p>
                             </div>
                         </td>
                     </tr>
@@ -853,79 +792,70 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map(item => `
-                <tr>
-                    <td>
-                        <span class="type-badge ${item.type}">
-                            ${item.type === 'institution' ? `🏢 ${t('subscriptions.type.institution')}` : `🏪 ${t('subscriptions.type.branch')}`}
-                        </span>
-                    </td>
-                    <td><strong>${item.name}</strong></td>
-                    <td>${item.parentName}</td>
-                    <td>${item.email}</td>
-                    <td>${item.expirationDate ? formatDate(item.expirationDate) : `<span style="color: #64748b;">${t('my_subscription.undefined')}</span>`}</td>
-                    <td>
-                        ${item.daysRemaining !== null ? `
-                            <span class="days-remaining ${getDaysClass(item.daysRemaining)}">
-                                ${item.daysRemaining > 0 ? item.daysRemaining + ' ' + t('subscriptions.days.day') :
-                        item.daysRemaining === 0 ? t('subscriptions.days.today') :
-                            Math.abs(item.daysRemaining) + ' ' + t('subscriptions.days.overdue')}
+            tbody.innerHTML = data.map(item => {
+                // Calculate days remaining (or use what server returns if we calculate there)
+                // Server should return accurate status based on unified logic.
+
+                // But for display flexibility, we might want to recalculate days if the server only returns dates.
+                // Our API returns 'daysRemaining' if calculated in JS, but we removed that JS logic.
+                // Uh oh, the backend code I wrote DOES NOT calculate 'daysRemaining' field, it just returns raw DB entities + 'type' field.
+                // We must calculate 'daysRemaining' and 'status' here again or update backend DTO.
+
+                // Let's recalculate here for display, consistent with old logic but faster list.
+                const today = new Date();
+                const expDateString = item.expirationDate;
+                let daysRemaining = null;
+                let statusVal = 'active'; // Default assumption if active=1
+                let statusBadge = '';
+
+                if (expDateString) {
+                    const expDate = new Date(expDateString);
+                    const d1 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                    const d2 = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate());
+                    daysRemaining = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+
+                    if (daysRemaining < 0) statusVal = 'expired';
+                    else if (daysRemaining <= 30) statusVal = 'expiring';
+                }
+
+                if (!item.isActive) statusVal = 'inactive';
+
+                // Badges
+                if (statusVal === 'active') statusBadge = `<span class="status-badge active">✅ ${t('subscriptions.status.active') || 'Active'}</span>`;
+                if (statusVal === 'expiring') statusBadge = `<span class="status-badge expiring">⚠️ ${t('subscriptions.status.expiring') || 'Expiring'}</span>`;
+                if (statusVal === 'expired') statusBadge = `<span class="status-badge expired">❌ ${t('subscriptions.status.expired') || 'Expired'}</span>`;
+                if (statusVal === 'inactive') statusBadge = `<span class="status-badge inactive">⭕ ${t('subscriptions.status.inactive') || 'Inactive'}</span>`;
+
+                const typeBadge = item.type === 'institution'
+                    ? `<span class="type-badge institution">🏛️ ${t('subscriptions.type.institution') || 'Institution'}</span>`
+                    : `<span class="type-badge branch">🏪 ${t('subscriptions.type.branch') || 'Branch'}</span>`;
+
+                return `
+                    <tr>
+                        <td>${typeBadge}</td>
+                        <td>
+                            <div style="font-weight: 600; color: white;">${item.name}</div>
+                            ${item.parentName ? `<div style="font-size: 0.75rem; color: #64748b;">${item.parentName}</div>` : ''}
+                        </td>
+                        <td>${item.parentName || '-'}</td>
+                        <td style="font-family: monospace;">${item.email || '-'}</td>
+                        <td>${formatDate(expDateString)}</td>
+                        <td>
+                            <span class="days-remaining ${daysRemaining < 0 ? 'negative' : (daysRemaining <= 30 ? 'warning' : 'positive')}">
+                                ${daysRemaining !== null ? daysRemaining + ' ' + (t('days') || 'days') : '-'}
                             </span>
-                        ` : '<span style="color: #64748b;">-</span>'}
-                    </td>
-                    <td>
-                        <span class="status-badge ${item.status}">
-                            ${getStatusLabel(item.status)}
-                        </span>
-                    </td>
-                    <td>
-                        ${item.type === 'institution' ? `
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td>
                             <button class="action-btn" onclick="openExtendModal('${item.type}', ${item.id}, '${item.name}', '${item.expirationDate || ''}')">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                                    <line x1="16" y1="2" x2="16" y2="6"/>
-                                    <line x1="8" y1="2" x2="8" y2="6"/>
-                                    <line x1="3" y1="10" x2="21" y2="10"/>
-                                    <line x1="12" y1="14" x2="12" y2="18"/>
-                                    <line x1="10" y1="16" x2="14" y2="16"/>
-                                </svg>
-                                ${t('subscriptions.actions.extend')}
+                                📅 ${t('subscriptions.actions.extend') || 'Extend'}
                             </button>
-                        ` : `<span style="color: #64748b; font-size: 0.75rem;">${t('subscriptions.type.from_institution')}</span>`}
-                    </td>
-                </tr>
-            `).join('');
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
-        function filterTable() {
-            renderTable();
-        }
-
-        function getDaysClass(days) {
-            if (days <= 0) return 'negative';
-            if (days <= 30) return 'warning';
-            return 'positive';
-        }
-
-        function getStatusLabel(status) {
-            const labels = {
-                'active': '✓ ' + t('subscriptions.status.active'),
-                'expiring': '⚠ ' + t('subscriptions.status.expiring'),
-                'expired': '✗ ' + t('subscriptions.status.expired'),
-                'inactive': '○ ' + t('subscriptions.status.inactive')
-            };
-            return labels[status] || status;
-        }
-
-        function formatDate(dateStr) {
-            if (!dateStr) return '-';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('ar-SA', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-        }
 
         function openExtendModal(type, id, name, currentDate) {
             currentExtendItem = { type, id, name };
@@ -956,6 +886,10 @@
             try {
                 if (currentExtendItem.type === 'institution') {
                     await api.institutions.update(currentExtendItem.id, {
+                        expirationDate: newDate
+                    });
+                } else if (currentExtendItem.type === 'branch') {
+                    await api.branches.update(currentExtendItem.id, {
                         expirationDate: newDate
                     });
                 }

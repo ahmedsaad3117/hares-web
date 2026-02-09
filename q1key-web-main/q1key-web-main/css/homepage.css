@@ -80,6 +80,19 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    /* Allow text selection for copying but keep default cursor for aesthetics */
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    cursor: default;
+}
+
+/* Cursor handling for inputs */
+input,
+textarea,
+[contenteditable="true"] {
+    cursor: text;
 }
 
 [lang="en"] body,
@@ -1547,4 +1560,10 @@ section {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary);
+}
+
+/* Hide browser default password reveal button */
+input::-ms-reveal,
+input::-ms-clear {
+    display: none;
 }

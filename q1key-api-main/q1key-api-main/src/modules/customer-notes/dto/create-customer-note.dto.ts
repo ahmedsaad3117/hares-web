@@ -1,5 +1,12 @@
-import { IsString, IsEnum, IsInt, IsOptional, MaxLength, MinLength } from 'class-validator';
-import { NoteCategory } from '../entities/note-category.enum';
+import {
+  IsString,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  MaxLength,
+  MinLength,
+} from "class-validator";
+import { NoteCategory } from "../entities/note-category.enum";
 
 export class CreateCustomerNoteDto {
   @IsInt()

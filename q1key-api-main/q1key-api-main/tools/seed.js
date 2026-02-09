@@ -50,7 +50,7 @@ async function seedDatabase() {
       VALUES ($1, $2, $3, $4, $5)
     `, [superAdminRoleId, 'System Admin', 'admin@hares.com', hashedPassword, true]);
     console.log('✅ Super Admin created');
-    console.log('   Email: admin@hares.com');
+    console.log('   Email: admin@q1key.com');
     console.log('   Password: 123456');
 
     // Insert sample institution
@@ -99,7 +99,7 @@ async function seedDatabase() {
 
     console.log('\n🎉 Database seeding completed successfully!');
     console.log('\n📌 You can now login with:');
-    console.log('   Email: admin@hares.com');
+    console.log('   Email: admin@q1key.com');
     console.log('   Password: 123456');
     console.log('\n🌐 API: http://localhost:8080/api');
     console.log('🌐 Frontend: http://localhost:3000');

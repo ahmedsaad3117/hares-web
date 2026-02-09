@@ -1,11 +1,20 @@
-import { IsNotEmpty, IsString, IsNumber, IsBoolean, IsOptional, Min, IsEmail, MinLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsBoolean,
+  IsOptional,
+  Min,
+  IsEmail,
+  MinLength,
+} from "class-validator";
 
 export class CreateBranchDto {
-  @IsNotEmpty({ message: 'رقم المؤسسة مطلوب' })
-  @IsNumber({}, { message: 'يجب أن يكون رقم المؤسسة رقماً' })
+  @IsNotEmpty({ message: "رقم المؤسسة مطلوب" })
+  @IsNumber({}, { message: "يجب أن يكون رقم المؤسسة رقماً" })
   institutionId: number;
 
-  @IsNotEmpty({ message: 'اسم الفرع مطلوب' })
+  @IsNotEmpty({ message: "اسم الفرع مطلوب" })
   @IsString()
   name: string;
 
@@ -14,7 +23,7 @@ export class CreateBranchDto {
   phoneNumber?: string;
 
   @IsOptional()
-  @IsEmail()
+  @IsEmail({}, { message: "البريد الإلكتروني للفرع غير صحيح" })
   email?: string;
 
   @IsOptional()
@@ -22,12 +31,12 @@ export class CreateBranchDto {
   isActive?: boolean;
 
   @IsOptional()
-  @IsNumber({}, { message: 'يجب أن يكون الحد الأقصى للقروض رقماً' })
-  @Min(0, { message: 'يجب أن يكون الحد الأقصى للقروض 0 على الأقل' })
+  @IsNumber({}, { message: "يجب أن يكون الحد الأقصى للقروض رقماً" })
+  @Min(0, { message: "يجب أن يكون الحد الأقصى للقروض 0 على الأقل" })
   maximumLoans?: number;
 
   @IsOptional()
-  @IsNumber({}, { message: 'يجب أن يكون رقم باقة الاشتراك رقماً صحيحاً' })
+  @IsNumber({}, { message: "يجب أن يكون رقم باقة الاشتراك رقماً صحيحاً" })
   planId?: number;
 
   @IsOptional()
@@ -35,7 +44,7 @@ export class CreateBranchDto {
   userName?: string;
 
   @IsOptional()
-  @IsEmail()
+  @IsEmail({}, { message: "البريد الإلكتروني للمدير غير صحيح" })
   userEmail?: string;
 
   @MinLength(6)
@@ -43,9 +52,13 @@ export class CreateBranchDto {
   @IsString()
   userPassword?: string;
 
-  @IsOptional()
+  @IsNotEmpty({ message: "رقم جوال المدير مطلوب" })
   @IsString()
   userPhoneNumber?: string;
+
+  @IsNotEmpty({ message: "رقم الهوية للمدير مطلوب" })
+  @IsString()
+  userNationalId: string;
 
   @IsOptional()
   @IsBoolean()

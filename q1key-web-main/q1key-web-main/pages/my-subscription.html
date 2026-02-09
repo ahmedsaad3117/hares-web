@@ -12,6 +12,13 @@
             margin: 0 auto;
         }
 
+        /* Allow selection in inputs and textareas */
+        input,
+        textarea,
+        [contenteditable="true"] {
+            cursor: text;
+        }
+
         .subscription-header {
             display: flex;
             align-items: center;
@@ -41,6 +48,11 @@
             margin: 0;
         }
 
+        .subscription-info {
+            user-select: none;
+            cursor: default;
+        }
+
         /* Status Cards */
         .status-cards {
             display: grid;
@@ -54,6 +66,8 @@
             border-radius: 16px;
             padding: 1.5rem;
             text-align: center;
+            user-select: none;
+            cursor: default;
         }
 
         .status-card .value {
@@ -378,21 +392,27 @@
             font-size: 1.75rem !important;
         }
     </style>
+    <script>
+        (function () {
+            var lang = localStorage.getItem('locale') || 'ar';
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            if (lang === 'ar') document.documentElement.classList.add('rtl');
+        })();
+    </script>
 </head>
 
 <body>
-    <div class="layout">
-        <div id="sidebar"></div>
+    <div id="sidebar"></div>
 
-        <div class="main-content">
-            <div id="header"></div>
+    <div class="main-content">
+        <div id="header"></div>
 
-            <div class="page-container">
-                <div class="glass-card" id="subscriptionContent">
-                    <div class="loading-state">
-                        <div class="spinner"></div>
-                        <p>جاري تحميل بيانات الاشتراك...</p>
-                    </div>
+        <div class="page-container">
+            <div class="glass-card" id="subscriptionContent">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>جاري تحميل بيانات الاشتراك...</p>
                 </div>
             </div>
         </div>
@@ -518,13 +538,12 @@
                             <p><span>الباقة:</span> <strong>${req.plan?.name || 'مخصص'}</strong></p>
                             <p><span>المبلغ:</span> <strong style="color: #10b981;">${req.amount} ر.س</strong></p>
                             <p><span>تاريخ الطلب:</span> <strong>${formatDate(req.createdAt)}</strong></p>
+                            <p><span>رقم الطلب:</span> <strong>#${req.id}</strong></p>
                         </div>
                         <p style="color: #94a3b8; font-size: 0.9rem;">
                             سيتم تفعيل اشتراكك فور استلام التحويل وتأكيده من قبل الإدارة
                         </p>
-                        <button class="btn btn-secondary" onclick="cancelMyRequest(${req.id})">
-                            إلغاء الطلب
-                        </button>
+
                     </div>
                 `;
             }
@@ -573,11 +592,19 @@
             }
 
             container.innerHTML = `
-                <div class="subscription-header">
-                    <div class="subscription-icon">${d.type === 'Institution' ? '🏛️' : '🏪'}</div>
-                    <div class="subscription-info">
-                        <h2>${d.entityName}</h2>
-                        <p>${d.type === 'Institution' ? 'مؤسسة' : 'فرع'}</p>
+                <div class="subscription-header" style="justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 1.5rem;">
+                        <div class="subscription-icon">${d.type === 'Institution' ? '🏛️' : '🏪'}</div>
+                        <div class="subscription-info">
+                            <h2>${d.entityName}</h2>
+                            <p>${d.type === 'Institution' ? 'مؤسسة' : 'فرع'}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary" onclick="syncSubscriptionStatus()" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🔄</span>
+                            <span data-i18n-key="common.sync_status">تحديث حالة الدخول</span>
+                        </button>
                     </div>
                 </div>
 
@@ -674,6 +701,29 @@
                     }
                 }
             });
+        }
+
+        async function syncSubscriptionStatus() {
+            try {
+                showToast('جاري تحديث البيانات من الخادم...', 'info');
+
+                // 1. Force refresh the profile data (updates localStorage)
+                await api.auth.getProfile();
+
+                // 2. Reload subscription data on the page
+                await loadSubscriptionData();
+
+                showToast('تم تحديث البيانات بنجاح', 'success');
+
+                // 3. Reload after a short delay to refresh the Sidebar
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Sync failed:', error);
+                showToast('فشل في جلب البيانات الجديدة', 'error');
+            }
         }
 
         // Initialize

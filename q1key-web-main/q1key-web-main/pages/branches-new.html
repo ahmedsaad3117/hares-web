@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>إضافة فرع - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css?v=17">
+  <link rel="stylesheet" href="../css/styles.css?v=18">
   <script src="../js/i18n.js"></script>
   <style>
     /* Premium Cyber-Minimalist Design System - Sync with Institutions New */
@@ -274,7 +274,8 @@
               <polyline points="12 19 5 12 12 5" />
             </svg>
           </span>
-          <span class="font-bold text-sm tracking-wide">العودة للفروع</span>
+          <span class="font-bold text-sm tracking-wide" data-i18n-key="branches.form.back_to_branches">العودة
+            للفروع</span>
         </a>
       </div>
 
@@ -288,7 +289,7 @@
                 stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
               </svg>
-              <span>اختر باقة الاشتراك المناسبة للفرع</span>
+              <span data-i18n-key="branches.form.plans_title">اختر باقة الاشتراك المناسبة للفرع</span>
             </div>
             <div id="plansContainer" class="plans-flex">
               <div class="spinner"></div>
@@ -309,15 +310,16 @@
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                   <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>
-                <span>معلومات وتفاصيل الفرع</span>
+                <span data-i18n-key="branches.form.branch_identity_title">معلومات وتفاصيل الفرع</span>
               </div>
 
               <!-- Institution Field (Searchable Dropdown) -->
               <div class="input-field-wrapper" id="institutionField">
-                <label class="input-label-clean" data-i18n-key="branches.form.institution_label">المؤسسة التابع لها
-                  <span style="color: #ef4444">*</span></label>
+                <label class="input-label-clean"><span data-i18n-key="branches.form.institution_label">المؤسسة التابع
+                    لها</span> <span data-i18n-key="common.required" class="required-star">*</span></label>
                 <div class="searchable-dropdown-container">
                   <input type="text" id="institutionSearch" class="modern-input"
+                    data-i18n-placeholder="institutions.form.search_placeholder"
                     placeholder="ابحث بالاسم، السجل أو الهاتف..." autocomplete="off">
                   <div id="instDropdownList" class="dropdown-list-results hidden"></div>
                   <input type="hidden" id="institutionId" name="institutionId" required>
@@ -325,39 +327,50 @@
               </div>
 
               <div class="input-field-wrapper">
-                <label class="input-label-clean">اسم الفرع <span style="color: #ef4444">*</span></label>
+                <label class="input-label-clean"><span data-i18n-key="branches.form.branch_name_label">اسم الفرع</span>
+                  <span data-i18n-key="common.required" class="required-star">*</span></label>
                 <input type="text" id="name" name="branch_display_name_field" autocomplete="off" class="modern-input"
-                  placeholder="فرع الرياض - الملز" required>
+                  data-i18n-placeholder="branches.form.branch_name_placeholder" placeholder="فرع الرياض - الملز"
+                  required>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">هاتف التواصل <span style="color: #ef4444">*</span></label>
+                  <label class="input-label-clean"><span data-i18n-key="branches.form.phone_contact">هاتف التواصل</span>
+                    <span data-i18n-key="common.required" class="required-star">*</span></label>
                   <input type="tel" id="phoneNumber" name="branch_contact_phone_field" autocomplete="off"
-                    class="modern-input" placeholder="05xxxxxxxx" required>
+                    class="modern-input" data-i18n-placeholder="branches.form.phone_placeholder"
+                    placeholder="05xxxxxxxx" required>
                 </div>
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">بريد الفرع <span style="color: #ef4444">*</span></label>
+                  <label class="input-label-clean"><span data-i18n-key="branches.form.branch_email">بريد الفرع</span>
+                    <span data-i18n-key="common.required" class="required-star">*</span></label>
                   <input type="email" id="email" name="branch_contact_email_field" autocomplete="off"
-                    class="modern-input" placeholder="branch@domain.com" required>
+                    class="modern-input" data-i18n-placeholder="branches.form.email_placeholder"
+                    placeholder="branch@domain.com" required>
                 </div>
               </div>
 
               <div class="input-field-wrapper">
-                <label class="input-label-clean">الحد الأقصى للمبلغ المسموح به</label>
+                <label class="input-label-clean" data-i18n-key="branches.form.max_amount">الحد الأقصى للمبلغ المسموح
+                  به</label>
                 <input type="number" id="maximumLoans" class="modern-input"
+                  data-i18n-placeholder="branches.form.max_amount_help"
                   placeholder="مثلاً: 50000 (اتركه فارغاً لمبالغ غير محدودة)" min="0">
-                <p class="text-[10px] text-white/30 mt-1">اترك الحقل فارغاً لإلغاء السقف المالي</p>
+                <p class="text-[10px] text-white/30 mt-1" data-i18n-key="branches.form.max_amount_help">اترك الحقل
+                  فارغاً لإلغاء السقف المالي</p>
               </div>
 
               <div class="grid grid-cols-2 gap-4 mt-2">
                 <label class="toggle-modern">
                   <input type="checkbox" id="isActive" checked class="w-4 h-4 accent-emerald-500">
-                  <span class="text-xs font-bold text-white/70">فرع نشط</span>
+                  <span class="text-xs font-bold text-white/70" data-i18n-key="branches.form.toggle_active">فرع
+                    نشط</span>
                 </label>
                 <label class="toggle-modern">
                   <input type="checkbox" id="userIsActive" checked class="w-4 h-4 accent-indigo-500">
-                  <span class="text-xs font-bold text-white/70">تفعيل حساب المدير</span>
+                  <span class="text-xs font-bold text-white/70" data-i18n-key="branches.form.toggle_admin_active">تفعيل
+                    حساب المدير</span>
                 </label>
               </div>
             </div>
@@ -370,24 +383,37 @@
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
-                <span>بيانات حساب مدير الفرع</span>
+                <span data-i18n-key="branches.form.manager_account_title">بيانات حساب مدير الفرع</span>
               </div>
 
               <div class="input-field-wrapper">
-                <label class="input-label-clean">الاسم الكامل للمدير <span style="color: #ef4444">*</span></label>
+                <label class="input-label-clean"><span data-i18n-key="branches.form.manager_full_name">الاسم الكامل
+                    للمدير</span> <span data-i18n-key="common.required">*</span></label>
                 <input type="text" id="userName" name="branch_manager_name_field" autocomplete="off"
-                  class="modern-input" placeholder="محمد علي" required>
+                  class="modern-input" data-i18n-placeholder="branches.form.username_placeholder" placeholder="محمد علي"
+                  required>
               </div>
 
               <div class="input-field-wrapper">
-                <label class="input-label-clean">البريد الإلكتروني للإدارة <span style="color: #ef4444">*</span></label>
+                <label class="input-label-clean"><span data-i18n-key="branches.form.manager_email_dept">البريد
+                    الإلكتروني للإدارة</span> <span data-i18n-key="common.required">*</span></label>
                 <input type="email" id="userEmail" name="branch_manager_email_field" autocomplete="off"
-                  class="modern-input" placeholder="manager@domain.com" required>
+                  class="modern-input" data-i18n-placeholder="branches.form.useremail_placeholder"
+                  placeholder="manager@domain.com" required>
+              </div>
+
+              <div class="input-field-wrapper">
+                <label class="input-label-clean"><span data-i18n-key="branches.form.manager_national_id">رقم الهوية
+                    للمدير</span> <span data-i18n-key="common.required">*</span></label>
+                <input type="text" id="userNationalId" name="branch_manager_national_id_field" autocomplete="off"
+                  class="modern-input" data-i18n-placeholder="users.form.national_id_placeholder"
+                  placeholder="أدخل رقم الهوية" required>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">كلمة المرور الآمنة <span style="color: #ef4444">*</span></label>
+                  <label class="input-label-clean"><span data-i18n-key="branches.form.password_secure">كلمة المرور
+                      الآمنة</span> <span data-i18n-key="common.required">*</span></label>
                   <div style="position: relative;">
                     <input type="password" id="userPassword" name="branch_manager_password_field"
                       autocomplete="new-password" class="modern-input" placeholder="••••••••" minlength="6" required>
@@ -402,9 +428,11 @@
                   </div>
                 </div>
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">جوال المدير</label>
+                  <label class="input-label-clean"><span data-i18n-key="branches.form.manager_phone_mobile">جوال
+                      المدير</span> <span data-i18n-key="common.required" class="required-star">*</span></label>
                   <input type="tel" id="userPhoneNumber" name="branch_manager_phone_field" autocomplete="off"
-                    class="modern-input" placeholder="05xxxxxxxx">
+                    class="modern-input" data-i18n-placeholder="branches.form.phone_placeholder"
+                    placeholder="05xxxxxxxx" required>
                 </div>
               </div>
 
@@ -420,7 +448,8 @@
 
           <!-- Final Submit -->
           <div class="mt-10">
-            <button type="submit" id="submitButton" class="btn-create-ultra">
+            <button type="submit" id="submitButton" class="btn-create-ultra"
+              data-i18n-key="branches.form.submit_request_new">
               تقديم طلب لإنشاء فرع جديد
             </button>
           </div>
@@ -510,14 +539,14 @@
 
           function renderResults(list) {
             if (list.length === 0) {
-              resultsDiv.innerHTML = '<div class="p-4 text-center text-xs opacity-50">لا توجد نتائج مطابقة</div>';
+              resultsDiv.innerHTML = `<div class="p-4 text-center text-xs opacity-50">${t('common.message.no_results')}</div>`;
             } else {
               resultsDiv.innerHTML = list.map(inst => `
                 <div class="dropdown-item" onclick="selectInstitution(${inst.institutionId}, '${inst.name.replace(/'/g, "\\'")}')">
                   <span class="font-bold text-white">${inst.name}</span>
                   <div class="sub-info">
-                    ${inst.taxId ? `<span>السجل: ${inst.taxId}</span>` : ''}
-                    ${inst.phoneNumber ? `<span class="mx-2">|</span><span>الهاتف: ${inst.phoneNumber}</span>` : ''}
+                    ${inst.taxId ? `<span>${t('institutions.form.tax_id_label')}: ${inst.taxId}</span>` : ''}
+                    ${inst.phoneNumber ? `<span class="mx-2">|</span><span>${t('institutions.form.phone_contact')}: ${inst.phoneNumber}</span>` : ''}
                   </div>
                 </div>
               `).join('');
@@ -556,6 +585,7 @@
           userEmail: document.getElementById('userEmail').value.trim(),
           userPassword: document.getElementById('userPassword').value,
           userPhoneNumber: document.getElementById('userPhoneNumber').value.trim(),
+          userNationalId: document.getElementById('userNationalId').value.trim(),
           userIsActive: document.getElementById('userIsActive').checked
         };
 
@@ -563,7 +593,7 @@
         formData.maximumLoans = maxLoansInput ? parseInt(maxLoansInput) : 0;
 
         if (!formData.planId) {
-          showError("يرجى اختيار باقة اشتراك لمتابعة العملية");
+          showError(t('institutions.form.plan_required'));
           return;
         }
 
@@ -571,7 +601,7 @@
           formData.institutionId = user.institutionId;
         } else {
           formData.institutionId = parseInt(document.getElementById('institutionId').value);
-          if (!formData.institutionId) { showError("يرجى اختيار المؤسسة"); return; }
+          if (!formData.institutionId) { showError(t('branches.form.institution_placeholder')); return; }
         }
 
         submitButton.disabled = true;
@@ -579,13 +609,13 @@
 
         try {
           const response = await api.branches.create(formData);
-          showToast(response.message || 'تم إرسال طلب تفعيل الفرع بنجاح', 'success');
+          showToast(response.message || t('branches.form.request_success'), 'success');
           // Redirect to requests page so they can see it
           setTimeout(() => window.location.href = 'requests.html', 1500);
         } catch (error) {
-          showError(error.message || 'فشل إرسال طلب إنشاء الفرع');
+          showError(error.message || t('branches.form.request_failed'));
           submitButton.disabled = false;
-          submitButton.innerHTML = "إرسال طلب تفعيل الفرع";
+          submitButton.innerHTML = t('branches.form.submit_request_new');
         }
       });
 
@@ -602,8 +632,14 @@
     async function loadSubscriptionPlans() {
       const container = document.getElementById('plansContainer');
       try {
-        const response = await api.subscriptions.getPlans();
+        const response = await api.subscriptions.getActivePlans();
         const plans = Array.isArray(response) ? response : (response.data || []);
+
+        if (plans.length === 0) {
+          container.innerHTML = `<p class='text-white/40 p-4 text-center w-full'>${t('institutions.form.no_plans') || 'لا توجد خطط اشتراك متاحة حالياً'}</p>`;
+          return;
+        }
+
         container.innerHTML = plans.map(plan => `
           <div class="plan-chip" onclick="selectPlan(this, ${plan.id})">
             <div class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">${i18n.isRTL() ? plan.name : (plan.nameEn || plan.name)}</div>
@@ -612,7 +648,8 @@
           </div>
         `).join('');
       } catch (e) {
-        container.innerHTML = "<p class='text-red-400 p-4'>عفواً، فشل تحميل الباقات المتوفرة</p>";
+        console.error('Plans loading error:', e);
+        container.innerHTML = `<p class='text-red-400 p-4'>${t('institutions.form.load_plans_error') || 'فشل في تحميل الخطط'}</p>`;
       }
     }
 

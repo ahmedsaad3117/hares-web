@@ -1,4 +1,4 @@
-import { IsNumber, IsString, IsOptional, MaxLength } from 'class-validator';
+import { IsNumber, IsString, IsOptional, MaxLength } from "class-validator";
 
 export class CreateSearchLogDto {
   @IsNumber()

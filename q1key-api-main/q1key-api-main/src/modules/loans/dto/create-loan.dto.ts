@@ -1,4 +1,13 @@
-import { IsNumber, IsNotEmpty, IsOptional, IsDateString, Min, Max, IsInt, ValidateIf } from 'class-validator';
+import {
+  IsNumber,
+  IsNotEmpty,
+  IsOptional,
+  IsDateString,
+  Min,
+  Max,
+  IsInt,
+  ValidateIf,
+} from "class-validator";
 
 export class CreateLoanDto {
   @IsNumber()

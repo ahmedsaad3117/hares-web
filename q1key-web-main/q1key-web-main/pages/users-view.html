@@ -105,6 +105,10 @@
                                     <p class="text-muted text-xs mb-1" data-i18n-key="users.phone">Phone Number</p>
                                     <p id="userPhone" class="text-white font-medium"></p>
                                 </div>
+                                <div>
+                                    <p class="text-muted text-xs mb-1" data-i18n-key="users.national_id">National ID</p>
+                                    <p id="userNationalId" class="text-white font-medium"></p>
+                                </div>
                             </div>
                         </div>
 
@@ -211,11 +215,12 @@
                 document.getElementById('userInitial').textContent = userData.name.charAt(0).toUpperCase();
                 document.getElementById('userEmail').textContent = userData.email;
                 document.getElementById('userPhone').textContent = userData.phoneNumber || '--';
+                document.getElementById('userNationalId').textContent = userData.nationalId || '--';
                 // Translate Role
                 const roleMap = {
-                    'Super Admin': t('users.roles.super_admin') || 'مدير عام',
-                    'Institution': t('users.roles.institution') || 'مؤسسة User', // Fallback to 'مؤسسة' if translation missing
-                    'Branch': t('users.roles.branch') || 'فرع'
+                    'Super Admin': t('users.roles.super_admin'),
+                    'Institution': t('users.roles.institution'),
+                    'Branch': t('users.roles.branch')
                 };
                 // Specific fix for "Institution" role usually mapping to 'مؤسسة'
                 if (userData.roleName === 'Institution') roleMap['Institution'] = t('users.roles.institution') || 'مؤسسة';
@@ -223,18 +228,18 @@
                 document.getElementById('userRole').textContent = roleMap[userData.roleName] || userData.roleName;
 
                 // Fix property access (API returns flattened institutionName/branchName) and translate N/A
-                const naText = t('common.na') || 'لا يوجد';
+                const naText = t('common.message.na') || 'N/A';
                 document.getElementById('userInstitution').textContent = userData.institutionName || userData.institution?.name || naText;
                 document.getElementById('userBranch').textContent = userData.branchName || userData.branch?.name || naText;
                 document.getElementById('createdAt').textContent = formatDateTime(userData.createdAt);
                 document.getElementById('updatedAt').textContent = formatDateTime(userData.updatedAt);
 
                 const statusBadge = document.getElementById('statusBadge');
-                statusBadge.textContent = userData.isActive ? (t('users.active') || 'نشط') : (t('users.inactive') || 'غير نشط');
+                statusBadge.textContent = userData.isActive ? t('users.active') : t('users.inactive');
                 statusBadge.className = `badge ${userData.isActive ? 'badge-success' : 'badge-danger'}`;
 
                 const toggleActiveText = document.getElementById('toggleActiveText');
-                toggleActiveText.textContent = userData.isActive ? (t('users.deactivate') || 'تعطيل') : (t('users.activate') || 'تفعيل');
+                toggleActiveText.textContent = userData.isActive ? t('users.deactivate') : t('users.activate');
 
                 document.getElementById('editBtn').href = `users-edit.html?id=${targetUserId}`;
 
@@ -269,13 +274,13 @@
                     toggleActiveBtn.classList.add('opacity-50');
                     toggleActiveBtn.title = t('users.cannot_deactivate_own_account') || "لا يمكن تعطيل حسابك الخاص";
                 }
-                reason = t('users.cannot_manage_own_account') || "لا يمكنك حذف أو تعطيل حسابك الخاص";
+                reason = t('users.cannot_manage_own_account');
             }
 
             // 2. Prevent Super Admin deletion by non-super admins (though roles guard should handle it)
             if (userData.roleName === 'Super Admin' && currentUser.roleName !== 'Super Admin') {
                 preventDelete = true;
-                reason = t('users.only_super_admin_manage') || "فقط المدير العام يمكنه إدارة حسابات المدراء العموميين";
+                reason = t('users.only_super_admin_manage');
             }
 
             // 3. SPECIAL RULE: Protect Master Admin (admin@q1key.com)
@@ -299,9 +304,7 @@
                     }
 
                     const editSpan = editBtn.querySelector('span');
-                    if (editSpan) {
-                        editSpan.textContent = "تغيير كلمة المرور";
-                    }
+                    editSpan.textContent = t('users.change_password');
                 }
 
                 return;
@@ -312,7 +315,7 @@
                 const logs = await api.searchLogs.getByUser(targetUserId, 1, 1);
                 if (logs.data && logs.data.length > 0) {
                     preventDelete = true;
-                    reason = "هذا المستخدم لديه سجلات نشاط مرتبطة به. يوصى بالتعطيل بدلاً من الحذف.";
+                    reason = t('users.has_activity_warning');
                 }
             } catch (e) {
                 console.error('Error checking user logs:', e);
@@ -341,9 +344,9 @@
             } else {
                 deleteBtn.addEventListener('click', () => {
                     showDeleteModal({
-                        title: t('users.delete_confirm_title') || 'Delete User',
+                        title: t('users.delete_confirm_title'),
                         itemName: userData.name,
-                        warningText: t('users.delete_warning_text') || 'This will permanently remove the user and all their permissions. This action cannot be undone.',
+                        warningText: t('users.delete_warning_text'),
                         onConfirm: async () => {
                             try {
                                 await api.users.delete(targetUserId);
@@ -360,11 +363,11 @@
 
             toggleActiveBtn.addEventListener('click', async () => {
                 const action = userData.isActive ? 'deactivate' : 'activate';
-                const actionText = userData.isActive ? t('users.deactivate') || 'تعطيل' : t('users.activate') || 'تفعيل';
+                const actionText = userData.isActive ? t('users.deactivate') : t('users.activate');
 
                 showConfirmModal({
-                    title: actionText + ' ' + (t('users.user') || 'المستخدم'),
-                    message: `هل أنت متأكد من ${actionText} هذا المستخدم؟`,
+                    title: t('users.toggle_status_confirm', { action: actionText }).split('?')[0] || actionText,
+                    message: t('users.toggle_status_confirm', { action: actionText }),
                     subMessage: userData.name,
                     confirmText: actionText,
                     icon: userData.isActive ? '⏸️' : '▶️',

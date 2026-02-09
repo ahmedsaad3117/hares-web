@@ -5,49 +5,49 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-} from 'typeorm';
-import { Branch } from './branch.entity';
-import { User } from './user.entity';
+} from "typeorm";
+import { Branch } from "./branch.entity";
+import { User } from "./user.entity";
 
-@Entity('institutions')
+@Entity("institutions")
 export class Institution {
-  @PrimaryGeneratedColumn({ name: 'institution_id' })
+  @PrimaryGeneratedColumn({ name: "institution_id" })
   institutionId: number;
 
   @Column({ length: 255 })
   name: string;
 
-  @Column({ name: 'tax_id', length: 100, nullable: true })
+  @Column({ name: "tax_id", length: 100, nullable: true })
   taxId: string;
 
-  @Column({ name: 'phone_number', length: 50, nullable: true })
+  @Column({ name: "phone_number", length: 50, nullable: true })
   phoneNumber: string;
 
   @Column({ length: 255, nullable: true })
   email: string;
 
-  @Column({ name: 'max_users', default: 5 })
+  @Column({ name: "max_users", default: 5 })
   maxUsers: number;
 
-  @Column({ name: 'can_create_branches', default: true })
+  @Column({ name: "can_create_branches", default: true })
   canCreateBranches: boolean;
 
-  @Column({ name: 'is_active', default: true })
+  @Column({ name: "is_active", default: true })
   isActive: boolean;
 
-  @Column({ name: 'total_loans', default: 0 })
+  @Column({ name: "total_loans", default: 0 })
   totalLoans: number;
 
-  @Column({ name: 'maximum_loans', default: 0 })
+  @Column({ name: "maximum_loans", default: 0 })
   maximumLoans: number;
 
-  @Column({ name: 'expiration_date', type: 'date', nullable: true })
+  @Column({ name: "expiration_date", type: "date", nullable: true })
   expirationDate: Date | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
 
   @OneToMany(() => Branch, (branch) => branch.institution)

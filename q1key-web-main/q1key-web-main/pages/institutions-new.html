@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>إضافة مؤسسة - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css?v=17">
+  <link rel="stylesheet" href="../css/styles.css?v=18">
   <script src="../js/i18n.js"></script>
   <style>
     /* Premium Cyber-Minimalist Design System */
@@ -69,6 +69,7 @@
       font-weight: 800;
       letter-spacing: -0.01em;
       margin-bottom: 2rem;
+      text-shadow: 0 0 10px rgba(129, 140, 248, 0.2);
     }
 
     .section-title-premium i {
@@ -235,7 +236,8 @@
               <polyline points="12 19 5 12 12 5" />
             </svg>
           </span>
-          <span class="font-bold text-sm tracking-wide">العودة للمؤسسات</span>
+          <span class="font-bold text-sm tracking-wide" data-i18n-key="institutions.form.back_to_institutions">العودة
+            للمؤسسات</span>
         </a>
       </div>
 
@@ -249,7 +251,7 @@
                 stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
               </svg>
-              <span>اختر باقة الاشتراك المناسبة لمؤسستك</span>
+              <span data-i18n-key="institutions.form.plans_title">اختر باقة الاشتراك المناسبة لمؤسستك</span>
             </div>
             <div id="plansContainer" class="plans-flex">
               <div class="spinner"></div>
@@ -273,65 +275,78 @@
                   <line x1="3" y1="9" x2="21" y2="9" />
                   <line x1="3" y1="15" x2="21" y2="15" />
                 </svg>
-                <span>هوية وبيانات المؤسسة</span>
+                <span data-i18n-key="institutions.form.identity_title">هوية وبيانات المؤسسة</span>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">الاسم التجاري <span style="color: #ef4444">*</span></label>
+                  <label class="input-label-clean"><span data-i18n-key="institutions.form.name_trade">الاسم
+                      التجاري</span> <span data-i18n-key="common.required">*</span></label>
                   <input type="text" id="name" name="inst_display_name_field" autocomplete="off" class="modern-input"
-                    placeholder="مؤسسة التقنية العالمية" required>
+                    data-i18n-placeholder="institutions.form.name_placeholder" placeholder="مؤسسة التقنية العالمية"
+                    required>
                 </div>
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">رقم السجل التجاري <span style="color: #ef4444">*</span></label>
+                  <label class="input-label-clean"><span data-i18n-key="institutions.form.tax_id_label">رقم السجل
+                      التجاري</span> <span data-i18n-key="common.required">*</span></label>
                   <input type="text" id="taxId" name="inst_tax_id_field" autocomplete="off" class="modern-input"
-                    placeholder="1010xxxxxx" required>
+                    data-i18n-placeholder="institutions.form.tax_id_placeholder" placeholder="1010xxxxxx" required>
                 </div>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">هاتف التواصل <span style="color: #ef4444">*</span></label>
+                  <label class="input-label-clean"><span data-i18n-key="institutions.form.phone_contact">هاتف
+                      التواصل</span> <span data-i18n-key="common.required">*</span></label>
                   <input type="tel" id="phoneNumber" name="inst_contact_phone_field" autocomplete="off"
-                    class="modern-input" placeholder="011xxxxxxx" required>
+                    class="modern-input" data-i18n-placeholder="institutions.form.phone_placeholder"
+                    placeholder="011xxxxxxx" required>
                 </div>
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">بريد المؤسسة <span style="color: #ef4444">*</span></label>
+                  <label class="input-label-clean"><span data-i18n-key="institutions.form.email_inst">بريد
+                      المؤسسة</span> <span data-i18n-key="common.required">*</span></label>
                   <input type="email" id="email" name="inst_contact_email_field" autocomplete="off" class="modern-input"
-                    placeholder="info@company.com" required>
+                    data-i18n-placeholder="institutions.form.email_placeholder" placeholder="info@company.com" required>
                 </div>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">عدد المستخدمين المسموح <span style="color: #ef4444">*</span></label>
+                  <label class="input-label-clean"><span data-i18n-key="institutions.form.max_users_allowed">عدد
+                      المستخدمين المسموح</span> <span data-i18n-key="common.required"
+                      class="required-star">*</span></label>
                   <input type="number" id="maxUsers" class="modern-input" min="1" value="1" required>
                 </div>
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">تاريخ انتهاء الترخيص <span style="color: #ef4444">*</span></label>
-                  <input type="date" id="expirationDate" class="modern-input" required>
+                  <label class="input-label-clean"><span data-i18n-key="institutions.form.expiration_license">تاريخ
+                      انتهاء الترخيص</span></label>
+                  <input type="date" id="expirationDate" class="modern-input">
                 </div>
               </div>
 
               <div class="input-field-wrapper">
-                <label class="input-label-clean">الحد الأقصى للمبلغ المسموح به (للمؤسسة)</label>
+                <label class="input-label-clean" data-i18n-key="institutions.form.max_amount">الحد الأقصى للمبلغ المسموح
+                  به (للمؤسسة)</label>
                 <input type="number" id="maximumLoans" class="modern-input"
+                  data-i18n-placeholder="institutions.form.max_amount_help"
                   placeholder="مثلاً: 1000000 (0 تعني غير محدود)" min="0">
-                <p class="text-[10px] text-white/30 mt-1">اترك الحقل فارغاً لإلغاء السقف المالي</p>
               </div>
 
               <div class="grid grid-cols-3 gap-4 mt-2">
                 <label class="toggle-modern">
                   <input type="checkbox" id="canCreateBranches" checked class="w-4 h-4 accent-indigo-500">
-                  <span class="text-xs font-bold text-white/70">إنشاء فروع</span>
+                  <span class="text-xs font-bold text-white/70" data-i18n-key="institutions.form.toggle_branches">إنشاء
+                    فروع</span>
                 </label>
                 <label class="toggle-modern">
                   <input type="checkbox" id="isActive" checked class="w-4 h-4 accent-emerald-500">
-                  <span class="text-xs font-bold text-white/70">مؤسسة نشطة</span>
+                  <span class="text-xs font-bold text-white/70"
+                    data-i18n-key="institutions.form.toggle_active_inst">مؤسسة نشطة</span>
                 </label>
                 <label class="toggle-modern">
                   <input type="checkbox" id="adminIsActive" checked class="w-4 h-4 accent-indigo-500">
-                  <span class="text-xs font-bold text-white/70">تفعيل حساب المدير</span>
+                  <span class="text-xs font-bold text-white/70"
+                    data-i18n-key="institutions.form.toggle_active_admin">تفعيل حساب المدير</span>
                 </label>
               </div>
             </div>
@@ -344,25 +359,36 @@
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
-                <span>حساب مدير المؤسسة</span>
+                <span data-i18n-key="institutions.form.admin_account_title">حساب مدير المؤسسة</span>
               </div>
 
               <div class="input-field-wrapper">
-                <label class="input-label-clean">الاسم الكامل لمدير المؤسسة <span
-                    style="color: #ef4444">*</span></label>
+                <label class="input-label-clean"><span data-i18n-key="institutions.form.admin_full_name">الاسم الكامل
+                    لمدير المؤسسة</span> <span data-i18n-key="common.required">*</span></label>
                 <input type="text" id="adminName" name="inst_admin_name_field" autocomplete="off" class="modern-input"
-                  placeholder="د. أحمد محمد" required>
+                  data-i18n-placeholder="institutions.form.admin_name_placeholder" placeholder="د. أحمد محمد" required>
               </div>
 
               <div class="input-field-wrapper">
-                <label class="input-label-clean">البريد الإلكتروني للإدارة <span style="color: #ef4444">*</span></label>
+                <label class="input-label-clean"><span data-i18n-key="institutions.form.admin_email_dept">البريد
+                    الإلكتروني للإدارة</span> <span data-i18n-key="common.required">*</span></label>
                 <input type="email" id="adminEmail" name="inst_admin_email_field" autocomplete="off"
-                  class="modern-input" placeholder="admin@domain.com" required>
+                  class="modern-input" data-i18n-placeholder="institutions.form.admin_email_placeholder"
+                  placeholder="admin@domain.com" required>
+              </div>
+
+              <div class="input-field-wrapper">
+                <label class="input-label-clean"><span data-i18n-key="institutions.form.admin_national_id">رقم الهوية
+                    للمدير</span> <span data-i18n-key="common.required">*</span></label>
+                <input type="text" id="adminNationalId" name="inst_admin_national_id_field" autocomplete="off"
+                  class="modern-input" data-i18n-placeholder="users.form.national_id_placeholder"
+                  placeholder="أدخل رقم الهوية" required>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">كلمة المرور الآمنة <span style="color: #ef4444">*</span></label>
+                  <label class="input-label-clean"><span data-i18n-key="institutions.form.admin_password_secure">كلمة
+                      المرور الآمنة</span> <span data-i18n-key="common.required">*</span></label>
                   <div style="position: relative;">
                     <input type="password" id="adminPassword" name="inst_admin_password_field"
                       autocomplete="new-password" class="modern-input" placeholder="••••••••" minlength="6" required>
@@ -377,9 +403,11 @@
                   </div>
                 </div>
                 <div class="input-field-wrapper">
-                  <label class="input-label-clean">جوال المدير <span style="color: #ef4444">*</span></label>
+                  <label class="input-label-clean"><span data-i18n-key="institutions.form.admin_phone_mobile">جوال
+                      المدير</span> <span data-i18n-key="common.required">*</span></label>
                   <input type="tel" id="adminPhoneNumber" name="inst_admin_phone_field" autocomplete="off"
-                    class="modern-input" placeholder="05xxxxxxxx" required>
+                    class="modern-input" data-i18n-placeholder="institutions.form.admin_phone_placeholder"
+                    placeholder="05xxxxxxxx" required>
                 </div>
               </div>
 
@@ -398,7 +426,8 @@
 
         <!-- Final Submit -->
         <div class="mt-10">
-          <button type="submit" id="submitButton" class="btn-create-ultra">
+          <button type="submit" id="submitButton" class="btn-create-ultra"
+            data-i18n-key="institutions.form.submit_request_new">
             تقديم طلب لمؤسسة جديدة
           </button>
         </div>
@@ -440,7 +469,7 @@
             const result = await api.institutions.checkTaxId(taxId);
 
             if (result && result.exists) {
-              showError(result.message || 'رقم السجل التجاري مسجل مسبقاً');
+              showError(result.message || t('institutions.form.tax_id_exists'));
               taxIdInput.style.borderColor = '#ef4444';
               taxIdInput.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
               submitBtn.disabled = true;
@@ -489,7 +518,7 @@
           phoneNumber: document.getElementById('phoneNumber').value.trim(),
           email: document.getElementById('email').value.trim(),
           maxUsers: parseInt(document.getElementById('maxUsers').value) || 1,
-          expirationDate: document.getElementById('expirationDate').value,
+          expirationDate: document.getElementById('expirationDate').value || null,
           maximumLoans: parseInt(document.getElementById('maximumLoans').value) || 0,
           canCreateBranches: document.getElementById('canCreateBranches').checked,
           isActive: document.getElementById('isActive').checked,
@@ -498,11 +527,12 @@
           adminEmail: document.getElementById('adminEmail').value.trim(),
           adminPassword: document.getElementById('adminPassword').value,
           adminPhoneNumber: document.getElementById('adminPhoneNumber').value.trim(),
+          adminNationalId: document.getElementById('adminNationalId').value.trim(),
           adminIsActive: document.getElementById('adminIsActive').checked
         };
 
         if (!formData.planId) {
-          showError("يرجى اختيار باقة اشتراك لمتابعة العملية");
+          showError(t('institutions.form.plan_required'));
           return;
         }
 
@@ -511,12 +541,12 @@
 
         try {
           await api.institutions.create(formData);
-          showToast('تمت إضافة المؤسسة وتفعيل الحساب بنجاح', 'success');
+          showToast(t('institutions.form.create_success'), 'success');
           setTimeout(() => window.location.href = 'institutions.html', 1500);
         } catch (error) {
           showError(error.message);
           submitButton.disabled = false;
-          submitButton.innerHTML = "تقديم طلب لمؤسسة جديدة";
+          submitButton.innerHTML = t('institutions.form.submit_request_new');
         }
       });
 
@@ -533,17 +563,24 @@
     async function loadSubscriptionPlans() {
       const container = document.getElementById('plansContainer');
       try {
-        const response = await api.subscriptions.getPlans();
+        const response = await api.subscriptions.getActivePlans();
         const plans = Array.isArray(response) ? response : (response.data || []);
+
+        if (plans.length === 0) {
+          container.innerHTML = `<p class='text-white/40 p-4 text-center w-full'>${t('institutions.form.no_plans') || 'لا توجد خطط اشتراك متاحة حالياً'}</p>`;
+          return;
+        }
+
         container.innerHTML = plans.map(plan => `
           <div class="plan-chip" onclick="selectPlan(this, ${plan.id})">
             <div class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">${i18n.isRTL() ? plan.name : (plan.nameEn || plan.name)}</div>
             <div class="text-xl font-black text-white">${plan.price} <span class="text-[10px] font-normal opacity-50">ر.س</span></div>
-            <div class="text-[9px] opacity-40 mt-1">${plan.durationMonths} شهر من الخدمة</div>
+            <div class="text-[9px] opacity-40 mt-1">${plan.durationMonths} ${t('my_subscription.month') || 'شهر'}</div>
           </div>
         `).join('');
       } catch (e) {
-        container.innerHTML = "<p class='text-red-400 p-4'>عفواً، فشل تحميل الباقات المتوفرة</p>";
+        console.error('Plans loading error:', e);
+        container.innerHTML = `<p class='text-red-400 p-4'>${t('institutions.form.load_plans_error') || 'فشل في تحميل الخطط'}</p>`;
       }
     }
 

@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { InstitutionsService } from './institutions.service';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
-import { Institution } from '../../entities/institution.entity';
+import { Injectable, Logger } from "@nestjs/common";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { InstitutionsService } from "./institutions.service";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, LessThan } from "typeorm";
+import { Institution } from "../../entities/institution.entity";
 
 @Injectable()
 export class InstitutionsScheduler {
@@ -16,7 +16,7 @@ export class InstitutionsScheduler {
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async checkExpiredInstitutions() {
-    this.logger.log('Running daily check for expired institutions...');
+    this.logger.log("Running daily check for expired institutions...");
 
     try {
       const today = new Date();
@@ -31,22 +31,26 @@ export class InstitutionsScheduler {
       });
 
       if (expiredInstitutions.length === 0) {
-        this.logger.log('No expired institutions found.');
+        this.logger.log("No expired institutions found.");
         return;
       }
 
-      this.logger.log(`Found ${expiredInstitutions.length} expired institution(s). Deactivating...`);
+      this.logger.log(
+        `Found ${expiredInstitutions.length} expired institution(s). Deactivating...`,
+      );
 
       // Deactivate expired institutions
       for (const institution of expiredInstitutions) {
         institution.isActive = false;
         await this.institutionsRepository.save(institution);
-        this.logger.log(`Deactivated institution: ${institution.name} (ID: ${institution.institutionId})`);
+        this.logger.log(
+          `Deactivated institution: ${institution.name} (ID: ${institution.institutionId})`,
+        );
       }
 
-      this.logger.log('Expired institutions check completed successfully.');
+      this.logger.log("Expired institutions check completed successfully.");
     } catch (error) {
-      this.logger.error('Error checking expired institutions:', error);
+      this.logger.error("Error checking expired institutions:", error);
     }
   }
 }

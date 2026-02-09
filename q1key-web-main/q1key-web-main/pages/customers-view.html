@@ -227,7 +227,7 @@
       <!-- Link Banner will be injected dynamically -->
 
       <!-- Customer Details -->
-      <div id="customerContainer" style="display: none;" dir="rtl" class="text-right">
+      <div id="customerContainer" style="display: none;">
         <div class="glass-card p-6 mb-6" style="position: relative; z-index: 50;">
           <div class="flex items-start justify-between flex-wrap gap-4 mb-6">
             <div class="flex items-center gap-4">
@@ -255,7 +255,7 @@
                       <path
                         d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
                     </svg>
-                    <span>WhatsApp</span>
+                    <span data-i18n-key="common.label.whatsapp">WhatsApp</span>
                   </a>
                   <a id="editBtn" class="dropdown-item">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -272,7 +272,7 @@
                       <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                       <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                     </svg>
-                    <span>نقل للمحذوفين</span>
+                    <span data-i18n-key="customers.view_page.move_to_deleted">نقل للمحذوفين</span>
                   </button>
                   <button id="deleteBtn" class="dropdown-item text-danger">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -385,7 +385,7 @@
               <div id="loansTab" class="tab-content" style="display: block;">
                 <div id="loansLoading" class="empty-state-visual">
                   <div class="spinner mb-4"></div>
-                  <p data-i18n-key="common.loading">جاري التحميل...</p>
+                  <p data-i18n-key="common.message.loading">جاري التحميل...</p>
                 </div>
                 <div id="loansEmpty" style="display: none;" class="empty-state-visual">
                   <div class="empty-icon-circle">
@@ -408,7 +408,7 @@
               <div id="searchesTab" class="tab-content" style="display: none;">
                 <div id="searchesLoading" class="empty-state-visual">
                   <div class="spinner mb-4"></div>
-                  <p data-i18n-key="common.loading">جاري التحميل...</p>
+                  <p data-i18n-key="common.message.loading">جاري التحميل...</p>
                 </div>
                 <div id="searchesEmpty" style="display: none;" class="empty-state-visual">
                   <div class="empty-icon-circle">
@@ -430,7 +430,7 @@
               <div id="notesTab" class="tab-content" style="display: none;">
                 <div id="notesLoading" class="empty-state-visual">
                   <div class="spinner mb-4"></div>
-                  <p data-i18n-key="common.loading">جاري التحميل...</p>
+                  <p data-i18n-key="common.message.loading">جاري التحميل...</p>
                 </div>
                 <div id="notesEmpty" style="display: none;" class="empty-state-visual">
                   <div class="empty-icon-circle">
@@ -521,30 +521,26 @@
     // --- GLOBAL LINK FUNCTION ---
     window.linkCustomerAction = async function () {
       if (!targetCustomerId) {
-        showToast('خطأ: لم يتم العثور على المعرف', 'error');
+        showToast(t('common.message.error') + ': customerId not found', 'error');
         return;
       }
 
-      const name = customerDataLoaded ? customerDataLoaded.name : 'العميل';
+      const name = customerDataLoaded ? customerDataLoaded.name : t('common.customer');
 
       showConfirmModal({
-        title: 'ربط العميل',
-        message: 'هل تريد ربط هذا العميل بمؤسستك لتتمكن من إدارته؟',
+        title: t('customers.view_page.link_customer_title'),
+        message: t('customers.view_page.link_customer_msg'),
         subMessage: name,
-        confirmText: 'ربط بمؤسستي',
+        confirmText: t('customers.view_page.link_customer_btn'),
         icon: '🔗',
-        btnClass: 'btn-success', // Green like the original button
+        btnClass: 'btn-success',
         onConfirm: async () => {
           try {
-            console.log('Linking ID:', targetCustomerId);
             await api.customers.link(parseInt(targetCustomerId));
-            showToast(`تم ربط العميل "${name}" بنجاح!`, 'success');
-
-            // Reload after short delay to refresh data
+            showToast(t('customers.view_page.link_success', { name }), 'success');
             setTimeout(() => window.location.reload(), 1000);
           } catch (err) {
-            console.error('Link Error:', err);
-            showToast(err.message || 'فشل الربط', 'error');
+            showToast(err.message || t('customers.view_page.link_failed'), 'error');
           }
         }
       });
@@ -579,23 +575,11 @@
       setActiveNav('customers');
       window.i18n.translatePage();
 
-      // Enforce RTL layout for Arabic BUT keep specific headers LTR as requested
-      if (localStorage.getItem('locale') !== 'en') {
-        document.documentElement.dir = 'rtl';
-        document.getElementById('customerContainer').style.direction = 'rtl';
-
-        // Force headers to LTR to keep Name on Left and Dots on Right
-        const headerFlex = document.getElementById('pageHeaderContainer');
-        if (headerFlex) headerFlex.style.direction = 'ltr';
-
-        // Force customer info header row to LTR
-        const infoHeader = document.querySelector('#customerContainer .flex.items-start.justify-between');
-        if (infoHeader) infoHeader.style.direction = 'ltr';
-
-        // Force Trust Status controls to LTR
-        const trustControls = document.getElementById('trustStatusControls');
-        if (trustControls) trustControls.style.direction = 'ltr';
-      }
+      // Enforce correct layout direction
+      const locale = localStorage.getItem('locale') || 'en';
+      document.documentElement.setAttribute('dir', locale === 'ar' ? 'rtl' : 'ltr');
+      const container = document.getElementById('customerContainer');
+      if (container) container.setAttribute('dir', locale === 'ar' ? 'rtl' : 'ltr');
 
       await loadCustomer();
       initMeatballMenu();
@@ -683,8 +667,8 @@
               </svg>
             </div>
             <div>
-              <h3 class="text-lg font-bold text-white">عميل خارجي (مؤسسة أخرى)</h3>
-              <p class="text-amber-400 text-sm mt-1">يجب ربط هذا العميل بمؤسستك لتتمكن من إضافة قروض أو تعديل بيانه.</p>
+              <h3 class="text-lg font-bold text-white">${t('customers.external_customer')}</h3>
+              <p class="text-amber-400 text-sm mt-1">${t('customers.view_page.link_customer_msg')}</p>
             </div>
           </div>
       `;
@@ -692,7 +676,7 @@
       // 4. Create Button
       const btn = document.createElement('button');
       btn.id = 'linkCustomerBtn';
-      btn.textContent = 'ربط بمؤسستي';
+      btn.textContent = t('customers.view_page.link_customer_btn');
       btn.className = 'btn btn-primary bg-emerald-600 hover:bg-emerald-700 border-none px-6 py-3 font-bold text-lg shadow-lg mr-auto';
 
       btn.onclick = function (e) {
@@ -904,26 +888,33 @@
         }
 
         const warning = document.createElement('div');
-        warning.className = 'glass-card p-4 mb-6 border border-red-500/20 bg-red-500/10';
-        warning.innerHTML = `<p class="text-red-500 text-sm font-medium text-center">${t('customers.view_page.delete_prevented_msg') || 'لا يمكن حذف العميل لوجود قروض أو سجلات مرتبطة به.'}</p>`;
+        warning.className = 'warning-banner';
+        warning.innerHTML = `
+          <p>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>${t('customers.view_page.delete_prevented_msg') || 'Cannot delete customer. Active loans or records found.'}</span>
+          </p>
+        `;
         document.getElementById('customerContainer').prepend(warning);
       } else {
         // Soft Delete button (moves to deleted list)
         if (softDeleteBtn) {
           softDeleteBtn.addEventListener('click', () => {
             showDeleteModal({
-              title: 'نقل للمحذوفين',
+              title: t('customers.view_page.move_to_deleted'),
               itemName: customerDataLoaded.name,
-              warningText: 'هل أنت متأكد من نقل هذا العميل لقائمة المحذوفين؟\n\nيمكنك استعادته لاحقاً من صفحة العملاء المحذوفين.',
-              confirmText: 'نعم، انقل للمحذوفين',
+              warningText: t('customers.view_page.move_to_deleted_confirm'),
+              confirmText: t('common.button.yes'),
               onConfirm: async () => {
                 try {
                   await api.customers.softDelete(targetCustomerId);
-                  showToast('تم نقل العميل لقائمة المحذوفين', 'success');
+                  showToast(t('customers.view_page.move_to_deleted_success'), 'success');
                   window.location.href = 'customers.html';
                 } catch (error) {
                   console.error('Error soft deleting:', error);
-                  showToast(error.message || 'فشل نقل العميل', 'error');
+                  showToast(error.message || t('customers.view_page.move_to_deleted_failed'), 'error');
                 }
               }
             });
@@ -936,7 +927,7 @@
             title: t('customers.view_page.delete_confirm_title') || 'Delete Customer',
             itemName: customerDataLoaded.name,
             warningText: isSuperAdmin
-              ? 'تحذير: سيتم حذف العميل وجميع بياناته نهائياً. لا يمكن التراجع عن هذا الإجراء!'
+              ? t('customers.view_page.delete_customer_confirm')
               : (t('customers.view_page.delete_warning') || 'Are you sure? This will remove the customer profile permanently.'),
             onConfirm: async () => {
               try {
@@ -970,7 +961,7 @@
         if (isHidden) {
           content.style.display = 'block';
           arrow.textContent = '▲';
-          toggleBtn.innerHTML = `<span id="toggleRecordArrow">▲</span> إخفاء السجل`;
+          toggleBtn.innerHTML = `<span id="toggleRecordArrow">▲</span> ${t('customers.view_page.hide_record')}`;
 
           // Load data only once
           if (!recordLoaded) {
@@ -980,7 +971,7 @@
         } else {
           content.style.display = 'none';
           arrow.textContent = '▼';
-          toggleBtn.innerHTML = `<span id="toggleRecordArrow">▼</span> عرض السجل`;
+          toggleBtn.innerHTML = `<span id="toggleRecordArrow">▼</span> ${t('customers.view_page.show_record')}`;
         }
       });
 
@@ -1023,6 +1014,12 @@
 
       try {
         const loans = customerLoans || [];
+        console.log('DEBUG: Loans Data:', loans);
+        loans.forEach(l => {
+          console.log(`Loan #${l.loanId} - Branch:`, l.branch);
+          console.log(`Loan #${l.loanId} - Institution:`, l.institution);
+          console.log(`Loan #${l.loanId} - Phones: Branch=${l.branch?.phoneNumber}, Inst=${l.institution?.phoneNumber}`);
+        });
         count.textContent = loans.length;
 
         loading.style.display = 'none';
@@ -1045,7 +1042,14 @@
                     <span class="text-muted" style="font-size: 0.875rem;">#${loan.loanId}</span>
                   </div>
                   <p class="text-white" style="font-weight: 600; margin: 0;">${loan.product?.name || 'قرض'}</p>
-                  <p class="text-muted" style="font-size: 0.875rem; margin: 0.25rem 0 0;">${loan.branch?.name || (loan.institution?.name) || 'الفرع'}</p>
+                  <p class="text-muted" style="font-size: 0.875rem; margin: 0.25rem 0 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>${loan.branch ? `${loan.branch.name} (${loan.branch.institution?.name || ''})` : (loan.institution?.name || 'الفرع')}</span>
+                    ${(loan.branch?.phoneNumber || loan.institution?.phoneNumber) ? `
+                      <button onclick="openWhatsapp('${loan.branch?.phoneNumber || loan.institution?.phoneNumber}')" class="btn-whatsapp" style="padding: 2px 5px; font-size: 0.75rem; display: inline-flex; align-items: center;" title="${t('help.contact_whatsapp')}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                      </button>
+                    ` : ''}
+                  </p>
                 </div>
                 <div class="record-item-side">
                   <p class="amount-text">${formatCurrency(loan.principalAmount)}</p>
@@ -1057,7 +1061,7 @@
               ${(loan.principalAmount + (loan.profitAmount || 0) - (loan.paidAmount || 0)) > 0 ? `
                 <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.1);">
                   <div style="display: flex; justify-content: space-between; font-size: 0.875rem;">
-                    <span class="text-muted">المبلغ المتبقي</span>
+                    <span class="text-muted">${t('reports.stats.remaining_amount')}</span>
                     <span class="text-warning" style="font-weight: 600;">${formatCurrency(loan.principalAmount + (loan.profitAmount || 0) - (loan.paidAmount || 0))}</span>
                   </div>
                 </div>
@@ -1083,9 +1087,16 @@
         searchLogs = response.data || [];
         count.textContent = searchLogs.length;
 
-        // Update count badge color if there are searches
+        // Update count badge color
         if (searchLogs.length > 0) {
           count.style.background = '#f59e0b';
+          count.style.color = '#000000';
+          count.style.fontWeight = '900';
+          count.style.fontSize = '0.85rem';
+        } else {
+          count.style.background = '#ef4444'; // Red
+          count.style.color = '#ffffff'; // White
+          count.style.fontWeight = '900';
         }
 
         loading.style.display = 'none';
@@ -1099,9 +1110,9 @@
 
           list.innerHTML = searchLogs.map(log => {
             // Determine the organization name and phone
-            const orgName = log.branchName || log.institutionName || 'مؤسسة غير محددة';
+            const orgName = log.branchName || log.institutionName || t('common.unknown_org');
             const orgPhone = log.branchPhone || log.institutionPhone;
-            const orgType = log.branchName ? 'فرع' : 'مؤسسة';
+            const orgType = log.branchName ? t('common.type.branch') : t('common.type.institution');
 
             return `
             <div class="record-item" style="border-inline-start-color: #f59e0b;">
@@ -1120,11 +1131,21 @@
                       <circle cx="11" cy="11" r="8"></circle>
                       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    قام بالبحث عن هذا العميل
-                    ${log.searchType ? `<span class="badge" style="background: #374151; padding: 0.125rem 0.5rem; border-radius: 0.25rem; margin-right: 0.5rem;">${t('search_logs.' + log.searchType) || log.searchType}</span>` : ''}
+                    ${t('customers.view_page.searched_for_customer')}
+                    ${log.searchType ? (() => {
+                const type = (log.searchType || '').toLowerCase();
+                const isSearch = type === 'search' || type === 'بحث';
+                const styles = isSearch
+                  ? 'background: rgba(245, 158, 11, 0.25); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.5);'
+                  : 'background: rgba(244, 63, 94, 0.25); color: #fecdd3; border: 1px solid rgba(244, 63, 94, 0.5);';
+                return `
+                        <span class="badge" style="${styles} padding: 0.2rem 0.6rem; border-radius: 6px; margin-right: 0.5rem; font-weight: 800; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; min-width: 50px;">
+                          ${t('search_logs.' + log.searchType) || log.searchType}
+                        </span>`;
+              })() : ''}
                   </p>
                   <p class="text-muted" style="font-size: 0.75rem; margin: 0;">
-                    <span style="opacity: 0.7;">بواسطة:</span> ${log.userName || 'مستخدم'}
+                    <span style="opacity: 0.7;">${t('customers.view_page.added_by')}:</span> ${log.userName || t('common.user')}
                   </p>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
@@ -1137,11 +1158,11 @@
                     </p>
                   </div>
                   ${orgPhone ? `
-                    <button onclick="openWhatsapp('${orgPhone}')" class="btn-whatsapp" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: #25D366; border: none; border-radius: 0.5rem; color: white; cursor: pointer; font-size: 0.75rem; transition: all 0.2s;" title="تواصل مع ${orgName}">
+                    <button onclick="openWhatsapp('${orgPhone}')" class="btn-whatsapp" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: #25D366; border: none; border-radius: 0.5rem; color: white; cursor: pointer; font-size: 0.75rem; transition: all 0.2s;" title="${t('common.contact')} ${orgName}">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                       </svg>
-                      تواصل
+                      ${t('common.contact')}
                     </button>
                   ` : ''}
                 </div>
@@ -1170,9 +1191,16 @@
         customerNotes = response.data || [];
         count.textContent = customerNotes.length;
 
-        // Update count badge color if there are notes
+        // Update count badge color
         if (customerNotes.length > 0) {
           count.style.background = '#10b981';
+          count.style.color = '#000000';
+          count.style.fontWeight = '900';
+          count.style.fontSize = '0.85rem';
+        } else {
+          count.style.background = '#ef4444'; // Red
+          count.style.color = '#ffffff'; // White
+          count.style.fontWeight = '900';
         }
 
         loading.style.display = 'none';
@@ -1197,7 +1225,7 @@
 
       list.innerHTML = customerNotes.map(note => {
         const categoryInfo = getNoteCategoryInfo(note.category);
-        const userName = note.user?.name || 'مستخدم';
+        const userName = note.user?.name || t('common.user');
         const canDelete = user.roleName === 'Super Admin' || note.user_id === user.userId || note.created_by === user.userId;
 
         // Determine organization details and phone
@@ -1211,12 +1239,12 @@
           const institutionName = note.branch.institution?.name || '';
           orgName = institutionName ? `${branchName} - ${institutionName}` : branchName;
           orgPhone = note.branch.phoneNumber || note.branch.institution?.phoneNumber;
-          orgTypeLabel = 'فرع';
+          orgTypeLabel = t('common.type.branch');
         } else {
           // It's an institution user (no branch)
-          orgName = note.user?.institution?.name || 'المؤسسة الأم';
+          orgName = note.user?.institution?.name || t('common.unknown_org');
           orgPhone = note.user?.institution?.phoneNumber;
-          orgTypeLabel = 'مؤسسة';
+          orgTypeLabel = t('common.type.institution');
         }
 
         return `
@@ -1228,7 +1256,7 @@
                     ${categoryInfo.icon} ${categoryInfo.label}
                   </span>
                   <span class="text-muted" style="font-size: 0.75rem;">
-                    بواسطة: <strong style="color: white;">${userName}</strong>
+                    ${t('customers.view_page.added_by')}: <strong style="color: white;">${userName}</strong>
                   </span>
                   <span class="badge" style="background: rgba(99, 102, 241, 0.2); padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; color: #a5b4fc;" title="${orgTypeLabel}">
                     ${orgName}
@@ -1238,7 +1266,7 @@
                 <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem;">
                   <p class="date-text" style="font-size: 0.75rem; margin: 0;">
                     ${formatDateTime(note.created_at)} • ${formatRelativeTime(note.created_at)}
-                    ${note.edited_at ? '<span style="color: #f59e0b; margin-right: 0.5rem;">(معدلة)</span>' : ''}
+                    ${note.edited_at ? `<span style="color: #f59e0b; margin-right: 0.5rem;">${t('common.edited')}</span>` : ''}
                   </p>
                   ${orgPhone ? `
                     <button onclick="openWhatsapp('${orgPhone}')" class="btn-whatsapp" 
@@ -1268,10 +1296,10 @@
 
     function getNoteCategoryInfo(category) {
       const categories = {
-        'General': { label: 'عام', color: '#6b7280', bgColor: 'rgba(107, 114, 128, 0.2)', icon: '📝' },
-        'Follow-up': { label: 'متابعة', color: '#6366f1', bgColor: 'rgba(99, 102, 241, 0.2)', icon: '📌' },
-        'Complaint': { label: 'شكوى', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.2)', icon: '⚠️' },
-        'Payment Issue': { label: 'مشكلة دفع', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.2)', icon: '💰' }
+        'General': { label: t('customers.notes.general'), color: '#6b7280', bgColor: 'rgba(107, 114, 128, 0.2)', icon: '📝' },
+        'Follow-up': { label: t('customers.notes.follow_up'), color: '#6366f1', bgColor: 'rgba(99, 102, 241, 0.2)', icon: '📌' },
+        'Complaint': { label: t('customers.notes.complaint'), color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.2)', icon: '⚠️' },
+        'Payment Issue': { label: t('customers.notes.payment_issue'), color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.2)', icon: '💰' }
       };
       return categories[category] || categories['General'];
     }
@@ -1288,7 +1316,7 @@
       const addBtn = document.getElementById('addNoteBtn');
 
       if (!noteText) {
-        showToast('يرجى كتابة الملاحظة', 'error');
+        showToast(t('customers.view_page.enter_note_req'), 'error');
         return;
       }
 
@@ -1303,15 +1331,15 @@
           category: category
         });
 
-        showToast('تم إضافة الملاحظة بنجاح', 'success');
+        showToast(t('customers.view_page.note_added_success'), 'success');
         document.getElementById('newNoteText').value = '';
-        document.getElementById('noteCategory').value = 'general';
+        document.getElementById('noteCategory').value = 'General';
 
         // Reload notes
         await loadNotesRecord();
       } catch (error) {
         console.error('Error adding note:', error);
-        showToast(error.message || 'فشل إضافة الملاحظة', 'error');
+        showToast(error.message || t('customers.view_page.note_add_failed'), 'error');
       } finally {
         addBtn.disabled = false;
         addBtn.innerHTML = originalText;
@@ -1323,20 +1351,20 @@
       if (!note) return;
 
       showConfirmModal({
-        title: 'حذف الملاحظة',
-        message: 'هل أنت متأكد من حذف هذه الملاحظة؟',
+        title: t('customers.view_page.delete_note'),
+        message: t('customers.view_page.delete_note_confirm'),
         subMessage: note.note_text.substring(0, 50) + (note.note_text.length > 50 ? '...' : ''),
-        confirmText: 'نعم، احذف',
+        confirmText: t('common.button.yes'),
         icon: '🗑️',
         btnClass: 'btn-danger',
         onConfirm: async () => {
           try {
             await api.customerNotes.delete(noteId);
-            showToast('تم حذف الملاحظة', 'success');
+            showToast(t('customers.view_page.note_deleted_success'), 'success');
             await loadNotesRecord();
           } catch (error) {
             console.error('Error deleting note:', error);
-            showToast(error.message || 'فشل حذف الملاحظة', 'error');
+            showToast(error.message || t('customers.view_page.failed_to_delete_note'), 'error');
           }
         }
       });
@@ -1364,6 +1392,9 @@
     function getLoanStatusColor(status) {
       const colors = {
         'Active': '#10b981',
+        'Late': '#ef4444',
+        'Paid': '#6366f1',
+        'Finished': '#64748b',
         'Pending': '#f59e0b',
         'Completed': '#6366f1',
         'Defaulted': '#ef4444',
@@ -1374,11 +1405,14 @@
 
     function getLoanStatusText(status) {
       const texts = {
-        'Active': 'نشط',
-        'Pending': 'معلق',
-        'Completed': 'مكتمل',
-        'Defaulted': 'متعثر',
-        'Cancelled': 'ملغي'
+        'Active': t('common.status.active'),
+        'Late': t('common.status.late'),
+        'Paid': t('common.status.paid'),
+        'Finished': t('common.status.finished'),
+        'Pending': t('common.status.pending'),
+        'Completed': t('loans.status.completed') || 'Completed',
+        'Defaulted': t('customer_analytics.segments.risk') || 'Defaulted',
+        'Cancelled': t('common.status.cancelled')
       };
       return texts[status] || status;
     }
@@ -1403,7 +1437,7 @@
           const currentStatus = customerDataLoaded ? customerDataLoaded.trustStatus : 'Unverified';
 
           if (!newStatus) {
-            showToast('Please select a status', 'error');
+            showToast(t('customers.view_page.select_status_req') || 'Please select a status', 'error');
             return;
           }
 
@@ -1435,7 +1469,7 @@
                 await loadCustomer();
               } catch (error) {
                 console.error('Error updating trust status:', error);
-                showToast(error.message || 'Failed to update trust status', 'error');
+                showToast(error.message || t('customers.view_page.status_update_failed') || 'Failed to update trust status', 'error');
               } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalText || 'Update Status';

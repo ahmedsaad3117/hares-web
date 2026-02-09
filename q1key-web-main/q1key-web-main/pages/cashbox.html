@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الصندوق - Q1KEY Platform</title>
-    <link rel="stylesheet" href="../css/styles.css?v=12">
-    <script src="../js/i18n.js"></script>
+    <link rel="stylesheet" href="../css/styles.css?v=19">
+    <script src="../js/i18n.js?v=2"></script>
 </head>
 
 <body>
@@ -38,7 +38,7 @@
                     style="padding: 2rem; border-radius: 16px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2)); border: 1px solid rgba(99, 102, 241, 0.3); text-align: center;"
                     id="mainBalanceCard">
                     <p class="text-muted mb-2" data-i18n-key="cashbox.current_balance">الرصيد الحالي</p>
-                    <h1 id="currentBalance" class="text-4xl font-bold" style="color: #10b981;">0.00 ر.س</h1>
+                    <h1 id="currentBalance" class="text-4xl font-bold" style="color: #10b981;">0.00</h1>
                     <p class="text-muted mt-2" id="lastUpdated"></p>
                 </div>
             </div>
@@ -53,23 +53,24 @@
 
             <!-- Quick Stats (Clickable filters) -->
             <div class="grid grid-cols-4 gap-4 mb-6">
-                <div class="glass-card p-4 text-center cursor-pointer transition-all hover:bg-white/10"
-                    onclick="toggleTypeFilter('Deposit')" id="stat-Deposit">
+                <div class="glass-card p-4 text-center cursor-pointer transition-all hover:bg-white/10 user-select-none"
+                    style="user-select: none;" onclick="toggleTypeFilter('Deposit')" id="stat-Deposit">
                     <p class="text-muted text-sm" data-i18n-key="cashbox.stats.deposits">الإيداعات</p>
                     <h3 id="totalDeposits" class="text-xl font-bold text-success">0.00</h3>
                 </div>
-                <div class="glass-card p-4 text-center cursor-pointer transition-all hover:bg-white/10"
-                    onclick="toggleTypeFilter('Withdrawal')" id="stat-Withdrawal">
+                <div class="glass-card p-4 text-center cursor-pointer transition-all hover:bg-white/10 user-select-none"
+                    style="user-select: none;" onclick="toggleTypeFilter('Withdrawal')" id="stat-Withdrawal">
                     <p class="text-muted text-sm" data-i18n-key="cashbox.stats.withdrawals">السحوبات</p>
                     <h3 id="totalWithdrawals" class="text-xl font-bold text-warning">0.00</h3>
                 </div>
-                <div class="glass-card p-4 text-center cursor-pointer transition-all hover:bg-white/10"
-                    onclick="toggleTypeFilter('LoanDisbursement')" id="stat-LoanDisbursement">
+                <div class="glass-card p-4 text-center cursor-pointer transition-all hover:bg-white/10 user-select-none"
+                    style="user-select: none;" onclick="toggleTypeFilter('LoanDisbursement')"
+                    id="stat-LoanDisbursement">
                     <p class="text-muted text-sm" data-i18n-key="cashbox.stats.loans_out">قروض مصروفة</p>
                     <h3 id="totalLoansOut" class="text-xl font-bold text-danger">0.00</h3>
                 </div>
-                <div class="glass-card p-4 text-center cursor-pointer transition-all hover:bg-white/10"
-                    onclick="toggleTypeFilter('LoanPayment')" id="stat-LoanPayment">
+                <div class="glass-card p-4 text-center cursor-pointer transition-all hover:bg-white/10 user-select-none"
+                    style="user-select: none;" onclick="toggleTypeFilter('LoanPayment')" id="stat-LoanPayment">
                     <p class="text-muted text-sm" data-i18n-key="cashbox.stats.payments_in">أقساط مستلمة</p>
                     <h3 id="totalPaymentsIn" class="text-xl font-bold text-primary">0.00</h3>
                 </div>
@@ -90,7 +91,7 @@
                         <span class="text-muted">-</span>
                         <input type="date" id="filterToDate" class="input" style="padding: 0.5rem;"
                             onchange="applyDateFilter()">
-                        <button class="btn btn-secondary" onclick="clearAllFilters()">
+                        <button class="btn btn-secondary" onclick="clearAllFilters()" style="white-space: nowrap;">
                             <span data-i18n-key="common.button.reset">إعادة تعيين</span>
                         </button>
                     </div>
@@ -114,58 +115,72 @@
     </div>
 
     <!-- Deposit Modal -->
-    <div id="depositModal" class="modal" style="display: none;">
-        <div class="modal-content glass-card p-6" style="max-width: 400px;">
-            <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="cashbox.deposit_title">إيداع مبلغ</h3>
-            <form id="depositForm">
-                <div id="depositBranchGroup" class="form-group mb-4" style="display: none;">
-                    <label class="form-label" data-i18n-key="cashbox.select_branch">اختر الفرع</label>
-                    <select id="depositBranchSelect" class="input">
-                        <!-- Options populated via JS -->
-                    </select>
-                </div>
-                <div class="form-group mb-4">
-                    <label class="form-label" data-i18n-key="cashbox.amount">المبلغ</label>
-                    <input type="number" id="depositAmount" class="input" step="0.01" min="0.01" required>
-                </div>
-                <div class="form-group mb-4">
-                    <label class="form-label" data-i18n-key="cashbox.description">الوصف (اختياري)</label>
-                    <textarea id="depositDescription" class="input" rows="3" placeholder="سبب الإيداع..."></textarea>
-                </div>
-                <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('depositModal')"
-                        data-i18n-key="common.button.cancel">إلغاء</button>
-                    <button type="submit" class="btn btn-success" data-i18n-key="cashbox.deposit">إيداع</button>
-                </div>
-            </form>
+    <div id="depositModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 450px;">
+            <div class="modal-card-header">
+                <h3 class="text-xl font-bold text-white" data-i18n-key="cashbox.deposit_title">إيداع مبلغ</h3>
+                <button onclick="closeModal('depositModal')" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-card-body" style="text-align: right;">
+                <form id="depositForm">
+                    <div id="depositBranchGroup" class="form-group mb-4" style="display: none;">
+                        <label class="label" data-i18n-key="cashbox.select_branch">اختر الفرع</label>
+                        <select id="depositBranchSelect" class="input">
+                            <!-- Options populated via JS -->
+                        </select>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="label" data-i18n-key="cashbox.amount">المبلغ</label>
+                        <input type="number" id="depositAmount" class="input" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="label" data-i18n-key="cashbox.description">الوصف (اختياري)</label>
+                        <textarea id="depositDescription" class="input" rows="3"
+                            data-i18n-placeholder="cashbox.description_placeholder"
+                            placeholder="سبب الإيداع..."></textarea>
+                    </div>
+                    <div class="modal-card-footer" style="padding: 1rem 0 0 0; background: transparent;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('depositModal')"
+                            data-i18n-key="common.button.cancel">إلغاء</button>
+                        <button type="submit" class="btn btn-success" data-i18n-key="cashbox.deposit">إيداع</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <!-- Withdraw Modal -->
-    <div id="withdrawModal" class="modal" style="display: none;">
-        <div class="modal-content glass-card p-6" style="max-width: 400px;">
-            <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="cashbox.withdraw_title">سحب مبلغ</h3>
-            <form id="withdrawForm">
-                <div id="withdrawBranchGroup" class="form-group mb-4" style="display: none;">
-                    <label class="form-label" data-i18n-key="cashbox.select_branch">اختر الفرع</label>
-                    <select id="withdrawBranchSelect" class="input">
-                        <!-- Options populated via JS -->
-                    </select>
-                </div>
-                <div class="form-group mb-4">
-                    <label class="form-label" data-i18n-key="cashbox.amount">المبلغ</label>
-                    <input type="number" id="withdrawAmount" class="input" step="0.01" min="0.01" required>
-                </div>
-                <div class="form-group mb-4">
-                    <label class="form-label" data-i18n-key="cashbox.description">الوصف (اختياري)</label>
-                    <textarea id="withdrawDescription" class="input" rows="3" placeholder="سبب السحب..."></textarea>
-                </div>
-                <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('withdrawModal')"
-                        data-i18n-key="common.button.cancel">إلغاء</button>
-                    <button type="submit" class="btn btn-warning" data-i18n-key="cashbox.withdraw">سحب</button>
-                </div>
-            </form>
+    <div id="withdrawModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 450px;">
+            <div class="modal-card-header">
+                <h3 class="text-xl font-bold text-white" data-i18n-key="cashbox.withdraw_title">سحب مبلغ</h3>
+                <button onclick="closeModal('withdrawModal')" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-card-body" style="text-align: right;">
+                <form id="withdrawForm">
+                    <div id="withdrawBranchGroup" class="form-group mb-4" style="display: none;">
+                        <label class="label" data-i18n-key="cashbox.select_branch">اختر الفرع</label>
+                        <select id="withdrawBranchSelect" class="input">
+                            <!-- Options populated via JS -->
+                        </select>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="label" data-i18n-key="cashbox.amount">المبلغ</label>
+                        <input type="number" id="withdrawAmount" class="input" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="label" data-i18n-key="cashbox.description">الوصف (اختياري)</label>
+                        <textarea id="withdrawDescription" class="input" rows="3"
+                            data-i18n-placeholder="cashbox.description_placeholder"
+                            placeholder="سبب السحب..."></textarea>
+                    </div>
+                    <div class="modal-card-footer" style="padding: 1rem 0 0 0; background: transparent;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('withdrawModal')"
+                            data-i18n-key="common.button.cancel">إلغاء</button>
+                        <button type="submit" class="btn btn-warning" data-i18n-key="cashbox.withdraw">سحب</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -180,25 +195,23 @@
     <script src="../components/header.js?v=3"></script>
     <script>
         let currentCashBox = null;
+        let institutionMainBox = null; // Specifically hold the HQ box for Institutions
         let branchCashBoxes = [];
         let activeBoxFilterId = null;
         let activeTypeFilter = 'all';
 
         // Lazy Loading state
         let txPage = 1;
-        const txLimit = 20;
+        let txLimit = 10; // Initial load (Last 10 transactions)
         let allTransactions = [];
 
         async function loadData() {
             await waitForI18n();
             if (!requireAuth()) return;
 
-            // Refresh profile to get latest subscription data
             try {
                 await api.auth.getProfile();
-            } catch (e) {
-                console.error('Failed to refresh profile:', e);
-            }
+            } catch (e) { console.error(e); }
 
             const user = getCurrentUser();
             document.getElementById('sidebar').innerHTML = createSidebar(user);
@@ -207,176 +220,278 @@
             setActiveNav('cashbox');
             i18n.translatePage();
 
-            await loadCashBox();
-            await loadTransactions();
+            await loadUnifiedData();
             setupForms();
         }
 
-        async function loadCashBox() {
+        async function loadUnifiedData() {
             try {
-                const cashBox = await api.cashBox.get();
-                currentCashBox = cashBox;
+                const fDate = document.getElementById('filterFromDate').value;
+                const tDate = document.getElementById('filterToDate').value;
 
-                // Update balance display
-                const balance = parseFloat(cashBox.balance || 0);
-                const balanceEl = document.getElementById('currentBalance');
-                balanceEl.textContent = formatCurrency(balance);
-                balanceEl.style.color = balance >= 0 ? '#10b981' : '#ef4444';
+                // Build filter object with correct keys for backend DTO
+                const filter = {
+                    fromDate: fDate,
+                    toDate: tDate,
+                    type: (activeTypeFilter === 'NewSubscription' || activeTypeFilter === 'SubscriptionRenewal')
+                        ? 'Subscription'
+                        : (activeTypeFilter !== 'all' ? activeTypeFilter : undefined),
+                    cashBoxId: activeBoxFilterId || undefined
+                };
 
-                // Update type
-                let typeText = '';
-                if (cashBox.boxType === 'Admin') {
-                    typeText = t('cashbox.type_admin');
-                } else if (cashBox.boxType === 'Aggregated') {
-                    typeText = t('cashbox.type_aggregated');
-                } else if (cashBox.branchName) {
-                    typeText = `${t('cashbox.type_branch')}: ${cashBox.branchName}`;
-                } else if (cashBox.institutionName) {
-                    typeText = `${t('cashbox.type_institution')}: ${cashBox.institutionName}`;
-                }
-                document.getElementById('cashBoxType').textContent = typeText;
+                // UNIFIED CALL
+                const data = await api.cashBox.getUnifiedData(filter);
 
-                // Update last updated
-                if (cashBox.updatedAt) {
-                    document.getElementById('lastUpdated').textContent =
-                        `${t('cashbox.last_updated')}: ${formatDateTime(cashBox.updatedAt)}`;
-                }
-
-                // Update stats grid for Admin Box
-                if (cashBox.boxType === 'Admin') {
-                    const depositsCard = document.getElementById('stat-Deposit');
-                    const withdrawalsCard = document.getElementById('stat-Withdrawal');
-                    const newSubsCard = document.getElementById('stat-LoanDisbursement');
-                    const renewalsCard = document.getElementById('stat-LoanPayment');
-                    const statsGrid = document.querySelector('.stats-grid');
-
-                    if (newSubsCard) {
-                        newSubsCard.querySelector('p').textContent = t('cashbox.stats.new_subscriptions');
-                        newSubsCard.querySelector('p').setAttribute('data-i18n-key', 'cashbox.stats.new_subscriptions');
-                        newSubsCard.onclick = () => toggleTypeFilter('NewSubscription');
-                        newSubsCard.id = 'stat-NewSubscription';
-                        newSubsCard.querySelector('h3').id = 'totalNewSubscriptions';
-                        newSubsCard.querySelector('h3').className = 'text-xl font-bold text-success';
+                // 1. Update Cash Box Info & Balance
+                if (data.mainBox) {
+                    currentCashBox = data.mainBox;
+                    // If it's an Institution or Aggregated box, and we don't have an institutionMainBox yet, save it
+                    if ((data.mainBox.boxType === 'Aggregated' || data.mainBox.boxType === 'Institution') && !institutionMainBox) {
+                        institutionMainBox = data.mainBox;
                     }
-                    if (renewalsCard) {
-                        renewalsCard.style.display = 'block';
-                        renewalsCard.querySelector('p').textContent = t('cashbox.stats.subscription_extensions');
-                        renewalsCard.querySelector('p').setAttribute('data-i18n-key', 'cashbox.stats.subscription_extensions');
-                        renewalsCard.onclick = () => toggleTypeFilter('SubscriptionRenewal');
-                        renewalsCard.id = 'stat-SubscriptionRenewal';
-                        renewalsCard.querySelector('h3').id = 'totalSubscriptionRenewals';
-                        renewalsCard.querySelector('h3').className = 'text-xl font-bold text-primary';
-                    }
-                    if (statsGrid) {
-                        statsGrid.style.gridTemplateColumns = 'repeat(4, 1fr)';
-                    }
+                    updateBalanceCard(data.mainBox);
                 }
 
-                // Load branch cash boxes if aggregated
-                if (cashBox.boxType === 'Aggregated') {
-                    await loadBranchCashBoxes();
+                // 2. Update Branch Cash Boxes (if applicable)
+                if (data.branches && data.branches.length > 0) {
+                    branchCashBoxes = data.branches;
+                    renderBranchCashBoxes(data.branches);
                 }
+
+                // 3. Update Statistics
+                const report = data.report || {};
+                updateStats(report);
+
+                // 4. Update Transactions
+                // Store all for client-side filtering/pagination
+                const rawTransactions = report.transactions || [];
+                allTransactions = rawTransactions.map(tx => ({
+                    ...tx,
+                    transactionType: tx.type || tx.transactionType
+                }));
+
+                renderTransactions();
 
             } catch (error) {
-                console.error('Error loading cash box:', error);
-                showToast(t('cashbox.load_error'), 'error');
+                console.error('Error loading unified data:', error);
+
+                // Show toast
+                showToast(t('cashbox.load_error') || 'Error loading data', 'error');
+
+                document.getElementById('transactionsList').innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-exclamation-circle text-danger mb-3" style="font-size: 2rem;"></i>
+                        <p class="text-danger mb-3">${t('cashbox.load_error') || 'فشل تحميل البيانات'}</p>
+                        <p class="text-xs text-muted mb-3" style="direction: ltr;">${error.message || error}</p>
+                        <button onclick="loadUnifiedData()" class="btn btn-sm" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;">
+                           <i class="fas fa-sync-alt me-2"></i> ${t('common.retry') === 'common.retry' ? 'إعادة المحاولة' : t('common.retry')}
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function updateBalanceCard(box) {
+            const balance = parseFloat(box.balance || 0);
+            const balanceEl = document.getElementById('currentBalance');
+            balanceEl.textContent = formatCurrency(balance);
+            balanceEl.style.color = balance >= 0 ? '#10b981' : '#ef4444';
+
+            let typeText = '';
+            if (box.boxType === 'Admin') typeText = t('cashbox.type_admin');
+            else if (box.boxType === 'Aggregated') typeText = t('cashbox.type_aggregated');
+            else if (box.branchName) typeText = `${t('cashbox.type_branch')}: ${box.branchName}`;
+            else if (box.institutionName) typeText = `${t('cashbox.type_institution')}: ${box.institutionName}`;
+
+            document.getElementById('cashBoxType').textContent = typeText;
+
+            if (box.updatedAt) {
+                document.getElementById('lastUpdated').textContent =
+                    `${t('cashbox.last_updated')}: ${formatDateTime(box.updatedAt)}`;
+            }
+
+            // Show/Hide stats for Admin
+            if (box.boxType === 'Admin') {
+                // ... existing admin logic for stats visibility (can be simplified if dynamic) ...
             }
         }
 
         function getBoxDisplayName(box) {
-            if (box.boxType === 'Institution' || !box.branchName) {
-                return t('cashbox.institution_main_safe') || 'الخزنة الرئيسية';
-            }
-            return box.branchName;
+            if (!box) return '';
+            if (box.boxType === 'Admin') return t('cashbox.type_admin') || 'Admin';
+            if (box.boxType === 'Aggregated') return t('cashbox.type_aggregated') || 'Aggregated';
+            if (box.branchName) return box.branchName;
+            if (box.institutionName) return box.institutionName;
+            return `Cashbox #${box.cashBoxId}`;
         }
 
-        async function loadBranchCashBoxes() {
-            try {
-                const branches = await api.cashBox.getBranchCashBoxes();
-                if (!branches || branches.length === 0) return;
+        function renderBranchCashBoxes(branches) {
+            // Filter out the main box if it's already shown at the top (HQ Safe vs Aggregated)
+            // If currentCashBox is Aggregated (ID 0), b.cashBoxId will never be 0, so nothing is filtered (Correct: we want to see all safes)
+            // If currentCashBox is a real safe (No branches), then b.cashBoxId will match and it will be filtered (Correct: hides redundant card)
+            const filtered = branches.filter(b => b.cashBoxId !== currentCashBox.cashBoxId);
 
-                branchCashBoxes = branches;
-
-                document.getElementById('branchCashBoxesSection').style.display = 'block';
-
-                const html = branches.map(box => `
-          <div onclick="toggleBoxFilter(${box.cashBoxId})" id="box-${box.cashBoxId}" 
-               class="glass-card p-4 cursor-pointer transition-all hover:bg-white/10" 
-               style="background: rgba(255,255,255,0.05);">
-            <h4 class="font-bold text-white">${getBoxDisplayName(box)}</h4>
-            <p class="text-2xl font-bold ${box.balance >= 0 ? 'text-success' : 'text-danger'}">
-              ${formatCurrency(box.balance)}
-            </p>
-          </div>
-        `).join('');
-
-                document.getElementById('branchCashBoxesList').innerHTML = html;
-            } catch (error) {
-                console.error('Error loading branch cash boxes:', error);
+            const section = document.getElementById('branchCashBoxesSection');
+            if (filtered.length === 0) {
+                section.style.display = 'none';
+                return;
             }
+
+            section.style.display = 'block';
+            const html = filtered.map(box => `
+                <div onclick="toggleBoxFilter(${box.cashBoxId})" id="box-${box.cashBoxId}" 
+                     class="glass-card p-4 cursor-pointer transition-all hover:bg-white/10 user-select-none ${activeBoxFilterId === box.cashBoxId ? 'selected-filter scale-105' : ''}" 
+                     style="background: ${activeBoxFilterId === box.cashBoxId ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.05)'}; user-select: none; border-color: ${activeBoxFilterId === box.cashBoxId ? '#6366f1' : 'rgba(255,255,255,0.1)'}">
+                    <h4 class="font-bold text-white">${getBoxDisplayName(box)}</h4>
+                    <p class="text-2xl font-bold ${box.balance >= 0 ? 'text-success' : 'text-danger'}">
+                    ${formatCurrency(box.balance)}
+                    </p>
+                </div>
+            `).join('');
+            document.getElementById('branchCashBoxesList').innerHTML = html;
+        }
+
+        function updateStats(report) {
+            const totalDeposits = report.totalDeposits !== undefined ? parseFloat(report.totalDeposits) : 0;
+            const totalWithdrawals = report.totalWithdrawals !== undefined ? parseFloat(report.totalWithdrawals) : 0;
+            const totalLoansOut = report.totalLoanDisbursements !== undefined ? parseFloat(report.totalLoanDisbursements) : 0;
+            const totalPaymentsIn = report.totalLoanPayments !== undefined ? parseFloat(report.totalLoanPayments) : 0;
+
+            document.getElementById('totalDeposits').textContent = formatCurrency(totalDeposits);
+            document.getElementById('totalWithdrawals').textContent = formatCurrency(totalWithdrawals);
+
+            const loansEl = document.getElementById('totalLoansOut');
+            if (loansEl) loansEl.textContent = formatCurrency(totalLoansOut);
+
+            const paymentsEl = document.getElementById('totalPaymentsIn');
+            if (paymentsEl) paymentsEl.textContent = formatCurrency(totalPaymentsIn);
+
+            // Handle special aggregated stats if needed for new vs renewal subscriptions (Admin view)
+            const newSubsEl = document.getElementById('totalNewSubscriptions');
+            if (newSubsEl) {
+                let newSubs = 0, renewals = 0;
+                const txs = report.transactions || [];
+                txs.forEach(tx => {
+                    const type = tx.type || tx.transactionType;
+                    if (type === 'Subscription') {
+                        const desc = tx.description || '';
+                        if (desc.startsWith('جديد:') || desc.startsWith('New:')) newSubs += parseFloat(tx.amount || 0);
+                        else if (desc.startsWith('تجديد:') || desc.startsWith('Renew:')) renewals += parseFloat(tx.amount || 0);
+                    }
+                });
+                newSubsEl.textContent = formatCurrency(newSubs);
+                document.getElementById('totalSubscriptionRenewals').textContent = formatCurrency(renewals);
+            }
+        }
+
+        function renderTransactions() {
+            let displayTransactions = allTransactions;
+
+            // Client-side filtering for subtypes (like New vs Renewal subscription which share main type)
+            if (activeTypeFilter === 'NewSubscription') {
+                displayTransactions = allTransactions.filter(tx => tx.transactionType === 'Subscription' && (tx.description || '').startsWith('جديد:'));
+            } else if (activeTypeFilter === 'SubscriptionRenewal') {
+                displayTransactions = allTransactions.filter(tx => tx.transactionType === 'Subscription' && (tx.description || '').startsWith('تجديد:'));
+            }
+
+            // Update active filters UI
+            updateFilterUI();
+
+            const totalAvailable = displayTransactions.length;
+            const paginatedTransactions = displayTransactions.slice(0, txLimit);
+
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if (loadMoreBtn) {
+                loadMoreBtn.classList.toggle('hidden', totalAvailable <= txLimit);
+            }
+
+            if (paginatedTransactions.length === 0) {
+                document.getElementById('transactionsList').innerHTML = `<p class="text-muted text-center py-8">${t('cashbox.no_transactions')}</p>`;
+                return;
+            }
+
+            const html = paginatedTransactions.map(tx => {
+                const amountVal = parseFloat(tx.amount || 0);
+                const absAmount = Math.abs(amountVal);
+                const isIncomeType = ['Deposit', 'LoanPayment', 'Subscription'].includes(tx.transactionType);
+                let displaySign = isIncomeType ? '+' : '-';
+                let colorClass = isIncomeType ? 'text-success' : 'text-danger';
+
+                if (tx.transactionType === 'LoanDisbursement') {
+                    if (amountVal >= 0) { displaySign = '+'; colorClass = 'text-success'; }
+                    else { displaySign = '-'; colorClass = 'text-danger'; }
+                }
+
+                const icon = getTransactionIcon(tx.transactionType);
+                let typeLabel = getTransactionLabel(tx.transactionType);
+                if (tx.transactionType === 'LoanDisbursement' && (tx.description || '').includes('تعديل')) {
+                    typeLabel = t('cashbox.transaction_types.adjustment');
+                }
+
+                return `
+                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; background: ${colorClass === 'text-success' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'};">
+                            ${icon}
+                        </div>
+                        <div style="flex: 1;">
+                            <p class="font-medium text-white">${typeLabel}</p>
+                            <p class="text-sm" style="color: #fbbf24;">${(tx.description || '') + (tx.customerName ? ` • ${tx.customerName}` : '')}</p>
+                            <p class="text-xs text-muted">
+                                ${formatDateTime(tx.createdAt)} 
+                                ${tx.branchName ? ' • ' + tx.branchName : ''}
+                                ${tx.createdByName ? ' • ' + tx.createdByName : ''} 
+                                ${tx.createdByRole ? ' (' + (t('common.type.' + tx.createdByRole.toLowerCase()) || tx.createdByRole) + ')' : ''}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold ${colorClass}">${displaySign}${formatCurrency(absAmount)}</p>
+                            <p class="text-sm text-muted">${t('cashbox.balance')}: ${formatCurrency(tx.balanceAfter || 0)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('transactionsList').innerHTML = html;
         }
 
         function toggleTypeFilter(type) {
-            if (activeTypeFilter === type) {
-                activeTypeFilter = null; // Toggle off
-            } else {
-                activeTypeFilter = type; // Set new filter
-            }
-            updateFilterUI();
-            loadTransactions();
+            activeTypeFilter = (activeTypeFilter === type) ? 'all' : type;
+            loadUnifiedData();
         }
 
         function toggleBoxFilter(boxId) {
-            if (activeBoxFilterId === boxId) {
-                activeBoxFilterId = null; // Toggle off (back to aggregated)
-            } else {
-                activeBoxFilterId = boxId;
-            }
-            updateFilterUI();
-            loadTransactions();
+            activeBoxFilterId = (activeBoxFilterId === boxId) ? null : boxId;
+            loadUnifiedData();
         }
 
         function resetBoxFilter() {
             activeBoxFilterId = null;
-            updateFilterUI();
-            loadTransactions();
+            loadUnifiedData();
         }
 
+        // Client side load more
         async function loadMoreTransactions() {
-            txPage++;
-            const btn = document.getElementById('loadMoreBtn');
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = '...';
-            }
-            await loadTransactions();
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = `<span data-i18n-key="common.button.load_more">${t('common.button.load_more')}</span>`;
-            }
+            txLimit += 20;
+            renderTransactions(); // Re-render with higher limit, data already loaded
         }
 
         async function applyDateFilter() {
-            txPage = 1;
-            allTransactions = [];
-            await loadTransactions();
+            // Server side reload
+            await loadUnifiedData();
         }
 
         async function clearDateFilter() {
             document.getElementById('filterFromDate').value = '';
             document.getElementById('filterToDate').value = '';
-            txPage = 1;
-            allTransactions = [];
-            await loadTransactions();
+            await loadUnifiedData();
         }
 
         function clearAllFilters() {
-            activeTypeFilter = null;
+            activeTypeFilter = 'all';
             activeBoxFilterId = null;
             document.getElementById('filterFromDate').value = '';
             document.getElementById('filterToDate').value = '';
-            updateFilterUI();
-            loadTransactions();
+            loadUnifiedData();
         }
 
         function updateFilterUI() {
@@ -425,155 +540,6 @@
             }
         }
 
-        async function loadTransactions() {
-            try {
-                const fromDate = document.getElementById('filterFromDate').value;
-                const toDate = document.getElementById('filterToDate').value;
-
-                const filter = {};
-                if (fromDate) filter.fromDate = fromDate;
-                if (toDate) filter.toDate = toDate;
-
-                if (activeTypeFilter && activeTypeFilter !== 'all') {
-                    if (activeTypeFilter === 'NewSubscription' || activeTypeFilter === 'SubscriptionRenewal') {
-                        filter.type = 'Subscription';
-                    } else {
-                        filter.type = activeTypeFilter;
-                    }
-                }
-
-                let result;
-                if (activeBoxFilterId) {
-                    result = await api.cashBox.getTransactionsFor(activeBoxFilterId, { ...filter, page: txPage, limit: txLimit });
-                } else {
-                    result = await api.cashBox.getTransactions({ ...filter, page: txPage, limit: txLimit });
-                }
-
-                const newTransactions = result.data || [];
-                if (txPage === 1) {
-                    allTransactions = newTransactions;
-                } else {
-                    allTransactions = [...allTransactions, ...newTransactions];
-                }
-
-                // Show/Hide Load More
-                const loadMoreBtn = document.getElementById('loadMoreBtn');
-                if (loadMoreBtn) { // Check if button exists
-                    if (newTransactions.length < txLimit) {
-                        loadMoreBtn.classList.add('hidden');
-                    } else {
-                        loadMoreBtn.classList.remove('hidden');
-                    }
-                }
-
-
-                // Recalculate stats based on ALL transactions for the period
-                // Ideally, this should come from a stats endpoint, but for now we fetch the full report for stats
-                const report = activeBoxFilterId
-                    ? await api.cashBox.getReportFor(activeBoxFilterId, filter.fromDate, filter.toDate)
-                    : await api.cashBox.getReport(filter.fromDate, filter.toDate);
-
-                document.getElementById('totalDeposits').textContent = formatCurrency(report.totalDeposits || 0);
-                document.getElementById('totalWithdrawals').textContent = formatCurrency(report.totalWithdrawals || 0);
-
-                const loansEl = document.getElementById('totalLoansOut');
-                if (loansEl) loansEl.textContent = formatCurrency(report.totalLoanDisbursements || 0);
-
-                const paymentsEl = document.getElementById('totalPaymentsIn');
-                if (paymentsEl) paymentsEl.textContent = formatCurrency(report.totalLoanPayments || 0);
-
-                // Update Subscription stats if applicable (manual calculation from report transactions if not in summary)
-                let newSubs = 0, renewals = 0;
-                report.transactions.forEach(tx => {
-                    if (tx.transactionType === 'Subscription') {
-                        if ((tx.description || '').startsWith('جديد:')) newSubs += parseFloat(tx.amount || 0);
-                        else if ((tx.description || '').startsWith('تجديد:')) renewals += parseFloat(tx.amount || 0);
-                    }
-                });
-
-                const newSubsEl = document.getElementById('totalNewSubscriptions');
-                if (newSubsEl) newSubsEl.textContent = formatCurrency(newSubs);
-
-                const renewalsEl = document.getElementById('totalSubscriptionRenewals');
-                if (renewalsEl) renewalsEl.textContent = formatCurrency(renewals);
-
-                let displayTransactions = allTransactions;
-                if (activeTypeFilter === 'NewSubscription') {
-                    displayTransactions = allTransactions.filter(tx => tx.transactionType === 'Subscription' && (tx.description || '').startsWith('جديد:'));
-                } else if (activeTypeFilter === 'SubscriptionRenewal') {
-                    displayTransactions = allTransactions.filter(tx => tx.transactionType === 'Subscription' && (tx.description || '').startsWith('تجديد:'));
-                }
-
-                if (displayTransactions.length === 0 && txPage === 1) { // Only show no transactions if on first page and no transactions
-                    document.getElementById('transactionsList').innerHTML = `
-            <p class="text-muted text-center py-8">${t('cashbox.no_transactions')}</p>
-          `;
-                    return;
-                }
-
-                const html = displayTransactions.map(tx => {
-                    const amountVal = parseFloat(tx.amount || 0);
-                    const absAmount = Math.abs(amountVal);
-
-                    // Default logic based on type
-                    const isIncomeType = ['Deposit', 'LoanPayment', 'Subscription'].includes(tx.transactionType);
-                    let displaySign = isIncomeType ? '+' : '-';
-                    let colorClass = isIncomeType ? 'text-success' : 'text-danger';
-
-                    // Special handling for LoanDisbursement (signed values from backend)
-                    if (tx.transactionType === 'LoanDisbursement') {
-                        if (amountVal >= 0) {
-                            displaySign = '+'; // Refund
-                            colorClass = 'text-success';
-                        } else {
-                            displaySign = '-'; // Disbursement
-                            colorClass = 'text-danger';
-                        }
-                    }
-
-                    const icon = getTransactionIcon(tx.transactionType);
-                    let typeLabel = getTransactionLabel(tx.transactionType);
-
-                    // Override label for Loan Modifications
-                    if (tx.transactionType === 'LoanDisbursement' && tx.description && tx.description.includes('تعديل')) {
-                        typeLabel = 'تعديل على قرض';
-                    }
-
-                    // Append customer name to description if available
-                    let descriptionText = tx.description || '';
-                    if (tx.customerName) {
-                        descriptionText += ` • ${tx.customerName}`;
-                    }
-
-                    return `
-            <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
-              <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; background: ${colorClass === 'text-success' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'};">
-                ${icon}
-              </div>
-              <div style="flex: 1;">
-                <p class="font-medium text-white">${typeLabel}</p>
-                 <p class="text-sm" style="color: #fbbf24;">${descriptionText}</p>
-                <p class="text-xs text-muted">${formatDateTime(tx.createdAt)} ${tx.createdByName ? '• ' + tx.createdByName : ''}</p>
-              </div>
-              <div class="text-right">
-                <p class="font-bold ${colorClass}">
-                  ${displaySign}${formatCurrency(absAmount)}
-                </p>
-                <p class="text-sm text-muted">${t('cashbox.balance')}: ${formatCurrency(tx.balanceAfter)}</p>
-              </div>
-            </div>
-          `;
-                }).join('');
-
-                document.getElementById('transactionsList').innerHTML = html;
-
-            } catch (error) {
-                console.error('Error loading transactions:', error);
-                document.getElementById('transactionsList').innerHTML = `
-          <p class="text-danger text-center py-8">${t('cashbox.transactions_error')}</p>
-        `;
-            }
-        }
 
         function getTransactionIcon(type) {
             const icons = {
@@ -599,61 +565,152 @@
             return labels[type] || type;
         }
 
-        function showDepositModal() {
+
+        async function showDepositModal() {
+            const user = getCurrentUser();
             const isAggregated = currentCashBox && currentCashBox.boxType === 'Aggregated';
+            // Role names matching system standards
+            const isInstitutionAdmin = user.roleName === 'Institution';
+            const showSelection = isInstitutionAdmin || isAggregated;
+
             const group = document.getElementById('depositBranchGroup');
             const select = document.getElementById('depositBranchSelect');
 
-            if (isAggregated) {
-                // Populate branches if needed
-                if (select.options.length === 0 && branchCashBoxes.length > 0) {
+            if (showSelection) {
+                select.innerHTML = `<option value="">${t('common.loading') || 'Loading...'}</option>`;
+                group.style.display = 'block';
+                document.getElementById('depositModal').classList.add('show');
+
+                // Reload data if needed
+                if (branchCashBoxes.length === 0 && user.roleName !== 'Branch') {
+                    try {
+                        branchCashBoxes = await api.cashBox.getBranchCashBoxes();
+                    } catch (e) { console.warn('Failed to load branches', e); }
+                }
+
+                if (!institutionMainBox && user.roleName !== 'Branch') {
+                    try {
+                        const box = await api.cashBox.get();
+                        if (box && (box.boxType === 'Aggregated' || box.boxType === 'Institution')) {
+                            institutionMainBox = box;
+                        }
+                    } catch (e) { console.warn('Failed to load main box', e); }
+                }
+
+                select.innerHTML = '';
+
+                // Match physical HQ (physical safe, not aggregated ID 0)
+                let physicalHQ = branchCashBoxes.find(b => b.boxType === 'Institution' && b.cashBoxId !== 0);
+                if (!physicalHQ && institutionMainBox && institutionMainBox.cashBoxId !== 0 && institutionMainBox.boxType === 'Institution') physicalHQ = institutionMainBox;
+                if (!physicalHQ && currentCashBox && currentCashBox.cashBoxId !== 0 && currentCashBox.boxType === 'Institution') physicalHQ = currentCashBox;
+
+                const targetHQ = physicalHQ;
+                if (targetHQ) {
+                    const opt = document.createElement('option');
+                    opt.value = targetHQ.cashBoxId;
+                    opt.textContent = `${t('cashbox.institution_main_safe') || 'الخزينة الرئيسية للمؤسسة'} (${formatCurrency(targetHQ.balance)})`;
+                    select.appendChild(opt);
+                }
+
+                if (branchCashBoxes && branchCashBoxes.length > 0) {
                     branchCashBoxes.forEach(box => {
+                        if (targetHQ && Number(box.cashBoxId) === Number(targetHQ.cashBoxId)) return;
+                        if (box.cashBoxId === 0 || box.boxType === 'Aggregated') return;
                         const opt = document.createElement('option');
                         opt.value = box.cashBoxId;
                         opt.textContent = `${getBoxDisplayName(box)} (${formatCurrency(box.balance)})`;
                         select.appendChild(opt);
                     });
                 }
-                // Pre-select activeBoxFilterId if available
+
+                if (select.options.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = "";
+                    opt.textContent = t('cashbox.no_cashboxes_available') || 'لا يوجد صناديق متاحة حالياً';
+                    select.appendChild(opt);
+                }
+
                 if (activeBoxFilterId) {
                     select.value = activeBoxFilterId;
                 }
-                group.style.display = 'block';
             } else {
                 group.style.display = 'none';
+                document.getElementById('depositModal').classList.add('show');
             }
-
-            document.getElementById('depositModal').style.display = 'flex';
         }
 
-        function showWithdrawModal() {
+        async function showWithdrawModal() {
+            const user = getCurrentUser();
             const isAggregated = currentCashBox && currentCashBox.boxType === 'Aggregated';
+            const isInstitutionAdmin = user.roleName === 'Institution';
+            const showSelection = isInstitutionAdmin || isAggregated;
+
             const group = document.getElementById('withdrawBranchGroup');
             const select = document.getElementById('withdrawBranchSelect');
 
-            if (isAggregated) {
-                // Populate branches if needed
-                if (select.options.length === 0 && branchCashBoxes.length > 0) {
+            if (showSelection) {
+                select.innerHTML = `<option value="">${t('common.loading') || 'Loading...'}</option>`;
+                group.style.display = 'block';
+                document.getElementById('withdrawModal').classList.add('show');
+
+                if (branchCashBoxes.length === 0 && user.roleName !== 'Branch') {
+                    try {
+                        branchCashBoxes = await api.cashBox.getBranchCashBoxes();
+                    } catch (e) { console.warn('Failed to load branches', e); }
+                }
+                if (!institutionMainBox && user.roleName !== 'Branch') {
+                    try {
+                        const box = await api.cashBox.get();
+                        if (box && (box.boxType === 'Aggregated' || box.boxType === 'Institution')) {
+                            institutionMainBox = box;
+                        }
+                    } catch (e) { console.warn('Failed to load main box', e); }
+                }
+
+                select.innerHTML = '';
+
+                // Match physical HQ (physical safe, not aggregated ID 0)
+                let physicalHQ = branchCashBoxes.find(b => b.boxType === 'Institution' && b.cashBoxId !== 0);
+                if (!physicalHQ && institutionMainBox && institutionMainBox.cashBoxId !== 0 && institutionMainBox.boxType === 'Institution') physicalHQ = institutionMainBox;
+                if (!physicalHQ && currentCashBox && currentCashBox.cashBoxId !== 0 && currentCashBox.boxType === 'Institution') physicalHQ = currentCashBox;
+
+                const targetHQ = physicalHQ;
+                if (targetHQ) {
+                    const opt = document.createElement('option');
+                    opt.value = targetHQ.cashBoxId;
+                    opt.textContent = `${t('cashbox.institution_main_safe') || 'الخزينة الرئيسية للمؤسسة'} (${formatCurrency(targetHQ.balance)})`;
+                    select.appendChild(opt);
+                }
+
+                if (branchCashBoxes && branchCashBoxes.length > 0) {
                     branchCashBoxes.forEach(box => {
+                        if (targetHQ && Number(box.cashBoxId) === Number(targetHQ.cashBoxId)) return;
+                        if (box.cashBoxId === 0 || box.boxType === 'Aggregated') return;
                         const opt = document.createElement('option');
                         opt.value = box.cashBoxId;
                         opt.textContent = `${getBoxDisplayName(box)} (${formatCurrency(box.balance)})`;
                         select.appendChild(opt);
                     });
                 }
-                // Pre-select activeBoxFilterId if available
+
+                if (select.options.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = "";
+                    opt.textContent = t('cashbox.no_cashboxes_available') || 'لا يوجد صناديق متاحة حالياً';
+                    select.appendChild(opt);
+                }
+
                 if (activeBoxFilterId) {
                     select.value = activeBoxFilterId;
                 }
-                group.style.display = 'block';
             } else {
                 group.style.display = 'none';
+                document.getElementById('withdrawModal').classList.add('show');
             }
-            document.getElementById('withdrawModal').style.display = 'flex';
         }
 
         function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
+            document.getElementById(id).classList.remove('show');
         }
 
         function setupForms() {
@@ -666,9 +723,14 @@
                 const isAggregated = currentCashBox && currentCashBox.boxType === 'Aggregated';
 
                 try {
-                    if (isAggregated) {
-                        const targetId = branchSelect.value;
-                        if (!targetId) throw new Error('Please select a branch');
+                    const user = getCurrentUser();
+                    const isBranch = user.roleName === 'Branch';
+
+                    // Branch users use context-based deposit (no ID in URL)
+                    // Institution/Admin use targeted ID
+                    const targetId = !isBranch ? (branchSelect.value || activeBoxFilterId || currentCashBox?.cashBoxId) : null;
+
+                    if (targetId) {
                         await api.cashBox.depositTo(targetId, { amount, description });
                     } else {
                         await api.cashBox.deposit({ amount, description });
@@ -677,8 +739,7 @@
                     showToast(t('cashbox.deposit_success'), 'success');
                     closeModal('depositModal');
                     document.getElementById('depositForm').reset();
-                    await loadCashBox();
-                    await loadTransactions();
+                    await loadUnifiedData();
                 } catch (error) {
                     showToast(error.message || t('cashbox.deposit_error'), 'error');
                 }
@@ -693,9 +754,14 @@
                 const isAggregated = currentCashBox && currentCashBox.boxType === 'Aggregated';
 
                 try {
-                    if (isAggregated) {
-                        const targetId = branchSelect.value;
-                        if (!targetId) throw new Error('Please select a branch');
+                    const user = getCurrentUser();
+                    const isBranch = user.roleName === 'Branch';
+
+                    // Branch users use context-based withdraw (no ID in URL)
+                    // Institution/Admin use targeted ID
+                    const targetId = !isBranch ? (branchSelect.value || activeBoxFilterId || currentCashBox?.cashBoxId) : null;
+
+                    if (targetId) {
                         await api.cashBox.withdrawFrom(targetId, { amount, description });
                     } else {
                         await api.cashBox.withdraw({ amount, description });
@@ -704,8 +770,7 @@
                     showToast(t('cashbox.withdraw_success'), 'success');
                     closeModal('withdrawModal');
                     document.getElementById('withdrawForm').reset();
-                    await loadCashBox();
-                    await loadTransactions();
+                    await loadUnifiedData();
                 } catch (error) {
                     showToast(error.message || t('cashbox.withdraw_error'), 'error');
                 }
@@ -714,8 +779,8 @@
 
         // Close modals on outside click
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                e.target.style.display = 'none';
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('show');
             }
         });
 

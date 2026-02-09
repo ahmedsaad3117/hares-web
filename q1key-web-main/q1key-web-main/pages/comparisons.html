@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <script>
+        // Critical: Immediate direction setup to prevent LTR flash
+        (function () {
+            var lang = localStorage.getItem('locale') || 'ar';
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            if (lang === 'ar') document.documentElement.classList.add('rtl');
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n-key="navigation.comparisons">تصنيفات الأداء | منصة Q1KEY</title>
+    <link rel="stylesheet" href="../css/styles.css?v=17">
+    <script src="../js/i18n.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* Flicker Prevention */
+        body:not(.i18n-ready) {
+            visibility: hidden;
+        }
+
+        body.i18n-ready {
+            visibility: visible;
+        }
+
+        .comparisons-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .comparison-hero {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .comparison-hero h1 {
+            font-size: 2.25rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Tabs Styling */
+        .rank-tabs {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+
+        .rank-tab {
+            padding: 0.875rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .rank-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+            color: white;
+        }
+
+        .rank-tab.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Chart Area */
+        .chart-section {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 450px;
+            width: 100%;
+        }
+
+        /* Rankings List */
+        .rankings-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .rank-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .rank-item:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .rank-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .rank-1 .rank-number {
+            background: linear-gradient(135deg, #ffd700, #b8860b);
+            color: #000;
+        }
+
+        .rank-2 .rank-number {
+            background: linear-gradient(135deg, #c0c0c0, #708090);
+        }
+
+        .rank-3 .rank-number {
+            background: linear-gradient(135deg, #cd7f32, #8b4513);
+        }
+
+        .rank-other .rank-number {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .rank-info {
+            flex: 1;
+        }
+
+        .rank-name {
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .rank-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #818cf8;
+        }
+
+        .rank-meta {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+
+            .comparison-hero h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Page Preloader (Flicker Prevention) -->
+    <div id="page-preloader">
+        <div class="preloader-spinner"></div>
+    </div>
+
+    <div id="sidebar"></div>
+
+    <div class="main-content">
+        <div id="header"></div>
+
+        <div class="page-content">
+            <div class="comparisons-container">
+                <!-- Hero -->
+                <div class="comparison-hero">
+                    <h1>📊 <span data-i18n-key="comparisons.title">تصنيفات الأداء والعشرة الأوائل</span></h1>
+                    <p style="color: rgba(255, 255, 255, 0.8); font-size: 1.05rem; margin: 0;"
+                        data-i18n-key="comparisons.subtitle">
+                        استعرض ترتيب الوحدات والمؤسسات والعملاء حسب معايير الأداء المختلفة
+                    </p>
+                </div>
+                <!-- Tabs -->
+                <div class="rank-tabs">
+                    <div class="rank-tab active" data-category="institutions">
+                        <span>🏛️</span> <span data-i18n-key="comparisons.tabs.institutions">المؤسسات</span>
+                    </div>
+                    <div class="rank-tab" data-category="branches">
+                        <span>🏢</span> <span data-i18n-key="comparisons.tabs.branches">الفروع</span>
+                    </div>
+                    <div class="rank-tab" data-category="customers">
+                        <span>👥</span> <span data-i18n-key="comparisons.tabs.customers">العملاء</span>
+                    </div>
+                    <div class="rank-tab" data-category="loans">
+                        <span>💰</span> <span data-i18n-key="comparisons.tabs.loans">القروض</span>
+                    </div>
+                    <div class="rank-tab" data-category="installments">
+                        <span>📅</span> <span data-i18n-key="comparisons.tabs.installments">الأقساط</span>
+                    </div>
+                    <div class="rank-tab" data-category="cashboxes">
+                        <span>🏦</span> <span data-i18n-key="comparisons.tabs.cashboxes">الصناديق</span>
+                    </div>
+                </div>
+
+                <!-- Chart Section -->
+                <div class="chart-section">
+                    <div class="chart-header">
+                        <h2 class="chart-title" id="rankTitle" data-i18n-key="comparisons.chart_titles.top_10_analysis">
+                            تحليل العشرة الأوائل</h2>
+                        <div style="display: flex; gap: 0.5rem;" id="subFilters">
+                            <!-- Dynamic sub-filters will go here -->
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="rankChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Rankings List Details -->
+                <div id="rankingsList" class="rankings-list">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/ui-utils.js"></script>
+    <script src="../components/sidebar.js"></script>
+    <script src="../components/header.js"></script>
+
+    <script>
+        let currentUser = null;
+        let mainChart = null;
+        let db = {
+            institutions: [],
+            branches: [],
+            customers: [],
+            loans: [],
+            installments: [],
+            cashboxes: []
+        };
+
+        async function init() {
+            await waitForI18n();
+            try {
+                if (!requireAuth()) return;
+                currentUser = await api.auth.getProfile();
+
+                // Correct injection of sidebar and header
+                const user = currentUser;
+                document.getElementById('sidebar').innerHTML = createSidebar(user);
+                document.getElementById('header').innerHTML = createHeader(t('navigation.comparisons') || 'المقارنات', t('dashboard.welcome_back') + ', ' + user.name);
+
+                // Initialize language switcher
+                if (typeof initializeLanguageSwitcher === 'function') {
+                    initializeLanguageSwitcher();
+                }
+
+                setActiveNav('comparisons');
+
+                // Translate page
+                if (typeof i18n !== 'undefined' && i18n.translatePage) {
+                    i18n.translatePage();
+                }
+
+                await loadAllData();
+
+                // Restrict tabs based on role
+                const role = currentUser.roleName || currentUser.role_name || currentUser.role;
+                if (role === 'Institution') {
+                    const instTab = document.querySelector('.rank-tab[data-category="institutions"]');
+                    if (instTab) instTab.style.display = 'none';
+                } else if (role === 'Branch') {
+                    const instTab = document.querySelector('.rank-tab[data-category="institutions"]');
+                    const branchTab = document.querySelector('.rank-tab[data-category="branches"]');
+                    if (instTab) instTab.style.display = 'none';
+                    if (branchTab) branchTab.style.display = 'none';
+                }
+
+                setupEventListeners();
+
+                // Show first VISIBLE category by default
+                const firstVisibleTab = Array.from(document.querySelectorAll('.rank-tab'))
+                    .find(tab => tab.style.display !== 'none');
+                if (firstVisibleTab) firstVisibleTab.click();
+
+            } catch (error) {
+                console.error('Init error:', error);
+                showToast('حدث خطأ في تحميل الصفحة', 'error');
+            } finally {
+                // Hide preloader
+                document.body.classList.add('i18n-ready');
+                const preloader = document.getElementById('page-preloader');
+                if (preloader) {
+                    preloader.classList.add('fade-out');
+                    setTimeout(() => preloader.remove(), 600);
+                }
+            }
+        }
+
+        async function loadAllData() {
+            try {
+                const res = await api.reports.getComparisonsData();
+                if (res.error) throw new Error(res.error);
+
+                db.institutions = res.institutions || [];
+                db.branches = res.branches || [];
+                db.customers = res.customers || [];
+                db.loans = res.loans || [];
+                db.installments = res.installments || [];
+                db.cashboxes = res.cashboxes || [];
+
+                console.log('✅ Comparisons data loaded:', db);
+            } catch (error) {
+                console.error('Data load error:', error);
+                showToast(t('common.message.error') || 'Error loading data', 'error');
+            }
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.rank-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.rank-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    showCategory(tab.dataset.category);
+                });
+            });
+        }
+
+        function showCategory(category) {
+            let data = [];
+            let title = "";
+            let accentColor = "#6366f1";
+
+            switch (category) {
+                case 'institutions':
+                    data = processInstitutions();
+                    title = t('comparisons.chart_titles.top_10_institutions') || "Top 10 Institutions (by Total Loans)";
+                    accentColor = "#8b5cf6";
+                    break;
+                case 'branches':
+                    data = processBranches();
+                    title = t('comparisons.chart_titles.top_10_branches') || "Top 10 Branches (by Portfolio Size)";
+                    accentColor = "#3b82f6";
+                    break;
+                case 'customers':
+                    data = processCustomers();
+                    title = t('comparisons.chart_titles.top_10_customers') || "Top 10 Customers (by Total Loans)";
+                    accentColor = "#10b981";
+                    break;
+                case 'loans':
+                    data = processLoans();
+                    title = t('comparisons.chart_titles.top_10_loans') || "Top 10 Largest Loans";
+                    accentColor = "#f59e0b";
+                    break;
+                case 'installments':
+                    data = processInstallments();
+                    title = t('comparisons.chart_titles.top_10_collection_rate') || "Top 10 Units by Collection Rate";
+                    accentColor = "#ef4444";
+                    break;
+                case 'cashboxes':
+                    data = processCashboxes();
+                    title = t('comparisons.chart_titles.top_10_cashboxes') || "Top 10 Cash Boxes by Liquidity";
+                    accentColor = "#06b6d4";
+                    break;
+            }
+
+            document.getElementById('rankTitle').textContent = title;
+            renderChart(data, accentColor);
+            renderList(data, category);
+        }
+
+        function processInstitutions() {
+            return db.institutions.map(inst => {
+                const instId = inst.institution_id || inst.institutionId;
+                const instLoans = db.loans.filter(l => (l.institution_id || l.institutionId) === instId);
+                const loansLabel = instLoans.length === 1 ? (t('comparisons.meta.loans_count') || '{count} loan').replace('{count}', instLoans.length) : (t('comparisons.meta.loans_count_plural') || '{count} loans').replace('{count}', instLoans.length);
+                return {
+                    name: inst.name,
+                    value: instLoans.reduce((sum, l) => sum + (parseFloat(l.principal_amount || l.principalAmount || 0)), 0),
+                    count: instLoans.length,
+                    meta: loansLabel
+                };
+            }).sort((a, b) => b.value - a.value).slice(0, 10);
+        }
+
+        function processBranches() {
+            return db.branches.map(branch => {
+                const brId = branch.branch_id || branch.branchId;
+                const branchLoans = db.loans.filter(l => (l.branch_id || l.branchId) === brId);
+                const loansLabel = branchLoans.length === 1 ? (t('comparisons.meta.loans_count') || '{count} loan').replace('{count}', branchLoans.length) : (t('comparisons.meta.loans_count_plural') || '{count} loans').replace('{count}', branchLoans.length);
+                return {
+                    name: branch.name,
+                    value: branchLoans.reduce((sum, l) => sum + (parseFloat(l.principal_amount || l.principalAmount || 0)), 0),
+                    count: branchLoans.length,
+                    meta: loansLabel
+                };
+            }).sort((a, b) => b.value - a.value).slice(0, 10);
+        }
+
+        function processCustomers() {
+            return db.customers.map(cust => {
+                const custId = cust.customer_id || cust.customerId;
+                const custLoans = db.loans.filter(l => (l.customer_id || l.customerId) === custId);
+                const loansLabel = custLoans.length === 1 ? (t('comparisons.meta.loans_count') || '{count} loan').replace('{count}', custLoans.length) : (t('comparisons.meta.loans_count_plural') || '{count} loans').replace('{count}', custLoans.length);
+                return {
+                    name: cust.name,
+                    value: custLoans.reduce((sum, l) => sum + (parseFloat(l.principal_amount || l.principalAmount || 0)), 0),
+                    count: custLoans.length,
+                    meta: loansLabel
+                };
+            }).sort((a, b) => b.value - a.value).slice(0, 10);
+        }
+
+        function processLoans() {
+            const loanLabel = t('common.loan') || 'Loan';
+            const customerLabel = t('common.customer') || 'Customer';
+            return db.loans.sort((a, b) => (parseFloat(b.principal_amount || b.principalAmount || 0)) - (parseFloat(a.principal_amount || a.principalAmount || 0))).slice(0, 10).map(loan => ({
+                name: `${loanLabel} #${(loan.loan_id || loan.loanId).toString().slice(-6)}`,
+                value: parseFloat(loan.principal_amount || loan.principalAmount || 0),
+                meta: loan.customer_name || loan.customerName || (loan.customer && loan.customer.name) || customerLabel
+            }));
+        }
+
+        function processInstallments() {
+            // Collection rate per branch
+            return db.branches.map(branch => {
+                const brId = branch.branch_id || branch.branchId;
+                const branchInsts = db.installments.filter(i => (i.branch_id || i.branchId) === brId);
+                const paid = branchInsts.filter(i => i.status === 'Paid').length;
+                const rate = branchInsts.length > 0 ? (paid / branchInsts.length) * 100 : 0;
+                const collectionLabel = (t('comparisons.meta.collection') || 'Collection {paid}/{total}').replace('{paid}', paid).replace('{total}', branchInsts.length);
+                return {
+                    name: branch.name,
+                    value: rate,
+                    meta: collectionLabel,
+                    displayValue: `${rate.toFixed(1)}%`
+                };
+            }).sort((a, b) => b.value - a.value).slice(0, 10);
+        }
+
+        function processCashboxes() {
+            const cashboxLabel = t('cashbox.title') || 'Cash Box';
+            const adminTreasuryLabel = t('cashbox.admin_treasury') || 'General Treasury (Admin)';
+            const hqBalanceLabel = t('comparisons.meta.hq_balance') || 'HQ Balance';
+            const branchBalanceLabel = t('comparisons.meta.branch_balance') || 'Branch Balance';
+            return db.cashboxes.map(cb => {
+                let displayName = cb.branch_name || cb.branchName || cb.institution_name || cb.institutionName || `${cashboxLabel} #${cb.cash_box_id || cb.cashBoxId}`;
+                if (cb.box_type === 'Admin' || cb.boxType === 'Admin') displayName = adminTreasuryLabel;
+
+                return {
+                    name: displayName,
+                    value: parseFloat(cb.balance || 0),
+                    meta: (cb.box_type || cb.boxType) === 'Institution' ? hqBalanceLabel : branchBalanceLabel
+                };
+            }).sort((a, b) => b.value - a.value).slice(0, 10);
+        }
+
+        function renderChart(data, color) {
+            const ctx = document.getElementById('rankChart').getContext('2d');
+
+            if (mainChart) mainChart.destroy();
+
+            mainChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        label: t('comparisons.chart.value_label') || 'Value',
+                        data: data.map(d => d.value),
+                        backgroundColor: color + 'CC',
+                        borderColor: color,
+                        borderWidth: 2,
+                        borderRadius: 10,
+                        barThickness: 50
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function (context) {
+                                    const val = context.parsed.y;
+                                    const category = document.querySelector('.rank-tab.active').dataset.category;
+                                    const currency = t('comparisons.chart.currency') || 'SAR';
+                                    if (category === 'installments') {
+                                        return ' ' + (t('comparisons.chart.collection_rate') || 'Collection Rate') + ': ' + val.toFixed(1) + '%';
+                                    }
+                                    return ' ' + (t('comparisons.chart.value_label') || 'Value') + ': ' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + currency;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                precision: 0,
+                                callback: function (value) {
+                                    if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+                                    if (value >= 1000) return (value / 1000).toFixed(1) + 'k';
+                                    return value;
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'rgba(255, 255, 255, 0.8)', font: { weight: '600' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderList(data, category) {
+            const list = document.getElementById('rankingsList');
+            list.innerHTML = data.map((item, index) => {
+                const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'rank-other';
+                const displayVal = item.displayValue || item.value.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س';
+
+                return `
+                    <div class="rank-item ${rankClass}">
+                        <div class="rank-number">${index + 1}</div>
+                        <div class="rank-info">
+                            <div class="rank-name">${item.name}</div>
+                            <div class="rank-meta">${item.meta}</div>
+                        </div>
+                        <div class="rank-value">${displayVal}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

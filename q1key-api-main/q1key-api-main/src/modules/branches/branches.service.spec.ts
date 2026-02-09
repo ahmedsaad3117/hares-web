@@ -1,16 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { BranchesService } from './branches.service';
-import { Branch } from '../../entities/branch.entity';
-import { Institution } from '../../entities/institution.entity';
-import { User } from '../../entities/user.entity';
-import { Customer } from '../../entities/customer.entity';
-import { Loan } from '../../entities/loan.entity';
-import { NotFoundException, ForbiddenException } from '@nestjs/common';
-import { UpdateBranchDto } from './dto/update-branch.dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { BranchesService } from "./branches.service";
+import { Branch } from "../../entities/branch.entity";
+import { Institution } from "../../entities/institution.entity";
+import { User } from "../../entities/user.entity";
+import { Customer } from "../../entities/customer.entity";
+import { Loan } from "../../entities/loan.entity";
+import { NotFoundException, ForbiddenException } from "@nestjs/common";
+import { UpdateBranchDto } from "./dto/update-branch.dto";
 
-describe('BranchesService', () => {
+describe("BranchesService", () => {
   let service: BranchesService;
   let branchRepository: Repository<Branch>;
 
@@ -69,21 +69,21 @@ describe('BranchesService', () => {
     jest.clearAllMocks();
   });
 
-  describe('update', () => {
+  describe("update", () => {
     const mockBranch = {
       branchId: 1,
-      name: 'Main Branch',
+      name: "Main Branch",
       institutionId: 1,
       totalLoans: 50,
       maximumLoans: 100,
       isActive: true,
       institution: {
         institutionId: 1,
-        name: 'Test Institution',
+        name: "Test Institution",
       },
     };
 
-    it('should update branch maximumLoans field', async () => {
+    it("should update branch maximumLoans field", async () => {
       // Arrange - RED PHASE: Test should FAIL initially
       const updateDto: UpdateBranchDto = {
         maximumLoans: 150,
@@ -104,7 +104,7 @@ describe('BranchesService', () => {
       expect(mockBranchRepository.save).toHaveBeenCalled();
     });
 
-    it('should allow Institution role to update maximumLoans', async () => {
+    it("should allow Institution role to update maximumLoans", async () => {
       // Arrange
       const updateDto: UpdateBranchDto = {
         maximumLoans: 150,
@@ -113,7 +113,7 @@ describe('BranchesService', () => {
       const currentUser = {
         userId: 1,
         institutionId: 1,
-        role: { roleName: 'Institution' },
+        role: { roleName: "Institution" },
       };
 
       mockBranchRepository.findOne.mockResolvedValue(mockBranch);
@@ -130,7 +130,7 @@ describe('BranchesService', () => {
       expect(result.maximumLoans).toBe(150);
     });
 
-    it('should prevent Institution from updating another institutions branch', async () => {
+    it("should prevent Institution from updating another institutions branch", async () => {
       // Arrange
       const updateDto: UpdateBranchDto = {
         maximumLoans: 150,
@@ -139,7 +139,7 @@ describe('BranchesService', () => {
       const currentUser = {
         userId: 1,
         institutionId: 2, // Different institution
-        role: { roleName: 'Institution' },
+        role: { roleName: "Institution" },
       };
 
       mockBranchRepository.findOne.mockResolvedValue(mockBranch);
@@ -149,11 +149,11 @@ describe('BranchesService', () => {
         ForbiddenException,
       );
       await expect(service.update(1, updateDto, currentUser)).rejects.toThrow(
-        'You can only update branches in your institution',
+        "You can only update branches in your institution",
       );
     });
 
-    it('should throw NotFoundException when branch does not exist', async () => {
+    it("should throw NotFoundException when branch does not exist", async () => {
       // Arrange
       const updateDto: UpdateBranchDto = {
         maximumLoans: 150,

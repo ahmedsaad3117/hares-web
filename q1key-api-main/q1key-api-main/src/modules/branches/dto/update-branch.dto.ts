@@ -1,4 +1,11 @@
-import { IsOptional, IsString, IsBoolean, IsNumber, Min, IsEmail } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsBoolean,
+  IsNumber,
+  Min,
+  IsEmail,
+} from "class-validator";
 
 export class UpdateBranchDto {
   @IsOptional()
@@ -10,7 +17,7 @@ export class UpdateBranchDto {
   phoneNumber?: string;
 
   @IsOptional()
-  @IsEmail()
+  @IsEmail({}, { message: "البريد الإلكتروني للفرع غير صحيح" })
   email?: string;
 
   @IsOptional()
@@ -21,4 +28,8 @@ export class UpdateBranchDto {
   @IsNumber()
   @Min(0)
   maximumLoans?: number;
+
+  @IsOptional()
+  @IsString()
+  expirationDate?: string;
 }

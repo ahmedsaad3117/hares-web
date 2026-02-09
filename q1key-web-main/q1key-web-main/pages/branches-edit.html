@@ -10,7 +10,7 @@
   <style>
     /* Premium Cyber-Minimalist Design System - Sync with Institutions */
     :root {
-      --neon-primary: #818cf8;
+      --neon-primary: #ef4444;
       --neon-secondary: #c084fc;
       --card-bg: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(255, 255, 255, 0.12);
@@ -59,7 +59,7 @@
 
     .section-title-premium i {
       padding: 8px;
-      background: rgba(129, 140, 248, 0.1);
+      background: rgba(239, 68, 68, 0.1);
       border-radius: 10px;
       color: var(--neon-primary);
     }
@@ -118,7 +118,7 @@
     .btn-create-ultra {
       width: 100%;
       height: 56px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+      background: linear-gradient(135deg, #ef4444, #dc2626) !important;
       color: white !important;
       border: none !important;
       border-radius: 16px !important;
@@ -126,13 +126,13 @@
       font-size: 1.05rem !important;
       cursor: pointer !important;
       margin-top: 1.5rem !important;
-      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3) !important;
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3) !important;
       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
 
     .btn-create-ultra:hover {
       transform: translateY(-3px) scale(1.01);
-      box-shadow: 0 15px 35px rgba(99, 102, 241, 0.5) !important;
+      box-shadow: 0 15px 35px rgba(239, 68, 68, 0.5) !important;
     }
 
     .info-strip {
@@ -208,7 +208,7 @@
 
           <div class="section-title-premium">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
               <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
@@ -242,9 +242,15 @@
             </div>
           </div>
 
-          <div class="input-field-wrapper">
-            <label class="input-label-clean">البريد الإلكتروني</label>
-            <input type="email" id="email" class="modern-input">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="input-field-wrapper">
+              <label class="input-label-clean">البريد الإلكتروني</label>
+              <input type="email" id="email" class="modern-input">
+            </div>
+            <div class="input-field-wrapper" id="expirationDateWrapper">
+              <label class="input-label-clean" data-i18n-key="common.expiration_date">تاريخ انتهاء الصلاحية</label>
+              <input type="date" id="expirationDate" class="modern-input">
+            </div>
           </div>
 
           <div class="input-field-wrapper">
@@ -289,7 +295,7 @@
   </div>
 
   <script src="../js/api.js?v=5"></script>
-  <script src="../js/ui-utils.js?v=6"></script>
+  <script src="../js/ui-utils.js?v=9"></script>
   <script src="../components/sidebar.js?v=13"></script>
   <script src="../components/header.js?v=3"></script>
   <script>
@@ -303,6 +309,12 @@
       initializeLanguageSwitcher();
       setActiveNav('branches');
       window.i18n.translatePage();
+
+      // Hide expiration date for non-super-admins
+      if (user.roleName !== 'Super Admin') {
+        const expWrapper = document.getElementById('expirationDateWrapper');
+        if (expWrapper) expWrapper.style.display = 'none';
+      }
 
       const errBox = document.getElementById('errorMessage');
 
@@ -318,6 +330,9 @@
         document.getElementById('email').value = branchData.email || '';
         document.getElementById('maximumLoans').value = branchData.maximumLoans || 0;
         document.getElementById('isActive').checked = branchData.isActive;
+        if (branchData.expirationDate) {
+          document.getElementById('expirationDate').value = branchData.expirationDate.split('T')[0];
+        }
 
         document.getElementById('branchIdVal').textContent = `#${branchData.branchId}`;
         document.getElementById('institutionNameVal').textContent = branchData.institution?.name || '---';
@@ -370,6 +385,7 @@
           subMessage: branchData?.name || '',
           confirmText: 'حفظ التغييرات',
           icon: '📝',
+          btnClass: 'btn-danger',
           onConfirm: async () => {
             submitButton.disabled = true;
             submitButton.innerHTML = `<div class='spinner' style='width:20px;height:20px;margin:auto;border-color:white'></div>`;
@@ -384,6 +400,9 @@
 
               const email = document.getElementById('email').value.trim();
               if (email) updateData.email = email;
+
+              const expDate = document.getElementById('expirationDate').value;
+              if (expDate) updateData.expirationDate = expDate;
 
               await api.branches.update(branchId, updateData);
               showToast('تم تحديث الفرع بنجاح', 'success');

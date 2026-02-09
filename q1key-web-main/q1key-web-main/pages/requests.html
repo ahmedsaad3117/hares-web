@@ -521,85 +521,96 @@
             font-weight: 600;
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
         }
+
+        .new-badge {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .renewal-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
     </style>
 </head>
 
 <body>
-    <div class="layout">
-        <div id="sidebar"></div>
+    <div id="sidebar"></div>
 
-        <div class="main-content">
-            <div id="header"></div>
+    <div class="main-content">
+        <div id="header"></div>
 
-            <div class="page-container">
-                <!-- Stats -->
-                <div class="stats-row">
-                    <div class="stat-card pending">
-                        <div class="stat-value" id="pendingCount">-</div>
-                        <div class="stat-label" data-i18n-key="requests.stats.pending">Pending</div>
+        <div class="page-container">
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-card pending">
+                    <div class="stat-value" id="pendingCount">-</div>
+                    <div class="stat-label" data-i18n-key="requests.stats.pending">Pending</div>
+                </div>
+                <div class="stat-card approved">
+                    <div class="stat-value" id="approvedCount">-</div>
+                    <div class="stat-label" data-i18n-key="requests.stats.approved">Approved</div>
+                </div>
+                <div class="stat-card rejected">
+                    <div class="stat-value" id="rejectedCount">-</div>
+                    <div class="stat-label" data-i18n-key="requests.stats.rejected">Rejected</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCount">-</div>
+                    <div class="stat-label" data-i18n-key="requests.stats.total">Total Requests</div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <!-- List Header Actions -->
+                <div class="list-header-actions">
+                    <!-- Filter Tabs -->
+                    <div class="filter-tabs">
+                        <button class="filter-tab" data-status="" onclick="filterRequests('')"
+                            data-i18n-key="requests.tabs.all">
+                            All
+                        </button>
+                        <button class="filter-tab active" data-status="Pending" onclick="filterRequests('Pending')">
+                            <span class="count" id="pendingBadge">0</span>
+                            <span data-i18n-key="requests.tabs.pending">Pending</span>
+                        </button>
+                        <button class="filter-tab" data-status="Approved" onclick="filterRequests('Approved')"
+                            data-i18n-key="requests.tabs.approved">
+                            Approved
+                        </button>
+                        <button class="filter-tab" data-status="Rejected" onclick="filterRequests('Rejected')"
+                            data-i18n-key="requests.tabs.rejected">
+                            Rejected
+                        </button>
                     </div>
-                    <div class="stat-card approved">
-                        <div class="stat-value" id="approvedCount">-</div>
-                        <div class="stat-label" data-i18n-key="requests.stats.approved">Approved</div>
-                    </div>
-                    <div class="stat-card rejected">
-                        <div class="stat-value" id="rejectedCount">-</div>
-                        <div class="stat-label" data-i18n-key="requests.stats.rejected">Rejected</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalCount">-</div>
-                        <div class="stat-label" data-i18n-key="requests.stats.total">Total Requests</div>
+
+                    <div class="search-container">
+                        <input type="text" id="requestSearch" name="q1key_request_search" autocomplete="off"
+                            class="search-input" data-i18n-placeholder="requests.search_placeholder"
+                            placeholder="البحث بالاسم، رقم الطلب، أو السجل..." oninput="handleSearch(this.value)">
+                        <div class="search-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
                     </div>
                 </div>
 
-                <div class="glass-card">
-                    <!-- List Header Actions -->
-                    <div class="list-header-actions">
-                        <!-- Filter Tabs -->
-                        <div class="filter-tabs">
-                            <button class="filter-tab active" data-status="" onclick="filterRequests('')"
-                                data-i18n-key="requests.tabs.all">
-                                All
-                            </button>
-                            <button class="filter-tab" data-status="Pending" onclick="filterRequests('Pending')">
-                                <span class="count" id="pendingBadge">0</span>
-                                <span data-i18n-key="requests.tabs.pending">Pending</span>
-                            </button>
-                            <button class="filter-tab" data-status="Approved" onclick="filterRequests('Approved')"
-                                data-i18n-key="requests.tabs.approved">
-                                Approved
-                            </button>
-                            <button class="filter-tab" data-status="Rejected" onclick="filterRequests('Rejected')"
-                                data-i18n-key="requests.tabs.rejected">
-                                Rejected
-                            </button>
-                        </div>
-
-                        <div class="search-container">
-                            <input type="text" id="requestSearch" name="q1key_request_search" autocomplete="off"
-                                class="search-input" placeholder="البحث بالاسم، رقم الطلب، أو السجل..."
-                                oninput="handleSearch(this.value)">
-                            <div class="search-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Requests List -->
-                    <div class="requests-list" id="requestsList">
-                        <div class="empty-state">
-                            <div class="spinner"></div>
-                            <p data-i18n-key="requests.list.loading">Loading Requests...</p>
-                        </div>
+                <!-- Requests List -->
+                <div class="requests-list" id="requestsList">
+                    <div class="empty-state">
+                        <div class="spinner"></div>
+                        <p data-i18n-key="requests.list.loading">Loading Requests...</p>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Process Modal -->
@@ -648,7 +659,7 @@
         <div class="process-modal-content"
             style="max-width: 900px; max-height: 95vh; overflow-y: auto; padding: 1.5rem;">
             <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                📄 تفاصيل الطلب
+                📄 <span data-i18n-key="requests.details_modal.title">تفاصيل الطلب</span>
             </h3>
 
             <div id="detailsContent"
@@ -658,7 +669,8 @@
 
             <div class="modal-actions"
                 style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                <button class="btn btn-secondary" onclick="closeDetailsModal()">إغلاق</button>
+                <button class="btn btn-secondary" onclick="closeDetailsModal()"
+                    data-i18n-key="requests.details_modal.close">إغلاق</button>
             </div>
         </div>
     </div>
@@ -881,7 +893,7 @@
     <script src="../components/header.js?v=3"></script>
     <script>
         let allRequests = [];
-        let currentFilter = '';
+        let currentFilter = 'Pending';
         let searchQuery = '';
         let processingRequest = null;
         let processAction = 'Approved';
@@ -922,44 +934,74 @@
         }
 
         async function loadRequests() {
+            const list = document.getElementById('requestsList');
+            const statsIds = ['pendingCount', 'approvedCount', 'rejectedCount', 'totalCount', 'pendingBadge'];
+
+            list.innerHTML = `<div class="empty-state"><div class="spinner"></div><p>${t('requests.list.loading') || 'جاري التحميل...'}</p></div>`;
+
             try {
-                const response = await api.subscriptions.getRequests('', 1, 500);
-                allRequests = Array.isArray(response) ? response : (response.data || []);
-                updateStats();
-                renderRequests();
+                console.log('Fetching unified data with status:', currentFilter);
+                const response = await api.subscriptions.getUnifiedData({
+                    status: currentFilter,
+                    search: searchQuery,
+                    page: 1,
+                    limit: 50
+                });
+
+                if (!response) throw new Error('Empty response from server');
+                console.log('Response received:', response);
+
+                const stats = response.stats;
+                if (stats) {
+                    const updateText = (id, val) => {
+                        const el = document.getElementById(id);
+                        if (el) el.textContent = val;
+                        else console.warn(`Element #${id} not found`);
+                    };
+
+                    updateText('pendingCount', stats.pending || 0);
+                    updateText('approvedCount', stats.approved || 0);
+                    updateText('rejectedCount', stats.rejected || 0);
+                    updateText('totalCount', stats.total || 0);
+                    updateText('pendingBadge', stats.pending || 0);
+                }
+
+                allRequests = (response.requests && response.requests.data) ? response.requests.data : [];
+                console.log(`Rendering ${allRequests.length} requests`);
+                renderRequestsList();
             } catch (error) {
-                console.error('Error loading requests:', error);
+                console.error('Critical Error in loadRequests:', error);
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+                        <h3 style="color: #ef4444;">${t('requests.messages.load_error') || 'خطأ في تحميل الطلبات'}</h3>
+                        <p style="color: #94a3b8; margin: 1rem 0; font-family: monospace; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                            ${error.message || 'Unknown Error'}
+                        </p>
+                        <button class="action-btn" onclick="loadRequests()">🔄 ${t('common.button.retry') || 'إعادة المحاولة'}</button>
+                    </div>
+                `;
                 showToast(t('requests.messages.load_error') || 'خطأ في تحميل الطلبات', 'error');
             }
         }
 
-        function updateStats() {
-            const pending = allRequests.filter(r => r.status === 'Pending').length;
-            const approved = allRequests.filter(r => r.status === 'Approved').length;
-            const rejected = allRequests.filter(r => r.status === 'Rejected').length;
-            const total = allRequests.length;
-
-            document.getElementById('pendingCount').textContent = pending;
-            document.getElementById('approvedCount').textContent = approved;
-            document.getElementById('rejectedCount').textContent = rejected;
-            document.getElementById('totalCount').textContent = total;
-            document.getElementById('pendingBadge').textContent = pending;
-        }
+        // updateStats is now handled in loadRequests
+        function updateStats() { }
 
         function filterRequests(status) {
             currentFilter = status;
             document.querySelectorAll('.filter-tab').forEach(tab => {
                 tab.classList.toggle('active', tab.dataset.status === status);
             });
-            renderRequests();
+            loadRequests();
         }
 
         function handleSearch(query) {
-            searchQuery = query.toLowerCase();
+            searchQuery = query;
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                renderRequests();
-            }, 300);
+                loadRequests();
+            }, 500);
         }
 
         function getStatusIcon(status) {
@@ -980,26 +1022,11 @@
             return labels[status] || status;
         }
 
-        function renderRequests() {
+        function renderRequestsList() {
             const list = document.getElementById('requestsList');
-            let filtered = allRequests;
+            const requests = allRequests; // Already filtered by server
 
-            if (currentFilter) {
-                filtered = filtered.filter(r => r.status === currentFilter);
-            }
-
-            if (searchQuery) {
-                filtered = filtered.filter(r => {
-                    const ent = r.institution || r.branch || {};
-                    let pd = {};
-                    try { if (r.pendingData) pd = JSON.parse(r.pendingData); } catch (e) { }
-                    const name = (ent.name || pd.name || '').toLowerCase();
-                    const taxId = (ent.taxId || pd.taxId || '').toLowerCase();
-                    return name.includes(searchQuery) || taxId.includes(searchQuery) || String(r.id).includes(searchQuery);
-                });
-            }
-
-            if (filtered.length === 0) {
+            if (requests.length === 0) {
                 list.innerHTML = `
                     <div class="empty-state">
                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.2; margin-bottom: 1rem;">
@@ -1015,20 +1042,38 @@
                 return;
             }
 
-            list.innerHTML = filtered.map(req => {
+            list.innerHTML = requests.map(req => {
                 const isInstitution = req.requesterType === 'Institution';
                 let entName = isInstitution ? req.institution?.name : req.branch?.name;
                 let taxId = isInstitution ? req.institution?.taxId : req.branch?.taxId;
                 if (req.pendingData) {
-                    try {
-                        const pd = JSON.parse(req.pendingData);
-                        entName = entName || pd.name;
+                    let pd = req.pendingData;
+                    if (typeof pd === 'string') {
+                        try { pd = JSON.parse(pd); } catch (e) { pd = {}; }
+                    }
+                    if (pd) {
+                        entName = entName || pd.name || pd.branchName;
                         taxId = taxId || pd.taxId;
-                    } catch (e) { }
+                    }
                 }
 
                 const plan = req.plan || availablePlans.find(p => p.id === req.planId);
                 const planName = plan ? (i18n.isRTL() ? plan.name : (plan.nameEn || plan.name)) : (req.customDurationMonths + ' شهر');
+
+                const statusClass = req.status.toLowerCase();
+                // Determine display type label
+                let typeLabel = '';
+                let typeClass = '';
+                if (req.status === 'Pending') {
+                    // If pendingData exists, it's a new registration request because renewals don't store pendingData
+                    if (req.pendingData && req.pendingData !== 'null') {
+                        typeLabel = 'إنشاء جديد';
+                        typeClass = 'new-badge';
+                    } else {
+                        typeLabel = 'تجديد اشتراك';
+                        typeClass = 'renewal-badge';
+                    }
+                }
 
                 return `
                     <div class="request-card ${req.status.toLowerCase()}">
@@ -1036,9 +1081,12 @@
                             <div class="request-info">
                                 <div class="request-icon">${isInstitution ? '🏛️' : '🏪'}</div>
                                 <div class="request-details">
-                                    <h3>${entName || '-'}</h3>
-                                    <p>${isInstitution ? 'مؤسسة' : 'فرع'} | رقم الطلب #${req.id}</p>
-                                    ${!isInstitution && req.institution ? `<p style="color: #818cf8; font-weight: bold; margin-top: 4px;">المؤسسة التابعة: ${req.institution.name}</p>` : ''}
+                                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                                        ${entName || '-'}
+                                        ${typeLabel ? `<span class="request-status ${typeClass}" style="font-size: 0.7rem; padding: 0.2rem 0.6rem;">${typeLabel}</span>` : ''}
+                                    </h3>
+                                    <p>${isInstitution ? t('requests.list.entity_institution') : t('requests.list.entity_branch')} | ${t('requests.list.request_num')} #${req.id}</p>
+                                    ${!isInstitution && req.institution ? `<p style="color: #818cf8; font-weight: bold; margin-top: 4px;">${t('requests.list.parent_institution')}: ${req.institution.name}</p>` : ''}
                                 </div>
                             </div>
                             <div class="request-status ${req.status.toLowerCase()}">
@@ -1047,30 +1095,34 @@
                         </div>
                         <div class="request-body">
                             <div class="request-field">
-                                <span class="label">الباقة</span>
+                                <span class="label">${t('requests.list.plan_label')}</span>
                                 <span class="value" style="color: #a855f7;">${planName}</span>
                             </div>
                             <div class="request-field">
-                                <span class="label">المبلغ</span>
-                                <span class="value amount">${req.isFree ? 'مجاني' : (req.amount || plan?.price) + ' ' + t('my_subscription.currency')}</span>
+                                <span class="label">${t('requests.list.amount_label')}</span>
+                                <span class="value amount">${req.isFree ? t('requests.list.free') : (req.amount || plan?.price) + ' ' + t('my_subscription.currency')}</span>
                             </div>
                             <div class="request-field">
-                                <span class="label">تاريخ الطلب</span>
+                                <span class="label">${t('requests.list.date_label')}</span>
                                 <span class="value">${formatDate(req.createdAt)}</span>
                             </div>
                         </div>
                         <div class="request-actions">
-                            <button class="action-btn" onclick="openDetailsModal(${req.id})">🔍 التفاصيل</button>
+                            <button class="action-btn" onclick="openDetailsModal(${req.id})">🔍 ${t('requests.list.details')}</button>
                             ${req.status === 'Pending' ? `
-                                <button class="action-btn approve" onclick="openProcessModal(${req.id}, 'Approved')">✅ تفعيل</button>
-                                <button class="action-btn reject" onclick="openProcessModal(${req.id}, 'Rejected')">❌ رفض</button>
-                                <button class="action-btn" onclick="openEditModal(${req.id})">✏️ تعديل</button>
+                                <button class="action-btn approve" onclick="openProcessModal(${req.id}, 'Approved')">✅ ${t('requests.list.activate')}</button>
+                                <button class="action-btn reject" onclick="openProcessModal(${req.id}, 'Rejected')">❌ ${t('requests.list.reject')}</button>
+                                <button class="action-btn" onclick="openEditModal(${req.id})">✏️ ${t('requests.list.edit')}</button>
                             ` : ''}
                         </div>
                     </div>
                 `;
             }).join('');
         }
+
+        // Bridge function for backwards compatibility if needed, or just remove usages of renderRequests
+        function renderRequests() { renderRequestsList(); }
+
 
         function openProcessModal(requestId, action) {
             const request = allRequests.find(r => r.id === requestId);
@@ -1081,7 +1133,9 @@
             document.getElementById('modalTitle').innerHTML = isApproval ? '✅ تفعيل الاشتراك' : '❌ رفض الطلب';
             const summary = document.getElementById('requestSummary');
             let name = (request.institution?.name || request.branch?.name);
-            try { if (request.pendingData) name = name || JSON.parse(request.pendingData).name; } catch (e) { }
+            let pd = request.pendingData;
+            if (typeof pd === 'string') { try { pd = JSON.parse(pd); } catch (e) { pd = {}; } }
+            if (pd && pd.name) name = name || pd.name;
             summary.innerHTML = `<div style="font-weight: bold;">${name}</div><div style="font-size: 0.85rem; color: #94a3b8;">${t('subscriptions.type.' + request.requesterType.toLowerCase())} #${request.id}</div>`;
             document.getElementById('freeToggleSection').style.display = isApproval ? 'flex' : 'none';
             document.getElementById('adminNotes').value = request.adminNotes || '';
@@ -1099,120 +1153,142 @@
             let entity = isInstitution ? request.institution : request.branch;
             let manager = null;
             let pendingData = {};
-            let parsedPD = null;
-            if (request.pendingData) {
-                try {
-                    parsedPD = JSON.parse(request.pendingData);
-                    pendingData = parsedPD; // Update outer variable
-                    if (!entity) {
-                        entity = {
-                            name: parsedPD.name || parsedPD.branchName || '',
-                            taxId: parsedPD.taxId || '-',
-                            phoneNumber: parsedPD.phoneNumber || parsedPD.phone || '',
-                            email: parsedPD.email || '',
-                            maxUsers: parsedPD.maxUsers || parsedPD.branchMaxUsers || 1,
-                            canCreateBranches: parsedPD.canCreateBranches,
-                            isActive: parsedPD.isActive,
-                            isPendingRegistration: true
-                        };
-                    }
 
-                    // Comprehensive manager data search
-                    const mName = parsedPD.adminName || parsedPD.userName || parsedPD.managerName || parsedPD.name;
-                    const mEmail = parsedPD.adminEmail || parsedPD.userEmail || parsedPD.managerEmail || parsedPD.email;
-
-                    if (mName || mEmail) {
-                        manager = {
-                            name: mName || '',
-                            email: mEmail || '',
-                            phoneNumber: parsedPD.adminPhoneNumber || parsedPD.userPhoneNumber || parsedPD.managerPhoneNumber || parsedPD.phoneNumber || '',
-                            isActive: parsedPD.adminIsActive !== undefined ? parsedPD.adminIsActive : (parsedPD.userIsActive !== undefined ? parsedPD.userIsActive : true)
-                        };
+            try {
+                if (request.pendingData) {
+                    let pd = request.pendingData;
+                    if (typeof pd === 'string') {
+                        try { pd = JSON.parse(pd); } catch (e) { pd = {}; }
                     }
-                } catch (e) {
-                    console.error('Error parsing pending data', e);
+                    if (pd) {
+                        pendingData = pd;
+                        if (!entity) {
+                            entity = {
+                                name: pd.name || pd.branchName || '',
+                                taxId: pd.taxId || '-',
+                                phoneNumber: pd.phoneNumber || pd.phone || '',
+                                email: pd.email || '',
+                                maxUsers: pd.maxUsers || pd.branchMaxUsers || 1,
+                                canCreateBranches: pd.canCreateBranches,
+                                isActive: pd.isActive,
+                                isPendingRegistration: true
+                            };
+                        }
+
+                        // Comprehensive manager data search
+                        const mName = pd.adminName || pd.userName || pd.managerName || pd.name;
+                        const mEmail = pd.adminEmail || pd.userEmail || pd.managerEmail || pd.email;
+
+                        if (mName || mEmail) {
+                            manager = {
+                                name: mName || '',
+                                email: mEmail || '',
+                                phoneNumber: pd.adminPhoneNumber || pd.userPhoneNumber || pd.managerPhoneNumber || pd.phoneNumber || '',
+                                isActive: pd.adminIsActive !== undefined ? pd.adminIsActive : (pd.userIsActive !== undefined ? pd.userIsActive : true)
+                            };
+                        }
+                    }
                 }
-            }
 
-            // Fallback to joined users if no manager found in pending data
-            if (!manager && entity && entity.users && entity.users.length > 0) {
-                // Find manager (Role ID 2 for Institutions, 3 for Branches)
-                manager = entity.users.find(u => u.roleId === 2 || u.roleId === 3) || entity.users[0];
-            }
-            const plan = request.plan || availablePlans.find(p => p.id === request.planId);
-            const planName = plan ? (i18n.isRTL() ? plan.name : (plan.nameEn || plan.name)) : (request.customDurationMonths + ' شهر');
-            const planDuration = plan ? plan.durationMonths : request.customDurationMonths;
-            const calculatedEndDate = new Date();
-            calculatedEndDate.setMonth(calculatedEndDate.getMonth() + (planDuration || 0));
-            const displayEndDate = request.requestedEndDate ? new Date(request.requestedEndDate) : calculatedEndDate;
+                // Fallback to joined users if no manager found in pending data
+                if (!manager && entity && entity.users && entity.users.length > 0) {
+                    // Find manager (Role ID 2 for Institutions, 3 for Branches)
+                    manager = entity.users.find(u => u.roleId === 2 || u.roleId === 3) || entity.users[0];
+                }
 
-            content.innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
-                        <h4 style="color: #818cf8; margin-bottom: 1rem;">${isInstitution ? '🏛️ معلومات المؤسسة' : '🏪 معلومات الفرع'}</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                            <div class="request-field"><span class="label">الاسم</span><span class="value">${entity?.name || '-'}</span></div>
-                            ${!isInstitution && request.institution ? `<div class="request-field"><span class="label">المؤسسة التابعة</span><span class="value" style="color:#818cf8;font-weight:bold;">${request.institution.name}</span></div>` : ''}
-                            <div class="request-field"><span class="label">السجل التجاري</span><span class="value">${entity?.taxId || '-'}</span></div>
-                            <div class="request-field"><span class="label">الهاتف</span><span class="value">${entity?.phoneNumber || pendingData.phoneNumber || '-'}</span></div>
-                            <div class="request-field"><span class="label">البريد</span><span class="value">${entity?.email || pendingData.email || '-'}</span></div>
-                            <div class="request-field"><span class="label">تاريخ الانتهاء المتوقع</span><span class="value">${formatDate(displayEndDate)}</span></div>
-                        </div>
+                const plan = request.plan || availablePlans.find(p => p.id === request.planId);
+                const planName = plan ? (i18n.isRTL() ? plan.name : (plan.nameEn || plan.name)) : (request.customDurationMonths + ' شهر');
+                const planDuration = plan ? plan.durationMonths : request.customDurationMonths;
 
-                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
-                            <h4 style="color: #f59e0b; margin-bottom: 1rem; font-size: 0.9rem;">👤 بيانات المدير المسئول</h4>
+                const calculatedEndDate = new Date();
+                calculatedEndDate.setMonth(calculatedEndDate.getMonth() + (planDuration || 0));
+                const displayEndDate = request.requestedEndDate ? new Date(request.requestedEndDate) : calculatedEndDate;
+
+                content.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                            <h4 style="color: #818cf8; margin-bottom: 1rem;">${isInstitution ? '🏛️ ' + t('requests.details_modal.entity_info_institution') : '🏪 ' + t('requests.details_modal.entity_info_branch')}</h4>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                                <div class="request-field">
-                                    <span class="label">الاسم</span>
-                                    <span class="value">${manager?.name || manager?.displayName || '-'}</span>
-                                </div>
-                                <div class="request-field">
-                                    <span class="label">البريد</span>
-                                    <span class="value">${manager?.email || '-'}</span>
-                                </div>
-                                <div class="request-field">
-                                    <span class="label">الهاتف</span>
-                                    <span class="value">${manager?.phoneNumber || manager?.phone || '-'}</span>
-                                </div>
-                                <div class="request-field">
-                                    <span class="label">الحالة</span>
-                                    <span class="value">${manager?.isActive !== false ? '<span style="color: #10b981;">✅ نشط</span>' : '<span style="color: #ef4444;">❌ غير نشط</span>'}</span>
+                                <div class="request-field"><span class="label">${t('requests.details_modal.name')}</span><span class="value">${entity?.name || '-'}</span></div>
+                                ${!isInstitution && request.institution ? `<div class="request-field"><span class="label">${t('requests.list.parent_institution')}</span><span class="value" style="color:#818cf8;font-weight:bold;">${request.institution.name}</span></div>` : ''}
+                                <div class="request-field"><span class="label">${t('requests.details_modal.tax_id')}</span><span class="value">${entity?.taxId || '-'}</span></div>
+                                <div class="request-field"><span class="label">${t('requests.details_modal.phone')}</span><span class="value">${entity?.phoneNumber || pendingData.phoneNumber || '-'}</span></div>
+                                <div class="request-field"><span class="label">${t('requests.details_modal.email')}</span><span class="value">${entity?.email || pendingData.email || '-'}</span></div>
+                                <div class="request-field"><span class="label">${t('requests.details_modal.expected_end_date')}</span><span class="value">${formatDate(displayEndDate)}</span></div>
+                            </div>
+
+                            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                                <h4 style="color: #f59e0b; margin-bottom: 1rem; font-size: 0.9rem;">👤 ${t('requests.details_modal.manager_info')}</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                    <div class="request-field">
+                                        <span class="label">${t('requests.details_modal.name')}</span>
+                                        <span class="value">${manager?.name || manager?.displayName || '-'}</span>
+                                    </div>
+                                    <div class="request-field">
+                                        <span class="label">${t('requests.details_modal.email')}</span>
+                                        <span class="value">${manager?.email || '-'}</span>
+                                    </div>
+                                    <div class="request-field">
+                                        <span class="label">${t('requests.details_modal.phone')}</span>
+                                        <span class="value">${manager?.phoneNumber || manager?.phone || '-'}</span>
+                                    </div>
+                                    <div class="request-field">
+                                        <span class="label">${t('requests.details_modal.status')}</span>
+                                        <span class="value">${manager?.isActive !== false ? '<span style="color: #10b981;">✅ ' + t('requests.details_modal.active') + '</span>' : '<span style="color: #ef4444;">❌ ' + t('requests.details_modal.inactive') + '</span>'}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
-                        <h4 style="color: #64748b; margin-bottom: 1rem;">📝 الملاحظات</h4>
-                        <div class="request-field"><span class="label">ملاحظات العميل</span><span class="value">${request.notes ? translateNote(request.notes) : '-'}</span></div>
-                        <div class="request-field"><span class="label">ملاحظات المشرف</span><span class="value">${request.adminNotes || '-'}</span></div>
-                    </div>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
-                        <h4 style="color: #a855f7; margin-bottom: 1rem;">💎 بيانات الاشتراك</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                            <div class="request-field"><span class="label">الباقة</span><span class="value" style="color:#a855f7;">${planName}</span></div>
-                            <div class="request-field">
-    <span class="label">المبلغ</span>
-    <span class="value amount">${request.isFree ? 'مجاني' : (request.amount || plan?.price) + ' ' + t('my_subscription.currency')}</span>
-</div>
-                            <div class="request-field"><span class="label">عدد المستخدمين</span><span class="value">${pendingData.maxUsers || entity?.maxUsers || 1}</span></div>
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                            <h4 style="color: #64748b; margin-bottom: 1rem;">📝 <span data-i18n-key="requests.list.notes">الملاحظات</span></h4>
+                            <div class="request-field"><span class="label">${t('requests.details_modal.customer_notes')}</span><span class="value">${request.notes ? translateNote(request.notes) : '-'}</span></div>
+                            <div class="request-field"><span class="label">${t('requests.process_modal.admin_notes')}</span><span class="value">${request.adminNotes || '-'}</span></div>
                         </div>
                     </div>
-                </div>
-            `;
-            document.getElementById('detailsModal').classList.add('active');
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem;">
+                            <h4 style="color: #a855f7; margin-bottom: 1rem;">💎 ${t('requests.details_modal.subscription_info')}</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <div class="request-field"><span class="label">${t('requests.list.plan_label')}</span><span class="value" style="color:#a855f7;">${planName}</span></div>
+                                <div class="request-field">
+                                    <span class="label">${t('requests.list.amount_label')}</span>
+                                    <span class="value amount">${request.isFree ? t('requests.list.free') : (request.amount || plan?.price) + ' ' + t('my_subscription.currency')}</span>
+                                </div>
+                                <div class="request-field"><span class="label">${t('requests.details_modal.users_count')}</span><span class="value">${pendingData.maxUsers || entity?.maxUsers || 1}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('detailsModal').classList.add('active');
+            } catch (e) {
+                console.error('Error in openDetailsModal:', e);
+                showToast('حدث خطأ أثناء عرض التفاصيل', 'error');
+            }
         }
 
         function closeDetailsModal() { document.getElementById('detailsModal').classList.remove('active'); }
 
         async function openEditModal(requestId) {
-            const request = allRequests.find(r => r.id === requestId);
+            let request = allRequests.find(r => r.id === requestId);
             if (!request) return;
+
+            // Fetch full details to ensure we have relations (users, etc.)
+            try {
+                document.body.style.cursor = 'wait';
+                const fullRequest = await api.subscriptions.getRequestById(requestId);
+                if (fullRequest) request = fullRequest;
+            } catch (e) {
+                console.warn('Could not fetch full request details, using list data', e);
+            } finally {
+                document.body.style.cursor = 'default';
+            }
+
             editingRequest = request;
             if (availablePlans.length === 0) await loadPlans();
             const isInstitution = request.requesterType === 'Institution';
-            let pd = {}; try { if (request.pendingData) pd = JSON.parse(request.pendingData); } catch (e) { }
+            let pd = request.pendingData;
+            if (typeof pd === 'string') { try { pd = JSON.parse(pd); } catch (e) { pd = {}; } }
+            if (!pd) pd = {};
             const entity = isInstitution ? request.institution : request.branch;
             document.getElementById('editInstName').value = entity?.name || pd.name || '';
             document.getElementById('editInstTaxId').value = entity?.taxId || pd.taxId || '';
@@ -1228,30 +1304,67 @@
                     expDate = d.toISOString();
                 }
             }
-            document.getElementById('editInstExpiration').value = expDate ? expDate.split('T')[0] : '';
+            let dateStr = '';
+            if (expDate) {
+                if (typeof expDate === 'string') dateStr = expDate.split('T')[0];
+                else if (expDate instanceof Date) dateStr = expDate.toISOString().split('T')[0];
+                else try { dateStr = new Date(expDate).toISOString().split('T')[0]; } catch (e) { }
+            }
+            document.getElementById('editInstExpiration').value = dateStr;
             document.getElementById('editInstCanCreateBranches').checked = pd.canCreateBranches !== false;
             document.getElementById('editNotes').value = request.notes || '';
             document.getElementById('editAdminNotes').value = request.adminNotes || '';
             document.getElementById('editAmount').value = request.amount || '';
             document.getElementById('editSelectedPlanId').value = request.planId || '';
-            document.getElementById('editAdminName').value = pd.adminName || pd.userName || pd.managerName || '';
-            document.getElementById('editAdminEmail').value = pd.adminEmail || pd.userEmail || pd.managerEmail || '';
-            document.getElementById('editAdminPhone').value = pd.adminPhoneNumber || pd.userPhoneNumber || pd.managerPhoneNumber || '';
-            document.getElementById('editAdminIsActive').checked = pd.adminIsActive !== false && pd.userIsActive !== false;
+            // For existing entities (Renewal), try to get manager info from users list if not in pendingData
+            let managerName = pd.adminName || pd.userName || pd.managerName || '';
+            let managerEmail = pd.adminEmail || pd.userEmail || pd.managerEmail || '';
+            let managerPhone = pd.adminPhoneNumber || pd.userPhoneNumber || pd.managerPhoneNumber || '';
+            let managerIsActive = pd.adminIsActive !== false && pd.userIsActive !== false;
+
+            if (!managerName && entity && entity.users) {
+                // Try to find the manager user (Role 2 for Institution, 3 for Branch)
+                const manager = entity.users.find(u => u.roleId === 2 || u.roleId === 3) || entity.users[0];
+                if (manager) {
+                    managerName = manager.name;
+                    managerEmail = manager.email;
+                    managerPhone = manager.phoneNumber;
+                    managerIsActive = manager.isActive;
+                }
+            }
+
+            document.getElementById('editAdminName').value = managerName;
+            document.getElementById('editAdminEmail').value = managerEmail;
+            document.getElementById('editAdminPhone').value = managerPhone;
+            document.getElementById('editAdminIsActive').checked = managerIsActive;
             renderEditPlans();
             document.getElementById('editModal').classList.add('active');
         }
 
         function closeEditModal() { document.getElementById('editModal').classList.remove('active'); }
 
+        function calculateNewExpiration(durationMonths) {
+            const isInstitution = editingRequest.requesterType === 'Institution';
+            const entity = isInstitution ? editingRequest.institution : editingRequest.branch;
+            let baseDate = new Date();
+
+            // If entity has a future expiration date, use it as base
+            if (entity && entity.expirationDate) {
+                const currentExp = new Date(entity.expirationDate);
+                if (currentExp > baseDate) baseDate = currentExp;
+            }
+
+            const d = new Date(baseDate);
+            d.setMonth(d.getMonth() + durationMonths);
+            return d.toISOString().split('T')[0];
+        }
+
         function selectEditPlan(planId) {
             document.getElementById('editSelectedPlanId').value = planId;
             const plan = availablePlans.find(p => p.id === planId);
             if (plan) {
                 document.getElementById('editAmount').value = plan.price;
-                const d = new Date();
-                d.setMonth(d.getMonth() + plan.durationMonths);
-                document.getElementById('editInstExpiration').value = d.toISOString().split('T')[0];
+                document.getElementById('editInstExpiration').value = calculateNewExpiration(plan.durationMonths);
             }
             renderEditPlans();
         }
@@ -1268,7 +1381,11 @@
 
         async function saveEditRequest() {
             if (!editingRequest) return;
-            const pd = JSON.parse(editingRequest.pendingData || '{}');
+            let pd = editingRequest.pendingData || {};
+            // If request is renewal, pendingData might be null/string "null", so init as empty object
+            if (typeof pd === 'string') { try { pd = JSON.parse(pd); } catch (e) { pd = {}; } }
+            if (!pd) pd = {};
+
             const data = {
                 amount: parseFloat(document.getElementById('editAmount').value),
                 planId: parseInt(document.getElementById('editSelectedPlanId').value),
@@ -1288,6 +1405,10 @@
                     userName: document.getElementById('editAdminName').value,
                     userEmail: document.getElementById('editAdminEmail').value,
                     userPhoneNumber: document.getElementById('editAdminPhone').value,
+                    // Preserve or update activation status
+                    adminIsActive: document.getElementById('editAdminIsActive').checked,
+                    userIsActive: document.getElementById('editAdminIsActive').checked,
+                    canCreateBranches: document.getElementById('editInstCanCreateBranches').checked
                 })
             };
             try {

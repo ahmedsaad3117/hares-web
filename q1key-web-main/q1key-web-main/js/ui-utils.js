@@ -90,9 +90,9 @@
           <span class="item-to-delete">${itemName}</span>
         </div>
         <div class="modal-card-footer">
-          <button class="btn btn-secondary" onclick="closeDeleteModal()">${t('common.button.cancel') || 'Cancel'}</button>
+          <button class="btn btn-secondary" onclick="closeDeleteModal()">${t('common.button.cancel') || 'إلغاء'}</button>
           <button class="btn btn-danger" id="confirmDeleteBtn">
-            ${confirmText || t('common.button.confirm_delete') || 'Confirm Delete'}
+            ${confirmText || t('common.button.confirm_delete') || 'تأكيد الحذف'}
           </button>
         </div>
       </div>
@@ -151,9 +151,9 @@
     const { title, message, subMessage, confirmText, onConfirm, icon = '✨', btnClass = 'btn-primary' } = options;
 
     // Determine theme color based on btnClass
-    let themeColor = '#6366f1'; // Default Indigo
-    let themeBg = 'rgba(99, 102, 241, 0.1)';
-    let themeBorder = 'rgba(99, 102, 241, 0.3)';
+    let themeColor = '#ef4444'; // Red (Changed from #6366f1)
+    let themeBg = 'rgba(239, 68, 68, 0.1)';
+    let themeBorder = 'rgba(239, 68, 68, 0.3)';
 
     if (btnClass.includes('success')) {
       themeColor = '#10b981'; // Emerald Green
@@ -181,9 +181,9 @@
           ${subMessage ? `<span class="item-to-delete" style="color: ${themeColor}; border-color: ${themeBorder}; background: ${themeBg};">${subMessage}</span>` : ''}
         </div>
         <div class="modal-card-footer">
-          <button class="btn btn-secondary" onclick="closeConfirmModal()">${t('common.button.cancel') || 'Cancel'}</button>
+          <button class="btn btn-secondary" onclick="closeConfirmModal()">${t('common.button.cancel') || 'إلغاء'}</button>
           <button class="btn ${btnClass}" id="confirmActionBtn">
-            ${confirmText || 'Confirm'}
+            ${confirmText || t('common.button.confirm') || 'تأكيد'}
           </button>
         </div>
       </div>
@@ -416,36 +416,34 @@
    * Handle saving support settings
    */
   async function saveSupportSettings() {
-    const saveBtn = document.getElementById('saveSupportBtn');
     const wa = document.getElementById('supportWhatsapp').value.trim();
     const em = document.getElementById('supportEmail').value.trim();
 
-    if (saveBtn) {
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = 'Saving...';
-    }
+    showConfirmModal({
+      title: t('help.save_settings') || 'حفظ الإعدادات',
+      message: t('help.save_confirm_msg') || 'هل أنت متأكد من حفظ تغييرات بيانات التواصل؟',
+      confirmText: t('common.button.save') || 'حفظ',
+      icon: '💾',
+      btnClass: 'btn-primary',
+      onConfirm: async () => {
+        try {
+          console.log('Saving support info:', { whatsapp: wa, email: em });
+          await window.api.settings.updateSupportInfo({ whatsapp: wa, email: em });
+          showToast(t('common.message.success') || 'تم التحديث بنجاح', 'success');
 
-    try {
-      console.log('Saving support info:', { whatsapp: wa, email: em });
-
-      await window.api.settings.updateSupportInfo({ whatsapp: wa, email: em });
-      showToast('Support info updated successfully', 'success');
-
-      // Force close
-      const modal = document.getElementById('helpModal');
-      if (modal) {
-        modal.classList.remove('show');
-        setTimeout(() => modal.remove(), 300);
+          // Force close Help Modal
+          const modal = document.getElementById('helpModal');
+          if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.remove(), 300);
+          }
+        } catch (error) {
+          console.error('Save error:', error);
+          showToast(t('common.message.error') + ': ' + (error.message || 'Unknown error.'), 'error');
+          throw error;
+        }
       }
-    } catch (error) {
-      console.error('Save error:', error);
-      alert('Error saving settings: ' + (error.message || 'Unknown error. Check console.'));
-
-      if (saveBtn) {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = 'Save Changes';
-      }
-    }
+    });
   }
 
   /**
@@ -506,6 +504,7 @@
     global.openHelpModal = openHelpModal;
     global.toggleSidebar = toggleSidebar;
     global.t = t; // Ensure translation fallback is global
+    global.saveSupportSettings = saveSupportSettings;
     global.debounce = debounce;
 
     console.log('UI Utils loaded successfully');
