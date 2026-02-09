@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Search Logs - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=12">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -59,6 +59,7 @@
                 <th data-i18n-key="search_logs.log_id">Log ID</th>
                 <th data-i18n-key="search_logs.customer">Customer</th>
                 <th data-i18n-key="search_logs.user">User</th>
+                <th data-i18n-key="search_logs.institution">Institution</th>
                 <th data-i18n-key="search_logs.search_query">Search Query</th>
                 <th data-i18n-key="search_logs.type">Type</th>
                 <th data-i18n-key="search_logs.ip_address">IP Address</th>
@@ -68,7 +69,7 @@
             </thead>
             <tbody id="searchLogsTableBody">
               <tr>
-                <td colspan="8" style="text-align: center; padding: 3rem;">
+                <td colspan="9" style="text-align: center; padding: 3rem;">
                   <div class="spinner" style="margin: 0 auto;"></div>
                 </td>
               </tr>
@@ -86,9 +87,9 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast"></div>
 
-  <script src="../js/api.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <script src="../js/api.js?v=4"></script>
+  <script src="../components/sidebar.js?v=12"></script>
+  <script src="../components/header.js?v=3"></script>
   <script src="../components/pagination.js"></script>
   <script>
     // Toast notification
@@ -136,7 +137,7 @@
       } catch (error) {
         console.error('Error loading search logs:', error);
         showToast(t('search_logs.failed_to_load'), 'error');
-        document.getElementById('searchLogsTableBody').innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('search_logs.failed_to_load')}</td></tr>`;
+        document.getElementById('searchLogsTableBody').innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('search_logs.failed_to_load')}</td></tr>`;
       }
     }
 
@@ -170,7 +171,7 @@
       const tbody = document.getElementById('searchLogsTableBody');
 
       if (logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('search_logs.no_logs')}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('search_logs.no_logs')}</td></tr>`;
         return;
       }
 
@@ -200,13 +201,20 @@
             </div>
           </td>
           <td>
+            <div class="text-secondary">${log.institutionName || '--'}</div>
+          </td>
+          <td>
             <div class="text-sm" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;" title="${log.searchQuery}">
-              ${log.searchQuery.replace('View customer', t('search_logs.view_customer') || 'عرض سجل العميل')}
+              ${log.searchQuery
+            .replace('View customer', t('search_logs.view') + ' ' + t('dashboard.activity.customer_generic'))
+            .replace('Search for customer', t('search_logs.search') + ' ' + t('dashboard.activity.customer_generic'))
+            .replace('Edit customer', t('search_logs.edit') + ' ' + t('dashboard.activity.customer_generic'))
+            .replace('List customers', t('search_logs.list') + ' ' + t('customers.title'))}
             </div>
           </td>
           <td>
             <span style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: ${typeColor}20; color: ${typeColor}; border: 1px solid ${typeColor}40;">
-              ${log.searchType}
+              ${t('search_logs.' + log.searchType) || log.searchType}
             </span>
           </td>
           <td class="text-sm text-muted">${log.ipAddress || 'N/A'}</td>
@@ -290,6 +298,13 @@
       }
 
       const user = getCurrentUser();
+
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
+      }
 
       // Only Super Admin can access
       if (user.roleName !== 'Super Admin') {

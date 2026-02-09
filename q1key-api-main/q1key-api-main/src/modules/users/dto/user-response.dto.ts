@@ -12,6 +12,7 @@ export class UserResponseDto {
   roleName?: string;
   institutionName?: string;
   branchName?: string;
+  expirationDate?: string | Date | null;
 
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);

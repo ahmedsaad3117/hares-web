@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Details - Q1KEY Platform</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css?v=12">
     <script src="../js/i18n.js"></script>
 </head>
 
@@ -92,8 +92,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-8"
-                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div class="grid grid-responsive-lg gap-8">
                         <div class="info-section">
                             <h3 class="text-sm font-bold text-muted uppercase mb-4" data-i18n-key="users.personal_info">
                                 Personal Information</h3>
@@ -129,8 +128,7 @@
                         </div>
                     </div>
 
-                    <div
-                        style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; gap: 2rem;">
+                    <div class="border-t border-white-10 pt-8 mt-8 grid grid-cols-2 gap-8">
                         <div>
                             <p class="text-muted text-xs mb-1" data-i18n-key="users.created_at">Created At</p>
                             <p id="createdAt" class="text-white text-sm"></p>
@@ -145,10 +143,10 @@
         </div>
     </div>
 
-    <script src="../js/api.js"></script>
-    <script src="../js/ui-utils.js"></script>
-    <script src="../components/sidebar.js?v=4"></script>
-    <script src="../components/header.js"></script>
+    <script src="../js/api.js?v=4"></script>
+    <script src="../js/ui-utils.js?v=3"></script>
+    <script src="../components/sidebar.js?v=12"></script>
+    <script src="../components/header.js?v=3"></script>
     <script>
         async function initPage() {
             await waitForI18n();
@@ -156,6 +154,13 @@
             if (!isAuthenticated()) {
                 window.location.href = '../index.html';
                 return;
+            }
+
+            // Refresh profile to get latest subscription data
+            try {
+                await api.auth.getProfile();
+            } catch (e) {
+                console.error('Failed to refresh profile:', e);
             }
 
             const user = getCurrentUser();
@@ -167,6 +172,15 @@
             initializeLanguageSwitcher();
             setActiveNav('users');
             window.i18n.translatePage();
+
+            // Enforce RTL if Arabic
+            if (localStorage.getItem('locale') !== 'en') {
+                document.getElementById('userContainer').dir = 'rtl';
+                document.getElementById('userContainer').style.textAlign = 'right';
+                // REVERSE HEADER: Keep Name Left and Dots Right (LTR) even in Arabic
+                const headerRow = document.querySelector('#userContainer .glass-card > .flex.items-center.justify-between');
+                if (headerRow) headerRow.style.direction = 'ltr';
+            }
 
             // Load user data
             await loadUserData();
@@ -197,9 +211,21 @@
                 document.getElementById('userInitial').textContent = userData.name.charAt(0).toUpperCase();
                 document.getElementById('userEmail').textContent = userData.email;
                 document.getElementById('userPhone').textContent = userData.phoneNumber || '--';
-                document.getElementById('userRole').textContent = userData.roleName;
-                document.getElementById('userInstitution').textContent = userData.institution?.name || 'N/A';
-                document.getElementById('userBranch').textContent = userData.branch?.name || 'N/A';
+                // Translate Role
+                const roleMap = {
+                    'Super Admin': t('users.roles.super_admin') || 'مدير عام',
+                    'Institution': t('users.roles.institution') || 'مؤسسة User', // Fallback to 'مؤسسة' if translation missing
+                    'Branch': t('users.roles.branch') || 'فرع'
+                };
+                // Specific fix for "Institution" role usually mapping to 'مؤسسة'
+                if (userData.roleName === 'Institution') roleMap['Institution'] = t('users.roles.institution') || 'مؤسسة';
+
+                document.getElementById('userRole').textContent = roleMap[userData.roleName] || userData.roleName;
+
+                // Fix property access (API returns flattened institutionName/branchName) and translate N/A
+                const naText = t('common.na') || 'لا يوجد';
+                document.getElementById('userInstitution').textContent = userData.institutionName || userData.institution?.name || naText;
+                document.getElementById('userBranch').textContent = userData.branchName || userData.branch?.name || naText;
                 document.getElementById('createdAt').textContent = formatDateTime(userData.createdAt);
                 document.getElementById('updatedAt').textContent = formatDateTime(userData.updatedAt);
 
@@ -208,7 +234,7 @@
                 statusBadge.className = `badge ${userData.isActive ? 'badge-success' : 'badge-danger'}`;
 
                 const toggleActiveText = document.getElementById('toggleActiveText');
-                toggleActiveText.textContent = userData.isActive ? 'Deactivate' : 'Activate';
+                toggleActiveText.textContent = userData.isActive ? (t('users.deactivate') || 'تعطيل') : (t('users.activate') || 'تفعيل');
 
                 document.getElementById('editBtn').href = `users-edit.html?id=${targetUserId}`;
 
@@ -234,16 +260,22 @@
             let preventDelete = false;
             let reason = '';
 
-            // 1. Prevent self-deletion
+            // 1. Prevent self-deletion AND self-deactivation
             if (parseInt(targetUserId) === currentUser.userId) {
                 preventDelete = true;
-                reason = "You cannot delete your own account";
+                // Add restriction for deactivation
+                if (toggleActiveBtn) {
+                    toggleActiveBtn.disabled = true;
+                    toggleActiveBtn.classList.add('opacity-50');
+                    toggleActiveBtn.title = t('users.cannot_deactivate_own_account') || "لا يمكن تعطيل حسابك الخاص";
+                }
+                reason = t('users.cannot_manage_own_account') || "لا يمكنك حذف أو تعطيل حسابك الخاص";
             }
 
             // 2. Prevent Super Admin deletion by non-super admins (though roles guard should handle it)
             if (userData.roleName === 'Super Admin' && currentUser.roleName !== 'Super Admin') {
                 preventDelete = true;
-                reason = "Only Super Admins can manage other Super Admin accounts";
+                reason = t('users.only_super_admin_manage') || "فقط المدير العام يمكنه إدارة حسابات المدراء العموميين";
             }
 
             // 3. SPECIAL RULE: Protect Master Admin (admin@q1key.com)

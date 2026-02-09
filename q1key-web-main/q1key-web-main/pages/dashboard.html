@@ -13,7 +13,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=11">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -33,7 +33,7 @@
             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
             <rect x="6" y="14" width="12" height="8" />
           </svg>
-          <span>Print</span>
+          <span data-i18n-key="common.button.print">طباعة</span>
         </button>
       </div>
 
@@ -42,81 +42,82 @@
 
       <!-- Installments Report Card -->
       <div class="glass-card p-6 mb-8">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-          <h2 class="text-xl font-bold text-white" data-i18n-key="dashboard.installments_report.title">Installments
-            Report</h2>
-          <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.from_date">From
-                Date</label>
-              <input type="date" id="fromDate" class="input"
-                style="padding: 0.5rem; font-size: 0.875rem; min-width: 140px;" />
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold text-white" data-i18n-key="dashboard.installments_report.title">تقرير الأقساط
+          </h2>
+          <div class="flex items-center gap-3">
+            <div class="flex flex-col gap-1">
+              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.from_date">من تاريخ</label>
+              <input type="date" id="fromDate" class="input input-date" />
             </div>
-            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.to_date">To Date</label>
-              <input type="date" id="toDate" class="input"
-                style="padding: 0.5rem; font-size: 0.875rem; min-width: 140px;" />
+            <div class="flex flex-col gap-1">
+              <label class="text-muted text-sm" data-i18n-key="dashboard.installments_report.to_date">إلى تاريخ</label>
+              <input type="date" id="toDate" class="input input-date" />
             </div>
-            <button id="filterInstallments" class="btn btn-primary" style="margin-top: 1.25rem; padding: 0.5rem 1rem;"
-              data-i18n-key="dashboard.installments_report.filter">Filter</button>
+            <button id="filterInstallments" class="btn btn-primary mt-5 px-4 py-2"
+              data-i18n-key="dashboard.installments_report.filter">تصفية</button>
           </div>
         </div>
 
-        <div id="installmentsStats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
-          <div
-            style="padding: 1.5rem; border-radius: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
-            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-              <div style="font-size: 1.5rem;">📅</div>
-              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.total_due">Total Due</span>
+        <div id="installmentsStats" class="premium-dashboard-grid" style="margin-bottom: 0;">
+          <div class="premium-card theme-blue">
+            <div class="premium-icon-box">📅</div>
+            <div class="premium-content">
+              <div class="premium-value" id="totalDueInstallments">0</div>
+              <div class="premium-label">
+                <span data-i18n-key="dashboard.installments_report.total_due">إجمالي المستحق</span>
+              </div>
+              <div class="text-lg font-bold text-blue-400 mt-2" id="totalDueAmount">0.00</div>
             </div>
-            <div class="text-white font-bold text-2xl" id="totalDueInstallments">0</div>
-            <div class="text-primary text-xl font-bold" id="totalDueAmount">0.00 ر.س</div>
           </div>
 
-          <div
-            style="padding: 1.5rem; border-radius: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);">
-            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-              <div style="font-size: 1.5rem;">✅</div>
-              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.paid">Paid</span>
+          <div class="premium-card theme-emerald">
+            <div class="premium-icon-box">✅</div>
+            <div class="premium-content">
+              <div class="premium-value" id="paidInstallments">0</div>
+              <div class="premium-label">
+                <span data-i18n-key="dashboard.installments_report.paid">المدفوع</span>
+              </div>
+              <div class="text-lg font-bold text-emerald-400 mt-2" id="paidAmount">0.00</div>
             </div>
-            <div class="text-white font-bold text-2xl" id="paidInstallments">0</div>
-            <div style="color: #10b981;" class="text-xl font-bold" id="paidAmount">0.00 ر.س</div>
           </div>
 
-          <div
-            style="padding: 1.5rem; border-radius: 12px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
-            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-              <div style="font-size: 1.5rem;">⏳</div>
-              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.pending">Pending</span>
+          <div class="premium-card theme-amber">
+            <div class="premium-icon-box">⏳</div>
+            <div class="premium-content">
+              <div class="premium-value" id="pendingInstallments">0</div>
+              <div class="premium-label">
+                <span data-i18n-key="dashboard.installments_report.pending">قيد الانتظار</span>
+              </div>
+              <div class="text-lg font-bold text-amber-400 mt-2" id="pendingAmount">0.00</div>
             </div>
-            <div class="text-white font-bold text-2xl" id="pendingInstallments">0</div>
-            <div style="color: #f59e0b;" class="text-xl font-bold" id="pendingAmount">0.00 ر.س</div>
           </div>
 
-          <div
-            style="padding: 1.5rem; border-radius: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
-            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-              <div style="font-size: 1.5rem;">⚠️</div>
-              <span class="text-muted text-sm" data-i18n-key="dashboard.installments_report.overdue">Overdue</span>
+          <div class="premium-card theme-rose">
+            <div class="premium-icon-box">⚠️</div>
+            <div class="premium-content">
+              <div class="premium-value" id="overdueInstallments">0</div>
+              <div class="premium-label">
+                <span data-i18n-key="dashboard.installments_report.overdue">متأخر</span>
+              </div>
+              <div class="text-lg font-bold text-rose-400 mt-2" id="overdueAmount">0.00</div>
             </div>
-            <div class="text-white font-bold text-2xl" id="overdueInstallments">0</div>
-            <div style="color: #ef4444;" class="text-xl font-bold" id="overdueAmount">0.00 ر.س</div>
           </div>
         </div>
       </div>
 
       <!-- Quick Actions and Recent Activity -->
-      <div class="grid grid-cols-2 gap-4 mb-8"
-        style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+      <div class="grid grid-cols-2 gap-6 mb-8">
         <!-- Quick Actions -->
-        <div class="glass-card p-6">
-          <h2 class="text-xl font-bold text-white mb-6" data-i18n-key="dashboard.quick_actions">Quick Actions</h2>
-          <div id="quickActions" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+        <div class="glass-card p-4">
+          <h2 class="text-base font-bold text-white mb-3" data-i18n-key="dashboard.quick_actions">إجراءات سريعة</h2>
+          <div id="quickActions" class="flex flex-col gap-2"></div>
         </div>
 
         <!-- Recent Activity -->
         <div class="glass-card p-6">
-          <h2 class="text-xl font-bold text-white mb-6" data-i18n-key="dashboard.recent_activity">Recent Activity</h2>
+          <h2 class="text-xl font-bold text-white mb-6" data-i18n-key="dashboard.recent_activity.title">النشاط الأخير
+          </h2>
           <div id="recentActivity" style="display: flex; flex-direction: column; gap: 0.75rem;">
             <div class="loading-container">
               <div class="spinner"></div>
@@ -127,11 +128,15 @@
     </div>
   </div>
 
-  <script src="../js/config.js"></script>
-  <script src="../js/api.js"></script>
-  <script src="../js/ui-utils.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <!-- Force correct API config before any external scripts -->
+  <script>
+    window.API_CONFIG = { baseUrl: 'http://localhost:3001/api' };
+  </script>
+  <script src="../js/config.js?v=3"></script>
+  <script src="../js/api.js?v=4"></script>
+  <script src="../js/ui-utils.js?v=3"></script>
+  <script src="../components/sidebar.js?v=5"></script>
+  <script src="../components/header.js?v=3"></script>
   <script>
     console.log('Dashboard loading...');
     console.log('Token:', getToken()?.substring(0, 20) + '...');
@@ -147,7 +152,7 @@
       } else {
         console.log('Authentication passed!');
         try {
-          initializeDashboard();
+          await initializeDashboard();
         } catch (error) {
           console.error('Error initializing dashboard:', error);
         }
@@ -161,7 +166,14 @@
       startDashboard();
     }
 
-    function initializeDashboard() {
+    async function initializeDashboard() {
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
+      }
+
       const user = getCurrentUser();
       console.log('Initializing dashboard for user:', user);
 
@@ -174,7 +186,7 @@
 
       // Render sidebar and header with translations
       document.getElementById('sidebar').innerHTML = createSidebar(user);
-      document.getElementById('header').innerHTML = createHeader(t('dashboard.title'), t('dashboard.welcome_back') + ', ' + user.name);
+      document.getElementById('header').innerHTML = createHeader(t('navigation.dashboard'), t('dashboard.welcome_back') + ', ' + user.name);
 
       // Initialize language switcher after header is rendered
       initializeLanguageSwitcher();
@@ -219,56 +231,52 @@
           const stats = await api.institutions.getStatistics(user.institutionId);
           console.log('Institution stats:', stats);
 
-          // Render institution stats
+          // Render institution stats (Premium Design)
           const statsHTML = `
-            <a href="branches.html" style="text-decoration: none; color: inherit;">
-            <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-              <div class="flex items-center justify-between mb-4">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-                  🏢
+            <div class="premium-dashboard-grid">
+              <a href="branches.html" class="premium-card theme-blue clickable-card">
+                <div class="premium-icon-box">🏢</div>
+                <div class="premium-content">
+                  <div class="premium-value">${stats.totalBranches}</div>
+                  <div class="premium-label">
+                    ${t('dashboard.stats.total_branches')}
+                    <span class="premium-indicator" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">${t('dashboard.stats.locations')}</span>
+                  </div>
                 </div>
-                <span class="badge badge-info">${stats.totalBranches}</span>
-              </div>
-              <div class="stat-card-value">${stats.totalBranches}</div>
-              <div class="stat-card-label">${t('dashboard.stats.total_branches')}</div>
-            </div>
-            </a>
-            
-            <a href="customers.html" style="text-decoration: none; color: inherit;">
-            <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-              <div class="flex items-center justify-between mb-4">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-                  👥
+              </a>
+              
+              <a href="customers.html" class="premium-card theme-indigo clickable-card">
+                <div class="premium-icon-box">👥</div>
+                <div class="premium-content">
+                  <div class="premium-value">${stats.totalCustomers}</div>
+                  <div class="premium-label">
+                    ${t('dashboard.stats.total_customers')}
+                    <span class="premium-indicator" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">${t('dashboard.stats.all_time')}</span>
+                  </div>
                 </div>
-                <span class="badge badge-success">${stats.totalCustomers}</span>
-              </div>
-              <div class="stat-card-value">${stats.totalCustomers}</div>
-              <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
-            </div>
-            </a>
-            
-            <a href="loans.html" style="text-decoration: none; color: inherit;">
-            <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-              <div class="flex items-center justify-between mb-4">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-                  💰
+              </a>
+              
+              <a href="loans.html" class="premium-card theme-emerald clickable-card">
+                <div class="premium-icon-box">💰</div>
+                <div class="premium-content">
+                  <div class="premium-value">${stats.totalLoans}</div>
+                  <div class="premium-label">
+                    ${t('dashboard.stats.total_loans')}
+                    <span class="premium-indicator" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">${t('dashboard.stats.disbursed')}</span>
+                  </div>
                 </div>
-                <span class="badge badge-success">${stats.totalLoans}</span>
-              </div>
-              <div class="stat-card-value">${stats.totalLoans}</div>
-              <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
-            </div>
-            </a>
-            
-            <div class="glass-card stat-card">
-              <div class="flex items-center justify-between mb-4">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
-                  ⚠️
+              </a>
+              
+              <a href="loans.html?filter=late" class="premium-card theme-amber clickable-card">
+                <div class="premium-icon-box">⚠️</div>
+                <div class="premium-content">
+                  <div class="premium-value">${stats.lateLoans || 0}</div>
+                  <div class="premium-label">
+                    ${t('dashboard.stats.late_loans')}
+                    <span class="premium-indicator" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">${t('dashboard.stats.late')}</span>
+                  </div>
                 </div>
-                <span class="badge badge-warning">${stats.lateLoans || 0}</span>
-              </div>
-              <div class="stat-card-value">${stats.lateLoans || 0}</div>
-              <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
+              </a>
             </div>
           `;
 
@@ -298,77 +306,69 @@
         const loanStats = await api.loans.getStatistics();
         console.log('Loan stats:', loanStats);
 
-        // Render stats
+        // Render stats (Premium Design)
         const statsHTML = `
-        ${user.roleName === 'Super Admin' ? `
-        <a href="institutions.html" style="text-decoration: none; color: inherit;">
-        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-          <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(139, 92, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-              🏛️
-            </div>
-            <span class="badge badge-info">${institutions.length}</span>
+          <div class="premium-dashboard-grid">
+            ${user.roleName === 'Super Admin' ? `
+            <a href="institutions.html" class="premium-card theme-violet clickable-card">
+              <div class="premium-icon-box">🏛️</div>
+              <div class="premium-content">
+                <div class="premium-value">${institutions.length}</div>
+                <div class="premium-label">
+                  ${t('dashboard.stats.total_institutions')}
+                  <span class="premium-indicator" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa;">${t('common.label.active')}</span>
+                </div>
+              </div>
+            </a>
+            ` : ''}
+            
+            ${user.roleName !== 'Branch' ? `
+            <a href="branches.html" class="premium-card theme-blue clickable-card">
+              <div class="premium-icon-box">🏢</div>
+              <div class="premium-content">
+                <div class="premium-value">${branches.length}</div>
+                <div class="premium-label">
+                  ${t('dashboard.stats.total_branches')}
+                  <span class="premium-indicator" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">${user.institutionId ? t('institutions.details') : t('dashboard.stats.all_time')}</span>
+                </div>
+              </div>
+            </a>
+            ` : ''}
+            
+            <a href="customers.html" class="premium-card theme-indigo clickable-card">
+              <div class="premium-icon-box">👥</div>
+              <div class="premium-content">
+                <div class="premium-value">${customers.length}</div>
+                <div class="premium-label">
+                  ${t('dashboard.stats.total_customers')}
+                  <span class="premium-indicator" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">${t('customers.verified')}</span>
+                </div>
+              </div>
+            </a>
+            
+            <a href="loans.html" class="premium-card theme-emerald clickable-card">
+              <div class="premium-icon-box">💰</div>
+              <div class="premium-content">
+                <div class="premium-value">${loanStats.total}</div>
+                <div class="premium-label">
+                  ${t('dashboard.stats.total_loans')}
+                  <span class="premium-indicator" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">${loanStats.byStatus.active || 0} ${t('common.label.active')}</span>
+                </div>
+              </div>
+            </a>
+            
+            <a href="loans.html?filter=late" class="premium-card theme-amber clickable-card">
+              <div class="premium-icon-box">⚠️</div>
+              <div class="premium-content">
+                <div class="premium-value">${loanStats.byStatus.late || 0}</div>
+                <div class="premium-label">
+                  ${t('dashboard.stats.late_loans')}
+                  <span class="premium-indicator" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">${t('dashboard.stats.late')}</span>
+                </div>
+              </div>
+            </a>
           </div>
-          <div class="stat-card-value">${institutions.length}</div>
-          <div class="stat-card-label">${t('dashboard.stats.total_institutions')}</div>
-        </div>
-        </a>
-        ` : ''}
-        
-        ${user.roleName !== 'Branch' ? `
-        <a href="branches.html" style="text-decoration: none; color: inherit;">
-        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-          <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-              🏢
-            </div>
-            <span class="badge badge-info">${branches.length}</span>
-          </div>
-          <div class="stat-card-value">${branches.length}</div>
-          <div class="stat-card-label">${t('dashboard.stats.total_branches')}</div>
-        </div>
-        </a>
-        ` : ''}
-        
-        <a href="customers.html" style="text-decoration: none; color: inherit;">
-        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-          <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-              👥
-            </div>
-            <span class="badge badge-success">${customers.length}</span>
-          </div>
-          <div class="stat-card-value">${customers.length}</div>
-          <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
-        </div>
-        </a>
-        
-        <a href="loans.html" style="text-decoration: none; color: inherit;">
-        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-          <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-              💰
-            </div>
-            <span class="badge badge-success">${loanStats.byStatus.active || 0}</span>
-          </div>
-          <div class="stat-card-value">${loanStats.total}</div>
-          <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
-        </div>
-        </a>
-        
-        <a href="loans.html?filter=late" style="text-decoration: none; color: inherit;">
-        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-          <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-              ⚠️
-            </div>
-            <span class="badge badge-warning">${loanStats.byStatus.late || 0}</span>
-          </div>
-          <div class="stat-card-value">${loanStats.byStatus.late || 0}</div>
-          <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
-        </div>
-        </a>
-      `;
+        `;
 
         document.getElementById('statsGrid').innerHTML = statsHTML;
 
@@ -390,57 +390,54 @@
     async function loadBranchDashboard(branchId) {
       const dashboardData = await api.branches.getDashboard(branchId);
 
-      // Render branch-specific stats
+      // Render branch-specific stats (Premium Design)
       const statsHTML = `
-        <a href="customers.html" style="text-decoration: none; color: inherit;">
-        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-          <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-              👥
+        <div class="premium-dashboard-grid">
+          <a href="customers.html" class="premium-card theme-indigo clickable-card">
+            <div class="premium-icon-box">👥</div>
+            <div class="premium-content">
+              <div class="premium-value">${dashboardData.metrics.totalCustomers}</div>
+              <div class="premium-label">
+                ${t('dashboard.stats.total_customers')}
+                <span class="premium-indicator" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">${t('customers.verified')}</span>
+              </div>
             </div>
-            <span class="badge badge-success">${dashboardData.metrics.totalCustomers}</span>
-          </div>
-          <div class="stat-card-value">${dashboardData.metrics.totalCustomers}</div>
-          <div class="stat-card-label">${t('dashboard.stats.total_customers')}</div>
-        </div>
-        </a>
-        
-        <a href="loans.html" style="text-decoration: none; color: inherit;">
-        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-          <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-              💰
+          </a>
+          
+          <a href="loans.html" class="premium-card theme-emerald clickable-card">
+            <div class="premium-icon-box">💰</div>
+            <div class="premium-content">
+              <div class="premium-value">${dashboardData.metrics.totalLoans}</div>
+              <div class="premium-label">
+                ${t('dashboard.stats.total_loans')}
+                <span class="premium-indicator" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">${dashboardData.metrics.activeLoans} ${t('common.label.active')}</span>
+              </div>
             </div>
-            <span class="badge badge-success">${dashboardData.metrics.activeLoans}</span>
-          </div>
-          <div class="stat-card-value">${dashboardData.metrics.totalLoans}</div>
-          <div class="stat-card-label">${t('dashboard.stats.total_loans')}</div>
-        </div>
-        </a>
-        
-        <a href="loans.html?filter=late" style="text-decoration: none; color: inherit;">
-        <div class="glass-card stat-card" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-          <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-              ⚠️
+          </a>
+          
+          <a href="loans.html?filter=late" class="premium-card theme-amber clickable-card">
+            <div class="premium-icon-box">⚠️</div>
+            <div class="premium-content">
+              <div class="premium-value">${dashboardData.metrics.lateLoans}</div>
+              <div class="premium-label">
+                ${t('dashboard.stats.late_loans')}
+                <span class="premium-indicator" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">${t('dashboard.stats.late')}</span>
+              </div>
             </div>
-            <span class="badge badge-warning">${dashboardData.metrics.lateLoans}</span>
-          </div>
-          <div class="stat-card-value">${dashboardData.metrics.lateLoans}</div>
-          <div class="stat-card-label">${t('dashboard.stats.late_loans')}</div>
-        </div>
-        </a>
-        
-        <div class="glass-card stat-card">
-          <div class="flex items-center justify-between mb-4">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-center; font-size: 1.5rem;">
-              📊
+          </a>
+          
+          <div class="premium-card theme-blue">
+            <div class="premium-icon-box">📊</div>
+            <div class="premium-content">
+              <div class="premium-value" style="font-size: 2rem;">${formatCurrency(dashboardData.metrics.totalPortfolioValue)}</div>
+              <div class="premium-label">
+                ${t('dashboard.stats.total_portfolio')}
+                <span class="premium-indicator" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">${t('common.label.total')}</span>
+              </div>
             </div>
           </div>
-          <div class="stat-card-value">${formatCurrency(dashboardData.metrics.totalPortfolioValue)}</div>
-          <div class="stat-card-label">${t('dashboard.stats.total_portfolio')}</div>
         </div>
-      `;
+        `;
 
       document.getElementById('statsGrid').innerHTML = statsHTML;
 
@@ -457,23 +454,25 @@
     function renderQuickActions() {
       const user = getCurrentUser();
       const actions = [
-        { icon: '👤', title: t('dashboard.actions.add_customer'), subtitle: t('dashboard.actions.add_customer_desc'), href: 'customers-new.html' },
-        { icon: '💰', title: t('dashboard.actions.issue_loan'), subtitle: t('dashboard.actions.issue_loan_desc'), href: 'loans-new.html' },
+        { icon: '👤', title: t('dashboard.actions.add_customer'), subtitle: t('dashboard.actions.add_customer_desc'), href: 'customers-new.html', color: 'indigo' },
+        { icon: '💰', title: t('dashboard.actions.issue_loan'), subtitle: t('dashboard.actions.issue_loan_desc'), href: 'loans-new.html', color: 'emerald' },
       ];
 
       if (user.roleName === 'Super Admin' || user.role_name === 'Super Admin') {
-        actions.push({ icon: '🏛️', title: t('dashboard.actions.add_institution'), subtitle: t('dashboard.actions.add_institution_desc'), href: 'institutions-new.html' });
+        actions.push({ icon: '🏛️', title: t('dashboard.actions.add_institution'), subtitle: t('dashboard.actions.add_institution_desc'), href: 'institutions-new.html', color: 'violet' });
       }
 
       const actionsHTML = actions.map(action => `
-        <a href="${action.href}" class="flex items-center gap-3 p-4 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-200" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); text-decoration: none; transition: all 0.2s ease;">
-          <div style="font-size: 1.5rem;">${action.icon}</div>
+        <a href="${action.href}" class="glass-card p-4 flex items-center gap-4 transition-all duration-300 hover:bg-white/10 group" style="text-decoration: none; border-left: 4px solid transparent;">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300" style="width: 48px; height: 48px; background: rgba(255,255,255,0.05);">
+            ${action.icon}
+          </div>
           <div>
-            <p class="text-white font-medium">${action.title}</p>
+            <h3 class="font-bold text-white text-lg group-hover:text-${action.color}-400 transition-colors">${action.title}</h3>
             <p class="text-sm text-muted">${action.subtitle}</p>
           </div>
         </a>
-      `).join('');
+        `).join('');
 
       document.getElementById('quickActions').innerHTML = actionsHTML;
     }
@@ -523,33 +522,54 @@
     }
 
     function renderRecentActivity(activities) {
+      const container = document.getElementById('recentActivity');
       if (!activities || activities.length === 0) {
-        document.getElementById('recentActivity').innerHTML = `<p class="text-muted text-sm">${t('dashboard.activity.no_activity')}</p>`;
+        container.innerHTML = `<div class="text-muted p-4 text-center">${t('dashboard.recent_activity.empty') || 'لا يوجد نشاط مؤخراً'}</div>`;
         return;
       }
 
-      const activityHTML = activities.slice(0, 5).map(activity => {
-        const icon = activity.type === 'loan_created' ? '💰' :
-          activity.type === 'customer_added' ? '👤' :
-            activity.type === 'payment_received' ? '💳' : '📝';
+      const activitiesHTML = activities.slice(0, 5).map(activity => {
+        let icon = '📝';
+        let color = '#6366f1';
+        const desc = activity.description || '';
+
+        if (desc.includes('قرض') || desc.includes('Loan')) {
+          icon = '💰';
+          color = '#10b981';
+        } else if (desc.includes('عميل') || desc.includes('Customer')) {
+          icon = '👤';
+          color = '#818cf8';
+        } else if (desc.includes('فرع') || desc.includes('Branch')) {
+          icon = '🏢';
+          color = '#3b82f6';
+        } else if (desc.includes('مؤسسة') || desc.includes('Institution')) {
+          icon = '🏛️';
+          color = '#a78bfa';
+        }
 
         return `
-          <div class="flex items-center gap-3 p-3 rounded-lg bg-white/5" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-radius: 8px; background: rgba(255, 255, 255, 0.05);">
-            <div style="font-size: 1.25rem;">${icon}</div>
-            <div style="flex: 1;">
-              <p class="text-white text-sm">${activity.description}</p>
-              <p class="text-muted text-sm">${formatDateTime(activity.timestamp)}</p>
+          <div class="activity-card-new" style="--accent: ${color}">
+            <div class="activity-icon-new">${icon}</div>
+            <div class="activity-info-new">
+              <div class="activity-desc-new">${desc}</div>
+              <div class="activity-time-new">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                ${formatDateTime(activity.timestamp || activity.createdAt)}
+              </div>
             </div>
           </div>
         `;
       }).join('');
 
-      document.getElementById('recentActivity').innerHTML = activityHTML;
+      container.innerHTML = `<div class="activity-container-new">${activitiesHTML}</div>`;
     }
 
-    // Load installments report
-    async function loadInstallmentsReport(fromDate = null, toDate = null) {
+    // Load installments report - Optimized with single API call
+    async function loadInstallmentsReport(fromDateInitial = null, toDateInitial = null) {
       try {
+        let fromDate = fromDateInitial;
+        let toDate = toDateInitial;
+
         // Set default dates if not provided
         if (!fromDate) {
           const today = new Date();
@@ -564,55 +584,35 @@
           document.getElementById('toDate').value = toDate;
         }
 
-        // Fetch all loans with installments
-        const loansResponse = await api.loans.getAll(1, 1000);
-        const loans = loansResponse.data || [];
-
-        let allInstallments = [];
-
-        // Fetch installments for each loan
-        for (const loan of loans) {
-          try {
-            const installments = await api.loans.getInstallments(loan.loanId);
-            allInstallments = allInstallments.concat(installments);
-          } catch (error) {
-            console.error(`Error fetching installments for loan ${loan.loanId}:`, error);
-          }
-        }
-
-        // Filter installments by date range
-        const fromDateObj = new Date(fromDate);
-        const toDateObj = new Date(toDate);
-        toDateObj.setHours(23, 59, 59, 999); // Include the entire end date
-
-        const filteredInstallments = allInstallments.filter(inst => {
-          const dueDate = new Date(inst.dueDate);
-          return dueDate >= fromDateObj && dueDate <= toDateObj;
+        // Fetch optimized report from server
+        // This replaces the previous N+1 logic that fetched all loans and all installments
+        const report = await api.reports.getInstallmentsReport({
+          startDate: fromDate,
+          endDate: toDate
         });
 
-        // Calculate statistics
-        const totalDue = filteredInstallments.length;
-        const paid = filteredInstallments.filter(i => i.status === 'Paid');
-        const pending = filteredInstallments.filter(i => i.status === 'Pending');
-        const overdue = filteredInstallments.filter(i => i.status === 'Overdue');
-
-        const totalDueAmount = filteredInstallments.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
-        const paidAmount = paid.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
-        const pendingAmount = pending.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
-        const overdueAmount = overdue.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+        const stats = report.totals || { count: 0, totalAmount: 0, paidCount: 0, pendingCount: 0, overdueCount: 0 };
 
         // Update UI
-        document.getElementById('totalDueInstallments').textContent = totalDue;
-        document.getElementById('totalDueAmount').textContent = formatCurrency(totalDueAmount);
+        document.getElementById('totalDueInstallments').textContent = stats.count;
+        document.getElementById('totalDueAmount').textContent = formatCurrency(stats.totalAmount);
 
-        document.getElementById('paidInstallments').textContent = paid.length;
-        document.getElementById('paidAmount').textContent = formatCurrency(paidAmount);
+        document.getElementById('paidInstallments').textContent = stats.paidCount;
+        document.getElementById('paidAmount').textContent = formatCurrency(stats.paidAmount || (report.byStatus.find(s => s.status === 'Paid')?.amount || 0));
 
-        document.getElementById('pendingInstallments').textContent = pending.length;
-        document.getElementById('pendingAmount').textContent = formatCurrency(pendingAmount);
+        // Use backend byStatus data for accurate mapping
+        const paidData = report.byStatus.find(s => s.status === 'Paid') || { count: 0, amount: 0 };
+        const pendingData = report.byStatus.find(s => s.status === 'Pending') || { count: 0, amount: 0 };
+        const overdueData = report.byStatus.find(s => s.status === 'Overdue') || { count: 0, amount: 0 };
 
-        document.getElementById('overdueInstallments').textContent = overdue.length;
-        document.getElementById('overdueAmount').textContent = formatCurrency(overdueAmount);
+        document.getElementById('paidInstallments').textContent = paidData.count;
+        document.getElementById('paidAmount').textContent = formatCurrency(paidData.amount);
+
+        document.getElementById('pendingInstallments').textContent = pendingData.count;
+        document.getElementById('pendingAmount').textContent = formatCurrency(pendingData.amount);
+
+        document.getElementById('overdueInstallments').textContent = overdueData.count;
+        document.getElementById('overdueAmount').textContent = formatCurrency(overdueData.amount);
 
       } catch (error) {
         console.error('Error loading installments report:', error);
@@ -647,34 +647,42 @@
       const content = document.querySelector('.page-content').innerHTML;
       const printWindow = window.open('', '', 'height=600,width=800');
 
-      printWindow.document.write('<html><head><title>Print Dashboard</title>');
+      printWindow.document.write('<html><head><title>' + (t('common.button.print') || 'طباعة لوحة التحكم') + '</title>');
       printWindow.document.write('<style>');
       printWindow.document.write(`
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; padding: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; padding: 20px; direction: ${i18n.isRTL() ? 'rtl' : 'ltr'}; }
         h1 { text-align: center; color: #4f46e5; margin-bottom: 20px; }
-        .glass-card { 
-          border: 1px solid #ccc; 
-          padding: 15px; 
-          margin-bottom: 20px; 
-          border-radius: 8px; 
-          background: #fff; /* White background for print */
-          color: #333; /* Dark text for print */
-          box-shadow: none;
-        }
-        .text-white { color: #333 !important; }
-        .text-muted { color: #666 !important; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .stat-card { text-align: center; }
-        .stat-card-value { font-size: 24px; font-weight: bold; margin: 10px 0; }
+        .glass-card, .premium-card {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        background: #fff!important;
+        color: #333!important;
+        box-shadow: none!important;
+        backdrop-filter: none!important;
+      }
+        .premium-dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+        .text-white, .premium-value { color: #333!important; text-shadow: none!important; -webkit-text-fill-color: initial!important; background: none!important; }
+        .text-muted, .premium-label { color: #666!important; }
+        .premium-value { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
         .grid { display: grid; gap: 20px; }
         .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-        .badge { padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; }
+        .badge, .premium-indicator { padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; background: #eee!important; color: #333!important; }
+        .premium-icon-box { float: left; margin-right: 15px; width: 40px; height: 40px; font-size: 20px; border: 1px solid #ddd; background: #f5f5f5!important; color: #333!important; box-shadow: none!important; }
+        .premium-content { overflow: hidden; } /* clearfix */
         a { text-decoration: none; color: inherit; }
-        /* Hide actions in print */
         .flex.justify-end { display: none; }
+        /* Hide dynamic hover effects */
+        .premium-card:hover { transform: none!important; box-shadow: none!important; }
       `);
       printWindow.document.write('</style></head><body>');
-      printWindow.document.write(`<h1>Q1KEY Dashboard - ${new Date().toLocaleString()}</h1>`);
+      printWindow.document.write(`<h1>${t('navigation.dashboard')} - Q1KEY</h1>`);
+      printWindow.document.write(`<div style="text-align: center; margin-bottom: 20px; color: #666;">${new Date().toLocaleString()}</div>`);
       printWindow.document.write(content);
       printWindow.document.write('</body></html>');
 

@@ -86,19 +86,19 @@ export class ProductsController {
 
   @Patch(':id')
   @Roles('Super Admin', 'Institution', 'Branch')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(+id, updateProductDto);
+  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto, @Request() req) {
+    return this.productsService.update(+id, updateProductDto, req.user);
   }
 
   @Patch(':id/toggle-active')
   @Roles('Super Admin', 'Institution', 'Branch')
-  toggleActive(@Param('id') id: string) {
-    return this.productsService.toggleActive(+id);
+  toggleActive(@Param('id') id: string, @Request() req) {
+    return this.productsService.toggleActive(+id, req.user);
   }
 
   @Delete(':id')
   @Roles('Super Admin', 'Institution', 'Branch')
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
+  remove(@Param('id') id: string, @Request() req) {
+    return this.productsService.remove(+id, req.user);
   }
 }

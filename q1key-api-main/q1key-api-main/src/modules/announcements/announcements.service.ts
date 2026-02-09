@@ -2,22 +2,31 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Announcement } from '../../entities/announcement.entity';
+import { CacheService, CACHE_KEYS, CACHE_TTL } from '../../common/cache';
 
 @Injectable()
 export class AnnouncementsService {
     constructor(
         @InjectRepository(Announcement)
         private announcementRepo: Repository<Announcement>,
+        private cacheService: CacheService,
     ) { }
 
     /**
      * Get the currently active announcement
+     * CACHED: 5 minutes
      */
     async getActiveAnnouncement(): Promise<Announcement | null> {
-        return this.announcementRepo.findOne({
-            where: { isActive: true },
-            order: { updatedAt: 'DESC' },
-        });
+        return this.cacheService.get(
+            CACHE_KEYS.ANNOUNCEMENT_ACTIVE,
+            async () => {
+                return this.announcementRepo.findOne({
+                    where: { isActive: true },
+                    order: { updatedAt: 'DESC' },
+                });
+            },
+            CACHE_TTL.SHORT // 5 minutes
+        );
     }
 
     /**
@@ -64,7 +73,9 @@ export class AnnouncementsService {
             createdBy: userId,
         });
 
-        return this.announcementRepo.save(announcement);
+        const saved = await this.announcementRepo.save(announcement);
+        this.cacheService.invalidate(CACHE_KEYS.ANNOUNCEMENT_ACTIVE);
+        return saved;
     }
 
     /**
@@ -83,7 +94,9 @@ export class AnnouncementsService {
         }
 
         Object.assign(announcement, dto);
-        return this.announcementRepo.save(announcement);
+        const saved = await this.announcementRepo.save(announcement);
+        this.cacheService.invalidate(CACHE_KEYS.ANNOUNCEMENT_ACTIVE);
+        return saved;
     }
 
     /**
@@ -102,7 +115,9 @@ export class AnnouncementsService {
         }
 
         announcement.isActive = !announcement.isActive;
-        return this.announcementRepo.save(announcement);
+        const saved = await this.announcementRepo.save(announcement);
+        this.cacheService.invalidate(CACHE_KEYS.ANNOUNCEMENT_ACTIVE);
+        return saved;
     }
 
     /**
@@ -116,6 +131,7 @@ export class AnnouncementsService {
         }
 
         await this.announcementRepo.delete(id);
+        this.cacheService.invalidate(CACHE_KEYS.ANNOUNCEMENT_ACTIVE);
         return { message: 'تم حذف الإعلان بنجاح' };
     }
 }

@@ -21,7 +21,8 @@
       "view": "عرض",
       "confirm_delete": "تأكيد الحذف",
       "add": "إضافة",
-      "reset": "إعادة تعيين"
+      "reset": "إعادة تعيين",
+      "print": "طباعة"
     },
     "message": {
       "loading": "جاري التحميل...",
@@ -55,7 +56,24 @@
     },
     "required": "*",
     "cancel": "إلغاء",
-    "delete": "حذف"
+    "delete": "حذف",
+    "subscription_expired_notice": "اشتراكك منتهٍ، يرجى تجديد الاشتراك لاستعادة الوصول إلى كافة الخدمات.",
+    "status": {
+      "active": "نشط",
+      "paid": "مدفوع",
+      "late": "متأخر",
+      "finished": "منتهي",
+      "pending": "قيد الانتظار",
+      "overdue": "متأخر",
+      "cancelled": "ملغي",
+      "approved": "مُعتمد",
+      "rejected": "مرفوض",
+      "trusted": "موثوق",
+      "unverified": "غير موثق",
+      "suspicious": "مشبوه",
+      "flagged": "مُعلَّم",
+      "blocked": "محظور"
+    }
   },
   "navigation": {
     "dashboard": "لوحة التحكم",
@@ -80,7 +98,10 @@
     "title": "لوحة التحكم",
     "welcome_back": "مرحباً بعودتك",
     "quick_actions": "إجراءات سريعة",
-    "recent_activity": "النشاط الأخير",
+    "recent_activity": {
+      "title": "النشاط الأخير",
+      "empty": "لا يوجد نشاط مؤخراً"
+    },
     "stats": {
       "total_institutions": "إجمالي المؤسسات",
       "total_branches": "إجمالي الفروع",
@@ -89,7 +110,11 @@
       "late_loans": "القروض المتأخرة",
       "active_loans": "القروض النشطة",
       "pending_loans": "القروض المعلقة",
-      "total_portfolio": "إجمالي المحفظة"
+      "total_portfolio": "إجمالي المحفظة",
+      "locations": "الفروع",
+      "all_time": "إجمالي الوقت",
+      "disbursed": "تم الصرف",
+      "late": "متأخر"
     },
     "actions": {
       "add_customer": "إضافة عميل",
@@ -139,7 +164,8 @@
       "network_error": "خطأ في الشبكة. يرجى المحاولة مرة أخرى.",
       "required_email": "البريد الإلكتروني مطلوب",
       "required_password": "كلمة المرور مطلوبة",
-      "invalid_email": "يرجى إدخال بريد إلكتروني صحيح"
+      "invalid_email": "يرجى إدخال بريد إلكتروني صحيح",
+      "already_logged_in": "الحساب مفتوح حالياً في جهاز آخر. يرجى تسجيل الخروج من الجهاز الآخر أو الانتظار لمدة 30 دقيقة من الخمول لتمكن من الدخول مجدداً."
     }
   },
   "customers": {
@@ -238,7 +264,6 @@
       "notes_title": "ملاحظات العميل",
       "show_notes": "عرض الملاحظات",
       "hide_notes": "إخفاء الملاحظات",
-      "add_note": "إضافة ملاحظة",
       "note_text": "نص الملاحظة",
       "note_text_placeholder": "أدخل نص الملاحظة (الحد الأقصى 1400 حرف)",
       "category": "الفئة",
@@ -297,7 +322,29 @@
       "status_no_change": "لم يتم تغيير الحالة",
       "status_updated_success": "تم تحديث حالة الثقة بنجاح",
       "delete_confirm_title": "تأكيد حذف العميل",
-      "delete_warning": "تحذير: سيتم حذف ملف العميل وجميع بياناته بشكل دائم. هذا الإجراء نهائي ولا يمكن التراجع عنه."
+      "delete_warning": "تحذير: سيتم حذف ملف العميل وجميع بياناته بشكل دائم. هذا الإجراء نهائي ولا يمكن التراجع عنه.",
+      "customer_record": "سجل العميل",
+      "show_record": "عرض السجل",
+      "hide_record": "إخفاء السجل",
+      "no_loans_title": "لا توجد قروض",
+      "no_loans_desc": "لا توجد قروض مسجلة لهذا العميل حالياً",
+      "no_logs_title": "لا توجد سجلات بحث",
+      "no_logs_desc": "لم يتم البحث عن هذا العميل من قبل أي مؤسسة أخرى",
+      "no_notes_title": "لا توجد ملاحظات",
+      "no_notes_desc": "يمكنك إضافة ملاحظات خاصة بهذا العميل",
+      "add_note": "إضافة ملاحظة",
+      "note_placeholder": "أضف ملاحظة جديدة..."
+    },
+    "tabs": {
+      "loans": "القروض",
+      "search_logs": "سجلات البحث",
+      "notes": "الملاحظات"
+    },
+    "notes": {
+      "general": "عام",
+      "follow_up": "متابعة",
+      "complaint": "شكوى",
+      "payment_issue": "مشكلة دفع"
     }
   },
   "loans": {
@@ -325,6 +372,7 @@
     "id": "الرقم",
     "customer": "العميل",
     "branch": "الفرع",
+    "institution": "المؤسسة",
     "product": "المنتج",
     "amount": "المبلغ",
     "payment_plan": "خطة الدفع",
@@ -388,7 +436,8 @@
       "available_capacity": "السعة المتاحة",
       "capacity_warning": "تحذير السعة",
       "at_capacity": "بلغت السعة القصوى",
-      "capacity_limit_exceeded": "تم تجاوز سعة الفرع - القرض سيتعدى الحد المسموح"
+      "capacity_limit_exceeded": "تم تجاوز سعة الفرع - القرض سيتعدى الحد المسموح",
+      "main_treasury": "الخزينة الرئيسية (الإدارة)"
     },
     "status": {
       "pending": "قيد الانتظار",
@@ -537,6 +586,8 @@
       "total_customers": "إجمالي العملاء",
       "active_loans_count": "عدد القروض النشطة",
       "recent_loans": "القروض الأخيرة",
+      "no_loans": "لم يتم العثور على قروض",
+      "unlimited": "غير محدد",
       "no_loans_found": "لم يتم العثور على قروض لهـذا الفرع",
       "delete_prevented_hint": "لا يمكن حذف الفرع لوجود بيانات مرتبطة به",
       "delete_prevented_msg": "تم منع الحذف: هذا الفرع مرتبط بعملاء أو قروض أو أعضاء فريق. يرجى نقل أو حذف هذه البيانات أولاً.",
@@ -560,6 +611,7 @@
     "view_institution_info": "عرض معلومات المؤسسة",
     "max_users": "الحد الأقصى للمستخدمين",
     "created": "تاريخ الإنشاء",
+    "view_stats": "عرض الإحصائيات",
     "details": "التفاصيل",
     "edit": "تعديل",
     "delete": "حذف",
@@ -611,7 +663,7 @@
     },
     "view_page": {
       "institution_id": "رقم المؤسسة",
-      "tax_id": "الرقم الضريبي",
+      "tax_id": "السجل التجاري",
       "phone_number": "رقم الهاتف",
       "email": "البريد الإلكتروني",
       "max_users": "الحد الأقصى للمستخدمين",
@@ -651,6 +703,10 @@
       "title": "تعديل منتج",
       "product_id": "رقم المنتج"
     },
+    "view_page": {
+      "title": "تفاصيل المنتج",
+      "subtitle": "عرض إعدادات وتفاصيل المنتج"
+    },
     "create_new_product": "إنشاء منتج قرض جديد",
     "update_product_info": "تحديث معلومات المنتج",
     "id": "الرقم",
@@ -660,6 +716,9 @@
     "status": "الحالة",
     "created": "تاريخ الإنشاء",
     "actions": "الإجراءات",
+    "visibility": "الظهور",
+    "visible": "مرئي",
+    "hidden": "مخفي",
     "active": "نشط",
     "inactive": "غير نشط",
     "global": "عام",
@@ -713,7 +772,11 @@
       "updating": "جاري التحديث...",
       "loading_details": "جاري تحميل تفاصيل المنتج...",
       "updated_success": "تم تحديث المنتج بنجاح",
-      "update_failed": "فشل تحديث المنتج"
+      "update_failed": "فشل تحديث المنتج",
+      "visibility_label": "ظهور المنتج",
+      "visible_to_branches": "مرئي للفروع",
+      "status_active": "نشط",
+      "status_inactive": "غير نشط"
     }
   },
   "users": {
@@ -772,6 +835,12 @@
     "deleted_success": "تم حذف المستخدم بنجاح",
     "update_failed": "فشل تحديث حالة المستخدم",
     "delete_failed": "فشل حذف المستخدم",
+    "force_logout": "خروج إجباري",
+    "force_logout_confirm": "هل أنت متأكد من تسجيل خروج",
+    "force_logout_desc": "سيتم إنهاء الجلسة الحالية للمستخدم فوراً.",
+    "confirm_logout": "تسجيل خروج",
+    "logout_success": "تم تسجيل خروج المستخدم بنجاح",
+    "logout_failed": "فشل في تسجيل خروج المستخدم",
     "roles": {
       "super_admin": "مشرف",
       "institution": "مؤسسة",
@@ -812,7 +881,11 @@
       "create_failed": "فشل إنشاء المستخدم",
       "inline_error": "جميع الحقول مطلوبة (الاسم والبريد الإلكتروني وكلمة المرور).",
       "password_min_error": "يجب أن تكون كلمة المرور 6 أحرف على الأقل."
-    }
+    },
+    "cannot_delete_own_account": "لا يمكنك حذف حسابك الخاص",
+    "cannot_deactivate_own_account": "لا يمكن تعطيل حسابك الخاص",
+    "cannot_manage_own_account": "لا يمكنك حذف أو تعطيل حسابك الخاص",
+    "only_super_admin_manage": "فقط المدير العام يمكنه إدارة حسابات المدراء العموميين"
   },
   "tools": {
     "title": "الأدوات",
@@ -823,7 +896,9 @@
       "plans": "إدارة باقات الاشتراكات",
       "plans_desc": "تعديل الأسعار وإدارة الباقات",
       "homepage": "إدارة الصفحة الرئيسية",
-      "homepage_desc": "تخصيص الصفحة الرئيسية العامة"
+      "homepage_desc": "تخصيص الصفحة الرئيسية العامة",
+      "quicklinks": "إدارة الروابط",
+      "quicklinks_desc": "إضافة روابط سريعة للوحة التحكم"
     },
     "announcements": {
       "title": "الإعلانات والتنبيهات",
@@ -884,7 +959,15 @@
       "sections_visibility": "إظهار/إخفاء الأقسام",
       "features_section": "قسم المميزات",
       "about_section": "قسم من نحن",
-      "footer_section": "الفوتر"
+      "footer_section": "الفوتر",
+      "save_confirm_title": "حفظ الإعدادات",
+      "save_confirm_msg": "هل أنت متأكد من حفظ التغييرات على الصفحة الرئيسية؟"
+    },
+    "quicklinks": {
+      "title": "إدارة الروابط السريعة",
+      "create": "إضافة رابط جديد",
+      "description": "أضف روابط سريعة تظهر في أعلى لوحة التحكم. يمكنك إضافة روابط لمواقع مهمة مثل يوتيوب، تويتر، أو أي موقع آخر.",
+      "no_links": "لا توجد روابط سريعة"
     }
   },
   "my_subscription": {
@@ -952,6 +1035,51 @@
     "save": "حفظ التغييرات",
     "cancel": "إلغاء",
     "close": "إغلاق"
+  },
+  "users": {
+    "title": "المستخدمون",
+    "user_details": "إدارة المستخدمين والصلاحيات",
+    "add_user": "إضافة مستخدم",
+    "search_placeholder": "بحث بالاسم، البريد أو المؤسسة...",
+    "id": "#",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "role": "الدور",
+    "institution": "المؤسسة",
+    "branch": "الفرع",
+    "institution_branch": "المؤسسة / الفرع",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "force_logout": "خروج إجباري",
+    "view_details": "عرض التفاصيل",
+    "edit": "تعديل",
+    "activate": "تفعيل",
+    "deactivate": "تعطيل",
+    "user": "المستخدم",
+    "activate_confirm": "هل أنت متأكد من تفعيل هذا المستخدم؟",
+    "deactivate_confirm": "هل أنت متأكد من تعطيل هذا المستخدم؟",
+    "activated_success": "تم تفعيل المستخدم بنجاح",
+    "deactivated_success": "تم تعطيل المستخدم بنجاح",
+    "update_failed": "فشل تحديث حالة المستخدم",
+    "force_logout_confirm": "هل أنت متأكد من تسجيل خروج",
+    "force_logout_desc": "سيتم إنهاء الجلسة الحالية للمستخدم فوراً.",
+    "confirm_logout": "تسجيل خروج",
+    "logout_success": "تم تسجيل خروج المستخدم بنجاح",
+    "logout_failed": "فشل في تسجيل خروج المستخدم",
+    "delete_confirm_title": "حذف المستخدم",
+    "delete_confirm": "هل أنت متأكد من حذف هذا المستخدم؟",
+    "deleted_success": "تم حذف المستخدم بنجاح",
+    "delete_failed": "فشل حذف المستخدم",
+    "failed_to_load": "فشل تحميل المستخدمين",
+    "no_users": "لا يوجد مستخدمين",
+    "details": "بيانات المستخدم",
+    "roles": {
+      "super_admin": "مدير النظام",
+      "institution": "مدير مؤسسة",
+      "branch": "مدير فرع"
+    }
   },
   "subscriptions": {
     "title": "الاشتراكات",
@@ -1102,6 +1230,7 @@
     }
   },
   "installments": {
+    "no_installments_found": "لم يتم العثور على أقساط",
     "title": "أقساط الدفع",
     "subtitle": "تتبع وإدارة جداول سداد القروض",
     "view_installment": "عرض قسط",
@@ -1222,6 +1351,7 @@
     "log_id": "رقم السجل",
     "customer": "العميل",
     "user": "المستخدم",
+    "institution": "المؤسسة",
     "search_query": "استعلام البحث",
     "type": "النوع",
     "ip_address": "عنوان IP",
@@ -1286,6 +1416,10 @@
       "branch": "الفرع",
       "from_date": "من تاريخ",
       "to_date": "إلى تاريخ",
+      "scope": "نطاق التقرير",
+      "scope_institutions": "تقارير المؤسسات",
+      "scope_admin": "تقارير الإدارة العليا",
+      "main_treasury": "الخزينة الرئيسية (الإدارة)",
       "apply": "تطبيق الفلاتر",
       "reset": "إعادة تعيين"
     },
@@ -1355,6 +1489,65 @@
       "last_activity": "آخر نشاط",
       "total_loans": "عدد القروض",
       "status": "الحالة"
+    }
+  },
+  "subscriptions": {
+    "title": "إدارة الاشتراكات",
+    "subtitle": "متابعة اشتراكات المؤسسات والفروع وتواريخ انتهائها",
+    "stats": {
+      "total_institutions": "إجمالي المؤسسات",
+      "active_subscriptions": "اشتراكات نشطة",
+      "expiring_soon": "تنتهي خلال 30 يوم",
+      "expired": "منتهية الصلاحية"
+    },
+    "search": {
+      "placeholder": "بحث بالاسم، البريد الإلكتروني، أو اسم المؤسسة...",
+      "status_all": "جميع الحالات",
+      "status_active": "نشط",
+      "status_expiring": "تنتهي قريباً",
+      "status_expired": "منتهية",
+      "status_inactive": "غير نشط",
+      "type_all": "كل الأنواع",
+      "type_institution": "مؤسسات فقط",
+      "type_branch": "فروع فقط"
+    },
+    "table": {
+      "type": "النوع",
+      "name": "الاسم",
+      "institution": "المؤسسة التابعة",
+      "email": "البريد الإلكتروني",
+      "expiration_date": "تاريخ الانتهاء",
+      "days_remaining": "المدة المتبقية",
+      "status": "الحالة",
+      "actions": "إجراءات",
+      "loading": "جاري تحميل البيانات...",
+      "empty": "لا توجد اشتراكات تطابق بحثك"
+    },
+    "type": {
+      "institution": "مؤسسة",
+      "branch": "فرع",
+      "from_institution": "تابع للمؤسسة"
+    },
+    "status": {
+      "active": "نشط",
+      "expiring": "تشارف على الانتهاء",
+      "expired": "منتهية",
+      "inactive": "معطل"
+    },
+    "days": {
+      "day": "يوم",
+      "today": "تنتهي اليوم",
+      "overdue": "يوم (تأخير)"
+    },
+    "actions": {
+      "extend": "تمديد"
+    },
+    "extend_modal": {
+      "title": "تمديد الاشتراك",
+      "name_label": "اسم المؤسسة/الفرع",
+      "date_label": "تاريخ الانتهاء الجديد",
+      "cancel": "إلغاء",
+      "save": "حفظ التغييرات"
     }
   }
 }

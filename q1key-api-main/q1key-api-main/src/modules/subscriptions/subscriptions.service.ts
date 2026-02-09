@@ -10,6 +10,7 @@ import { CashBox, CashBoxType } from '../../entities/cash-box.entity';
 import { CashBoxTransaction, TransactionType } from '../../entities/cash-box-transaction.entity';
 import { UsersService } from '../users/users.service';
 import { User } from '../../entities/user.entity';
+import { CacheService, CACHE_KEYS, CACHE_TTL } from '../../common/cache';
 
 @Injectable()
 export class SubscriptionsService {
@@ -30,6 +31,7 @@ export class SubscriptionsService {
         private userRepo: Repository<User>,
         private usersService: UsersService,
         private dataSource: DataSource,
+        private cacheService: CacheService,
     ) { }
 
     // ==================== PLANS ====================
@@ -42,11 +44,21 @@ export class SubscriptionsService {
         });
     }
 
+    /**
+     * Get active subscription plans
+     * CACHED: 1 hour (rarely changes)
+     */
     async getActivePlans(): Promise<SubscriptionPlan[]> {
-        return this.planRepo.find({
-            where: { isActive: true },
-            order: { sortOrder: 'ASC', durationMonths: 'ASC' },
-        });
+        return this.cacheService.get(
+            CACHE_KEYS.SUBSCRIPTION_PLANS_ACTIVE,
+            async () => {
+                return this.planRepo.find({
+                    where: { isActive: true },
+                    order: { sortOrder: 'ASC', durationMonths: 'ASC' },
+                });
+            },
+            CACHE_TTL.VERY_LONG // 1 hour
+        );
     }
 
     async createPlan(dto: any): Promise<SubscriptionPlan> {
@@ -60,7 +72,9 @@ export class SubscriptionsService {
             isFreeTrial: dto.isFreeTrial || false,
             sortOrder: dto.sortOrder || 0,
         });
-        return this.planRepo.save(plan);
+        const saved = await this.planRepo.save(plan);
+        this.cacheService.invalidate(CACHE_KEYS.SUBSCRIPTION_PLANS_ACTIVE);
+        return saved;
     }
 
     async updatePlan(id: number, dto: any): Promise<SubscriptionPlan> {
@@ -70,7 +84,9 @@ export class SubscriptionsService {
         }
 
         Object.assign(plan, dto);
-        return this.planRepo.save(plan);
+        const saved = await this.planRepo.save(plan);
+        this.cacheService.invalidate(CACHE_KEYS.SUBSCRIPTION_PLANS_ACTIVE);
+        return saved;
     }
 
     async togglePlanVisibility(id: number): Promise<SubscriptionPlan> {
@@ -80,7 +96,9 @@ export class SubscriptionsService {
         }
 
         plan.isActive = !plan.isActive;
-        return this.planRepo.save(plan);
+        const saved = await this.planRepo.save(plan);
+        this.cacheService.invalidate(CACHE_KEYS.SUBSCRIPTION_PLANS_ACTIVE);
+        return saved;
     }
 
     async deletePlan(id: number): Promise<{ message: string }> {
@@ -99,6 +117,7 @@ export class SubscriptionsService {
         }
 
         await this.planRepo.delete(id);
+        this.cacheService.invalidate(CACHE_KEYS.SUBSCRIPTION_PLANS_ACTIVE);
         return { message: 'تم حذف الباقة بنجاح' };
     }
 
@@ -113,6 +132,7 @@ export class SubscriptionsService {
             .leftJoinAndSelect('request.institution', 'institution')
             .leftJoinAndSelect('institution.users', 'institutionUsers')
             .leftJoinAndSelect('request.branch', 'branch')
+            .leftJoinAndSelect('branch.users', 'branchUsers')
             .leftJoinAndSelect('request.plan', 'plan')
             .leftJoinAndSelect('request.processor', 'processor');
 
@@ -375,8 +395,9 @@ export class SubscriptionsService {
                 throw new HttpException('تم معالجة هذا الطلب مسبقاً', HttpStatus.BAD_REQUEST);
             }
 
-            // Capture NEW registration status BEFORE updating request.institutionId
-            const isNewRegistration = !request.institutionId && !request.branchId && !!request.pendingData;
+            // Detect NEW registration types
+            const isNewInstitution = !request.institutionId && !request.branchId && !!request.pendingData;
+            const isNewBranch = request.institutionId && !request.branchId && !!request.pendingData && request.requesterType === RequesterType.BRANCH;
 
             request.status = dto.status;
             request.adminNotes = dto.adminNotes;
@@ -390,8 +411,8 @@ export class SubscriptionsService {
             }
 
             if (dto.status === 'Approved') {
-                // Handle New Registration (PENDING DATA)
-                if (isNewRegistration && request.pendingData) {
+                // CASE 1: New Institution Registration
+                if (isNewInstitution && request.pendingData) {
                     try {
                         const data = JSON.parse(request.pendingData);
 
@@ -403,7 +424,7 @@ export class SubscriptionsService {
                             email: data.email,
                             maxUsers: data.maxUsers || 5,
                             canCreateBranches: data.canCreateBranches !== false,
-                            isActive: true, // Activate now
+                            isActive: true,
                             expirationDate: request.requestedEndDate,
                         });
                         const savedInstitution = await queryRunner.manager.save(Institution, institution);
@@ -412,10 +433,9 @@ export class SubscriptionsService {
                         request.institutionId = savedInstitution.institutionId;
                         request.institution = savedInstitution;
 
-                        // Create the admin user (only if not existing)
+                        // Create the admin user for the institution
                         if (data.adminName && data.adminEmail && data.adminPassword) {
                             const hashedPassword = await bcrypt.hash(data.adminPassword, 10);
-
                             const newUser = queryRunner.manager.create(User, {
                                 name: data.adminName,
                                 email: data.adminEmail,
@@ -425,21 +445,77 @@ export class SubscriptionsService {
                                 institutionId: savedInstitution.institutionId,
                                 isActive: data.adminIsActive !== false,
                             });
-
                             await queryRunner.manager.save(User, newUser);
                         }
                     } catch (e) {
                         console.error('Error creating institution from pending data:', e);
                         throw new HttpException('فشل إنشاء المؤسسة من بيانات الطلب', HttpStatus.INTERNAL_SERVER_ERROR);
                     }
-                } else if (request.requesterType === RequesterType.INSTITUTION && request.institutionId) {
+                }
+                // CASE 2: New Branch Registration (requested by an existing institution)
+                else if (isNewBranch && request.pendingData) {
+                    try {
+                        const data = JSON.parse(request.pendingData);
+
+                        // Create the branch
+                        const branch = queryRunner.manager.create(Branch, {
+                            institutionId: request.institutionId!,
+                            name: data.name,
+                            phoneNumber: data.phoneNumber,
+                            email: data.email,
+                            maximumLoans: data.maximumLoans || 0,
+                            isActive: true,
+                            expirationDate: request.requestedEndDate,
+                        });
+                        const savedBranch = await queryRunner.manager.save(Branch, branch);
+
+                        // Link request to new branch
+                        request.branchId = savedBranch.branchId;
+                        request.branch = savedBranch;
+
+                        // Create the admin user for the branch
+                        if (data.userName && data.userEmail && data.userPassword) {
+                            // Check institution user capacity - REMOVED per user request
+                            // const currentUsers = await queryRunner.manager.count(User, {
+                            //     where: { institutionId: request.institutionId!, isActive: true }
+                            // });
+
+                            // const institution = await queryRunner.manager.findOne(Institution, {
+                            //     where: { institutionId: request.institutionId! }
+                            // });
+
+                            // if (institution && currentUsers >= institution.maxUsers) {
+                            //     throw new HttpException(`لا يمكن إنشاء مستخدم جديد للفرع. تم الوصول للحد الأقصى من المستخدمين للمؤسسة (${institution.maxUsers})`, HttpStatus.BAD_REQUEST);
+                            // }
+
+                            const hashedPassword = await bcrypt.hash(data.userPassword, 10);
+                            const newUser = queryRunner.manager.create(User, {
+                                name: data.userName,
+                                email: data.userEmail,
+                                passwordHash: hashedPassword,
+                                phoneNumber: data.userPhoneNumber,
+                                roleId: 3, // Branch role
+                                institutionId: request.institutionId!,
+                                branchId: savedBranch.branchId,
+                                isActive: data.userIsActive !== false,
+                            });
+                            await queryRunner.manager.save(User, newUser);
+                        }
+                    } catch (e) {
+                        console.error('Error creating branch from pending data:', e);
+                        throw new HttpException('فشل إنشاء الفرع من بيانات الطلب: ' + e.message, HttpStatus.INTERNAL_SERVER_ERROR);
+                    }
+                }
+                // CASE 3: Standard Renewal for existing Institution
+                else if (request.requesterType === RequesterType.INSTITUTION && request.institutionId) {
                     await queryRunner.manager.update(
                         Institution,
                         { institutionId: request.institutionId },
                         { expirationDate: request.requestedEndDate, isActive: true },
                     );
-                } else if (request.requesterType === RequesterType.BRANCH && request.branchId) {
-                    // Update Branch Expiration
+                }
+                // CASE 4: Standard Renewal for existing Branch
+                else if (request.requesterType === RequesterType.BRANCH && request.branchId) {
                     await queryRunner.manager.update(
                         Branch,
                         { branchId: request.branchId },
@@ -461,7 +537,7 @@ export class SubscriptionsService {
                         // Create transaction
                         const entityName = request.institution?.name || request.branch?.name || 'غير معروف';
                         const planName = request.plan?.name || `${request.customDurationMonths} شهر`;
-                        const prefix = isNewRegistration ? "جديد: " : "تجديد: ";
+                        const prefix = (isNewInstitution || isNewBranch) ? "جديد: " : "تجديد: ";
 
                         const transaction = queryRunner.manager.create(CashBoxTransaction, {
                             cashBoxId: adminCashBox.cashBoxId,

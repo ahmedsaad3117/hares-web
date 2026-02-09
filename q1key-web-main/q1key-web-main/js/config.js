@@ -7,5 +7,5 @@
 
 // For development, leave this commented and api.js will use localhost:3001 by default
 window.API_CONFIG = {
-    baseUrl: 'http://127.0.0.1:3001'
+    baseUrl: 'http://localhost:3001/api'
 };

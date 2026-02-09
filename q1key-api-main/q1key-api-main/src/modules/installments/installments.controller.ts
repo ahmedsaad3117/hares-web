@@ -15,35 +15,42 @@ import { CreateInstallmentDto } from './dto/create-installment.dto';
 import { UpdateInstallmentDto } from './dto/update-installment.dto';
 import { PayInstallmentDto } from './dto/pay-installment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../../entities/user.entity';
 
 @Controller('installments')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class InstallmentsController {
   constructor(private readonly installmentsService: InstallmentsService) { }
 
   @Post()
+  @Roles('Super Admin', 'Institution', 'Branch')
   create(@Body() createInstallmentDto: CreateInstallmentDto) {
     return this.installmentsService.create(createInstallmentDto);
   }
 
   @Get('search')
+  @Roles('Super Admin', 'Institution', 'Branch')
   search(@Query('q') searchTerm: string) {
     return this.installmentsService.search(searchTerm || '');
   }
 
   @Get('overdue')
+  @Roles('Super Admin', 'Institution', 'Branch')
   findOverdue() {
     return this.installmentsService.findOverdue();
   }
 
   @Get(':id')
+  @Roles('Super Admin', 'Institution', 'Branch')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.installmentsService.findOne(id);
   }
 
   @Patch(':id')
+  @Roles('Super Admin', 'Institution', 'Branch')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateInstallmentDto: UpdateInstallmentDto,
@@ -52,6 +59,7 @@ export class InstallmentsController {
   }
 
   @Patch(':id/pay')
+  @Roles('Super Admin', 'Institution', 'Branch')
   pay(
     @Param('id', ParseIntPipe) id: number,
     @Body() payInstallmentDto: PayInstallmentDto,
@@ -62,7 +70,9 @@ export class InstallmentsController {
   }
 
   @Delete(':id')
+  @Roles('Super Admin', 'Institution')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.installmentsService.remove(id);
   }
 }
+

@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { CashBoxService } from './cash-box.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import {
     DepositDto,
@@ -18,18 +20,20 @@ import {
 } from './dto/cash-box.dto';
 
 @Controller('cash-box')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class CashBoxController {
     constructor(private readonly cashBoxService: CashBoxService) { }
 
     // Get current user's cash box
     @Get()
+    @Roles('Super Admin', 'Institution', 'Branch')
     async getMyCashBox(@CurrentUser() user: any) {
         return this.cashBoxService.getCashBoxForUser(user);
     }
 
     // Get all branch cash boxes for institution
     @Get('institution/branches')
+    @Roles('Super Admin', 'Institution')
     async getBranchCashBoxes(@CurrentUser() user: any) {
         if (!user.institutionId) {
             throw new Error('User has no associated institution');
@@ -39,6 +43,7 @@ export class CashBoxController {
 
     // Get my transactions
     @Get('transactions')
+    @Roles('Super Admin', 'Institution', 'Branch')
     async getMyTransactions(
         @CurrentUser() user: any,
         @Query() filter: TransactionFilterDto,
@@ -54,23 +59,31 @@ export class CashBoxController {
 
     // Get my report
     @Get('report')
+    @Roles('Super Admin', 'Institution', 'Branch')
     async getMyReport(
         @CurrentUser() user: any,
         @Query('fromDate') fromDate: string,
         @Query('toDate') toDate: string,
     ) {
         const cashBox = await this.cashBoxService.getCashBoxForUser(user);
+
+        if (cashBox.boxType === 'Aggregated' && user.institutionId) {
+            return this.cashBoxService.getInstitutionReport(user.institutionId, fromDate, toDate);
+        }
+
         return this.cashBoxService.getReport(cashBox.cashBoxId, fromDate, toDate);
     }
 
     // Get specific cash box by ID
     @Get(':id')
+    @Roles('Super Admin', 'Institution')
     async getCashBox(@Param('id', ParseIntPipe) id: number) {
         return this.cashBoxService.getCashBoxForUser({ cashBoxId: id });
     }
 
     // Deposit money
     @Post('deposit')
+    @Roles('Super Admin', 'Institution', 'Branch')
     async deposit(
         @Body() dto: DepositDto,
         @CurrentUser() user: any,
@@ -81,6 +94,7 @@ export class CashBoxController {
 
     // Deposit to specific cash box
     @Post(':id/deposit')
+    @Roles('Super Admin', 'Institution')
     async depositToCashBox(
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: DepositDto,
@@ -91,6 +105,7 @@ export class CashBoxController {
 
     // Withdraw money
     @Post('withdraw')
+    @Roles('Super Admin', 'Institution', 'Branch')
     async withdraw(
         @Body() dto: WithdrawDto,
         @CurrentUser() user: any,
@@ -101,6 +116,7 @@ export class CashBoxController {
 
     // Withdraw from specific cash box
     @Post(':id/withdraw')
+    @Roles('Super Admin', 'Institution')
     async withdrawFromCashBox(
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: WithdrawDto,
@@ -111,6 +127,7 @@ export class CashBoxController {
 
     // Get transactions for specific cash box
     @Get(':id/transactions')
+    @Roles('Super Admin', 'Institution')
     async getTransactions(
         @Param('id', ParseIntPipe) id: number,
         @Query() filter: TransactionFilterDto,
@@ -120,6 +137,7 @@ export class CashBoxController {
 
     // Get report for specific cash box
     @Get(':id/report')
+    @Roles('Super Admin', 'Institution')
     async getReport(
         @Param('id', ParseIntPipe) id: number,
         @Query('fromDate') fromDate: string,
@@ -128,3 +146,4 @@ export class CashBoxController {
         return this.cashBoxService.getReport(id, fromDate, toDate);
     }
 }
+

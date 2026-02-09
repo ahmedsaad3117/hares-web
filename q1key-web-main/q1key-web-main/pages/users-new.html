@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add User - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=15">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -17,9 +17,8 @@
 
     <div class="page-content">
       <!-- Page Header -->
-      <div class="flex items-center gap-3 mb-8"
-        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
-        <a href="users.html" class="btn btn-secondary" style="padding: 0.5rem;">
+      <div class="flex items-center gap-3 mb-8">
+        <a href="users.html" class="btn btn-secondary p-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12" />
@@ -27,64 +26,67 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white" data-i18n-key="users.add_user">Add User</h1>
-          <p class="text-secondary" data-i18n-key="users.create_new_user">Create a new user account</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="users.add_user">إضافة مستخدم جديد</h1>
+          <p class="text-secondary" data-i18n-key="users.create_new_user">إنشاء حساب مستخدم جديد ومنح الصلاحيات</p>
         </div>
       </div>
 
       <!-- Form -->
-      <div class="glass-card p-6" style="max-width: 800px;">
-        <form id="userForm">
-          <!-- Name -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="users.form.full_name">Full Name *</label>
-            <input type="text" id="name" name="name" class="input"
-              data-i18n-placeholder="users.form.full_name_placeholder" placeholder="Enter full name" required />
-            <div id="nameError" class="error-text hidden"></div>
-          </div>
+      <div class="glass-card p-6 max-w-3xl">
+        <form id="userForm" autocomplete="off">
 
-          <!-- Email -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="users.form.email_label">Email *</label>
-            <input type="email" id="email" name="email" class="input"
-              data-i18n-placeholder="users.form.email_placeholder" placeholder="user@example.com" required />
-            <div id="emailError" class="error-text hidden"></div>
-          </div>
-
-          <!-- Phone Number -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="users.form.phone_label">Phone Number *</label>
-            <input type="tel" id="phoneNumber" name="phoneNumber" class="input"
-              data-i18n-placeholder="users.form.phone_placeholder" placeholder="Enter phone number" required />
-            <div id="phoneNumberError" class="error-text hidden"></div>
-          </div>
-
-          <!-- Password -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="users.form.password">Password *</label>
-            <div style="position: relative;">
-              <input type="password" id="password" name="password" class="input"
-                data-i18n-placeholder="users.form.password_placeholder" placeholder="Enter password (min 6 characters)"
-                required style="padding-inline-end: 2.5rem;" />
-              <button type="button" id="togglePassword"
-                style="position: absolute; inset-inline-end: 0; top: 0; height: 100%; padding: 0 0.75rem; background: none; border: none; cursor: pointer; color: #a5b4fc; display: flex; align-items: center; justify-content: center; transition: color 0.2s;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="eye-icon">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="eye-off-icon hidden" style="display: none;">
-                  <path
-                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
-                  </path>
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
-              </button>
+          <!-- Row 1: Name & Email -->
+          <div class="form-grid">
+            <div class="form-group mb-0">
+              <label class="label" data-i18n-key="users.form.full_name">Full Name *</label>
+              <input type="text" id="name" name="name" class="input" autocomplete="off"
+                data-i18n-placeholder="users.form.full_name_placeholder" placeholder="Enter full name" required />
+              <div id="nameError" class="error-text hidden"></div>
             </div>
-            <div id="passwordError" class="error-text hidden"></div>
+
+            <div class="form-group mb-0">
+              <label class="label" data-i18n-key="users.form.email_label">Email *</label>
+              <input type="email" id="email" name="email" class="input" autocomplete="off"
+                data-i18n-placeholder="users.form.email_placeholder" placeholder="user@example.com" required />
+              <div id="emailError" class="error-text hidden"></div>
+            </div>
+          </div>
+
+          <!-- Row 2: Phone & Password -->
+          <div class="form-grid">
+            <div class="form-group mb-0">
+              <label class="label" data-i18n-key="users.form.phone_label">Phone Number *</label>
+              <input type="tel" id="phoneNumber" name="phoneNumber" class="input" autocomplete="off"
+                data-i18n-placeholder="users.form.phone_placeholder" placeholder="Enter phone number" required />
+              <div id="phoneNumberError" class="error-text hidden"></div>
+            </div>
+
+            <div class="form-group mb-0">
+              <label class="label" data-i18n-key="users.form.password">كلمة المرور *</label>
+              <div class="relative">
+                <input type="password" id="password" name="password" class="input pe-10" autocomplete="new-password"
+                  data-i18n-placeholder="users.form.password_placeholder"
+                  placeholder="أدخل كلمة المرور (6 أحرف على الأقل)" required />
+                <button type="button" id="togglePassword"
+                  class="absolute top-1/2 -translate-y-1/2 end-0 flex items-center px-3 text-indigo-300 hover:text-indigo-400 transition-colors bg-transparent border-none cursor-pointer z-10"
+                  style="height: fit-content;"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="eye-icon">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="eye-off-icon hidden">
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                    </path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+              <div id="passwordError" class="error-text hidden"></div>
+            </div>
           </div>
 
           <!-- Role -->
@@ -97,7 +99,7 @@
           </div>
 
           <!-- Institution (conditional) -->
-          <div class="form-group" id="institutionGroup" style="display: none;">
+          <div class="form-group hidden" id="institutionGroup">
             <label class="label" data-i18n-key="users.form.institution_label">Institution *</label>
             <select id="institutionId" name="institutionId" class="input">
               <option value="" data-i18n-key="users.form.institution_placeholder">Select institution...</option>
@@ -106,47 +108,46 @@
           </div>
 
           <!-- Branch (conditional) -->
-          <div class="form-group" id="branchGroup" style="display: none;">
-            <label class="label" data-i18n-key="users.form.branch_label">Branch *</label>
+          <div class="form-group hidden" id="branchGroup">
+            <label class="label" data-i18n-key="users.form.branch_label">الفرع *</label>
             <select id="branchId" name="branchId" class="input">
-              <option value="" data-i18n-key="users.form.branch_placeholder">Select branch...</option>
+              <option value="" data-i18n-key="users.form.branch_placeholder">اختر الفرع...</option>
             </select>
             <div id="branchIdError" class="error-text hidden"></div>
           </div>
 
           <!-- Active Status -->
           <div class="form-group">
-            <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
-              <input type="checkbox" id="isActive" name="isActive" checked>
-              <span class="label" style="margin: 0;" data-i18n-key="users.form.active_label">Active</span>
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" id="isActive" name="isActive" checked class="w-5 h-5">
+              <span class="label mb-0" data-i18n-key="users.form.active_label">نشط</span>
             </label>
           </div>
 
           <!-- Error Message -->
-          <div id="errorMessage" class="hidden mb-4"
-            style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
-            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+          <div id="errorMessage" class="hidden mb-6 glass-card p-3 border border-red-500/20 bg-red-500/10">
+            <p class="text-sm text-red-500 text-center"></p>
           </div>
 
           <!-- Buttons -->
-          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
-            <button type="submit" id="submitButton" class="btn btn-primary">
+          <div class="flex items-center justify-end gap-3 mt-8">
+            <a href="users.html" class="btn btn-secondary" data-i18n-key="users.form.cancel">إلغاء</a>
+            <button type="submit" id="submitButton" class="btn btn-primary px-8">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              <span data-i18n-key="users.form.create_user">Create User</span>
+              <span data-i18n-key="users.form.create_user">حفظ الحساب</span>
             </button>
-            <a href="users.html" class="btn btn-secondary" data-i18n-key="users.form.cancel">Cancel</a>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <script src="../js/api.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <script src="../js/api.js?v=4"></script>
+  <script src="../components/sidebar.js?v=12"></script>
+  <script src="../components/header.js?v=3"></script>
   <script>
     async function initPage() {
       await waitForI18n();
@@ -157,6 +158,14 @@
       }
 
       const user = getCurrentUser();
+
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
+        // Don't block access if refresh fails, just use current data
+      }
 
       // Only Super Admin and Institution can access
       if (user.roleName !== 'Super Admin' && user.roleName !== 'Institution') {
@@ -411,13 +420,15 @@
           const eyeOffIcon = togglePasswordBtn.querySelector('.eye-off-icon');
 
           if (type === 'password') {
-            eyeIcon.style.display = 'block';
-            eyeOffIcon.style.display = 'none';
-            togglePasswordBtn.style.color = '#a5b4fc';
+            eyeIcon.classList.remove('hidden');
+            eyeOffIcon.classList.add('hidden');
+            togglePasswordBtn.classList.add('text-indigo-300');
+            togglePasswordBtn.classList.remove('text-white');
           } else {
-            eyeIcon.style.display = 'none';
-            eyeOffIcon.style.display = 'block';
-            togglePasswordBtn.style.color = '#fff';
+            eyeIcon.classList.add('hidden');
+            eyeOffIcon.classList.remove('hidden');
+            togglePasswordBtn.classList.remove('text-indigo-300');
+            togglePasswordBtn.classList.add('text-white');
           }
         });
       }

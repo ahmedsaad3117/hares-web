@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Branch Details - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=12">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -17,7 +17,7 @@
 
     <div class="page-content">
       <!-- Page Header -->
-      <div class="flex items-center gap-3 mb-8"
+      <div id="pageHeaderContainer" class="flex items-center gap-3 mb-8"
         style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
         <a href="branches.html" class="btn btn-secondary" style="padding: 0.5rem;">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -38,9 +38,9 @@
       </div>
 
       <!-- Branch Details -->
-      <div id="branchContainer" style="display: none;">
+      <div id="branchContainer" style="display: none;" dir="rtl" class="text-right">
         <div class="glass-card p-6 mb-6">
-          <div class="flex items-center justify-between mb-6"
+          <div class="flex items-center justify-between mb-6" dir="ltr"
             style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
             <div>
               <h2 id="branchName" class="text-2xl font-bold text-white mb-2"></h2>
@@ -87,8 +87,7 @@
           <!-- Capacity Info -->
           <div id="capacityInfo" class="mb-6"></div>
 
-          <div class="grid grid-cols-2 gap-6"
-            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+          <div class="grid grid-cols-2 gap-6">
             <div>
               <p class="text-muted mb-1" data-i18n-key="branches.form.phone_label">Phone Number</p>
               <p id="phoneNumber" class="text-2xl font-bold text-white"></p>
@@ -137,10 +136,10 @@
     </div>
   </div>
 
-  <script src="../js/api.js"></script>
-  <script src="../js/ui-utils.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <script src="../js/api.js?v=5"></script>
+  <script src="../js/ui-utils.js?v=4"></script>
+  <script src="../components/sidebar.js?v=13"></script>
+  <script src="../components/header.js?v=3"></script>
   <script>
     async function initPage() {
       await waitForI18n();
@@ -148,6 +147,13 @@
       if (!isAuthenticated()) {
         window.location.href = '../index.html';
         return;
+      }
+
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
       }
 
       const user = getCurrentUser();
@@ -158,7 +164,17 @@
       );
       initializeLanguageSwitcher();
       setActiveNav('branches');
+      setActiveNav('branches');
       window.i18n.translatePage();
+
+      // Enforce RTL layout for Arabic BUT keep specific headers LTR as requested
+      if (localStorage.getItem('locale') !== 'en') {
+        document.documentElement.dir = 'rtl';
+        document.getElementById('branchContainer').style.direction = 'rtl';
+        // Force headers to LTR to keep Name on Left and Dots on Right
+        document.getElementById('pageHeaderContainer').style.direction = 'ltr';
+        document.querySelector('#branchContainer .flex.items-center.justify-between').style.direction = 'ltr';
+      }
 
       // Load branch data
       await loadBranch();
@@ -208,7 +224,7 @@
         }
 
         document.getElementById('totalLoans').textContent = formatCurrency(branchData.totalLoans || 0);
-        document.getElementById('maximumLoans').textContent = branchData.maximumLoans ? formatCurrency(branchData.maximumLoans) : 'Unlimited';
+        document.getElementById('maximumLoans').textContent = branchData.maximumLoans ? formatCurrency(branchData.maximumLoans) : (t('branches.view_page.unlimited') || 'Unlimited');
         document.getElementById('createdAt').textContent = formatDateTime(branchData.createdAt);
         document.getElementById('updatedAt').textContent = formatDateTime(branchData.updatedAt);
 
@@ -218,8 +234,8 @@
           statusBadge.className = `badge ${branchData.isActive ? 'badge-success' : 'badge-danger'}`;
         }
 
-        // Show capacity info if maximum loans is set
-        if (branchData.maximumLoans) {
+        // Show capacity info if maximum loans is set (> 0)
+        if (Number(branchData.maximumLoans) > 0) {
           const utilizationPercent = (branchData.totalLoans / branchData.maximumLoans) * 100;
           const capacityColor = utilizationPercent >= 90 ? '#ef4444' : utilizationPercent >= 70 ? '#f59e0b' : '#10b981';
 
@@ -234,6 +250,8 @@
               </div>
             </div>
           `;
+        } else {
+          document.getElementById('capacityInfo').style.display = 'none';
         }
 
         document.getElementById('editBtn').href = `branches-edit.html?id=${branchId}`;
@@ -269,7 +287,7 @@
         const statsContainer = document.getElementById('statsContainer');
 
         statsContainer.innerHTML = `
-          <div class="grid grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+          <div class="grid grid-cols-3 gap-4">
             <div class="glass-card p-4" style="background: rgba(30, 41, 59, 0.5);">
               <p class="text-muted text-sm">${t('branches.view_page.total_customers')}</p>
               <p class="text-2xl font-bold text-white">${branchStats.totalCustomers || 0}</p>
@@ -296,7 +314,7 @@
         const loansContainer = document.getElementById('loansContainer');
 
         if (loans.length === 0) {
-          loansContainer.innerHTML = `<p class="text-muted">No loans found</p>`;
+          loansContainer.innerHTML = `<p class="text-muted text-center py-4 bg-white/5 rounded-lg border border-white/5 data-i18n-key="branches.view_page.no_loans">${t('branches.view_page.no_loans') || 'No loans found'}</p>`;
           return;
         }
 

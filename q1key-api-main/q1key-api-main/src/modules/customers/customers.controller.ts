@@ -20,6 +20,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
+import { RateLimiterGuard, RateLimit, RATE_LIMITS } from '../../common/rate-limiter';
 
 @Controller('customers')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -38,8 +39,15 @@ export class CustomersController {
     return this.customersService.findAll(paginationDto, user, deleted === 'true');
   }
 
+  /**
+   * Search customers with rate limiting
+   * - 30 requests per minute per user
+   * - Prevents search abuse
+   */
   @Get('search')
   @Roles('Super Admin', 'Institution', 'Branch')
+  @UseGuards(RateLimiterGuard)
+  @RateLimit(RATE_LIMITS.SEARCH)
   search(@Query() searchDto: SearchCustomerDto, @CurrentUser() user?: any) {
     return this.customersService.search(searchDto, user);
   }

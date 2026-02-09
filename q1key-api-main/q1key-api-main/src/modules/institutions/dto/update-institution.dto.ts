@@ -33,4 +33,9 @@ export class UpdateInstitutionDto {
   @IsOptional()
   @IsDateString()
   expirationDate?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  maximumLoans?: number;
 }

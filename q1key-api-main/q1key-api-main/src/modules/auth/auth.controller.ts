@@ -1,18 +1,35 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, UseGuards, Ip } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { RateLimiterGuard, RateLimit, RATE_LIMITS } from '../../common/rate-limiter';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
+  /**
+   * Login endpoint with rate limiting
+   * - 5 attempts per minute per IP
+   * - Prevents brute force attacks
+   */
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  @UseGuards(RateLimiterGuard)
+  @RateLimit(RATE_LIMITS.LOGIN)
+  login(@Body() loginDto: LoginDto, @Ip() ip: string) {
+    return this.authService.login(loginDto, ip);
+  }
+
+  /**
+   * Refresh token endpoint
+   * Allows clients to get a new access token using a refresh token
+   */
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  refresh(@Body('refresh_token') refreshToken: string) {
+    return this.authService.refresh(refreshToken);
   }
 
   @Post('logout')

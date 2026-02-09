@@ -71,6 +71,7 @@ export class TransactionResponseDto {
     installmentId?: number;
     createdBy?: number;
     createdByName?: string;
+    customerName?: string;
     createdAt: Date;
 }
 

@@ -160,13 +160,7 @@ export class CashBoxService {
 
     // Get all branch cash boxes for institution
     async getBranchCashBoxes(institutionId: number): Promise<CashBoxResponseDto[]> {
-        // Ensure all branches have cash boxes
-        const branches = await this.branchRepository.find({ where: { institutionId } });
-        for (const branch of branches) {
-            await this.getOrCreateBranchCashBox(branch.branchId);
-        }
-
-        // Fetch all boxes (Branches + Institution Head Office)
+        // Fetch existing boxes (Branches + Institution Head Office)
         const cashBoxes = await this.cashBoxRepository.find({
             where: {
                 institutionId,
@@ -175,26 +169,25 @@ export class CashBoxService {
             relations: ['branch'],
         });
 
+        // Optimization: Don't force create all boxes during listing. 
+        // Boxes are created lazily when a transaction happens or when getting individual balance.
+        // This makes list loading much faster for institutions with many branches.
+
         return cashBoxes.map(box => this.toCashBoxResponse(box));
     }
 
     // Deposit money
     async deposit(cashBoxId: number, dto: DepositDto, userId: number): Promise<TransactionResponseDto> {
         return this.dataSource.transaction(async (manager) => {
-            const cashBox = await manager.findOne(CashBox, {
-                where: { cashBoxId },
-            });
+            // Use increment for atomic update (prevents race conditions)
+            await manager.increment(CashBox, { cashBoxId }, 'balance', dto.amount);
 
-            if (!cashBox) {
-                throw new NotFoundException(`Cash box ${cashBoxId} not found`);
-            }
+            // Fetch updated state for record keeping
+            const updatedBox = await manager.findOne(CashBox, { where: { cashBoxId } });
+            if (!updatedBox) throw new NotFoundException(`Cash box ${cashBoxId} not found`);
 
-            const balanceBefore = parseFloat(cashBox.balance.toString());
-            const balanceAfter = balanceBefore + dto.amount;
-
-            // Update balance
-            cashBox.balance = balanceAfter;
-            await manager.save(cashBox);
+            const balanceBefore = parseFloat(updatedBox.balance.toString()) - dto.amount;
+            const balanceAfter = parseFloat(updatedBox.balance.toString());
 
             // Create transaction record
             const transaction = manager.create(CashBoxTransaction, {
@@ -215,20 +208,15 @@ export class CashBoxService {
     // Withdraw money
     async withdraw(cashBoxId: number, dto: WithdrawDto, userId: number): Promise<TransactionResponseDto> {
         return this.dataSource.transaction(async (manager) => {
-            const cashBox = await manager.findOne(CashBox, {
-                where: { cashBoxId },
-            });
+            // Use decrement for atomic update (prevents race conditions)
+            await manager.decrement(CashBox, { cashBoxId }, 'balance', dto.amount);
 
-            if (!cashBox) {
-                throw new NotFoundException(`Cash box ${cashBoxId} not found`);
-            }
+            // Fetch updated state for record keeping
+            const updatedBox = await manager.findOne(CashBox, { where: { cashBoxId } });
+            if (!updatedBox) throw new NotFoundException(`Cash box ${cashBoxId} not found`);
 
-            const balanceBefore = parseFloat(cashBox.balance.toString());
-            const balanceAfter = balanceBefore - dto.amount;
-
-            // Update balance (can go negative)
-            cashBox.balance = balanceAfter;
-            await manager.save(cashBox);
+            const balanceBefore = parseFloat(updatedBox.balance.toString()) + dto.amount;
+            const balanceAfter = parseFloat(updatedBox.balance.toString());
 
             // Create transaction record
             const transaction = manager.create(CashBoxTransaction, {
@@ -256,33 +244,37 @@ export class CashBoxService {
         manager?: any,
         description?: string,
     ): Promise<{ transaction: CashBoxTransaction; warning?: string }> {
-        let cashBox: CashBox;
+        const queryRunner = manager || this.dataSource.manager;
 
+        let cashBoxId: number;
         if (branchId) {
-            cashBox = await this.getOrCreateBranchCashBox(branchId, manager);
+            const box = await this.getOrCreateBranchCashBox(branchId, queryRunner);
+            cashBoxId = box.cashBoxId;
         } else if (institutionId) {
-            cashBox = await this.getOrCreateInstitutionCashBox(institutionId, manager);
+            const box = await this.getOrCreateInstitutionCashBox(institutionId, queryRunner);
+            cashBoxId = box.cashBoxId;
         } else {
             throw new BadRequestException('Either branchId or institutionId must be provided');
         }
 
-        const balanceBefore = parseFloat(cashBox.balance.toString());
-        const balanceAfter = balanceBefore - amount;
+        // Atomic update
+        await queryRunner.decrement(CashBox, { cashBoxId }, 'balance', amount);
+
+        // Fetch updated state for record keeping
+        const updatedBox = await queryRunner.findOne(CashBox, { where: { cashBoxId } });
+        if (!updatedBox) throw new NotFoundException(`Cash box ${cashBoxId} not found`);
+        const balanceAfter = parseFloat(updatedBox.balance.toString());
+        const balanceBefore = balanceAfter + amount;
 
         let warning: string | undefined;
         if (balanceAfter < 0) {
             warning = `تحذير: رصيد الصندوق سالب (${balanceAfter.toFixed(2)})`;
         }
 
-        // Update balance
-        cashBox.balance = balanceAfter;
-        const cbRepo = manager ? manager.getRepository(CashBox) : this.cashBoxRepository;
-        await cbRepo.save(cashBox);
-
         // Create transaction
-        const txRepo = manager ? manager.getRepository(CashBoxTransaction) : this.transactionRepository;
+        const txRepo = queryRunner.getRepository(CashBoxTransaction);
         const transaction = txRepo.create({
-            cashBoxId: cashBox.cashBoxId,
+            cashBoxId,
             transactionType: TransactionType.LOAN_DISBURSEMENT,
             amount: amount,
             balanceBefore,
@@ -305,37 +297,43 @@ export class CashBoxService {
         amount: number,
         userId?: number,
     ): Promise<CashBoxTransaction> {
-        let cashBox: CashBox;
+        return this.dataSource.transaction(async (manager) => {
+            let cashBoxId: number;
+            if (branchId) {
+                const box = await this.getOrCreateBranchCashBox(branchId, manager);
+                cashBoxId = box.cashBoxId;
+            } else if (institutionId) {
+                const box = await this.getOrCreateInstitutionCashBox(institutionId, manager);
+                cashBoxId = box.cashBoxId;
+            } else {
+                throw new BadRequestException('Either branchId or institutionId must be provided');
+            }
 
-        if (branchId) {
-            cashBox = await this.getOrCreateBranchCashBox(branchId);
-        } else if (institutionId) {
-            cashBox = await this.getOrCreateInstitutionCashBox(institutionId);
-        } else {
-            throw new BadRequestException('Either branchId or institutionId must be provided');
-        }
+            // Atomic update
+            await manager.increment(CashBox, { cashBoxId }, 'balance', amount);
 
-        const balanceBefore = parseFloat(cashBox.balance.toString());
-        const balanceAfter = balanceBefore + amount;
+            // Fetch updated state for record
+            const updatedBox = await manager.findOne(CashBox, { where: { cashBoxId } });
+            if (!updatedBox) throw new NotFoundException(`Cash box ${cashBoxId} not found`);
+            const balanceAfter = parseFloat(updatedBox.balance.toString());
+            const balanceBefore = balanceAfter - amount;
 
-        // Update balance
-        cashBox.balance = balanceAfter;
-        await this.cashBoxRepository.save(cashBox);
+            // Create transaction record
+            const transaction = manager.create(CashBoxTransaction, {
+                cashBoxId,
+                transactionType: TransactionType.LOAN_PAYMENT,
+                amount: amount,
+                balanceBefore,
+                balanceAfter,
+                loanId,
+                installmentId,
+                description: `سداد قسط للقرض رقم ${loanId}`,
+                createdBy: userId,
+            });
 
-        // Create transaction
-        const transaction = this.transactionRepository.create({
-            cashBoxId: cashBox.cashBoxId,
-            transactionType: TransactionType.LOAN_PAYMENT,
-            amount,
-            balanceBefore,
-            balanceAfter,
-            loanId,
-            installmentId,
-            description: `سداد قسط رقم ${installmentId} للقرض ${loanId}`,
-            createdBy: userId,
+            await manager.save(transaction);
+            return transaction;
         });
-
-        return this.transactionRepository.save(transaction);
     }
 
     // Get transactions
@@ -349,6 +347,8 @@ export class CashBoxService {
         const queryBuilder = this.transactionRepository
             .createQueryBuilder('t')
             .leftJoinAndSelect('t.creator', 'creator')
+            .leftJoinAndSelect('t.loan', 'loan')
+            .leftJoinAndSelect('loan.customer', 'customer')
             .where('t.cashBoxId = :cashBoxId', { cashBoxId })
             .orderBy('t.createdAt', 'DESC')
             .skip(skip)
@@ -388,6 +388,8 @@ export class CashBoxService {
             .createQueryBuilder('t')
             .innerJoin('CashBox', 'cb', 'cb.cashBoxId = t.cashBoxId')
             .leftJoinAndSelect('t.creator', 'creator')
+            .leftJoinAndSelect('t.loan', 'loan')
+            .leftJoinAndSelect('loan.customer', 'customer')
             .where('cb.institutionId = :institutionId', { institutionId })
             .orderBy('t.createdAt', 'DESC')
             .skip(skip)
@@ -416,10 +418,11 @@ export class CashBoxService {
     }
 
     // Get report
+    // Get report
     async getReport(
         cashBoxId: number,
-        fromDate: string,
-        toDate: string,
+        fromDate?: string,
+        toDate?: string,
     ): Promise<CashBoxReportDto> {
         const cashBox = await this.cashBoxRepository.findOne({
             where: { cashBoxId },
@@ -430,52 +433,107 @@ export class CashBoxService {
             throw new NotFoundException(`Cash box ${cashBoxId} not found`);
         }
 
-        const startDate = new Date(fromDate);
-        const endDate = new Date(toDate);
-        endDate.setHours(23, 59, 59, 999);
+        const queryBuilder = this.transactionRepository.createQueryBuilder('t')
+            .leftJoinAndSelect('t.creator', 'creator')
+            .leftJoinAndSelect('t.loan', 'loan')
+            .leftJoinAndSelect('loan.customer', 'customer')
+            .where('t.cashBoxId = :cashBoxId', { cashBoxId })
+            .orderBy('t.createdAt', 'DESC');
 
-        const transactions = await this.transactionRepository.find({
-            where: {
-                cashBoxId,
-                createdAt: Between(startDate, endDate),
-            },
-            relations: ['creator'],
-            order: { createdAt: 'DESC' },
-        });
+        if (fromDate && fromDate !== 'undefined' && fromDate !== '') {
+            queryBuilder.andWhere('t.createdAt >= :fromDate', { fromDate: new Date(fromDate) });
+        }
 
+        if (toDate && toDate !== 'undefined' && toDate !== '') {
+            const endDate = new Date(toDate);
+            endDate.setHours(23, 59, 59, 999);
+            queryBuilder.andWhere('t.createdAt <= :toDate', { toDate: endDate });
+        }
+
+        const transactions = await queryBuilder.getMany();
+
+        return this.calculateReportStats(cashBox, transactions);
+    }
+
+    // Get aggregated report for institution
+    async getInstitutionReport(
+        institutionId: number,
+        fromDate?: string,
+        toDate?: string,
+    ): Promise<CashBoxReportDto> {
+        // Get aggregated cashbox structure
+        const aggregatedBox = await this.getInstitutionAggregatedCashBox(institutionId);
+
+        // Convert DTO back to minimal entity-like object for calculator
+        // Note: We need a CashBox entity or similar check for the response DTO
+        // Since calculateReportStats needs CashBox entity for toCashBoxResponse, 
+        // but here we already have ResponseDTO. 
+        // Let's adjust helper.
+
+        const queryBuilder = this.transactionRepository.createQueryBuilder('t')
+            .innerJoin('CashBox', 'cb', 'cb.cashBoxId = t.cashBoxId')
+            .leftJoinAndSelect('t.creator', 'creator')
+            .leftJoinAndSelect('t.loan', 'loan')
+            .leftJoinAndSelect('loan.customer', 'customer')
+            .where('cb.institutionId = :institutionId', { institutionId })
+            .orderBy('t.createdAt', 'DESC');
+
+        if (fromDate && fromDate !== 'undefined' && fromDate !== '') {
+            queryBuilder.andWhere('t.createdAt >= :fromDate', { fromDate: new Date(fromDate) });
+        }
+
+        if (toDate && toDate !== 'undefined' && toDate !== '') {
+            const endDate = new Date(toDate);
+            endDate.setHours(23, 59, 59, 999);
+            queryBuilder.andWhere('t.createdAt <= :toDate', { toDate: endDate });
+        }
+
+        const transactions = await queryBuilder.getMany();
+
+        return {
+            cashBox: aggregatedBox,
+            ...this.calculateStats(transactions),
+            transactions: transactions.map(t => this.toTransactionResponse(t)),
+        };
+    }
+
+    private calculateReportStats(cashBox: CashBox, transactions: CashBoxTransaction[]): CashBoxReportDto {
+        return {
+            cashBox: this.toCashBoxResponse(cashBox),
+            ...this.calculateStats(transactions),
+            transactions: transactions.map(t => this.toTransactionResponse(t)),
+        };
+    }
+
+    private calculateStats(transactions: CashBoxTransaction[]) {
         const totals = {
-            deposits: 0,
-            withdrawals: 0,
-            loanDisbursements: 0,
-            loanPayments: 0,
+            totalDeposits: 0,
+            totalWithdrawals: 0,
+            totalLoanDisbursements: 0,
+            totalLoanPayments: 0,
         };
 
         transactions.forEach(t => {
             const amount = parseFloat(t.amount.toString());
             switch (t.transactionType) {
                 case TransactionType.DEPOSIT:
-                    totals.deposits += amount;
+                    totals.totalDeposits += amount;
                     break;
                 case TransactionType.WITHDRAWAL:
-                    totals.withdrawals += amount;
+                    totals.totalWithdrawals += amount;
                     break;
                 case TransactionType.LOAN_DISBURSEMENT:
-                    totals.loanDisbursements += amount;
+                    totals.totalLoanDisbursements += amount;
                     break;
                 case TransactionType.LOAN_PAYMENT:
-                    totals.loanPayments += amount;
+                    totals.totalLoanPayments += amount;
                     break;
             }
         });
 
         return {
-            cashBox: this.toCashBoxResponse(cashBox),
-            totalDeposits: totals.deposits,
-            totalWithdrawals: totals.withdrawals,
-            totalLoanDisbursements: totals.loanDisbursements,
-            totalLoanPayments: totals.loanPayments,
-            netChange: totals.deposits + totals.loanPayments - totals.withdrawals - totals.loanDisbursements,
-            transactions: transactions.map(t => this.toTransactionResponse(t)),
+            ...totals,
+            netChange: totals.totalDeposits + totals.totalLoanPayments - totals.totalWithdrawals - totals.totalLoanDisbursements
         };
     }
 
@@ -503,6 +561,12 @@ export class CashBoxService {
             ? -parseFloat(t.amount.toString())
             : parseFloat(t.amount.toString());
 
+        // Extract customer name from loan relations if available
+        let customerName: string | undefined = undefined;
+        if (t.loan && t.loan.customer) {
+            customerName = t.loan.customer.name;
+        }
+
         return {
             id: t.id,
             cashBoxId: t.cashBoxId,
@@ -515,6 +579,7 @@ export class CashBoxService {
             installmentId: t.installmentId,
             createdBy: t.createdBy,
             createdByName: t.creator?.name,
+            customerName: customerName,
             createdAt: t.createdAt,
         };
     }

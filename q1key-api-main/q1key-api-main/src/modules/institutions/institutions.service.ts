@@ -72,6 +72,16 @@ export class InstitutionsService {
       }
     }
 
+    // Check if admin email is already taken in the system
+    if (createInstitutionDto.adminEmail) {
+      const existingUser = await this.usersRepository.findOne({
+        where: { email: createInstitutionDto.adminEmail.trim() }
+      });
+      if (existingUser) {
+        throw new BadRequestException('البريد الإلكتروني لمدير المؤسسة مسجل مسبقاً في النظام');
+      }
+    }
+
     // Validate Plan if provided
     let plan: SubscriptionPlan | null = null;
     if (planId) {
@@ -332,9 +342,9 @@ export class InstitutionsService {
       where: { taxId: taxId.trim() }
     });
     if (existingInstitution) {
-      return { 
-        exists: true, 
-        message: 'رقم السجل التجاري مسجل مسبقاً في مؤسسة أخرى' 
+      return {
+        exists: true,
+        message: 'رقم السجل التجاري مسجل مسبقاً في مؤسسة أخرى'
       };
     }
 
@@ -349,9 +359,9 @@ export class InstitutionsService {
       try {
         const pendingData = JSON.parse(req.pendingData || '{}');
         if (pendingData.taxId && pendingData.taxId.trim() === taxId.trim()) {
-          return { 
-            exists: true, 
-            message: 'رقم السجل التجاري مستخدم في طلب اشتراك قيد المراجعة' 
+          return {
+            exists: true,
+            message: 'رقم السجل التجاري مستخدم في طلب اشتراك قيد المراجعة'
           };
         }
       } catch (e) {

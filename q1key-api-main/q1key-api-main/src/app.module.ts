@@ -4,6 +4,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CacheModule } from './common/cache';
+import { RateLimiterModule } from './common/rate-limiter';
+import { MonitoringModule, MonitoringInterceptor } from './common/monitoring';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { InstitutionsModule } from './modules/institutions/institutions.module';
@@ -20,6 +24,7 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { AnnouncementsModule } from './modules/announcements/announcements.module';
 import { HomepageModule } from './modules/homepage/homepage.module';
+import { QuickLinksModule } from './quick-links/quick-links.module';
 
 @Module({
   imports: [
@@ -43,6 +48,12 @@ import { HomepageModule } from './modules/homepage/homepage.module';
         connectionTimeoutMillis: 5000,
       },
     }),
+    // Cache Module (Global)
+    CacheModule,
+    // Rate Limiter Module (Global)
+    RateLimiterModule,
+    // Monitoring Module (Global)
+    MonitoringModule,
     // Feature modules
     AuthModule,
     UsersModule,
@@ -60,10 +71,17 @@ import { HomepageModule } from './modules/homepage/homepage.module';
     SubscriptionsModule,
     AnnouncementsModule,
     HomepageModule,
+    QuickLinksModule,
     // NotesModule,
     // ActivityLogModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: MonitoringInterceptor,
+    },
+  ],
 })
 export class AppModule { }

@@ -5,126 +5,134 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loan Details - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=14">
   <script src="../js/i18n.js"></script>
 </head>
 
 <body>
-  <div id="sidebar"></div>
+  <div class="layout">
+    <div id="sidebarContainer"></div>
 
-  <div class="main-content">
-    <div id="header"></div>
+    <div class="main-content">
+      <div id="header"></div>
 
-    <div class="page-content">
-      <!-- Page Header -->
-      <div class="flex items-center gap-3 mb-8"
-        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
-        <a href="loans.html" class="btn btn-secondary" style="padding: 0.5rem;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-        </a>
-        <div>
-          <h1 class="text-3xl font-bold text-white" data-i18n-key="loans.view_page.title">Loan Details</h1>
-          <p class="text-secondary" data-i18n-key="loans.view_page.subtitle">View loan information</p>
+      <div class="page-content">
+        <!-- Page Header -->
+        <div class="flex items-center gap-3 mb-8"
+          style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+          <a href="loans.html" class="btn btn-secondary" style="padding: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+          </a>
+          <div>
+            <h1 class="text-3xl font-bold text-white" data-i18n-key="loans.view_page.title">Loan Details</h1>
+            <p class="text-secondary" data-i18n-key="loans.view_page.subtitle">View loan information</p>
+          </div>
         </div>
-      </div>
 
-      <!-- Loading -->
-      <div id="loadingContainer" class="loading-container">
-        <div class="spinner"></div>
-      </div>
+        <!-- Loading -->
+        <div id="loadingContainer" class="loading-container">
+          <div class="spinner"></div>
+        </div>
 
-      <!-- Loan Details -->
-      <div id="loanContainer" style="display: none;">
-        <div class="glass-card p-6 mb-6">
-          <div class="flex items-center justify-between mb-6"
-            style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
-            <div>
-              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-                <h2 id="loanIdDisplay" class="text-2xl font-bold text-white" style="margin: 0;"></h2>
-                <span id="statusBadge"></span>
-              </div>
-              <p class="text-muted" style="margin: 0;" data-i18n-key="loans.view_page.loan_application">Loan Application
-              </p>
-            </div>
-            <div class="flex gap-2" style="display: flex; gap: 0.5rem; align-items: center;">
-              <div class="meatball-container">
-                <button class="meatball-btn">⋮</button>
-                <div class="meatball-dropdown">
-                  <a id="editBtn" class="dropdown-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                    <span data-i18n-key="common.button.edit">Edit</span>
-                  </a>
-                  <button id="deleteBtn" class="dropdown-item text-danger">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
-                    <span data-i18n-key="common.button.delete">Delete</span>
-                  </button>
+        <!-- Loan Details -->
+        <div id="loanContainer" style="display: none;">
+          <div class="glass-card p-6 mb-6">
+            <div class="flex items-center justify-between mb-6"
+              style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem;">
+              <div class="flex gap-2" style="display: flex; gap: 0.5rem; align-items: center;">
+                <div class="meatball-container">
+                  <button class="meatball-btn">⋮</button>
+                  <div class="meatball-dropdown">
+                    <a id="editBtn" class="dropdown-item">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                      <span data-i18n-key="common.button.edit">Edit</span>
+                    </a>
+                    <button id="deleteBtn" class="dropdown-item text-danger">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                      <span data-i18n-key="common.button.delete">Delete</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Rest of the details (Customer, Branch, etc.) -->
-          <div class="grid grid-cols-2 gap-6 mb-6"
-            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-            <div>
-              <p class="text-muted mb-1" data-i18n-key="loans.view_page.customer">Customer</p>
-              <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <a id="customerLink" href="#" class="text-white font-medium hover:text-primary"
-                  style="color: #fff; text-decoration: none; transition: color 0.2s;">
-                  <span id="customerName"></span>
-                </a>
+              <div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                  <h2 id="loanIdDisplay" class="text-2xl font-bold text-emerald-400"
+                    style="margin: 0; color: #10b981 !important;"></h2>
+                  <span id="statusBadge"></span>
+                </div>
+                <p class="text-muted" style="margin: 0;" data-i18n-key="loans.view_page.loan_application">Loan
+                  Application
+                </p>
               </div>
             </div>
-            <div>
-              <p class="text-muted mb-1" data-i18n-key="loans.view_page.branch">Branch</p>
-              <p id="branchName" class="text-white font-medium"></p>
+
+            <!-- Rest of the details (Customer, Branch, etc.) -->
+            <div class="grid grid-responsive-sm gap-6 mb-6 pb-6 border-b border-white-10">
+              <div>
+                <p class="text-muted mb-1" data-i18n-key="loans.view_page.customer">Customer</p>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <a id="customerLink" href="#" class="text-emerald-400 font-medium hover:text-emerald-300"
+                    style="text-decoration: none; transition: color 0.2s; color: #10b981 !important;">
+                    <span id="customerName"></span>
+                  </a>
+                </div>
+              </div>
+              <div id="institutionField">
+                <p class="text-muted mb-1" data-i18n-key="loans.view_page.institution">Institution</p>
+                <p id="loanInstitutionName" class="text-white font-medium">--</p>
+              </div>
+              <div>
+                <p class="text-muted mb-1" data-i18n-key="loans.view_page.branch">Branch</p>
+                <p id="branchName" class="text-white font-medium"></p>
+              </div>
+            </div>
+
+            <div class="grid grid-responsive-sm gap-6">
+              <div>
+                <p class="text-muted mb-1" data-i18n-key="loans.view_page.principal_amount">Principal Amount</p>
+                <p id="principalAmount" class="text-white font-medium text-lg"></p>
+              </div>
+              <div>
+                <p class="text-muted mb-1" data-i18n-key="loans.view_page.due_date">Due Date</p>
+                <p id="dueDate" class="text-white font-medium"></p>
+              </div>
+              <div>
+                <p class="text-muted mb-1" data-i18n-key="loans.view_page.status">Status</p>
+                <p id="statusText" class="text-white font-medium"></p>
+              </div>
             </div>
           </div>
 
-          <div class="grid grid-cols-3 gap-6"
-            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
-            <div>
-              <p class="text-muted mb-1" data-i18n-key="loans.view_page.principal_amount">Principal Amount</p>
-              <p id="principalAmount" class="text-white font-medium text-lg"></p>
-            </div>
-            <div>
-              <p class="text-muted mb-1" data-i18n-key="loans.view_page.due_date">Due Date</p>
-              <p id="dueDate" class="text-white font-medium"></p>
-            </div>
-            <div>
-              <p class="text-muted mb-1" data-i18n-key="loans.view_page.status">Status</p>
-              <p id="statusText" class="text-white font-medium"></p>
-            </div>
+          <!-- Installments -->
+          <div id="installmentsSection" class="glass-card p-6 mb-6">
+            <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="loans.view_page.installments_title">
+              Installments
+            </h3>
+            <div id="installmentsContainer"></div>
           </div>
-        </div>
-
-        <!-- Installments -->
-        <div id="installmentsSection" class="glass-card p-6 mb-6">
-          <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="loans.view_page.installments_title">Installments
-          </h3>
-          <div id="installmentsContainer"></div>
         </div>
       </div>
     </div>
   </div>
 
   <script src="../js/api.js?v=2.0"></script>
-  <script src="../js/ui-utils.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <script src="../js/ui-utils.js?v=3"></script>
+  <script src="../components/sidebar.js?v=12"></script>
+  <script src="../components/header.js?v=3"></script>
   <script>
+    let user = null;
     let loanData = null;
     let installmentsData = [];
 
@@ -135,12 +143,24 @@
         return;
       }
 
-      const user = getCurrentUser();
-      document.getElementById('sidebar').innerHTML = createSidebar(user);
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
+      }
+
+      user = getCurrentUser();
+      document.getElementById('sidebarContainer').innerHTML = createSidebar(user);
       document.getElementById('header').innerHTML = createHeader(t('loans.loan_details'), t('loans.view_loan_info'));
       initializeLanguageSwitcher();
       setActiveNav('loans');
       window.i18n.translatePage();
+
+      // Enforce RTL layout for Arabic
+      if (localStorage.getItem('locale') !== 'en') {
+        document.documentElement.dir = 'rtl';
+      }
 
       await loadLoan();
       initMeatballMenu();
@@ -158,6 +178,13 @@
         document.getElementById('customerName').textContent = loanData.customer.name;
         document.getElementById('customerLink').href = `customers-view.html?id=${loanData.customer.customerId}`;
         document.getElementById('branchName').textContent = loanData.branch?.name || '--';
+        document.getElementById('loanInstitutionName').textContent = loanData.branch?.institution?.name || loanData.institution?.name || '--';
+
+        // Hide institution field for non-super admins
+        if (user && user.roleName !== 'Super Admin') {
+          const instField = document.getElementById('institutionField');
+          if (instField) instField.style.display = 'none';
+        }
         document.getElementById('principalAmount').textContent = formatCurrency(loanData.principalAmount);
         document.getElementById('dueDate').textContent = formatDate(loanData.dueDate);
         const translatedStatus = t(`loans.status.${loanData.status.toLowerCase()}`) || loanData.status;

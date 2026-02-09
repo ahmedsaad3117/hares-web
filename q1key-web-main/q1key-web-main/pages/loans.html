@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loans - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=11">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -82,6 +82,7 @@
               <tr>
                 <th data-i18n-key="loans.id">ID</th>
                 <th data-i18n-key="loans.customer">Customer</th>
+
                 <th data-i18n-key="loans.branch">Branch</th>
                 <th data-i18n-key="loans.product">Product</th>
                 <th data-i18n-key="loans.amount">Amount</th>
@@ -108,27 +109,45 @@
     </div>
   </div>
 
-  <script src="../js/api.js"></script>
-  <script src="../js/ui-utils.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <script src="../js/api.js?v=4"></script>
+  <script src="../js/ui-utils.js?v=3"></script>
+  <script src="../components/sidebar.js?v=11"></script>
+  <script src="../components/header.js?v=3"></script>
   <script src="../components/pagination.js"></script>
   <script>
     async function initPage() {
       await waitForI18n();
 
       // Check authentication
-      if (!isAuthenticated()) {
-        window.location.href = '../index.html';
-        return;
+      if (!requireAuth()) return;
+
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
       }
 
-      user = getCurrentUser(); // Set global user variable
+      user = getCurrentUser(); // Update global user after refresh
       document.getElementById('sidebar').innerHTML = createSidebar(user);
       document.getElementById('header').innerHTML = createHeader(
         t('loans.title'),
         t('loans.loan_details')
       );
+
+      // Dynamically add Institution column for Super Admin
+      if (user.roleName === 'Super Admin') {
+        const headerRow = document.querySelector('#loansTable thead tr');
+        if (headerRow) {
+          const institutionTh = document.createElement('th');
+          institutionTh.setAttribute('data-i18n-key', 'loans.institution');
+          institutionTh.textContent = t('loans.institution') || 'Institution';
+          // Insert after Customer column (index 1)
+          if (headerRow.children[1]) {
+            headerRow.children[1].after(institutionTh);
+          }
+        }
+      }
       initializeLanguageSwitcher();
       setActiveNav('loans');
 
@@ -143,19 +162,13 @@
     // Setup search with debounce
     function setupSearch() {
       const searchInput = document.getElementById('searchInput');
+      const debouncedSearch = debounce(() => {
+        searchTerm = searchInput.value.trim();
+        performSearch();
+      }, 500);
+
       searchInput.addEventListener('input', (e) => {
-        const value = e.target.value.trim();
-
-        // Clear existing timeout
-        if (searchTimeout) {
-          clearTimeout(searchTimeout);
-        }
-
-        // Set new timeout for 1 second
-        searchTimeout = setTimeout(() => {
-          searchTerm = value;
-          performSearch();
-        }, 1000);
+        debouncedSearch();
       });
     }
 
@@ -164,7 +177,7 @@
       if (searchTerm) {
         // Show loading
         document.getElementById('loansTableBody').innerHTML =
-          '<tr><td colspan="9" style="text-align: center; padding: 3rem;"><div class="spinner"></div><p class="text-muted mt-2">Searching...</p></td></tr>';
+          `<tr><td colspan="${user.roleName === 'Super Admin' ? 10 : 9}" style="text-align: center; padding: 3rem;"><div class="spinner"></div><p class="text-muted mt-2">Searching...</p></td></tr>`;
 
         try {
           const searchResults = await api.loans.search(searchTerm);
@@ -184,7 +197,7 @@
         } catch (error) {
           console.error('Search error:', error);
           document.getElementById('loansTableBody').innerHTML =
-            `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">Search failed. Please try again.</td></tr>`;
+            `<tr><td colspan="${user.roleName === 'Super Admin' ? 10 : 9}" style="text-align: center; padding: 2rem; color: #94a3b8;">Search failed. Please try again.</td></tr>`;
         }
       } else {
         // Clear search, reload normal view
@@ -218,24 +231,18 @@
         let response;
         if (currentFilter === 'all') {
           response = await api.loans.getAll(page, pageSize);
-          currentPage = response.meta.page;
-          totalPages = response.meta.totalPages;
-          renderLoans(response.data);
         } else {
-          // Load filtered loans by status (no pagination from backend)
-          allLoans = await api.loans.getByStatus(currentFilter);
-          // Implement client-side pagination for filtered results
-          const startIndex = (page - 1) * pageSize;
-          const endIndex = startIndex + pageSize;
-          const paginatedLoans = allLoans.slice(startIndex, endIndex);
-          currentPage = page;
-          totalPages = Math.ceil(allLoans.length / pageSize);
-          renderLoans(paginatedLoans);
+          // Optimized: Fetch only current page for the selected status
+          response = await api.loans.getAll(page, pageSize, currentFilter);
         }
+
+        currentPage = response.meta.page;
+        totalPages = response.meta.totalPages;
+        renderLoans(response.data);
       } catch (error) {
         console.error('Error loading loans:', error);
         showToast(t('loans.failed_to_load'), 'error');
-        document.getElementById('loansTableBody').innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('loans.failed_to_load')}</td></tr>`;
+        document.getElementById('loansTableBody').innerHTML = `<tr><td colspan="${user.roleName === 'Super Admin' ? 10 : 9}" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('loans.failed_to_load')}</td></tr>`;
       }
     }
 
@@ -280,7 +287,7 @@
       const tbody = document.getElementById('loansTableBody');
 
       if (loans.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('loans.no_loans_found')}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${user.roleName === 'Super Admin' ? 10 : 9}" style="text-align: center; padding: 2rem; color: #94a3b8;">${t('loans.no_loans_found')}</td></tr>`;
         return;
       }
 
@@ -298,7 +305,8 @@
         const progressColor = progressPercent >= 100 ? '#10b981' : progressPercent >= 50 ? '#3b82f6' : '#f59e0b';
 
         // Determine branch/institution display
-        const locationName = loan.branch ? loan.branch.name : (loan.institution ? loan.institution.name : 'N/A');
+        const branchName = loan.branch ? loan.branch.name : 'N/A';
+        const institutionName = loan.branch?.institution?.name || loan.institution?.name || 'N/A';
 
         return `
           <tr>
@@ -309,7 +317,8 @@
                 <div class="text-muted text-sm">ID: ${loan.customer.customerId}</div>
               </div>
             </td>
-            <td class="text-secondary">${locationName}</td>
+            ${user.roleName === 'Super Admin' ? `<td class="text-secondary">${institutionName}</td>` : ''}
+            <td class="text-secondary">${branchName}</td>
             <td class="text-secondary">${loan.product.name}</td>
             <td class="text-white font-semibold">${formatCurrency(loan.principalAmount)}</td>
             <td>

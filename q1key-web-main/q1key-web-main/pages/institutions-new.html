@@ -1,12 +1,220 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Institution - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <title>إضافة مؤسسة - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css?v=17">
   <script src="../js/i18n.js"></script>
+  <style>
+    /* Premium Cyber-Minimalist Design System */
+    :root {
+      --neon-primary: #818cf8;
+      --neon-secondary: #c084fc;
+      /* Slightly lighter glass to sit ON TOP of #1c2135 */
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.12);
+    }
+
+    .page-wrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem;
+    }
+
+    .form-container-ultra {
+      width: 100%;
+      max-width: 1000px;
+      background: var(--card-bg);
+      backdrop-filter: blur(15px);
+      border-radius: 28px;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative Glows */
+    .form-container-ultra::before {
+      content: '';
+      position: absolute;
+      top: -150px;
+      right: -150px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.15) 0%, transparent 70%);
+      z-index: -1;
+    }
+
+    .form-content-inner {
+      padding: 3.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .form-content-inner {
+        padding: 2rem;
+      }
+    }
+
+    /* Section Typography */
+    .section-title-premium {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: white;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin-bottom: 2rem;
+    }
+
+    .section-title-premium i {
+      padding: 8px;
+      background: rgba(129, 140, 248, 0.1);
+      border-radius: 10px;
+      color: var(--neon-primary);
+    }
+
+    /* Grid Layout */
+    .dual-column-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .dual-column-layout {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+    }
+
+    /* Clean Input Fields */
+    .input-field-wrapper {
+      margin-bottom: 1.5rem;
+    }
+
+    .input-label-clean {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 0.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .modern-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03) !important;
+      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      border-radius: 14px !important;
+      padding: 0.9rem 1.1rem !important;
+      color: white !important;
+      font-size: 0.95rem !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .modern-input:focus {
+      background: rgba(255, 255, 255, 0.05) !important;
+      border-color: var(--neon-primary) !important;
+      box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.1) !important;
+      outline: none;
+    }
+
+    /* Plan Selection Pills */
+    .plans-flex {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .plan-chip {
+      padding: 0.75rem 1.25rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: center;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .plan-chip:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .plan-chip.active {
+      background: rgba(129, 140, 248, 0.1);
+      border-color: var(--neon-primary);
+      box-shadow: 0 0 15px rgba(129, 140, 248, 0.2);
+    }
+
+    /* Toggle Switches */
+    .toggle-modern {
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+      height: 42px;
+      white-space: nowrap;
+    }
+
+    .toggle-modern:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Submit Button */
+    .btn-create-ultra {
+      width: 100%;
+      height: 56px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 16px !important;
+      font-weight: 800 !important;
+      font-size: 1.05rem !important;
+      cursor: pointer !important;
+      margin-top: 1.5rem !important;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3) !important;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    }
+
+    .btn-create-ultra:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 15px 35px rgba(99, 102, 241, 0.5) !important;
+    }
+
+    .btn-create-ultra:active {
+      transform: scale(0.98);
+    }
+
+    /* Divider */
+    .glow-divider {
+      height: 1px;
+      background: linear-gradient(to left, transparent, var(--glass-border), transparent);
+      width: 100%;
+      margin: 3rem 0;
+    }
+
+    [dir="rtl"] .section-title-premium i {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  </style>
 </head>
 
 <body>
@@ -15,424 +223,362 @@
   <div class="main-content">
     <div id="header"></div>
 
-    <div class="page-content">
-      <!-- Page Header -->
-      <div class="flex items-center gap-3 mb-8"
-        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
-        <a href="institutions.html" class="btn btn-secondary" style="padding: 0.5rem;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
+    <div class="page-wrapper">
+      <!-- Top Navigation -->
+      <div class="w-full max-w-[1000px] flex items-center mb-8 px-2">
+        <a href="institutions.html" class="flex items-center gap-2 text-secondary hover:text-white group">
+          <span
+            class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+          </span>
+          <span class="font-bold text-sm tracking-wide">العودة للمؤسسات</span>
         </a>
-        <div>
-          <h1 class="text-3xl font-bold text-white" data-i18n-key="institutions.add_institution">Add Institution</h1>
-          <p class="text-secondary" data-i18n-key="institutions.create_new_institution">Create a new institution</p>
-        </div>
       </div>
 
-      <!-- Main Grid Layout -->
-      <form id="institutionForm" class="grid gap-6"
-        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; max-width: 1400px; margin: 0 auto;">
+      <form id="institutionForm" class="form-container-ultra">
+        <div class="form-content-inner">
 
-        <!-- Left Column: Institution Details -->
-        <div class="glass-card p-6 h-full">
-          <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <span style="font-size: 1.5rem;">🏢</span>
-            <span data-i18n-key="institutions.form.institution_info">Institution Information</span>
-          </h3>
-
-          <div class="space-y-4" style="display: flex; flex-direction: column; gap: 1rem;">
-            <!-- Name -->
-            <div class="form-group">
-              <label class="label" data-i18n-key="institutions.form.name_label">Institution Name</label> <span
-                data-i18n-key="institutions.form.name_required" style="color: red">*</span>
-              <input type="text" id="name" name="name" class="input"
-                data-i18n-placeholder="institutions.form.name_placeholder" placeholder="Enter institution name"
-                required />
-              <div id="nameError" class="error-text hidden"></div>
+          <!-- Section 1: Subscription Selection -->
+          <div class="mb-12">
+            <div class="section-title-premium">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+              </svg>
+              <span>اختر باقة الاشتراك المناسبة لمؤسستك</span>
             </div>
-
-            <!-- Tax ID -->
-            <div class="form-group">
-              <label class="label" data-i18n-key="institutions.form.tax_id_label">Commercial Registration No.</label>
-              <span style="color: #ef4444;">*</span>
-              <input type="text" id="taxId" name="taxId" class="input"
-                data-i18n-placeholder="institutions.form.tax_id_placeholder" placeholder="Enter CR number" required />
-              <div id="taxIdError" class="error-text hidden"></div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <!-- Phone -->
-              <div class="form-group">
-                <label class="label" data-i18n-key="institutions.form.phone_label">Phone</label> <span
-                  style="color: #ef4444;">*</span>
-                <input type="tel" id="phoneNumber" name="phoneNumber" class="input"
-                  data-i18n-placeholder="institutions.form.phone_placeholder" placeholder="Phone" required />
-                <div id="phoneNumberError" class="error-text hidden"></div>
-              </div>
-              <!-- Email -->
-              <div class="form-group">
-                <label class="label" data-i18n-key="institutions.form.email_label">Email</label> <span
-                  style="color: #ef4444;">*</span>
-                <input type="email" id="email" name="email" class="input"
-                  data-i18n-placeholder="institutions.form.email_placeholder" placeholder="Email" required />
-                <div id="emailError" class="error-text hidden"></div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <!-- Max Users -->
-              <div class="form-group">
-                <label class="label" data-i18n-key="institutions.form.max_users_label">Max Users</label> <span
-                  data-i18n-key="institutions.form.max_users_required" style="color: red">*</span>
-                <input type="number" id="maxUsers" name="maxUsers" class="input" min="1" value="1" required />
-                <div id="maxUsersError" class="error-text hidden"></div>
-              </div>
-              <!-- Expiration Date -->
-              <div class="form-group">
-                <label class="label" data-i18n-key="institutions.form.expiration_date_label">Expiration</label>
-                <input type="date" id="expirationDate" name="expirationDate" class="input" />
-                <div id="expirationDateError" class="error-text hidden"></div>
-              </div>
-            </div>
-
-            <!-- Toggles -->
-            <div class="flex flex-col gap-3 mt-2"
-              style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px;">
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" id="canCreateBranches" name="canCreateBranches" checked
-                  style="width: 18px; height: 18px; accent-color: #6366f1;">
-                <div>
-                  <span class="label block" style="margin: 0;"
-                    data-i18n-key="institutions.form.can_create_branches_label">Allow Branch Creation</span>
-                  <span class="text-xs text-secondary" data-i18n-key="institutions.form.can_create_branches_help">Allow
-                    creating child branches</span>
-                </div>
-              </label>
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" id="isActive" name="isActive" checked
-                  style="width: 18px; height: 18px; accent-color: #10b981;">
-                <span class="label" style="margin: 0;" data-i18n-key="institutions.form.active_label">Institution
-                  Active</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Column: Manager & Subscription -->
-        <div class="space-y-6" style="display: flex; flex-direction: column; gap: 1.5rem;">
-
-          <!-- Subscription Plan -->
-          <div class="glass-card p-6">
-            <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <span style="font-size: 1.5rem;">💎</span>
-              <span data-i18n-key="institutions.form.plan_section_title">Subscription Plan</span>
-            </h3>
-            <div id="plansContainer" style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+            <div id="plansContainer" class="plans-flex">
               <div class="spinner"></div>
             </div>
             <input type="hidden" id="selectedPlanId" name="planId" required>
-            <div id="planError" class="error-text hidden mt-2"></div>
           </div>
 
-          <!-- Manager Account -->
-          <div class="glass-card p-6">
-            <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <span style="font-size: 1.5rem;">👤</span>
-              <span data-i18n-key="institutions.form.admin_section_title">Manager Account</span>
-            </h3>
+          <div class="glow-divider"></div>
 
-            <div class="space-y-4" style="display: flex; flex-direction: column; gap: 1rem;">
-              <div class="form-group">
-                <label class="label" data-i18n-key="users.form.full_name">Admin Name</label> <span
-                  style="color: #ef4444;">*</span>
-                <input type="text" id="adminName" name="adminName" class="input"
-                  data-i18n-placeholder="users.form.full_name_placeholder" placeholder="Full Name" required />
+          <!-- Section 2: Dual Column Main Info -->
+          <div class="dual-column-layout">
+
+            <!-- RIGHT COLUMN: Institution Info -->
+            <div>
+              <div class="section-title-premium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <line x1="9" y1="3" x2="9" y2="21" />
+                  <line x1="15" y1="3" x2="15" y2="21" />
+                  <line x1="3" y1="9" x2="21" y2="9" />
+                  <line x1="3" y1="15" x2="21" y2="15" />
+                </svg>
+                <span>هوية وبيانات المؤسسة</span>
               </div>
 
-              <div class="form-group">
-                <label class="label" data-i18n-key="users.form.email_label">Admin Email</label> <span
-                  style="color: #ef4444;">*</span>
-                <input type="email" id="adminEmail" name="adminEmail" class="input"
-                  data-i18n-placeholder="users.form.email_placeholder" placeholder="Email" required />
+              <div class="grid grid-cols-2 gap-4">
+                <div class="input-field-wrapper">
+                  <label class="input-label-clean">الاسم التجاري <span style="color: #ef4444">*</span></label>
+                  <input type="text" id="name" name="inst_display_name_field" autocomplete="off" class="modern-input"
+                    placeholder="مؤسسة التقنية العالمية" required>
+                </div>
+                <div class="input-field-wrapper">
+                  <label class="input-label-clean">رقم السجل التجاري <span style="color: #ef4444">*</span></label>
+                  <input type="text" id="taxId" name="inst_tax_id_field" autocomplete="off" class="modern-input"
+                    placeholder="1010xxxxxx" required>
+                </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group">
-                  <label class="label" data-i18n-key="users.form.password">Password</label> <span
-                    style="color: #ef4444;">*</span>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="input-field-wrapper">
+                  <label class="input-label-clean">هاتف التواصل <span style="color: #ef4444">*</span></label>
+                  <input type="tel" id="phoneNumber" name="inst_contact_phone_field" autocomplete="off"
+                    class="modern-input" placeholder="011xxxxxxx" required>
+                </div>
+                <div class="input-field-wrapper">
+                  <label class="input-label-clean">بريد المؤسسة <span style="color: #ef4444">*</span></label>
+                  <input type="email" id="email" name="inst_contact_email_field" autocomplete="off" class="modern-input"
+                    placeholder="info@company.com" required>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="input-field-wrapper">
+                  <label class="input-label-clean">عدد المستخدمين المسموح <span style="color: #ef4444">*</span></label>
+                  <input type="number" id="maxUsers" class="modern-input" min="1" value="1" required>
+                </div>
+                <div class="input-field-wrapper">
+                  <label class="input-label-clean">تاريخ انتهاء الترخيص <span style="color: #ef4444">*</span></label>
+                  <input type="date" id="expirationDate" class="modern-input" required>
+                </div>
+              </div>
+
+              <div class="input-field-wrapper">
+                <label class="input-label-clean">الحد الأقصى للمبلغ المسموح به (للمؤسسة)</label>
+                <input type="number" id="maximumLoans" class="modern-input"
+                  placeholder="مثلاً: 1000000 (0 تعني غير محدود)" min="0">
+                <p class="text-[10px] text-white/30 mt-1">اترك الحقل فارغاً لإلغاء السقف المالي</p>
+              </div>
+
+              <div class="grid grid-cols-3 gap-4 mt-2">
+                <label class="toggle-modern">
+                  <input type="checkbox" id="canCreateBranches" checked class="w-4 h-4 accent-indigo-500">
+                  <span class="text-xs font-bold text-white/70">إنشاء فروع</span>
+                </label>
+                <label class="toggle-modern">
+                  <input type="checkbox" id="isActive" checked class="w-4 h-4 accent-emerald-500">
+                  <span class="text-xs font-bold text-white/70">مؤسسة نشطة</span>
+                </label>
+                <label class="toggle-modern">
+                  <input type="checkbox" id="adminIsActive" checked class="w-4 h-4 accent-indigo-500">
+                  <span class="text-xs font-bold text-white/70">تفعيل حساب المدير</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- LEFT COLUMN: Admin Access -->
+            <div>
+              <div class="section-title-premium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                <span>حساب مدير المؤسسة</span>
+              </div>
+
+              <div class="input-field-wrapper">
+                <label class="input-label-clean">الاسم الكامل لمدير المؤسسة <span
+                    style="color: #ef4444">*</span></label>
+                <input type="text" id="adminName" name="inst_admin_name_field" autocomplete="off" class="modern-input"
+                  placeholder="د. أحمد محمد" required>
+              </div>
+
+              <div class="input-field-wrapper">
+                <label class="input-label-clean">البريد الإلكتروني للإدارة <span style="color: #ef4444">*</span></label>
+                <input type="email" id="adminEmail" name="inst_admin_email_field" autocomplete="off"
+                  class="modern-input" placeholder="admin@domain.com" required>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="input-field-wrapper">
+                  <label class="input-label-clean">كلمة المرور الآمنة <span style="color: #ef4444">*</span></label>
                   <div style="position: relative;">
-                    <input type="password" id="adminPassword" name="adminPassword" class="input" placeholder="Password"
-                      minlength="6" required style="padding-inline-end: 2.5rem;" />
-                    <button type="button" id="toggleAdminPassword"
-                      style="position: absolute; inset-inline-end: 0; top: 0; height: 100%; padding: 0 0.75rem; background: none; border: none; cursor: pointer; color: #a5b4fc;">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="eye-icon">
+                    <input type="password" id="adminPassword" name="inst_admin_password_field"
+                      autocomplete="new-password" class="modern-input" placeholder="••••••••" minlength="6" required>
+                    <button type="button" onclick="togglePassword()" id="togglePasswordBtn"
+                      style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.5); padding: 0; display: flex; align-items: center; justify-content: center; outline: none;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
-                      </svg>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="eye-off-icon hidden" style="display: none;">
-                        <path
-                          d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
-                        </path>
-                        <line x1="1" y1="1" x2="23" y2="23"></line>
                       </svg>
                     </button>
                   </div>
                 </div>
-                <div class="form-group">
-                  <label class="label" data-i18n-key="users.form.phone_label">Phone</label>
-                  <input type="tel" id="adminPhoneNumber" name="adminPhoneNumber" class="input" placeholder="Phone" />
+                <div class="input-field-wrapper">
+                  <label class="input-label-clean">جوال المدير <span style="color: #ef4444">*</span></label>
+                  <input type="tel" id="adminPhoneNumber" name="inst_admin_phone_field" autocomplete="off"
+                    class="modern-input" placeholder="05xxxxxxxx" required>
                 </div>
               </div>
-              <div class="form-group">
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" id="adminIsActive" name="adminIsActive" checked
-                    style="width: 16px; height: 16px;">
-                  <span class="label" style="margin: 0;" data-i18n-key="users.form.active_label">Admin Active</span>
-                </label>
-              </div>
-            </div>
-          </div>
 
-          <!-- Action Buttons -->
-          <div class="glass-card p-4 flex items-center justify-end gap-3 border-t border-white/10">
-            <div id="errorMessage"
-              class="hidden mr-auto text-sm text-red-400 px-3 py-1 rounded bg-red-500/10 border border-red-500/20">
-              <p></p>
+
             </div>
 
-            <a href="institutions.html" class="btn btn-secondary px-6"
-              data-i18n-key="institutions.form.cancel">Cancel</a>
-            <button type="submit" id="submitButton"
-              class="btn btn-primary px-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              <span data-i18n-key="institutions.form.create_institution">Create Institution</span>
-            </button>
           </div>
 
         </div>
-      </form>
+
+        <!-- Error Alert -->
+        <div id="errorMessage" class="hidden mt-8 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-center">
+          <p id="errorMessageText" style="color: #ef4444 !important; font-weight: bold !important; font-size: 16px;">
+          </p>
+        </div>
+
+        <!-- Final Submit -->
+        <div class="mt-10">
+          <button type="submit" id="submitButton" class="btn-create-ultra">
+            تقديم طلب لمؤسسة جديدة
+          </button>
+        </div>
+
     </div>
+    </form>
+  </div>
   </div>
 
-  <script src="../js/api.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <!-- Scripts Logic (Preserved and Updated) -->
+  <script src="../js/api.js?v=4"></script>
+  <script src="../components/sidebar.js?v=12"></script>
+  <script src="../components/header.js?v=3"></script>
   <script>
     async function initPage() {
       await waitForI18n();
-
-      if (!isAuthenticated()) {
-        window.location.href = '../index.html';
-        return;
-      }
+      if (!requireAuth()) return;
 
       const user = getCurrentUser();
       document.getElementById('sidebar').innerHTML = createSidebar(user);
-      document.getElementById('header').innerHTML = createHeader(
-        t('institutions.add_institution'),
-        t('institutions.create_new_institution')
-      );
+      document.getElementById('header').innerHTML = createHeader(t('institutions.add_institution'), '');
       initializeLanguageSwitcher();
       setActiveNav('institutions');
       window.i18n.translatePage();
 
-      // Load Subscription Plans
       loadSubscriptionPlans();
 
-      const form = document.getElementById('institutionForm');
-      const submitButton = document.getElementById('submitButton');
-      const errorMessage = document.getElementById('errorMessage');
+      // Real-time Tax ID Validation
+      const taxIdInput = document.getElementById('taxId');
+      const submitBtn = document.getElementById('submitButton');
 
+      taxIdInput.addEventListener('blur', async () => {
+        const taxId = taxIdInput.value.trim();
+        if (taxId.length > 5) {
+          try {
+            // Visual feedback for checking
+            taxIdInput.style.borderColor = '#818cf8';
+
+            const result = await api.institutions.checkTaxId(taxId);
+
+            if (result && result.exists) {
+              showError(result.message || 'رقم السجل التجاري مسجل مسبقاً');
+              taxIdInput.style.borderColor = '#ef4444';
+              taxIdInput.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+              submitBtn.disabled = true;
+              submitBtn.style.opacity = '0.5';
+              submitBtn.style.cursor = 'not-allowed';
+            } else {
+              // Clear error if it was related to tax ID
+              const err = document.getElementById('errorMessage');
+              if (!err.classList.contains('hidden') && err.innerText.includes('السجل التجاري')) {
+                err.classList.add('hidden');
+              }
+              // Reset styles
+              taxIdInput.style.borderColor = '';
+              taxIdInput.style.backgroundColor = '';
+              submitBtn.disabled = false;
+              submitBtn.style.opacity = '1';
+              submitBtn.style.cursor = 'pointer';
+            }
+          } catch (e) {
+            console.error('Validation error', e);
+            // On error (like network), we don't block, but maybe warn
+            taxIdInput.style.borderColor = '';
+          }
+        }
+      });
+
+      // Clear error state on input
+      taxIdInput.addEventListener('input', () => {
+        taxIdInput.style.borderColor = '';
+        taxIdInput.style.backgroundColor = '';
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+      });
+
+      const form = document.getElementById('institutionForm');
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        // Clear errors
+        const errorMessage = document.getElementById('errorMessage');
+        const submitButton = document.getElementById('submitButton');
         errorMessage.classList.add('hidden');
-        document.getElementById('nameError').classList.add('hidden');
-        document.getElementById('maxUsersError').classList.add('hidden');
 
-        // Get form data
         const formData = {
           name: document.getElementById('name').value.trim(),
-          maxUsers: parseInt(document.getElementById('maxUsers').value) || 0,
+          taxId: document.getElementById('taxId').value.trim(),
+          phoneNumber: document.getElementById('phoneNumber').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          maxUsers: parseInt(document.getElementById('maxUsers').value) || 1,
+          expirationDate: document.getElementById('expirationDate').value,
+          maximumLoans: parseInt(document.getElementById('maximumLoans').value) || 0,
           canCreateBranches: document.getElementById('canCreateBranches').checked,
           isActive: document.getElementById('isActive').checked,
-          planId: parseInt(document.getElementById('selectedPlanId').value)
+          planId: parseInt(document.getElementById('selectedPlanId').value),
+          adminName: document.getElementById('adminName').value.trim(),
+          adminEmail: document.getElementById('adminEmail').value.trim(),
+          adminPassword: document.getElementById('adminPassword').value,
+          adminPhoneNumber: document.getElementById('adminPhoneNumber').value.trim(),
+          adminIsActive: document.getElementById('adminIsActive').checked
         };
 
-        // Mandatory fields checks
-        const taxId = document.getElementById('taxId').value.trim();
-        const phoneNumber = document.getElementById('phoneNumber').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const adminName = document.getElementById('adminName').value.trim();
-        const adminEmail = document.getElementById('adminEmail').value.trim();
-        const adminPassword = document.getElementById('adminPassword').value;
-        const adminPhoneNumber = document.getElementById('adminPhoneNumber').value.trim();
-
-        if (!formData.name || !taxId || !phoneNumber || !email || !adminName || !adminEmail || !adminPassword) {
-          errorMessage.querySelector('p').textContent = t('users.form.inline_error') || 'Please fill in all required fields';
-          errorMessage.classList.remove('hidden');
-          // Also show specific field errors if possible, or just rely on the general message
-          if (!formData.name) {
-            document.getElementById('nameError').textContent = t('institutions.form.name_required') || 'Institution name is required';
-            document.getElementById('nameError').classList.remove('hidden');
-          }
+        if (!formData.planId) {
+          showError("يرجى اختيار باقة اشتراك لمتابعة العملية");
           return;
         }
 
-
-
-        if (!formData.planId || isNaN(formData.planId)) {
-          document.getElementById('planError').textContent = t('institutions.form.plan_required') || 'Please select a subscription plan';
-          document.getElementById('planError').classList.remove('hidden');
-          return;
-        }
-
-        if (adminPassword.length < 6) {
-          errorMessage.querySelector('p').textContent = t('users.form.password_min_error');
-          errorMessage.classList.remove('hidden');
-          return;
-        }
-
-        formData.taxId = taxId;
-        formData.phoneNumber = phoneNumber;
-        formData.email = email;
-
-        formData.adminName = adminName;
-        formData.adminEmail = adminEmail;
-        formData.adminPassword = adminPassword;
-        formData.adminPhoneNumber = adminPhoneNumber;
-        formData.adminIsActive = document.getElementById('adminIsActive').checked;
-
-        // Validation
-        let hasError = false;
-
-        if (formData.name.length < 2) {
-          document.getElementById('nameError').textContent = t('institutions.form.name_error');
-          document.getElementById('nameError').classList.remove('hidden');
-          hasError = true;
-        }
-
-        if (formData.maxUsers < 1) {
-          document.getElementById('maxUsersError').textContent = t('institutions.form.max_users_error');
-          document.getElementById('maxUsersError').classList.remove('hidden');
-          hasError = true;
-        }
-
-        if (hasError) return;
-
-        // Disable submit button
         submitButton.disabled = true;
-        submitButton.innerHTML = `<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> ${t('institutions.form.creating')}`;
+        submitButton.innerHTML = `<div class='spinner' style='width:20px;height:20px;margin:auto;border-color:white'></div>`;
 
         try {
           await api.institutions.create(formData);
-          showToast(t('common.message.request_created_success') || 'تم تقديم طلب التسجيل بنجاح', 'success');
-          setTimeout(() => {
-            window.location.href = 'requests.html';
-          }, 1500);
+          showToast('تمت إضافة المؤسسة وتفعيل الحساب بنجاح', 'success');
+          setTimeout(() => window.location.href = 'institutions.html', 1500);
         } catch (error) {
-          console.error('Error creating institution:', error);
-          errorMessage.querySelector('p').textContent = error.message || 'Failed to create institution';
-          errorMessage.classList.remove('hidden');
-
-          // Scroll to error
-          errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-          // Re-enable button
+          showError(error.message);
           submitButton.disabled = false;
-          submitButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          <span data-i18n-key="institutions.form.create_institution">${t('institutions.form.create_institution')}</span>
-        `;
+          submitButton.innerHTML = "تقديم طلب لمؤسسة جديدة";
         }
       });
-      // Toggle Password Visibility Logic
-      const togglePasswordBtn = document.getElementById('toggleAdminPassword');
-      const passwordInput = document.getElementById('adminPassword');
 
-      if (togglePasswordBtn && passwordInput) {
-        togglePasswordBtn.addEventListener('click', () => {
-          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-          passwordInput.setAttribute('type', type);
-
-          const eyeIcon = togglePasswordBtn.querySelector('.eye-icon');
-          const eyeOffIcon = togglePasswordBtn.querySelector('.eye-off-icon');
-
-          if (type === 'password') {
-            eyeIcon.style.display = 'block';
-            eyeOffIcon.style.display = 'none';
-            togglePasswordBtn.style.color = '#a5b4fc';
-          } else {
-            eyeIcon.style.display = 'none';
-            eyeOffIcon.style.display = 'block';
-            togglePasswordBtn.style.color = '#fff';
-          }
-        });
+      function showError(msg) {
+        const err = document.getElementById('errorMessage');
+        const text = document.getElementById('errorMessageText');
+        if (text) text.textContent = msg;
+        else err.querySelector('p').textContent = msg;
+        err.classList.remove('hidden');
+        err.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
 
     async function loadSubscriptionPlans() {
       const container = document.getElementById('plansContainer');
       try {
-        const response = await api.subscriptions.getPlans(); // Assuming this endpoint exists or will be created
+        const response = await api.subscriptions.getPlans();
         const plans = Array.isArray(response) ? response : (response.data || []);
-
-        if (plans.length === 0) {
-          container.innerHTML = `<p class="text-muted">${t('institutions.form.no_plans') || 'No subscription plans available.'}</p>`;
-          return;
-        }
-
         container.innerHTML = plans.map(plan => `
-                <div class="plan-card glass-card p-3 items-center gap-2 cursor-pointer transition-all duration-200 border border-white/10 hover:border-primary flex-1 min-w-[140px]" 
-                     onclick="selectPlan(this, ${plan.id})"
-                     style="border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; text-align: center; min-width: 140px;">
-                    <h4 class="font-bold text-base mb-1 text-white">${i18n.isRTL() ? plan.name : (plan.nameEn || plan.name)}</h4>
-                    <div class="text-xl font-bold text-primary mb-1">${plan.price} ${t('my_subscription.currency')}</div>
-                    <div class="text-xs text-muted">${plan.durationMonths} ${plan.durationMonths > 1 ? t('my_subscription.months') : t('my_subscription.month')}</div>
-                    ${plan.description ? `<p class="text-[10px] text-muted mt-1 truncate">${plan.description}</p>` : ''}
-                </div>
-            `).join('');
-
-      } catch (error) {
-        console.error('Error loading plans:', error);
-        container.innerHTML = `<p class="text-red-500">${t('institutions.form.load_plans_error') || 'Failed to load plans.'}</p>`;
+          <div class="plan-chip" onclick="selectPlan(this, ${plan.id})">
+            <div class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">${i18n.isRTL() ? plan.name : (plan.nameEn || plan.name)}</div>
+            <div class="text-xl font-black text-white">${plan.price} <span class="text-[10px] font-normal opacity-50">ر.س</span></div>
+            <div class="text-[9px] opacity-40 mt-1">${plan.durationMonths} شهر من الخدمة</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        container.innerHTML = "<p class='text-red-400 p-4'>عفواً، فشل تحميل الباقات المتوفرة</p>";
       }
     }
 
-    window.selectPlan = function (element, planId) {
-      // Remove active class from all
-      document.querySelectorAll('.plan-card').forEach(card => {
-        card.style.borderColor = 'rgba(255,255,255,0.1)';
-        card.style.background = 'rgba(255,255,255,0.05)';
-      });
-
-      // Add active style to selected
-      element.style.borderColor = '#6366f1'; // Primary color
-      element.style.background = 'rgba(99, 102, 241, 0.1)';
-
-      // Set value
-      document.getElementById('selectedPlanId').value = planId;
-      document.getElementById('planError').classList.add('hidden');
-    };
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initPage);
-    } else {
-      initPage();
+    window.selectPlan = function (el, id) {
+      document.querySelectorAll('.plan-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('selectedPlanId').value = id;
     }
+
+    window.togglePassword = function () {
+      const passwordInput = document.getElementById('adminPassword');
+      const toggleBtn = document.getElementById('togglePasswordBtn');
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        `;
+        toggleBtn.style.color = 'var(--neon-primary)';
+      } else {
+        passwordInput.type = 'password';
+        toggleBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        `;
+        toggleBtn.style.color = 'rgba(255,255,255,0.5)';
+      }
+    }
+
+    initPage();
   </script>
 </body>
 

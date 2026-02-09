@@ -47,13 +47,13 @@ export class SubscriptionRequest {
     requesterType: RequesterType;
 
     @Column({ name: 'institution_id', nullable: true })
-    institutionId: number;
+    institutionId: number | null;
 
     @Column({ name: 'branch_id', nullable: true })
-    branchId: number;
+    branchId: number | null;
 
     @Column({ name: 'plan_id', nullable: true })
-    planId: number;
+    planId: number | null;
 
     @Column({ name: 'custom_duration_months', nullable: true })
     customDurationMonths: number; // For custom date selection

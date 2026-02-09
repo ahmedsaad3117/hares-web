@@ -108,6 +108,12 @@ export class HomePageSettings {
     @Column({ name: 'contact_title_en', type: 'varchar', length: 200, default: 'Contact Us' })
     contactTitleEn: string;
 
+    @Column({ name: 'whatsapp_number', type: 'varchar', length: 50, nullable: true })
+    whatsappNumber: string;
+
+    @Column({ name: 'support_email', type: 'varchar', length: 150, nullable: true })
+    supportEmail: string;
+
     // Section Order (JSON array of section keys)
     @Column({ name: 'sections_order', type: 'text', default: '["hero","features","plans","about","contact"]' })
     sectionsOrder: string;
@@ -121,6 +127,9 @@ export class HomePageSettings {
 
     @Column({ name: 'social_links', type: 'text', nullable: true })
     socialLinks: string; // JSON object { twitter, facebook, linkedin, instagram }
+
+    @Column({ name: 'quick_links', type: 'text', nullable: true })
+    quickLinks: string; // JSON array of links
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;

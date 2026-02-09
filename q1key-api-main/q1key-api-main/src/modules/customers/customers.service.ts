@@ -260,8 +260,10 @@ export class CustomersService implements OnModuleInit {
       LEFT JOIN institutions i ON i.institution_id = cr.institution_id
       ${whereClause}
       ORDER BY cr.deleted_at DESC
-      LIMIT ${limit} OFFSET ${skip}
+      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
     `;
+
+    params.push(limit, skip);
 
     const rawCustomers = await this.customerRepository.query(dataQuery, params);
 
@@ -459,7 +461,10 @@ export class CustomersService implements OnModuleInit {
 
     // Check if linked to current user's institution
     let isLinked = false;
-    if (user && user.institutionId) {
+    const role = user?.role?.roleName || user?.roleName;
+    if (role === 'Super Admin') {
+      isLinked = true;
+    } else if (user && user.institutionId) {
       if (customer.institutionId === user.institutionId) {
         isLinked = true; // Owned by institution
       } else {
@@ -492,7 +497,10 @@ export class CustomersService implements OnModuleInit {
       whereConditions.push({ phoneNumber: searchDto.phoneNumber });
     }
 
-    // Name search disabled - only exact ID/phone searches allowed
+    // Enable Name search - allows finding customers by name (partial match)
+    if (searchDto.name) {
+      whereConditions.push({ name: Like(`%${searchDto.name}%`) });
+    }
 
     // If no search criteria provided, return empty array
     if (whereConditions.length === 0) {
@@ -505,38 +513,61 @@ export class CustomersService implements OnModuleInit {
       order: { createdAt: 'DESC' },
     });
 
+    if (customers.length === 0) {
+      return [];
+    }
+
+    // Get role name
+    const roleName = user?.role?.roleName || user?.roleName;
+
+    // ===== FIX N+1: Fetch all relations in ONE query =====
+    let linkedCustomerIds: Set<number> = new Set();
+
+    if (user && roleName !== 'Super Admin' && user.institutionId) {
+      const customerIds = customers.map(c => c.customerId);
+
+      // Single query to get all relations for these customers
+      const relations = await this.relationRepository.find({
+        where: {
+          customerId: In(customerIds),
+          institutionId: user.institutionId
+        },
+        select: ['customerId'],
+        withDeleted: false
+      });
+
+      linkedCustomerIds = new Set(relations.map(r => r.customerId));
+    }
+
     const dtos: CustomerResponseDto[] = [];
 
-    for (const customer of customers) {
-      // Log search
-      if (user) {
-        try {
-          await this.searchLogsService.create({
+    // Log search asynchronously (don't block the response)
+    if (user && customers.length > 0) {
+      // Fire and forget - log in background
+      Promise.all(
+        customers.map(customer =>
+          this.searchLogsService.create({
             customerId: customer.customerId,
             userId: user.userId,
             searchQuery: JSON.stringify(searchDto),
             searchType: 'search',
-          });
-        } catch (error) {
-          console.error('Failed to log customer search:', error);
-        }
-      }
+          }).catch(error => console.error('Failed to log customer search:', error))
+        )
+      );
+    }
 
+    for (const customer of customers) {
       const dto = this.toResponseDto(customer);
 
       // Check if linked to current user's institution
-      if (user && user.institutionId) {
+      if (roleName === 'Super Admin') {
+        dto.isLinked = true;
+      } else if (user && user.institutionId) {
         if (customer.institutionId === user.institutionId) {
           dto.isLinked = true; // Owned by institution
         } else {
-          const relation = await this.relationRepository.findOne({
-            where: {
-              customerId: customer.customerId,
-              institutionId: user.institutionId
-            },
-            withDeleted: false
-          });
-          dto.isLinked = !!relation;
+          // Use pre-fetched relations instead of N+1 query
+          dto.isLinked = linkedCustomerIds.has(customer.customerId);
         }
       }
 

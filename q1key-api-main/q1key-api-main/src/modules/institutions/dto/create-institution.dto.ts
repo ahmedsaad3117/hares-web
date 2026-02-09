@@ -1,21 +1,25 @@
-import { IsNotEmpty, IsString, IsNumber, IsBoolean, IsOptional, Min, IsDateString, IsEmail, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsBoolean, IsOptional, Min, IsDateString, IsEmail, MinLength, MaxLength } from 'class-validator';
 
 export class CreateInstitutionDto {
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'اسم المؤسسة مطلوب' })
   @IsString()
+  @MaxLength(150, { message: 'اسم المؤسسة طويل جداً' })
   name: string;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'السجل التجاري مطلوب' })
   @IsString()
-  taxId?: string;
+  @MaxLength(50, { message: 'رقم السجل التجاري طويل جداً' })
+  taxId: string;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'رقم هاتف المؤسسة مطلوب' })
   @IsString()
-  phoneNumber?: string;
+  @MaxLength(20, { message: 'رقم الهاتف طويل جداً' })
+  phoneNumber: string;
 
-  @IsOptional()
-  @IsEmail()
-  email?: string;
+  @IsNotEmpty({ message: 'البريد الإلكتروني للمؤسسة مطلوب' })
+  @IsEmail({}, { message: 'البريد الإلكتروني غير صالح' })
+  @MaxLength(100, { message: 'البريد الإلكتروني طويل جداً' })
+  email: string;
 
   @IsOptional()
   @IsNumber({}, { message: 'يجب أن يكون الحد الأقصى للمستخدمين رقماً' })
@@ -34,28 +38,37 @@ export class CreateInstitutionDto {
   @IsDateString()
   expirationDate?: string;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'باقة الاشتراك مطلوبة' })
   @IsNumber({}, { message: 'يجب أن يكون رقم باقة الاشتراك رقماً صحيحاً' })
-  planId?: number;
+  planId: number;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'اسم المدير مطلوب' })
   @IsString()
-  adminName?: string;
+  @MaxLength(100, { message: 'اسم المدير طويل جداً' })
+  adminName: string;
 
-  @IsOptional()
-  @IsEmail()
-  adminEmail?: string;
+  @IsNotEmpty({ message: 'البريد الإلكتروني للمدير مطلوب' })
+  @IsEmail({}, { message: 'البريد الإلكتروني للمدير غير صالح' })
+  @MaxLength(100, { message: 'البريد الإلكتروني للمدير طويل جداً' })
+  adminEmail: string;
 
-  @MinLength(6)
-  @IsOptional()
+  @IsNotEmpty({ message: 'كلمة مرور المدير مطلوبة' })
+  @MinLength(6, { message: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' })
+  @MaxLength(50, { message: 'كلمة المرور طويلة جداً' })
   @IsString()
-  adminPassword?: string;
+  adminPassword: string;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'رقم هاتف المدير مطلوب' })
   @IsString()
-  adminPhoneNumber?: string;
+  @MaxLength(20, { message: 'رقم هاتف المدير طويل جداً' })
+  adminPhoneNumber: string;
 
   @IsOptional()
   @IsBoolean()
   adminIsActive?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  maximumLoans?: number;
 }

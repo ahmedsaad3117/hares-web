@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <script>
+        (function () {
+            var lang = localStorage.getItem('locale') || 'ar';
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            if (lang === 'ar') document.documentElement.classList.add('rtl');
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q1KEY Platform - منصة إدارة القروض</title>
+    <meta name="description" content="منصة Q1Key المتكاملة لإدارة القروض والمؤسسات المالية">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/homepage.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <img src="logo.png" alt="Q1KEY Logo" style="height: 40px; width: auto;">
+        </div>
+        <div class="nav-btns">
+            <button onclick="toggleLanguage()" class="lang-switcher" id="langBtn">EN</button>
+            <button onclick="openLoginModal()" class="nav-btn secondary" id="loginBtn">تسجيل الدخول</button>
+            <button onclick="openSubscribeModal()" class="nav-btn primary" id="registerBtn">اشترك معنا</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="floating-shape"></div>
+        <div class="floating-shape"></div>
+        <div class="floating-shape"></div>
+
+        <div class="hero-content">
+            <h1 id="heroTitle">منصة Q1KEY المتكاملة لإدارة القروض</h1>
+            <p id="heroSubtitle">الحل الأمثل لإدارة مؤسستك المالية بكل سهولة وأمان. تتبع قروضك، عملائك، وأرباحك في مكان
+                واحد.</p>
+            <div class="hero-btns">
+                <button onclick="openSubscribeModal()" class="hero-btn primary" id="heroRegisterBtn">ابدأ الآن</button>
+                <a href="#about-section" class="hero-btn secondary" id="heroLearnBtn">اكتشف المزيد</a>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
+            </svg>
+        </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="section" style="padding-top: 0; padding-bottom: 2rem;">
+        <div class="stats-container">
+            <div class="stat-item">
+                <span class="stat-number">+100</span>
+                <span class="stat-label">مؤسسة مالية</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">+5000</span>
+                <span class="stat-label">عميل نشط</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">+10M</span>
+                <span class="stat-label">إجمالي القروض</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section" id="about-section">
+        <div class="about-grid">
+            <div class="about-text">
+                <h2 class="section-title" style="text-align: right; margin-bottom: 1.5rem;" id="aboutTitle">من نحن</h2>
+                <p id="aboutContent">نحن منصة رائدة في مجال إدارة القروض والمؤسسات المالية، نقدم حلولاً تقنية متطورة
+                    تساعد المؤسسات على تحقيق أهدافها بأعلى معايير الأمان والشفافية. نوفر لك كافة الأدوات اللازمة لإدارة
+                    دقيقة وفعالة.</p>
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <button class="nav-btn primary" onclick="openSubscribeModal()">تعرف على خططنا</button>
+                </div>
+            </div>
+            <div class="about-image">
+                <div class="about-image-container">
+                    <img src="img/about-loans.png" alt="Loan Management System" id="aboutImg">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section" id="features-section">
+        <h2 class="section-title" id="featuresTitle">مميزات المنصة</h2>
+        <p class="section-subtitle">كل ما تحتاجه لإدارة أعمالك بكفاءة عالية</p>
+        <div class="features-grid" id="featuresGrid">
+            <!-- Features loaded dynamically -->
+        </div>
+    </section>
+
+    <!-- Plans Section -->
+    <section class="section" id="plans-section">
+        <h2 class="section-title" id="plansTitle">باقات الاشتراك</h2>
+        <p class="section-subtitle">اختر الباقة المناسبة لاحتياجات مؤسستك</p>
+        <div class="plans-grid" id="plansGrid">
+            <!-- Plans loaded dynamically -->
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section" id="contact-section">
+        <div class="contact-wrapper">
+            <h2 class="section-title" id="contactTitle">تواصل معنا</h2>
+            <p class="section-subtitle" id="contactSubtitle">نحن هنا لمساعدتك والإجابة على استفساراتك</p>
+            <div class="contact-links" id="contactLinks">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p id="footerText">© 2024 Q1Key - جميع الحقوق محفوظة</p>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="login-modal-overlay" id="loginModalOverlay" onclick="handleOverlayClick(event)">
+        <div class="login-modal">
+            <button class="login-modal-close" onclick="closeLoginModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+
+            <div class="login-modal-header">
+                <h2 id="loginModalTitle">تسجيل الدخول</h2>
+                <p id="loginModalSubtitle">أدخل بياناتك للوصول إلى حسابك</p>
+            </div>
+
+            <div class="login-error" id="loginError"></div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="login-form-group">
+                    <label id="loginIdentifierLabel" for="loginIdentifier">البريد الإلكتروني أو رقم الهاتف</label>
+                    <input type="text" id="loginIdentifier" class="login-input" placeholder="admin@example.com"
+                        required>
+                </div>
+
+                <div class="login-form-group">
+                    <label id="loginPasswordLabel" for="loginPassword">كلمة المرور</label>
+                    <div class="login-input-wrapper">
+                        <input type="password" id="loginPassword" class="login-input" placeholder="••••••••" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" id="eyeIcon">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginSubmitBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                    <span id="loginBtnText">تسجيل الدخول</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Subscribe Modal -->
+    <div class="subscribe-modal-overlay" id="subscribeModalOverlay" onclick="handleSubscribeOverlayClick(event)">
+        <div class="subscribe-modal">
+            <button class="login-modal-close" onclick="closeSubscribeModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+
+            <!-- Form View -->
+            <div id="subscribeFormView">
+                <div class="subscribe-modal-header">
+                    <h2 id="subscribeModalTitle">اشترك معنا</h2>
+                    <p id="subscribeModalSubtitle">قم بملء البيانات التالية لإنشاء طلب اشتراك جديد</p>
+                </div>
+
+                <div class="login-error" id="subscribeError"></div>
+
+                <form id="subscribeForm" onsubmit="handleSubscribe(event)">
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                        <!-- Selection Area -->
+                        <div class="subscribe-section">
+                            <h3 class="subscribe-section-title" id="plansSectionTitle">باقة الاشتراك</h3>
+                            <div class="plans-selection" id="plansSelection">
+                                <!-- Plans will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Admin Account Info -->
+                        <div class="subscribe-section">
+                            <h3 class="subscribe-section-title" id="adminSectionTitle">بيانات حساب المدير</h3>
+                            <div class="login-form-group">
+                                <label id="adminNameLabel">الاسم الكامل <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="subAdminName" class="login-input" placeholder="أدخل اسمك الكامل"
+                                    required>
+                            </div>
+                            <div class="login-form-group">
+                                <label id="adminEmailLabel">البريد الإلكتروني <span
+                                        style="color: #ef4444;">*</span></label>
+                                <input type="email" id="subAdminEmail" class="login-input"
+                                    placeholder="example@email.com" required>
+                            </div>
+                            <div class="login-form-group">
+                                <label id="adminPhoneLabel">رقم الهاتف <span style="color: #ef4444;">*</span></label>
+                                <input type="tel" id="subAdminPhone" class="login-input" placeholder="05xxxxxxxx"
+                                    required>
+                            </div>
+                            <div class="login-form-group">
+                                <label id="adminPasswordLabel">كلمة المرور <span
+                                        style="color: #ef4444;">*</span></label>
+                                <input type="password" id="subAdminPassword" class="login-input" placeholder="••••••••"
+                                    required>
+                            </div>
+                        </div>
+
+                        <!-- Institution Info -->
+                        <div class="subscribe-section">
+                            <h3 class="subscribe-section-title" id="institutionSectionTitle">معلومات المؤسسة</h3>
+                            <div class="login-form-group">
+                                <label id="instNameLabel">اسم المؤسسة <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="subInstName" class="login-input" placeholder="أدخل اسم المؤسسة"
+                                    required>
+                            </div>
+                            <div class="login-form-group">
+                                <label id="instTaxIdLabel">رقم السجل التجاري <span
+                                        style="color: #ef4444;">*</span></label>
+                                <input type="text" id="subInstTaxId" class="login-input"
+                                    placeholder="أدخل رقم السجل التجاري" required>
+                            </div>
+                            <div class="login-form-group">
+                                <label id="instPhoneLabel">رقم الهاتف <span style="color: #ef4444;">*</span></label>
+                                <input type="tel" id="subInstPhone" class="login-input" placeholder="01xxxxxxxx"
+                                    required>
+                            </div>
+                            <div class="login-form-group">
+                                <label id="instEmailLabel">البريد الإلكتروني <span
+                                        style="color: #ef4444;">*</span></label>
+                                <input type="email" id="subInstEmail" class="login-input" placeholder="inst@example.com"
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <button type="button" class="nav-btn secondary" onclick="closeSubscribeModal()"
+                            id="subscribeCancelText">إلغاء</button>
+                        <button type="submit" class="nav-btn primary" id="subscribeSubmitBtn">
+                            <span id="subscribeBtnText">تقديم طلب</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Success View -->
+            <div id="subscribeSuccessView" style="display: none; text-align: center; padding: 2rem 0;">
+                <div
+                    style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem;">
+                    ✓
+                </div>
+                <h2 id="subscribeSuccessTitle" style="color: white; margin-bottom: 1rem;">تم إرسال الطلب بنجاح!</h2>
+                <p id="subscribeSuccessMessage" style="color: #94a3b8; line-height: 1.6; margin-bottom: 2rem;">يرجى
+                    تحويل مبلغ الاشتراك وإرسال إيصال التحويل، ثم التواصل معنا عبر قسم التواصل.</p>
+                <button class="nav-btn primary" onclick="closeSubscribeModal()" id="subscribeCloseText">حسناً</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/homepage.js"></script>
+</body>
+
+</html>

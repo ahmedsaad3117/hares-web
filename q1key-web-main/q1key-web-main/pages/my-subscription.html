@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>اشتراكي - Q1KEY Platform</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css?v=12">
     <style>
         .page-container {
             max-width: 1000px;
@@ -44,7 +44,6 @@
         /* Status Cards */
         .status-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-bottom: 2rem;
         }
@@ -131,7 +130,6 @@
         /* Plans Section */
         .plans-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1rem;
             margin-top: 1.5rem;
         }
@@ -352,6 +350,33 @@
             padding: 3rem;
             color: #94a3b8;
         }
+
+        /* Improved Grid and Card Layouts */
+        @media (min-width: 768px) {
+
+            .status-cards,
+            .plans-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+        }
+
+        .status-card,
+        .plan-card {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            height: 100% !important;
+            min-height: 180px !important;
+        }
+
+        .plan-card {
+            min-height: 250px !important;
+        }
+
+        .status-card .value {
+            font-size: 1.75rem !important;
+        }
     </style>
 </head>
 
@@ -375,12 +400,16 @@
 
     <div id="toast" class="toast"></div>
 
-    <script src="../js/config.js"></script>
+    <!-- Force correct API config -->
+    <script>
+        window.API_CONFIG = { baseUrl: 'http://localhost:3001/api' };
+    </script>
+    <script src="../js/config.js?v=3"></script>
     <script src="../js/i18n.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/ui-utils.js"></script>
-    <script src="../components/sidebar.js?v=5"></script>
-    <script src="../components/header.js"></script>
+    <script src="../js/api.js?v=4"></script>
+    <script src="../js/ui-utils.js?v=3"></script>
+    <script src="../components/sidebar.js?v=12"></script>
+    <script src="../components/header.js?v=3"></script>
     <script>
         let subscriptionData = null;
         let selectedPlanId = null;
@@ -393,7 +422,15 @@
                 return;
             }
 
-            const user = getCurrentUser();
+            let user = getCurrentUser();
+
+            // Refresh profile to get latest subscription data
+            try {
+                const refreshed = await api.auth.getProfile();
+                if (refreshed) user = getCurrentUser();
+            } catch (e) {
+                console.error('Failed to refresh profile:', e);
+            }
 
             // Only Institution or Branch can access this page
             if (user.roleName !== 'Institution' && user.roleName !== 'Branch') {
@@ -497,7 +534,7 @@
                 plansHtml = `
                     <div class="request-section">
                         <h3 style="color: white; margin-bottom: 1rem;">📦 اختر باقة التجديد</h3>
-                        <div class="plans-grid">
+                        <div class="plans-grid grid-responsive-sm">
                             ${d.availablePlans.map(plan => `
                                 <div class="plan-card ${selectedPlanId === plan.id ? 'selected' : ''}" 
                                      onclick="selectPlan(${plan.id})">
@@ -546,7 +583,7 @@
 
                 ${alertHtml}
 
-                <div class="status-cards">
+                <div class="status-cards grid-responsive-sm">
                     <div class="status-card ${statusClass}">
                         <div class="value">${statusIcon} ${statusText}</div>
                         <div class="label">حالة الاشتراك</div>

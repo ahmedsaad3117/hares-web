@@ -43,11 +43,14 @@ export class User {
   @Column({ name: "active_session_id", type: "varchar", nullable: true, length: 255 })
   activeSessionId: string | null;
 
-  @ManyToOne(() => Institution)
+  @Column({ name: "last_activity_at", type: "timestamp", nullable: true })
+  lastActivityAt: Date | null;
+
+  @ManyToOne(() => Institution, (institution) => institution.users)
   @JoinColumn({ name: "institution_id" })
   institution: Institution;
 
-  @ManyToOne(() => Branch)
+  @ManyToOne(() => Branch, (branch) => branch.users)
   @JoinColumn({ name: "branch_id" })
   branch: Branch;
 

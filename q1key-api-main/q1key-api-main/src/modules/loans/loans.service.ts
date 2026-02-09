@@ -81,12 +81,8 @@ export class LoansService {
           `Institution with ID ${createLoanDto.institutionId} not found`,
         );
       }
-      // Verify institution cannot create branches
-      if (institution.canCreateBranches) {
-        throw new BadRequestException(
-          `Institution '${institution.name}' has branch creation enabled. Loans must be assigned to a branch.`,
-        );
-      }
+      // Verify institution existance is already done above. 
+      // We allow institutions to have their own loans even if they can create branches.
     }
 
     // Verify product exists and is active
@@ -106,22 +102,36 @@ export class LoansService {
 
     // Atomic transaction: Create loan and update branch/institution total amount
     const { savedLoan, warning } = await this.dataSource.transaction(async (manager) => {
-      // Update branch or institution total loan amount atomically
+      // Update branch or institution total loan amount atomically with capacity check
       if (branch) {
-        await manager.increment(
-          Branch,
-          { branchId: branch.branchId },
-          'totalLoans',
-          createLoanDto.principalAmount
-        );
+        // Use pessimistic lock to prevent concurrent capacity overruns
+        const lockedBranch = await manager.findOne(Branch, {
+          where: { branchId: branch.branchId },
+          lock: { mode: 'pessimistic_write' }
+        });
+
+        if (!lockedBranch) throw new NotFoundException('Branch not found');
+
+        if (lockedBranch.maximumLoans > 0 && (lockedBranch.totalLoans + createLoanDto.principalAmount > lockedBranch.maximumLoans)) {
+          throw new BadRequestException(`Branch capacity exceeded. Current: ${lockedBranch.totalLoans}, Max: ${lockedBranch.maximumLoans}`);
+        }
+
+        lockedBranch.totalLoans += createLoanDto.principalAmount;
+        await manager.save(lockedBranch);
       } else if (institution) {
-        // Update institution's total loans when no branch is involved
-        await manager.increment(
-          Institution,
-          { institutionId: institution.institutionId },
-          'totalLoans',
-          createLoanDto.principalAmount
-        );
+        const lockedInst = await manager.findOne(Institution, {
+          where: { institutionId: institution.institutionId },
+          lock: { mode: 'pessimistic_write' }
+        });
+
+        if (!lockedInst) throw new NotFoundException('Institution not found');
+
+        if (lockedInst.maximumLoans > 0 && (lockedInst.totalLoans + createLoanDto.principalAmount > lockedInst.maximumLoans)) {
+          throw new BadRequestException(`Institution capacity exceeded. Current: ${lockedInst.totalLoans}, Max: ${lockedInst.maximumLoans}`);
+        }
+
+        lockedInst.totalLoans += createLoanDto.principalAmount;
+        await manager.save(lockedInst);
       }
 
       // Create and save loan
@@ -167,7 +177,8 @@ export class LoansService {
 
   async findAll(paginationDto: PaginationDto, user?: any): Promise<PaginatedResult<LoanResponseDto>> {
     const { page = 1, limit = 10 } = paginationDto;
-    const skip = (page - 1) * limit;
+    const Skip = (page - 1) * limit;
+    const Take = limit;
 
     // Build query to filter by institution
     const queryBuilder = this.loanRepository.createQueryBuilder('loan')
@@ -177,12 +188,18 @@ export class LoansService {
       .leftJoinAndSelect('loan.product', 'product')
       .leftJoinAndSelect('branch.institution', 'branchInstitution')
       .orderBy('loan.createdAt', 'DESC')
-      .skip(skip)
-      .take(limit);
+      .skip(Skip)
+      .take(Take);
+
+    // Filter by status if provided
+    if (paginationDto.status) {
+      queryBuilder.andWhere('loan.status = :status', { status: paginationDto.status });
+    }
 
     // Filter by institution unless Super Admin
-    if (user && user.role !== 'Super Admin' && user.institutionId) {
-      queryBuilder.where(
+    const roleName = user?.role?.roleName || user?.roleName;
+    if (user && roleName !== 'Super Admin' && user.institutionId) {
+      queryBuilder.andWhere(
         '(branch.institution_id = :institutionId OR loan.institution_id = :institutionId)',
         { institutionId: user.institutionId }
       );
@@ -201,46 +218,22 @@ export class LoansService {
     };
   }
 
-  async findByCustomer(customerId: number): Promise<LoanResponseDto[]> {
-    const loans = await this.loanRepository.find({
-      where: { customerId },
-      relations: ['customer', 'branch', 'product'],
-      order: { createdAt: 'DESC' },
-    });
-    return loans.map((loan) => this.toResponseDto(loan));
-  }
-
-  async findByBranch(branchId: number): Promise<LoanResponseDto[]> {
-    const loans = await this.loanRepository.find({
-      where: { branchId },
-      relations: ['customer', 'branch', 'product'],
-      order: { createdAt: 'DESC' },
-    });
-    return loans.map((loan) => this.toResponseDto(loan));
-  }
-
-  async findByStatus(status: LoanStatus): Promise<LoanResponseDto[]> {
-    const loans = await this.loanRepository.find({
-      where: { status },
-      relations: ['customer', 'branch', 'product'],
-      order: { createdAt: 'DESC' },
-    });
-    return loans.map((loan) => this.toResponseDto(loan));
-  }
-
-  async search(searchTerm: string): Promise<LoanResponseDto[]> {
-    const queryBuilder = this.loanRepository
-      .createQueryBuilder('loan')
+  async findByCustomer(customerId: number, user?: any): Promise<LoanResponseDto[]> {
+    const queryBuilder = this.loanRepository.createQueryBuilder('loan')
       .leftJoinAndSelect('loan.customer', 'customer')
       .leftJoinAndSelect('loan.branch', 'branch')
+      .leftJoinAndSelect('loan.institution', 'loanInstitution')
       .leftJoinAndSelect('loan.product', 'product')
+      .leftJoinAndSelect('branch.institution', 'branchInstitution')
+      .where('loan.customerId = :customerId', { customerId })
       .orderBy('loan.createdAt', 'DESC');
 
-    if (searchTerm && searchTerm.trim()) {
-      const term = `%${searchTerm.trim()}%`;
-      queryBuilder.where(
-        '(customer.name ILIKE :term OR customer.nationalId ILIKE :term OR customer.phoneNumber ILIKE :term OR branch.name ILIKE :term OR product.name ILIKE :term OR CAST(loan.principalAmount AS TEXT) ILIKE :term OR CAST(loan.loanId AS TEXT) ILIKE :term)',
-        { term }
+    // Filter by institution unless Super Admin
+    const roleName = user?.role?.roleName || user?.roleName;
+    if (user && roleName !== 'Super Admin' && user.institutionId) {
+      queryBuilder.andWhere(
+        '(branch.institution_id = :institutionId OR loan.institution_id = :institutionId)',
+        { institutionId: user.institutionId }
       );
     }
 
@@ -248,7 +241,98 @@ export class LoansService {
     return loans.map((loan) => this.toResponseDto(loan));
   }
 
-  async findOne(id: number): Promise<LoanResponseDto> {
+  async findByBranch(branchId: number, user?: any): Promise<LoanResponseDto[]> {
+    const queryBuilder = this.loanRepository.createQueryBuilder('loan')
+      .leftJoinAndSelect('loan.customer', 'customer')
+      .leftJoinAndSelect('loan.branch', 'branch')
+      .leftJoinAndSelect('loan.institution', 'loanInstitution')
+      .leftJoinAndSelect('loan.product', 'product')
+      .leftJoinAndSelect('branch.institution', 'branchInstitution')
+      .where('loan.branchId = :branchId', { branchId })
+      .orderBy('loan.createdAt', 'DESC');
+
+    // Filter by institution unless Super Admin
+    const roleName = user?.role?.roleName || user?.roleName;
+    if (user && roleName !== 'Super Admin' && user.institutionId) {
+      queryBuilder.andWhere(
+        '(branch.institution_id = :institutionId OR loan.institution_id = :institutionId)',
+        { institutionId: user.institutionId }
+      );
+    }
+
+    const loans = await queryBuilder.getMany();
+    return loans.map((loan) => this.toResponseDto(loan));
+  }
+
+  async findByStatus(status: LoanStatus, user?: any): Promise<LoanResponseDto[]> {
+    const queryBuilder = this.loanRepository.createQueryBuilder('loan')
+      .leftJoinAndSelect('loan.customer', 'customer')
+      .leftJoinAndSelect('loan.branch', 'branch')
+      .leftJoinAndSelect('loan.institution', 'loanInstitution')
+      .leftJoinAndSelect('loan.product', 'product')
+      .leftJoinAndSelect('branch.institution', 'branchInstitution')
+      .where('loan.status = :status', { status })
+      .orderBy('loan.createdAt', 'DESC');
+
+    // Filter by institution unless Super Admin
+    const roleName = user?.role?.roleName || user?.roleName;
+    if (user && roleName !== 'Super Admin' && user.institutionId) {
+      queryBuilder.andWhere(
+        '(branch.institution_id = :institutionId OR loan.institution_id = :institutionId)',
+        { institutionId: user.institutionId }
+      );
+    }
+
+    const loans = await queryBuilder.getMany();
+    return loans.map((loan) => this.toResponseDto(loan));
+  }
+
+  async search(searchTerm: string, user?: any): Promise<LoanResponseDto[]> {
+    const queryBuilder = this.loanRepository
+      .createQueryBuilder('loan')
+      .leftJoinAndSelect('loan.customer', 'customer')
+      .leftJoinAndSelect('loan.branch', 'branch')
+      .leftJoinAndSelect('loan.institution', 'loanInstitution')
+      .leftJoinAndSelect('loan.product', 'product')
+      .leftJoinAndSelect('branch.institution', 'branchInstitution')
+      .orderBy('loan.createdAt', 'DESC')
+      .take(100); // Limit results for performance
+
+    // Filter by institution FIRST (uses index) before text search
+    const roleName = user?.role?.roleName || user?.roleName;
+    if (user && roleName !== 'Super Admin' && user.institutionId) {
+      queryBuilder.andWhere(
+        '(branch.institution_id = :institutionId OR loan.institution_id = :institutionId)',
+        { institutionId: user.institutionId }
+      );
+    }
+
+    // Then apply text search (more expensive operation)
+    if (searchTerm && searchTerm.trim()) {
+      const term = `%${searchTerm.trim()}%`;
+      // Check if search term is numeric (likely loan ID or amount)
+      const isNumeric = /^\d+$/.test(searchTerm.trim());
+
+      if (isNumeric) {
+        // Numeric search - prioritize indexed columns
+        queryBuilder.andWhere(
+          '(loan.loanId = :exactId OR CAST(loan.principalAmount AS TEXT) ILIKE :term OR customer.nationalId = :exactTerm OR customer.phoneNumber = :exactTerm)',
+          { term, exactId: parseInt(searchTerm.trim()), exactTerm: searchTerm.trim() }
+        );
+      } else {
+        // Text search
+        queryBuilder.andWhere(
+          '(customer.name ILIKE :term OR branch.name ILIKE :term OR product.name ILIKE :term)',
+          { term }
+        );
+      }
+    }
+
+    const loans = await queryBuilder.getMany();
+    return loans.map((loan) => this.toResponseDto(loan));
+  }
+
+  async findOne(id: number, user?: any): Promise<LoanResponseDto> {
     const loan = await this.loanRepository.findOne({
       where: { loanId: id },
       relations: ['customer', 'branch', 'branch.institution', 'institution', 'product', 'creator', 'installments'],
@@ -256,6 +340,15 @@ export class LoansService {
 
     if (!loan) {
       throw new NotFoundException(`Loan with ID ${id} not found`);
+    }
+
+    // Security check: only show if Super Admin or same institution
+    const roleName = user?.role?.roleName || user?.roleName;
+    if (user && roleName !== 'Super Admin' && user.institutionId) {
+      const loanInstId = loan.branch?.institutionId || loan.institutionId;
+      if (loanInstId !== user.institutionId) {
+        throw new NotFoundException(`Loan with ID ${id} not found or access denied`);
+      }
     }
 
     return this.toResponseDto(loan);

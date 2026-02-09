@@ -6,8 +6,10 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from "typeorm";
 import { Institution } from "./institution.entity";
+import { User } from "./user.entity";
 
 @Entity("branches")
 export class Branch {
@@ -32,7 +34,7 @@ export class Branch {
   @Column({ name: "total_loans", default: 0 })
   totalLoans: number;
 
-  @Column({ name: "maximum_loans", default: 100 })
+  @Column({ name: "maximum_loans", default: 0 })
   maximumLoans: number;
 
   @Column({ name: "expiration_date", type: "timestamp", nullable: true })
@@ -47,4 +49,7 @@ export class Branch {
   @ManyToOne(() => Institution, (institution) => institution.branches)
   @JoinColumn({ name: "institution_id" })
   institution: Institution;
+
+  @OneToMany(() => User, (user) => user.branch)
+  users: User[];
 }

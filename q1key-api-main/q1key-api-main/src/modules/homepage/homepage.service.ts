@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HomePageSettings } from '../../entities/homepage-settings.entity';
+import { CacheService, CACHE_KEYS, CACHE_TTL } from '../../common/cache';
 
 @Injectable()
 export class HomepageService {
     constructor(
         @InjectRepository(HomePageSettings)
         private homepageRepo: Repository<HomePageSettings>,
+        private cacheService: CacheService,
     ) { }
 
     /**
@@ -71,13 +73,29 @@ export class HomepageService {
         // Merge updates
         Object.assign(settings, updateData);
 
+        // Invalidate cache when settings are updated
+        this.cacheService.invalidate(CACHE_KEYS.HOMEPAGE_PUBLIC);
+        this.cacheService.invalidate(CACHE_KEYS.HOMEPAGE_SETTINGS);
+
         return this.homepageRepo.save(settings);
     }
 
     /**
      * Get public homepage data (for unauthenticated users)
+     * CACHED: 1 hour (rarely changes)
      */
     async getPublicData(): Promise<any> {
+        return this.cacheService.get(
+            CACHE_KEYS.HOMEPAGE_PUBLIC,
+            async () => this.fetchPublicData(),
+            CACHE_TTL.VERY_LONG // 1 hour
+        );
+    }
+
+    /**
+     * Internal: Fetch public data from database
+     */
+    private async fetchPublicData(): Promise<any> {
         const settings = await this.getSettings();
 
         // Parse JSON fields
@@ -95,6 +113,11 @@ export class HomepageService {
 
         try {
             socialLinks = settings.socialLinks ? JSON.parse(settings.socialLinks) : {};
+        } catch (e) { }
+
+        let quickLinks = [];
+        try {
+            quickLinks = settings.quickLinks ? JSON.parse(settings.quickLinks) : [];
         } catch (e) { }
 
         return {
@@ -142,11 +165,14 @@ export class HomepageService {
                 visible: settings.contactSectionVisible,
                 titleAr: settings.contactTitleAr,
                 titleEn: settings.contactTitleEn,
+                whatsappNumber: settings.whatsappNumber,
+                supportEmail: settings.supportEmail,
             },
             footer: {
                 textAr: settings.footerTextAr,
                 textEn: settings.footerTextEn,
                 socialLinks,
+                quickLinks,
             },
             sectionsOrder,
         };

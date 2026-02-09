@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Installments | Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=11">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -33,9 +33,7 @@
           </div>
 
           <!-- Summary Cards -->
-          <div class="grid grid-cols-4 gap-4 mb-6"
-            style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;"
-            id="summaryCards">
+          <div class="grid grid-cols-4 gap-4 mb-6" id="summaryCards">
             <!-- Will be populated by JavaScript -->
           </div>
 
@@ -162,17 +160,23 @@
   <div id="toast" class="toast"></div>
 
   <!-- Scripts -->
-  <script src="../components/header.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
+  <script src="../components/header.js?v=3"></script>
+  <script src="../components/sidebar.js?v=12"></script>
   <script src="../components/pagination.js"></script>
-  <script src="../js/ui-utils.js"></script>
-  <script src="../js/api.js"></script>
+  <script src="../js/ui-utils.js?v=3"></script>
+  <script src="../js/api.js?v=4"></script>
 
   <script>
     async function initPage() {
       await waitForI18n();
 
       // Authentication check
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
+      }
       const user = getCurrentUser();
       if (!user) {
         window.location.href = '../index.html';
@@ -247,11 +251,14 @@
 
     // Currency formatting
     function formatCurrency(amount) {
+      const num = parseFloat(amount);
+      if (isNaN(num)) return '0.00 ر.س.';
       return new Intl.NumberFormat('ar-SA', {
         style: 'currency',
         currency: 'SAR',
-        minimumFractionDigits: 2
-      }).format(amount || 0);
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(num);
     }
 
     // Check if installment is overdue

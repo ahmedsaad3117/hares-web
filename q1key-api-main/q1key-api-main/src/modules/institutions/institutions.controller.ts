@@ -19,6 +19,7 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { RateLimiterGuard, RateLimit, RATE_LIMITS } from '../../common/rate-limiter';
 
 @Controller('institutions')
 export class InstitutionsController {
@@ -26,20 +27,25 @@ export class InstitutionsController {
 
   /**
    * Public endpoint to check if a tax ID already exists
-   * Used by the subscription form to validate before submission
+   * Rate limited to prevent scraping
    */
   @Get('check-tax-id/:taxId')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimiterGuard)
+  @RateLimit(RATE_LIMITS.SEARCH)
   checkTaxId(@Param('taxId') taxId: string) {
     return this.institutionsService.checkTaxIdExists(taxId);
   }
 
   /**
    * Public endpoint for subscription requests (no authentication required)
-   * This allows new users to submit subscription requests from the homepage
+   * Rate limited: 5 attempts per hour per IP
+   * Prevents spam and abuse of subscription form
    */
   @Post('subscribe')
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(RateLimiterGuard)
+  @RateLimit(RATE_LIMITS.REGISTRATION)
   publicSubscriptionRequest(@Body() createInstitutionDto: CreateInstitutionDto) {
     return this.institutionsService.create(createInstitutionDto);
   }
@@ -59,9 +65,13 @@ export class InstitutionsController {
     return this.institutionsService.findAll(paginationDto);
   }
 
+  /**
+   * Search institutions with rate limiting
+   */
   @Get('search')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, RateLimiterGuard)
   @Roles('Super Admin', 'Institution', 'Branch')
+  @RateLimit(RATE_LIMITS.SEARCH)
   search(@Query('q') searchTerm: string) {
     return this.institutionsService.search(searchTerm || '');
   }

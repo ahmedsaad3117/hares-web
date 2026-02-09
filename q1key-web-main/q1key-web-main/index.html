@@ -1,187 +1,489 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Q1KEY Platform - Login</title>
-  <link rel="stylesheet" href="css/styles.css">
-  <script src="js/i18n.js"></script>
+    <script>
+        (function () {
+            var lang = localStorage.getItem('locale') || 'ar';
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+
+            // وظيفة للتحقق من انتهاء الاشتراك
+            function isSubscriptionExpired(expirationDate) {
+                if (!expirationDate) return false;
+                const now = new Date();
+                const exp = new Date(expirationDate);
+                const diffTime = exp.getTime() - now.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 0;
+            }
+
+            // إذا كان هناك token، انتقل للجهة المناسبة
+            if (localStorage.getItem('token')) {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const role = user.roleName || user.role_name;
+                const isExpired = role !== 'Super Admin' && isSubscriptionExpired(user.expirationDate);
+
+                if (isExpired) {
+                    window.location.href = 'pages/my-subscription.html';
+                } else {
+                    window.location.href = 'pages/dashboard.html';
+                }
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q1KEY - منصة إدارة القروض المتكاملة</title>
+    <meta name="description" content="Q1KEY منصة متكاملة لإدارة القروض والمؤسسات المالية بكفاءة وأمان">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/homepage.css">
 </head>
 
 <body>
-  <div class="min-h-screen flex items-center justify-center"
-    style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem;">
-    <div class="glass-card p-8" style="padding: 2rem; width: 100%; max-width: 450px;">
-      <div style="text-align: center; margin-bottom: 2rem;">
-        <h1 class="text-3xl font-bold text-white" style="font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5rem;"
-          data-i18n-key="login.title">
-          Q1KEY Platform
-        </h1>
-        <p class="text-secondary" style="color: #cbd5e1;" data-i18n-key="login.subtitle">Sign in to your account</p>
-      </div>
+    <!-- ============================================== -->
+    <!--                   HEADER                       -->
+    <!-- ============================================== -->
+    <header class="header" id="header">
+        <div class="header-container">
+            <!-- Logo -->
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <img src="logo.png" alt="Q1KEY Logo">
+                </div>
+                <span class="logo-text">Q1KEY</span>
+            </a>
 
-      <form id="loginForm" style="display: flex; flex-direction: column; gap: 1rem;">
-        <!-- Email or Phone -->
-        <div class="form-group">
-          <label class="label" data-i18n-key="login.identifier_label">Email or Phone</label>
-          <input type="text" id="identifier" name="identifier" class="input"
-            data-i18n-placeholder="login.identifier_placeholder" placeholder="admin@example.com or phone number"
-            required />
-          <div id="identifierError" class="error-text hidden"></div>
+            <!-- Navigation -->
+            <nav class="nav" id="headerNav">
+                <a href="#hero" class="nav-link" data-text-ar="الرئيسية" data-text-en="Home">الرئيسية</a>
+                <a href="#features" class="nav-link" data-text-ar="المميزات" data-text-en="Features">المميزات</a>
+                <a href="#plans" class="nav-link" data-text-ar="الباقات" data-text-en="Plans">الباقات</a>
+                <a href="#about" class="nav-link" data-text-ar="من نحن" data-text-en="About">من نحن</a>
+                <a href="#contact" class="nav-link" data-text-ar="تواصل معنا" data-text-en="Contact">تواصل معنا</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="header-actions">
+                <button class="btn-lang" onclick="toggleLanguage()" id="langToggle">
+                    <span id="langLabel">EN</span>
+                </button>
+                <button class="btn-outline" onclick="openLoginModal()" id="loginBtn">
+                    <span data-text-ar="تسجيل الدخول" data-text-en="Login">تسجيل الدخول</span>
+                </button>
+                <button class="btn-primary" onclick="openSubscribeModal()" id="subscribeBtn">
+                    <span data-text-ar="اشترك معنا" data-text-en="Subscribe">اشترك معنا</span>
+                </button>
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()" id="mobileMenuBtn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
         </div>
+    </header>
 
-        <!-- Password -->
-        <div class="form-group">
-          <label class="label" data-i18n-key="login.password_label">Password</label>
-          <div style="position: relative;">
-            <button type="button" id="togglePassword"
-              style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0.25rem; display: flex; align-items: center; justify-content: center; z-index: 10;"
-              aria-label="Toggle password visibility">
-              <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
+    <!-- ============================================== -->
+    <!--                HERO SECTION                    -->
+    <!-- ============================================== -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <div class="hero-glow hero-glow-1"></div>
+            <div class="hero-glow hero-glow-2"></div>
+            <div class="hero-grid"></div>
+        </div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge" id="heroBadge">
+                    <span data-text-ar="منصة معتمدة" data-text-en="Certified Platform">🏆 منصة معتمدة</span>
+                </div>
+                <h1 class="hero-title" id="heroTitle">
+                    <span data-text-ar="منصة" data-text-en="The">منصة</span>
+                    <span class="text-gradient">Q1KEY</span>
+                    <span data-text-ar="لإدارة القروض" data-text-en="for Loan Management">لإدارة القروض</span>
+                </h1>
+                <p class="hero-subtitle" id="heroSubtitle"
+                    data-text-ar="الحل الأمثل لإدارة مؤسستك المالية بكفاءة وأمان. تتبع القروض، إدارة العملاء، وتقارير متقدمة في منصة واحدة متكاملة."
+                    data-text-en="The ultimate solution for managing your financial institution efficiently and securely. Track loans, manage customers, and advanced reports in one integrated platform.">
+                    الحل الأمثل لإدارة مؤسستك المالية بكفاءة وأمان. تتبع القروض، إدارة العملاء، وتقارير متقدمة في منصة
+                    واحدة متكاملة.
+                </p>
+                <div class="hero-actions">
+                    <button class="btn-primary btn-lg" onclick="openSubscribeModal()" id="heroSubscribeBtn">
+                        <span data-text-ar="ابدأ الآن مجاناً" data-text-en="Start Free Now">ابدأ الآن مجاناً</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                    <a href="#features" class="btn-ghost" id="heroLearnBtn">
+                        <span data-text-ar="تعرف على المزيد" data-text-en="Learn More">تعرف على المزيد</span>
+                    </a>
+                </div>
+                <div class="hero-stats" id="heroStats">
+                    <div class="hero-stat">
+                        <span class="stat-value">+500</span>
+                        <span class="stat-label" data-text-ar="مؤسسة" data-text-en="Institutions">مؤسسة</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="stat-value">+10K</span>
+                        <span class="stat-label" data-text-ar="مستخدم" data-text-en="Users">مستخدم</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="stat-value">99%</span>
+                        <span class="stat-label" data-text-ar="رضا العملاء" data-text-en="Satisfaction">رضا
+                            العملاء</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!--              FEATURES SECTION                  -->
+    <!-- ============================================== -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag" data-text-ar="لماذا تختارنا" data-text-en="Why Choose Us">لماذا تختارنا</span>
+                <h2 class="section-title" id="featuresTitle" data-text-ar="مميزات المنصة"
+                    data-text-en="Platform Features">مميزات المنصة</h2>
+                <p class="section-desc" id="featuresDesc"
+                    data-text-ar="نوفر لك أدوات متكاملة لإدارة مؤسستك المالية بأعلى معايير الأمان والكفاءة"
+                    data-text-en="We provide you with integrated tools to manage your financial institution with the highest standards of security and efficiency">
+                    نوفر لك أدوات متكاملة لإدارة مؤسستك المالية بأعلى معايير الأمان والكفاءة
+                </p>
+            </div>
+            <div class="features-grid" id="featuresGrid">
+                <!-- Features will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!--               PLANS SECTION                    -->
+    <!-- ============================================== -->
+    <section class="plans" id="plans">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag" data-text-ar="الأسعار" data-text-en="Pricing">الأسعار</span>
+                <h2 class="section-title" id="plansTitle" data-text-ar="باقات الاشتراك"
+                    data-text-en="Subscription Plans">باقات الاشتراك</h2>
+                <p class="section-desc" id="plansDesc" data-text-ar="اختر الباقة المناسبة لاحتياجات مؤسستك"
+                    data-text-en="Choose the plan that fits your institution's needs">
+                    اختر الباقة المناسبة لاحتياجات مؤسستك
+                </p>
+            </div>
+            <div class="plans-grid" id="plansGrid">
+                <!-- Plans will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!--               ABOUT SECTION                    -->
+    <!-- ============================================== -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content">
+                    <span class="section-tag" data-text-ar="من نحن" data-text-en="About Us">من نحن</span>
+                    <h2 class="section-title" id="aboutTitle" data-text-ar="شريكك في النجاح المالي"
+                        data-text-en="Your Partner in Financial Success">شريكك في النجاح المالي</h2>
+                    <p class="about-text" id="aboutText"
+                        data-text-ar="نحن فريق من الخبراء في مجال التقنية المالية، نسعى لتوفير حلول متطورة تساعد المؤسسات المالية على تحقيق أهدافها بكفاءة عالية. منصتنا مبنية على أحدث التقنيات مع التركيز على الأمان وسهولة الاستخدام."
+                        data-text-en="We are a team of experts in financial technology, striving to provide advanced solutions that help financial institutions achieve their goals efficiently. Our platform is built on the latest technologies with a focus on security and ease of use.">
+                        نحن فريق من الخبراء في مجال التقنية المالية، نسعى لتوفير حلول متطورة تساعد المؤسسات المالية على
+                        تحقيق أهدافها بكفاءة عالية. منصتنا مبنية على أحدث التقنيات مع التركيز على الأمان وسهولة
+                        الاستخدام.
+                    </p>
+                    <div class="about-features">
+                        <div class="about-feature">
+                            <div class="about-feature-icon">✓</div>
+                            <span data-text-ar="دعم فني على مدار الساعة" data-text-en="24/7 Technical Support">دعم فني
+                                على مدار الساعة</span>
+                        </div>
+                        <div class="about-feature">
+                            <div class="about-feature-icon">✓</div>
+                            <span data-text-ar="تحديثات مستمرة" data-text-en="Continuous Updates">تحديثات مستمرة</span>
+                        </div>
+                        <div class="about-feature">
+                            <div class="about-feature-icon">✓</div>
+                            <span data-text-ar="أمان عالي المستوى" data-text-en="High-Level Security">أمان عالي
+                                المستوى</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image" id="aboutImage">
+                    <img src="logo.png" alt="Q1KEY Logo" class="about-logo-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!--              CONTACT SECTION                   -->
+    <!-- ============================================== -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag" data-text-ar="تواصل معنا" data-text-en="Contact Us">تواصل معنا</span>
+                <h2 class="section-title" id="contactTitle" data-text-ar="نحن هنا لمساعدتك"
+                    data-text-en="We're Here to Help">نحن هنا لمساعدتك</h2>
+            </div>
+            <div class="contact-cards" id="contactCards">
+                <!-- Contact cards will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!--                  FOOTER                        -->
+    <!-- ============================================== -->
+    <footer class="footer" id="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <div class="logo-icon">
+                            <img src="logo.png" alt="Q1KEY Logo">
+                        </div>
+                        <span class="logo-text">Q1KEY</span>
+                    </div>
+                    <p class="footer-desc" id="footerDesc" data-text-ar="منصة Q1KEY لإدارة القروض والمؤسسات المالية"
+                        data-text-en="Q1KEY Platform for Loan & Financial Management">
+                        منصة Q1KEY لإدارة القروض والمؤسسات المالية
+                    </p>
+                </div>
+                <div class="footer-links" id="footerLinks">
+                    <!-- Quick links will be loaded dynamically -->
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p id="footerCopyright" data-text-ar="© 2024 Q1KEY - جميع الحقوق محفوظة"
+                    data-text-en="© 2024 Q1KEY - All Rights Reserved">© 2024 Q1KEY - جميع الحقوق محفوظة</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================== -->
+    <!--              LOGIN MODAL                       -->
+    <!-- ============================================== -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeLoginModal()" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
             </button>
-            <input type="password" id="password" name="password" class="input"
-              data-i18n-placeholder="login.password_placeholder" placeholder="••••••••" style="padding-left: 2.5rem;"
-              required />
-          </div>
-          <div id="passwordError" class="error-text hidden"></div>
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                </div>
+                <h2 id="loginModalTitle" data-text-ar="تسجيل الدخول" data-text-en="Login">تسجيل الدخول</h2>
+                <p id="loginModalSubtitle" data-text-ar="أدخل بياناتك للوصول إلى حسابك"
+                    data-text-en="Enter your credentials to access your account">أدخل بياناتك للوصول إلى حسابك</p>
+            </div>
+            <div class="modal-error" id="loginError"></div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label id="loginIdentifierLabel" data-text-ar="البريد الإلكتروني أو رقم الهاتف"
+                        data-text-en="Email or Phone">البريد الإلكتروني أو رقم الهاتف</label>
+                    <input type="text" id="loginIdentifier" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label id="loginPasswordLabel" data-text-ar="كلمة المرور" data-text-en="Password">كلمة
+                        المرور</label>
+                    <div class="input-wrapper password-wrapper">
+                        <input type="password" id="loginPassword" required autocomplete="current-password">
+                        <button type="button" class="toggle-password" onclick="toggleLoginPassword()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                id="loginEyeIcon">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary btn-full" id="loginSubmitBtn">
+                    <span id="loginSubmitText" data-text-ar="تسجيل الدخول" data-text-en="Login">تسجيل الدخول</span>
+                    <div class="spinner" id="loginSpinner"></div>
+                </button>
+            </form>
         </div>
-
-        <!-- Error Message -->
-        <div id="errorMessage" class="hidden"
-          style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
-          <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
-        </div>
-
-        <!-- Submit Button -->
-        <button type="submit" id="loginButton" class="btn btn-primary w-full" style="width: 100%; margin-top: 0.5rem;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-            <polyline points="10 17 15 12 10 7" />
-            <line x1="15" y1="12" x2="3" y2="12" />
-          </svg>
-          <span data-i18n-key="login.submit_button">Sign In</span>
-        </button>
-      </form>
     </div>
-  </div>
 
-  <script src="js/config.js"></script>
-  <script src="js/api.js"></script>
-  <script>
-    // Wait for i18n to be ready
-    waitForI18n().then(() => {
-      // Apply translations to the page
-      i18n.translatePage();
+    <!-- ============================================== -->
+    <!--            SUBSCRIBE MODAL                     -->
+    <!-- ============================================== -->
+    <div class="modal-overlay" id="subscribeModal">
+        <div class="modal modal-lg" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeSubscribeModal()" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+            </button>
 
-      const loginForm = document.getElementById('loginForm');
-      const loginButton = document.getElementById('loginButton');
-      const errorMessage = document.getElementById('errorMessage');
-      const togglePassword = document.getElementById('togglePassword');
-      const passwordInput = document.getElementById('password');
-      const eyeIcon = document.getElementById('eyeIcon');
+            <!-- Form View -->
+            <div id="subscribeFormView">
+                <div class="modal-header">
+                    <div class="modal-icon modal-icon-success">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                            <path d="M2 17l10 5 10-5" />
+                            <path d="M2 12l10 5 10-5" />
+                        </svg>
+                    </div>
+                    <h2 id="subscribeModalTitle" data-text-ar="اشترك معنا" data-text-en="Subscribe Now">اشترك معنا</h2>
+                    <p id="subscribeModalSubtitle" data-text-ar="اختر باقتك وابدأ رحلتك معنا"
+                        data-text-en="Choose your plan and start your journey">اختر باقتك وابدأ رحلتك معنا</p>
+                </div>
+                <div class="modal-error" id="subscribeError"></div>
+                <form id="subscribeForm" onsubmit="handleSubscribe(event)">
+                    <!-- Plan Selection -->
+                    <div class="form-section">
+                        <h3 class="form-section-title" id="planSelectTitle" data-text-ar="اختر الباقة"
+                            data-text-en="Select Plan">اختر الباقة</h3>
+                        <div class="plan-selector" id="planSelector">
+                            <!-- Plans loaded dynamically -->
+                        </div>
+                    </div>
 
-      // Toggle password visibility
-      togglePassword.addEventListener('click', () => {
-        const type = passwordInput.type === 'password' ? 'text' : 'password';
-        passwordInput.type = type;
+                    <div class="form-grid">
+                        <!-- Institution Section (Right in RTL) -->
+                        <div class="form-section">
+                            <h3 class="form-section-title" id="instSectionTitle" data-text-ar="بيانات المؤسسة"
+                                data-text-en="Institution Details">بيانات المؤسسة</h3>
+                            <div class="form-group">
+                                <label data-text-ar="اسم المؤسسة" data-text-en="Institution Name">اسم المؤسسة <span
+                                        class="required-star">*</span></label>
+                                <input type="text" id="subInstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-text-ar="السجل التجاري" data-text-en="Commercial Reg.">السجل التجاري <span
+                                        class="required-star">*</span></label>
+                                <input type="text" id="subInstTaxId" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-text-ar="رقم الهاتف" data-text-en="Phone">رقم الهاتف <span
+                                        class="required-star">*</span></label>
+                                <input type="tel" id="subInstPhone" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-text-ar="البريد الإلكتروني" data-text-en="Email">البريد الإلكتروني <span
+                                        class="required-star">*</span></label>
+                                <input type="email" id="subInstEmail" required>
+                            </div>
+                        </div>
 
-        // Toggle eye icon (eye vs eye-off)
-        if (type === 'text') {
-          eyeIcon.innerHTML = `
-            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-            <line x1="1" y1="1" x2="23" y2="23"></line>
-          `;
-        } else {
-          eyeIcon.innerHTML = `
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-          `;
-        }
-      });
+                        <!-- Admin Section (Left in RTL) -->
+                        <div class="form-section">
+                            <h3 class="form-section-title" id="adminSectionTitle" data-text-ar="بيانات المدير"
+                                data-text-en="Admin Details">بيانات المدير</h3>
+                            <div class="form-group">
+                                <label data-text-ar="الاسم الكامل" data-text-en="Full Name">الاسم الكامل <span
+                                        class="required-star">*</span></label>
+                                <input type="text" id="subAdminName" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-text-ar="البريد الإلكتروني" data-text-en="Email">البريد الإلكتروني <span
+                                        class="required-star">*</span></label>
+                                <input type="email" id="subAdminEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-text-ar="رقم الهاتف" data-text-en="Phone">رقم الهاتف <span
+                                        class="required-star">*</span></label>
+                                <input type="tel" id="subAdminPhone" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-text-ar="كلمة المرور" data-text-en="Password">كلمة المرور <span
+                                        class="required-star">*</span></label>
+                                <input type="password" id="subAdminPassword" required minlength="6">
+                            </div>
+                        </div>
+                    </div>
 
-      // Check if already logged in
-      if (isAuthenticated()) {
-        console.log('Already authenticated, redirecting to dashboard...');
-        window.location.replace('pages/dashboard.html');
-      }
+                    <div class="form-actions">
+                        <button type="button" class="btn-ghost" onclick="closeSubscribeModal()" id="cancelBtn"
+                            data-text-ar="إلغاء" data-text-en="Cancel">إلغاء</button>
+                        <button type="submit" class="btn-primary" id="subscribeSubmitBtn">
+                            <span id="subscribeSubmitText" data-text-ar="تقديم الطلب"
+                                data-text-en="Submit Request">تقديم الطلب</span>
+                            <div class="spinner" id="subscribeSpinner"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-      loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+            <!-- Success View -->
+            <div id="subscribeSuccessView" class="success-view" style="display: none;">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                </div>
+                <h2 id="successTitle" data-text-ar="تم إرسال الطلب بنجاح!"
+                    data-text-en="Request Submitted Successfully!">تم إرسال الطلب بنجاح!</h2>
 
-        const identifier = document.getElementById('identifier').value.trim();
-        const password = document.getElementById('password').value;
+                <!-- Request Number -->
+                <div class="request-info-box">
+                    <div class="request-number">
+                        <span class="request-label" data-text-ar="رقم الطلب:" data-text-en="Request #:">رقم
+                            الطلب:</span>
+                        <span class="request-value" id="requestNumberValue">#0000</span>
+                    </div>
+                    <div class="request-amount">
+                        <span class="request-label" data-text-ar="قيمة الاشتراك:"
+                            data-text-en="Subscription Amount:">قيمة الاشتراك:</span>
+                        <span class="request-value" id="requestAmountValue">0.00 ر.س</span>
+                    </div>
+                </div>
 
-        // Hide previous errors
-        errorMessage.classList.add('hidden');
-        document.getElementById('identifierError').classList.add('hidden');
-        document.getElementById('passwordError').classList.add('hidden');
+                <!-- Instructions -->
+                <div class="request-instructions">
+                    <p class="instructions-title" data-text-ar="📝 لإتمام عملية التفعيل:"
+                        data-text-en="📝 To complete activation:">📝 لإتمام عملية التفعيل:</p>
+                    <ol class="instructions-list">
+                        <li data-text-ar="قم بتحويل قيمة الاشتراك إلى الحساب البنكي"
+                            data-text-en="Transfer the subscription amount to the bank account">قم بتحويل قيمة الاشتراك
+                            إلى الحساب البنكي</li>
+                        <li data-text-ar="أرسل صورة إيصال التحويل عبر الواتساب"
+                            data-text-en="Send the transfer receipt via WhatsApp">أرسل صورة إيصال التحويل عبر الواتساب
+                        </li>
+                        <li data-text-ar="سيتم اعتماد طلبك خلال 24 ساعة"
+                            data-text-en="Your request will be approved within 24 hours">سيتم اعتماد طلبك خلال 24 ساعة
+                        </li>
+                    </ol>
+                </div>
 
-        // Validation
-        if (!identifier) {
-          document.getElementById('identifierError').textContent = 'Email or phone is required';
-          document.getElementById('identifierError').classList.remove('hidden');
-          return;
-        }
+                <!-- Action Buttons -->
+                <div class="success-actions">
+                    <a href="#" id="whatsappBtn" class="btn-whatsapp" target="_blank">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                            <path
+                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                        </svg>
+                        <span data-text-ar="تواصل عبر واتساب" data-text-en="Contact via WhatsApp">تواصل عبر
+                            واتساب</span>
+                    </a>
+                    <button class="btn-primary" onclick="closeSubscribeModal()" id="successBtn" data-text-ar="حسناً"
+                        data-text-en="OK">حسناً</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        if (!password || password.length < 6) {
-          document.getElementById('passwordError').textContent = t('validation.min_length', { field: t('login.password_label'), count: 6 });
-          document.getElementById('passwordError').classList.remove('hidden');
-          return;
-        }
-
-        // Disable button and show loading
-        loginButton.disabled = true;
-        loginButton.innerHTML = `
-        <div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
-        <span data-i18n-key="login.loading">${t('login.loading')}</span>
-      `;
-
-        try {
-          const response = await api.auth.login({ identifier, password });
-
-          console.log('Login successful:', response);
-
-          // Save auth data
-          saveAuthData(response.access_token, response.user);
-
-          console.log('Auth data saved. Token:', getToken()?.substring(0, 20) + '...');
-          console.log('User:', getCurrentUser());
-
-          // Redirect to dashboard
-          console.log('Login successful, redirecting to dashboard...');
-          window.location.replace('pages/dashboard.html');
-        } catch (error) {
-          console.error('Login error:', error);
-          let msg = error.message;
-          if (msg === 'Failed to fetch') {
-            msg = t('login.errors.network_error');
-          } else if (msg === 'Unauthorized' || msg === 'Invalid credentials') { // Handle common 401s if they come as string
-            msg = t('login.errors.invalid_credentials');
-          }
-
-          errorMessage.querySelector('p').textContent = msg || t('login.errors.invalid_credentials');
-          errorMessage.classList.remove('hidden');
-
-          // Re-enable button
-          loginButton.disabled = false;
-          loginButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-            <polyline points="10 17 15 12 10 7"/>
-            <line x1="15" y1="12" x2="3" y2="12"/>
-          </svg>
-          <span data-i18n-key="login.submit_button">${t('login.submit_button')}</span>
-        `;
-        }
-      });
-    });
-  </script>
+    <!-- Scripts -->
+    <script src="js/config.js?v=3"></script>
+    <script src="js/api.js?v=4"></script>
+    <script src="js/homepage.js?v=1.0.2"></script>
 </body>
 
 </html>

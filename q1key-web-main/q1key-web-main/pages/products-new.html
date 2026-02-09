@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Product - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=13">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -86,6 +86,17 @@
             </select>
           </div>
 
+          <div class="form-group" id="visibilityGroup" style="display: none;">
+            <label class="label" data-i18n-key="products.form.visibility_label">Visibility</label>
+            <div class="flex items-center gap-2"
+              style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+              <input type="checkbox" id="isVisibleToBranches" name="isVisibleToBranches" checked
+                style="width: 18px; height: 18px; cursor: pointer;" />
+              <label for="isVisibleToBranches" class="text-secondary" style="cursor: pointer;"
+                data-i18n-key="products.form.visible_to_branches">Visible to branches</label>
+            </div>
+          </div>
+
           <div class="flex items-center gap-3"
             style="display: flex; align-items: center; gap: 0.75rem; margin-top: 1.5rem;">
             <button type="submit" class="btn btn-primary">
@@ -104,9 +115,9 @@
     </div>
   </div>
 
-  <script src="../js/api.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <script src="../js/api.js?v=4"></script>
+  <script src="../components/sidebar.js?v=12"></script>
+  <script src="../components/header.js?v=3"></script>
   <script>
     async function initPage() {
       await waitForI18n();
@@ -117,6 +128,13 @@
       }
 
       const user = getCurrentUser();
+
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
+      }
 
       // Allow Super Admin, Institution, and Branch roles
       if (!['Super Admin', 'Institution', 'Branch'].includes(user.roleName)) {
@@ -132,6 +150,12 @@
       initializeLanguageSwitcher();
       setActiveNav('products');
       window.i18n.translatePage();
+
+      const visibilityGroup = document.getElementById('visibilityGroup');
+      // Institution users see visibility toggle by default
+      if (user.roleName === 'Institution') {
+        visibilityGroup.style.display = 'block';
+      }
 
       // Load institutions if Super Admin
       if (user.roleName === 'Super Admin') {
@@ -179,6 +203,13 @@
             institutionGroup.style.display = 'block';
             branchGroup.style.display = 'block';
           }
+
+          // Show visibility toggle if institution scope is selected
+          if (scope === 'institution') {
+            visibilityGroup.style.display = 'block';
+          } else {
+            visibilityGroup.style.display = 'none';
+          }
         }
 
         async function loadInstitutions() {
@@ -225,7 +256,8 @@
         const formData = {
           name: document.getElementById('name').value.trim(),
           description: document.getElementById('description').value.trim(),
-          isActive: document.getElementById('isActive').value === 'true'
+          isActive: document.getElementById('isActive').value === 'true',
+          isVisibleToBranches: document.getElementById('isVisibleToBranches').checked
         };
 
         // Add institutionId if Super Admin selected one

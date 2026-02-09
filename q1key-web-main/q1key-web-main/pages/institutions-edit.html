@@ -1,309 +1,301 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit Institution - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <title>تعديل مؤسسة - Q1KEY Platform</title>
+  <link rel="stylesheet" href="../css/styles.css?v=17">
   <script src="../js/i18n.js"></script>
+  <style>
+    /* Premium Cyber-Minimalist Design System */
+    :root {
+      --neon-primary: #818cf8;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.12);
+    }
+
+    .page-wrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem;
+    }
+
+    .form-container-ultra {
+      width: 100%;
+      max-width: 900px;
+      background: var(--card-bg);
+      backdrop-filter: blur(15px);
+      border-radius: 28px;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    .form-content-inner {
+      padding: 3.5rem;
+    }
+
+    .section-title-premium {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: white;
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 2rem;
+    }
+
+    .input-field-wrapper {
+      margin-bottom: 1.5rem;
+    }
+
+    .input-label-clean {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 0.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .modern-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03) !important;
+      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      border-radius: 14px !important;
+      padding: 0.9rem 1.1rem !important;
+      color: white !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .modern-input:focus {
+      border-color: var(--neon-primary) !important;
+      background: rgba(255, 255, 255, 0.05) !important;
+      box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.1) !important;
+      outline: none;
+    }
+
+    .toggle-modern {
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 14px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .btn-create-ultra {
+      width: 100%;
+      height: 56px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+      color: white !important;
+      border: none;
+      border-radius: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+      transition: all 0.3s;
+    }
+
+    .btn-create-ultra:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(99, 102, 241, 0.5);
+    }
+  </style>
 </head>
+
 <body>
   <div id="sidebar"></div>
-  
   <div class="main-content">
     <div id="header"></div>
-    
-    <div class="page-content">
-      <!-- Page Header -->
-      <div class="flex items-center gap-3 mb-8" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
-        <a href="institutions.html" class="btn btn-secondary" style="padding: 0.5rem;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"/>
-            <polyline points="12 19 5 12 12 5"/>
+    <div class="page-wrapper">
+      <!-- Nav -->
+      <div class="w-full max-w-[900px] flex mb-8 px-2">
+        <a href="institutions.html" class="flex items-center gap-2 text-secondary hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
           </svg>
+          <span class="font-bold text-sm"> العودة للمؤسسات</span>
         </a>
-        <div>
-          <h1 class="text-3xl font-bold text-white" data-i18n-key="institutions.edit_page.title">Edit Institution</h1>
-          <p class="text-secondary" data-i18n-key="institutions.edit_page.subtitle">Update institution information</p>
+      </div>
+
+      <div id="loadingContainer" class="form-container-ultra p-20 text-center">
+        <div class="spinner mx-auto scale-125"></div>
+        <p class="text-secondary mt-6">جاري تحميل بيانات المؤسسة...</p>
+      </div>
+
+      <form id="institutionForm" class="form-container-ultra hidden">
+        <div class="form-content-inner">
+          <div class="section-title-premium">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+            <span>تحديث بيانات المؤسسة</span>
+          </div>
+
+          <div class="input-field-wrapper">
+            <label class="input-label-clean">اسم المؤسسة <span style="color: #ef4444">*</span></label>
+            <input type="text" id="name" class="modern-input" required>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="input-field-wrapper">
+              <label class="input-label-clean">السجل التجاري / الضريبي</label>
+              <input type="text" id="taxId" class="modern-input">
+            </div>
+            <div class="input-field-wrapper">
+              <label class="input-label-clean">عدد المستخدمين المسموح <span style="color: #ef4444">*</span></label>
+              <input type="number" id="maxUsers" class="modern-input" min="1" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="input-field-wrapper">
+              <label class="input-label-clean">رقم الهاتف</label>
+              <input type="tel" id="phoneNumber" class="modern-input">
+            </div>
+            <div class="input-field-wrapper">
+              <label class="input-label-clean">البريد الإلكتروني</label>
+              <input type="email" id="email" class="modern-input">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="input-field-wrapper">
+              <label class="input-label-clean">تاريخ انتهاء الصلاحية</label>
+              <input type="date" id="expirationDate" class="modern-input">
+            </div>
+            <div class="input-field-wrapper">
+              <label class="input-label-clean">الحد الأقصى للمبلغ المسموح به</label>
+              <input type="number" id="maximumLoans" class="modern-input" min="0" placeholder="0 تعني غير محدود">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <label class="toggle-modern">
+              <input type="checkbox" id="canCreateBranches" class="w-4 h-4 accent-emerald-500">
+              <span class="text-xs font-bold text-white/70">تفعيل خاصية الفروع</span>
+            </label>
+            <label class="toggle-modern">
+              <input type="checkbox" id="isActive" class="w-4 h-4 accent-emerald-500">
+              <span class="text-xs font-bold text-white/70">المؤسسة نشطة</span>
+            </label>
+          </div>
+
+          <div id="errorMessage"
+            class="hidden mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-center text-sm">
+            <p></p>
+          </div>
+
+          <button type="submit" id="submitButton" class="btn-create-ultra">حفظ التعديلات</button>
         </div>
-      </div>
-      
-      <!-- Loading -->
-      <div id="loadingContainer" class="loading-container">
-        <div class="spinner"></div>
-      </div>
-      
-      <!-- Form -->
-      <div id="formContainer" class="glass-card p-6" style="max-width: 800px; display: none;">
-        <form id="institutionForm">
-          <!-- Name -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="institutions.form.name_label">Institution Name</label> <span data-i18n-key="institutions.form.name_required">*</span>
-            <input 
-              type="text" 
-              id="name" 
-              name="name" 
-              class="input" 
-              data-i18n-placeholder="institutions.form.name_placeholder"
-              placeholder="Enter institution name"
-              required
-            />
-            <div id="nameError" class="error-text hidden"></div>
-          </div>
-          
-          <!-- Tax ID -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="institutions.form.tax_id_label">Tax ID</label>
-            <input 
-              type="text" 
-              id="taxId" 
-              name="taxId" 
-              class="input" 
-              data-i18n-placeholder="institutions.form.tax_id_placeholder"
-              placeholder="Enter tax ID"
-            />
-            <div id="taxIdError" class="error-text hidden"></div>
-          </div>
-          
-          <!-- Phone Number -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="institutions.form.phone_label">Phone Number</label>
-            <input 
-              type="tel" 
-              id="phoneNumber" 
-              name="phoneNumber" 
-              class="input" 
-              data-i18n-placeholder="institutions.form.phone_placeholder"
-              placeholder="Enter phone number"
-            />
-            <div id="phoneNumberError" class="error-text hidden"></div>
-          </div>
-          
-          <!-- Email -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="institutions.form.email_label">Email</label>
-            <input 
-              type="email" 
-              id="email" 
-              name="email" 
-              class="input" 
-              data-i18n-placeholder="institutions.form.email_placeholder"
-              placeholder="Enter email address"
-            />
-            <div id="emailError" class="error-text hidden"></div>
-          </div>
-          
-          <!-- Max Users -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="institutions.form.max_users_label">Maximum Users</label> <span data-i18n-key="institutions.form.max_users_required">*</span>
-            <input 
-              type="number" 
-              id="maxUsers" 
-              name="maxUsers" 
-              class="input" 
-              data-i18n-placeholder="institutions.form.max_users_placeholder"
-              placeholder="Enter maximum users"
-              min="1"
-              required
-            />
-            <div id="maxUsersError" class="error-text hidden"></div>
-          </div>
-          
-          <!-- Can Create Branches -->
-          <div class="form-group">
-            <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
-              <input type="checkbox" id="canCreateBranches" name="canCreateBranches">
-              <span class="label" style="margin: 0;" data-i18n-key="institutions.form.can_create_branches_label">Allow Branch Creation</span>
-            </label>
-            <p class="text-sm text-muted" style="margin-top: 0.25rem;" data-i18n-key="institutions.form.can_create_branches_help">Allow this institution to create and manage branches</p>
-          </div>
-          
-          <!-- Expiration Date -->
-          <div class="form-group">
-            <label class="label" data-i18n-key="institutions.form.expiration_date_label">Expiration Date</label>
-            <input 
-              type="date" 
-              id="expirationDate" 
-              name="expirationDate" 
-              class="input" 
-              data-i18n-placeholder="institutions.form.expiration_date_placeholder"
-              placeholder="Select expiration date"
-            />
-            <div id="expirationDateError" class="error-text hidden"></div>
-            <p class="text-sm text-muted" style="margin-top: 0.25rem;" data-i18n-key="institutions.form.expiration_date_help">Institution will be automatically deactivated after this date</p>
-          </div>
-          
-          <!-- Active Status -->
-          <div class="form-group">
-            <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
-              <input type="checkbox" id="isActive" name="isActive">
-              <span class="label" style="margin: 0;" data-i18n-key="institutions.form.active_label">Active</span>
-            </label>
-          </div>
-          
-          <!-- Error Message -->
-          <div id="errorMessage" class="hidden mb-4" style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
-            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
-          </div>
-          
-          <!-- Buttons -->
-          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
-            <button type="submit" id="submitButton" class="btn btn-primary">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              <span data-i18n-key="institutions.form.update_institution">Update Institution</span>
-            </button>
-            <a href="institutions.html" class="btn btn-secondary" data-i18n-key="institutions.form.cancel">Cancel</a>
-          </div>
-        </form>
-      </div>
+      </form>
     </div>
   </div>
 
-  <script src="../js/api.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <script src="../js/api.js?v=4"></script>
+  <script src="../js/ui-utils.js?v=5"></script>
+  <script src="../components/sidebar.js?v=12"></script>
+  <script src="../components/header.js?v=3"></script>
   <script>
     async function initPage() {
       await waitForI18n();
-      
-      if (!isAuthenticated()) {
-        window.location.href = '../index.html';
-        return;
-      }
-      
+      if (!requireAuth()) return;
       const user = getCurrentUser();
       document.getElementById('sidebar').innerHTML = createSidebar(user);
-      document.getElementById('header').innerHTML = createHeader(
-        t('institutions.edit_institution'),
-        t('institutions.update_institution_info')
-      );
-      initializeLanguageSwitcher();
-      setActiveNav('institutions');
+      document.getElementById('header').innerHTML = createHeader(t('institutions.edit_institution'), '');
+      initializeLanguageSwitcher(); setActiveNav('institutions');
       window.i18n.translatePage();
-    
-    const form = document.getElementById('institutionForm');
-    const submitButton = document.getElementById('submitButton');
-    const errorMessage = document.getElementById('errorMessage');
-    const loadingContainer = document.getElementById('loadingContainer');
-    const formContainer = document.getElementById('formContainer');
-    
-    // Get institution ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const institutionId = urlParams.get('id');
-    
-    if (!institutionId) {
-      window.location.href = 'institutions.html';
-    }
-    
-    // Load institution data
-    async function loadInstitution() {
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const institutionId = urlParams.get('id');
+      if (!institutionId) { window.location.href = 'institutions.html'; return; }
+
       try {
-        const institution = await api.institutions.getById(institutionId);
-        
-        // Populate form
-        document.getElementById('name').value = institution.name;
-        document.getElementById('taxId').value = institution.taxId || '';
-        document.getElementById('phoneNumber').value = institution.phoneNumber || '';
-        document.getElementById('email').value = institution.email || '';
-        document.getElementById('maxUsers').value = institution.maxUsers;
-        document.getElementById('canCreateBranches').checked = institution.canCreateBranches ?? true;
-        document.getElementById('isActive').checked = institution.isActive;
-        if (institution.expirationDate) {
-          document.getElementById('expirationDate').value = institution.expirationDate.split('T')[0];
-        }
-        
-        loadingContainer.style.display = 'none';
-        formContainer.style.display = 'block';
-      } catch (error) {
-        console.error('Error loading institution:', error);
-        showToast('Failed to load institution', 'error');
-        setTimeout(() => window.location.href = 'institutions.html', 2000);
+        const inst = await api.institutions.getById(institutionId);
+        document.getElementById('name').value = inst.name;
+        document.getElementById('taxId').value = inst.taxId || '';
+        document.getElementById('phoneNumber').value = inst.phoneNumber || '';
+        document.getElementById('email').value = inst.email || '';
+        document.getElementById('maxUsers').value = inst.maxUsers;
+        document.getElementById('maximumLoans').value = inst.maximumLoans || 0;
+        document.getElementById('canCreateBranches').checked = inst.canCreateBranches ?? true;
+        document.getElementById('isActive').checked = inst.isActive;
+        if (inst.expirationDate) document.getElementById('expirationDate').value = inst.expirationDate.split('T')[0];
+
+        document.getElementById('loadingContainer').classList.add('hidden');
+        document.getElementById('institutionForm').classList.remove('hidden');
+      } catch (e) {
+        showToast('فشل تحميل بيانات المؤسسة', 'error');
+        setTimeout(() => window.location.href = 'institutions.html', 1500);
       }
+
+      const form = document.getElementById('institutionForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitButton = document.getElementById('submitButton');
+        const err = document.getElementById('errorMessage');
+        err.classList.add('hidden');
+
+        showConfirmModal({
+          title: 'تأكيد التحديث',
+          message: 'هل أنت متأكد من رغبتك في حفظ التغييرات على هذه المؤسسة؟',
+          subMessage: document.getElementById('name').value.trim(),
+          confirmText: 'حفظ التعديلات',
+          icon: '📝',
+          onConfirm: async () => {
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<div class='spinner' style='width:20px;height:20px;margin:auto;border-color:white'></div>`;
+
+            try {
+              const updateData = {
+                name: document.getElementById('name').value.trim(),
+                maxUsers: parseInt(document.getElementById('maxUsers').value),
+                maximumLoans: parseInt(document.getElementById('maximumLoans').value) || 0,
+                canCreateBranches: document.getElementById('canCreateBranches').checked,
+                isActive: document.getElementById('isActive').checked
+              };
+
+              const taxId = document.getElementById('taxId').value.trim();
+              if (taxId) updateData.taxId = taxId;
+
+              const phone = document.getElementById('phoneNumber').value.trim();
+              if (phone) updateData.phoneNumber = phone;
+
+              const email = document.getElementById('email').value.trim();
+              if (email) updateData.email = email;
+
+              const expDate = document.getElementById('expirationDate').value;
+              if (expDate) updateData.expirationDate = expDate;
+
+              await api.institutions.update(institutionId, updateData);
+              showToast('تم التحديث بنجاح', 'success');
+              setTimeout(() => window.location.href = 'institutions.html', 1000);
+            } catch (error) {
+              err.querySelector('p').textContent = error.message || 'فشل التحديث';
+              err.classList.remove('hidden');
+              submitButton.disabled = false;
+              submitButton.innerHTML = "حفظ التعديلات";
+            }
+          }
+        });
+      });
     }
-    
-    loadInstitution();
-    
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      // Clear errors
-      errorMessage.classList.add('hidden');
-      document.getElementById('nameError').classList.add('hidden');
-      document.getElementById('maxUsersError').classList.add('hidden');
-      
-      // Get form data
-      const formData = {
-        name: document.getElementById('name').value.trim(),
-        maxUsers: parseInt(document.getElementById('maxUsers').value),
-        canCreateBranches: document.getElementById('canCreateBranches').checked,
-        isActive: document.getElementById('isActive').checked,
-      };
-      
-      // Add optional fields if provided
-      const taxId = document.getElementById('taxId').value.trim();
-      if (taxId) formData.taxId = taxId;
-      
-      const phoneNumber = document.getElementById('phoneNumber').value.trim();
-      if (phoneNumber) formData.phoneNumber = phoneNumber;
-      
-      const email = document.getElementById('email').value.trim();
-      if (email) formData.email = email;
-      
-      // Add expiration date if provided
-      const expirationDate = document.getElementById('expirationDate').value;
-      if (expirationDate) {
-        formData.expirationDate = expirationDate;
-      }
-      
-      // Validation
-      let hasError = false;
-      
-      if (formData.name.length < 2) {
-        document.getElementById('nameError').textContent = 'Name must be at least 2 characters';
-        document.getElementById('nameError').classList.remove('hidden');
-        hasError = true;
-      }
-      
-      if (formData.maxUsers < 1) {
-        document.getElementById('maxUsersError').textContent = 'Max users must be at least 1';
-        document.getElementById('maxUsersError').classList.remove('hidden');
-        hasError = true;
-      }
-      
-      if (hasError) return;
-      
-      // Disable submit button
-      submitButton.disabled = true;
-      submitButton.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Updating...';
-      
-      try {
-        await api.institutions.update(institutionId, formData);
-        showToast('Institution updated successfully', 'success');
-        window.location.href = 'institutions.html';
-      } catch (error) {
-        console.error('Error updating institution:', error);
-        errorMessage.querySelector('p').textContent = error.message || 'Failed to update institution';
-        errorMessage.classList.remove('hidden');
-        
-        // Re-enable button
-        submitButton.disabled = false;
-        submitButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          Update Institution
-        `;
-      }
-    });
-    }
-    
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initPage);
-    } else {
-      initPage();
-    }
+    initPage();
   </script>
 </body>
+
 </html>

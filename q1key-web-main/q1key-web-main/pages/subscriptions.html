@@ -13,18 +13,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الاشتراكات - Q1KEY Platform</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css?v=12">
     <style>
         .subscriptions-container {
-            max-width: 1400px;
-            margin: 0 auto;
+            width: 100%;
+            padding: 0 1rem;
         }
 
         .stats-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 1.5rem;
             margin-bottom: 2rem;
+        }
+
+        @media (min-width: 640px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .stats-row {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
 
         .stat-card {
@@ -32,22 +44,70 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 1.5rem;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            transition: all 0.3s ease;
         }
 
-        .stat-card .stat-value {
+        .stat-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            text-align: right;
+            /* RTL default */
+        }
+
+        .ltr .stat-content {
+            text-align: left;
+        }
+
+        .stat-value {
             font-size: 2rem;
             font-weight: 700;
             color: white;
-            margin-bottom: 0.5rem;
+            line-height: 1.2;
         }
 
-        .stat-card .stat-label {
+        .stat-label {
             font-size: 0.875rem;
             color: #94a3b8;
         }
 
+        .stat-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+        }
+
+        .stat-card.success .stat-value {
+            color: #10b981;
+        }
+
+        .stat-card.success .stat-icon-wrapper {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
         .stat-card.warning .stat-value {
+            color: #f59e0b;
+        }
+
+        .stat-card.warning .stat-icon-wrapper {
+            background: rgba(245, 158, 11, 0.2);
             color: #f59e0b;
         }
 
@@ -55,8 +115,18 @@
             color: #ef4444;
         }
 
-        .stat-card.success .stat-value {
-            color: #10b981;
+        .stat-card.danger .stat-icon-wrapper {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .stat-card.primary .stat-value {
+            color: #818cf8;
+        }
+
+        .stat-card.primary .stat-icon-wrapper {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
         }
 
         .filter-bar {
@@ -421,25 +491,75 @@
 
             <div class="subscriptions-container">
                 <!-- Stats -->
-                <div class="stats-row" id="statsRow">
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalInstitutions">-</div>
-                        <div class="stat-label" data-i18n-key="subscriptions.stats.total_institutions">Total
-                            Institutions</div>
+                <div class="stats-row grid-responsive-sm" id="statsRow">
+                    <div class="stat-card primary">
+                        <div class="stat-icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+                                <path d="M9 22v-4h6v4" />
+                                <path d="M8 6h.01" />
+                                <path d="M16 6h.01" />
+                                <path d="M8 10h.01" />
+                                <path d="M16 10h.01" />
+                                <path d="M8 14h.01" />
+                                <path d="M16 14h.01" />
+                                <path d="M8 18h.01" />
+                                <path d="M16 18h.01" />
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="totalInstitutions">-</div>
+                            <div class="stat-label" data-i18n-key="subscriptions.stats.total_institutions">Total
+                                Institutions</div>
+                        </div>
                     </div>
                     <div class="stat-card success">
-                        <div class="stat-value" id="activeCount">-</div>
-                        <div class="stat-label" data-i18n-key="subscriptions.stats.active_subscriptions">Active
-                            Subscriptions</div>
+                        <div class="stat-icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                                <path d="m9 12 2 2 4-4" />
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="activeCount">-</div>
+                            <div class="stat-label" data-i18n-key="subscriptions.stats.active_subscriptions">Active
+                                Subscriptions</div>
+                        </div>
                     </div>
                     <div class="stat-card warning">
-                        <div class="stat-value" id="expiringCount">-</div>
-                        <div class="stat-label" data-i18n-key="subscriptions.stats.expiring_soon">Expiring Soon (30
-                            days)</div>
+                        <div class="stat-icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <line x1="10" x2="14" y1="2" y2="2" />
+                                <line x1="12" x2="15" y1="14" y2="11" />
+                                <circle cx="12" cy="14" r="8" />
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="expiringCount">-</div>
+                            <div class="stat-label" data-i18n-key="subscriptions.stats.expiring_soon">Expiring Soon (30
+                                days)</div>
+                        </div>
                     </div>
                     <div class="stat-card danger">
-                        <div class="stat-value" id="expiredCount">-</div>
-                        <div class="stat-label" data-i18n-key="subscriptions.stats.expired">Expired</div>
+                        <div class="stat-icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="m15 9-6 6" />
+                                <path d="m9 9 6 6" />
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="expiredCount">-</div>
+                            <div class="stat-label" data-i18n-key="subscriptions.stats.expired">Expired</div>
+                        </div>
                     </div>
                 </div>
 
@@ -448,8 +568,8 @@
                     <div class="filter-bar">
                         <!-- Search Input with Icon -->
                         <div class="search-input">
-                            <input type="text" id="searchInput" data-i18n-key="subscriptions.search.placeholder"
-                                data-i18n-attr="placeholder"
+                            <input type="text" id="searchInput" name="subscription_search_query" autocomplete="off"
+                                data-i18n-placeholder="subscriptions.search.placeholder"
                                 placeholder="🔍  Search by name, email, or institution name..." onkeyup="filterTable()">
                         </div>
 
@@ -551,12 +671,16 @@
 
     <div id="toast" class="toast"></div>
 
-    <script src="../js/config.js"></script>
+    <!-- Force correct API config -->
+    <script>
+        window.API_CONFIG = { baseUrl: 'http://localhost:3001/api' };
+    </script>
+    <script src="../js/config.js?v=3"></script>
     <script src="../js/i18n.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/ui-utils.js"></script>
-    <script src="../components/sidebar.js?v=4"></script>
-    <script src="../components/header.js"></script>
+    <script src="../js/api.js?v=4"></script>
+    <script src="../js/ui-utils.js?v=3"></script>
+    <script src="../components/sidebar.js?v=12"></script>
+    <script src="../components/header.js?v=3"></script>
     <script>
         let allData = [];
         let currentExtendItem = null;
@@ -564,9 +688,13 @@
         async function initPage() {
             await waitForI18n();
 
-            if (!isAuthenticated()) {
-                window.location.href = '../index.html';
-                return;
+            if (!requireAuth()) return;
+
+            // Refresh profile to get latest subscription data
+            try {
+                await api.auth.getProfile();
+            } catch (e) {
+                console.error('Failed to refresh profile:', e);
             }
 
             const user = getCurrentUser();  // Only Super Admin can access this page

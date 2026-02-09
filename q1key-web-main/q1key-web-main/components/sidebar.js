@@ -11,18 +11,33 @@ function translateRole(roleName) {
   return t(roleMap[roleName] || roleName || 'Guest');
 }
 
+// function isSubscriptionExpired is now globally defined in api.js
+
 function createSidebar(user) {
+  const isExpired = user.roleName !== 'Super Admin' && isSubscriptionExpired(user.expirationDate);
+  console.log('Sidebar user:', user);
+  console.log('Subscription expired status:', isExpired);
+
   const sidebarHTML = `
-    <div class="sidebar">
+    <div class="sidebar ${isExpired ? 'subscription-expired' : ''}">
+      <button class="mobile-close-sidebar" onclick="toggleSidebar()" aria-label="Close Menu">&times;</button>
       <div class="sidebar-header" style="display: flex; justify-content: center; align-items: center; padding: 1.5rem 0;">
         <a href="dashboard.html" style="display: block; cursor: pointer;">
           <img src="../logo.png" alt="Logo" style="height: 140px; width: auto; max-width: 90%;">
         </a>
       </div>
       
+      ${isExpired ? `
+      <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); border-radius: 8px; padding: 0.75rem; margin: 0 1rem 1.5rem; color: #fca5a5; font-size: 0.8rem; text-align: center;">
+        <span data-i18n-key="common.subscription_expired_notice">
+          ${t('common.subscription_expired_notice') || 'اشتراكك منتهٍ، يرجى التجديد لاستعادة الصلاحيات'}
+        </span>
+      </div>
+      ` : ''}
+
       <nav>
         <ul class="sidebar-nav">
-          <li class="sidebar-nav-item">
+          <li class="sidebar-nav-item ${isExpired ? 'expired' : ''}">
             <a href="dashboard.html" class="sidebar-nav-link" id="nav-dashboard">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="7" height="7"/>
@@ -73,7 +88,7 @@ function createSidebar(user) {
           ` : ''}
           
           ${(user.roleName === 'Super Admin' || (user.roleName === 'Institution' && user.canCreateBranches !== false)) ? `
-          <li class="sidebar-nav-item">
+          <li class="sidebar-nav-item ${isExpired ? 'expired' : ''}">
             <a href="branches.html" class="sidebar-nav-link" id="nav-branches">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -83,7 +98,7 @@ function createSidebar(user) {
           </li>
           ` : ''}
           
-          <li class="sidebar-nav-item">
+          <li class="sidebar-nav-item ${isExpired ? 'expired' : ''}">
             <a href="customers.html" class="sidebar-nav-link" id="nav-customers">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -95,7 +110,7 @@ function createSidebar(user) {
             </a>
           </li>
           
-          <li class="sidebar-nav-item">
+          <li class="sidebar-nav-item ${isExpired ? 'expired' : ''}">
             <a href="loans.html" class="sidebar-nav-link" id="nav-loans">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="1" x2="12" y2="23"/>
@@ -105,7 +120,7 @@ function createSidebar(user) {
             </a>
           </li>
           
-          <li class="sidebar-nav-item">
+          <li class="sidebar-nav-item ${isExpired ? 'expired' : ''}">
             <a href="installments.html" class="sidebar-nav-link" id="nav-installments">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
@@ -115,7 +130,7 @@ function createSidebar(user) {
             </a>
           </li>
           
-          <li class="sidebar-nav-item">
+          <li class="sidebar-nav-item ${isExpired ? 'expired' : ''}">
             <a href="cashbox.html" class="sidebar-nav-link" id="nav-cashbox">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="4" width="20" height="16" rx="2"/>
@@ -126,8 +141,8 @@ function createSidebar(user) {
               <span data-i18n-key="navigation.cashbox">${t('navigation.cashbox')}</span>
             </a>
           </li>
-
-          <li class="sidebar-nav-item">
+ 
+          <li class="sidebar-nav-item ${isExpired ? 'expired' : ''}">
             <a href="reports.html" class="sidebar-nav-link" id="nav-reports">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -140,7 +155,7 @@ function createSidebar(user) {
             </a>
           </li>
           
-          <li class="sidebar-nav-item">
+          <li class="sidebar-nav-item ${isExpired ? 'expired' : ''}">
             <a href="products.html" class="sidebar-nav-link" id="nav-products">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -152,7 +167,7 @@ function createSidebar(user) {
           </li>
           
           ${user.roleName === 'Super Admin' || (user.roleName === 'Institution' && user.canCreateBranches !== false) ? `
-          <li class="sidebar-nav-item">
+          <li class="sidebar-nav-item ${isExpired ? 'expired' : ''}">
             <a href="users.html" class="sidebar-nav-link" id="nav-users">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -185,9 +200,9 @@ function createSidebar(user) {
             </a>
           </li>
           ` : ''}
-
+ 
           ${user.roleName === 'Institution' || user.roleName === 'Branch' ? `
-          <li class="sidebar-nav-item">
+          <li class="sidebar-nav-item expired-exception">
             <a href="my-subscription.html" class="sidebar-nav-link" id="nav-my-subscription">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -202,8 +217,8 @@ function createSidebar(user) {
             </a>
           </li>
           ` : ''}
-
-          <li class="sidebar-nav-item">
+ 
+          <li class="sidebar-nav-item expired-exception">
             <a href="javascript:void(0)" onclick="openHelpModal()" class="sidebar-nav-link" id="nav-help">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
@@ -272,7 +287,7 @@ async function updatePendingRequestsCount() {
 }
 
 function setActiveNav(pageId) {
-  const navLink = document.getElementById(`nav-${pageId} `);
+  const navLink = document.getElementById(`nav-${pageId}`);
   if (navLink) {
     navLink.classList.add('active');
   }
@@ -292,7 +307,117 @@ async function handleLogout() {
         console.error('Logout error:', error);
       }
       clearAuthData();
-      window.location.href = '../home.html';
+      window.location.href = '../index.html';
     }
   });
+}
+// Make functions globally available
+window.updatePendingRequestsCount = updatePendingRequestsCount;
+window.createSidebar = createSidebar;
+window.setActiveNav = setActiveNav;
+window.handleLogout = handleLogout;
+
+// Inject expired styles automatically if not present
+(function injectSidebarStyles() {
+  if (document.getElementById('sidebar-expired-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'sidebar-expired-styles';
+  style.textContent = `
+    .sidebar-nav-item.expired {
+      opacity: 0.3 !important;
+      position: relative !important;
+      cursor: not-allowed !important;
+      filter: grayscale(100%) !important;
+      transition: all 0.3s ease;
+    }
+    .sidebar-nav-item.expired a,
+    .sidebar-nav-item.expired button {
+      pointer-events: none !important;
+      cursor: not-allowed !important;
+    }
+    .sidebar-nav-item.expired::after {
+      content: '🔒';
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      z-index: 20;
+      opacity: 0.8;
+    }
+    [dir="ltr"] .sidebar-nav-item.expired::after {
+      left: auto;
+      right: 1rem;
+    }
+    .sidebar-nav-item.expired-exception {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      filter: none !important;
+    }
+    .sidebar-nav-item.expired-exception a {
+      pointer-events: auto !important;
+    }
+    .sidebar-nav-item.expired-exception::after {
+      display: none !important;
+    }
+    /* Ensure logout button stays visible and active */
+    .sidebar button.btn-secondary {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      filter: none !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+// Block clicks on expired items globally as a fallback
+document.addEventListener('click', function (e) {
+  const expiredItem = e.target.closest('.sidebar-nav-item.expired');
+  if (expiredItem && !e.target.closest('.expired-exception')) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Blocked click on expired sidebar item');
+    return false;
+  }
+}, true);
+
+// Optimization: Targeted observation for better performance
+// Only observes specific containers instead of the entire document tree
+const initSidebarObserver = () => {
+  const targets = ['sidebar', 'sidebarContainer'];
+  let observed = false;
+
+  const observer = new MutationObserver((mutations) => {
+    // Debounce the check slightly or just check existence
+    const badge = document.getElementById('pendingRequestsBadge');
+    if (badge && !badge.dataset.observed) {
+      badge.dataset.observed = "true";
+      updatePendingRequestsCount();
+    }
+  });
+
+  // Try to observe specific containers
+  targets.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      observer.observe(el, { childList: true }); // No subtree needed for direct injection
+      observed = true;
+    }
+  });
+
+  // Fallback: If no specific container found, observe body but without subtree if possible,
+  // or restricted subtree. For now, if no container, we rely on createSidebar's internal timeout.
+  // This prevents the expensive global observer.
+  if (!observed) {
+    console.warn('Sidebar container not found for observation. Relying on createSidebar timeout.');
+  }
+
+  // Initial check
+  updatePendingRequestsCount();
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSidebarObserver);
+} else {
+  initSidebarObserver();
 }

@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit User - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=12">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -17,9 +17,8 @@
 
     <div class="page-content">
       <!-- Page Header -->
-      <div class="flex items-center gap-3 mb-8"
-        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
-        <a href="users.html" class="btn btn-secondary" style="padding: 0.5rem;">
+      <div class="flex items-center gap-3 mb-8">
+        <a href="users.html" class="btn btn-secondary p-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12" />
@@ -27,8 +26,8 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white" data-i18n-key="users.edit_page.title">Edit User</h1>
-          <p class="text-secondary" data-i18n-key="users.edit_page.subtitle">Update user account</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="users.edit_page.title">تعديل المستخدم</h1>
+          <p class="text-secondary" data-i18n-key="users.edit_page.subtitle">تحديث بيانات وكلمة مرور الحساب</p>
         </div>
       </div>
 
@@ -38,7 +37,7 @@
       </div>
 
       <!-- Form -->
-      <div id="formContainer" class="glass-card p-6" style="max-width: 800px; display: none;">
+      <div id="formContainer" class="glass-card p-6 max-w-3xl hidden">
         <form id="userForm">
           <!-- Name -->
           <div class="form-group">
@@ -70,15 +69,15 @@
           <!-- Password Section (Adaptive) -->
           <div id="passwordSection">
             <!-- Old Password (Only for Master Admin) -->
-            <div class="form-group" id="oldPasswordGroup" style="display: none;">
-              <label class="label"><span data-i18n-key="users.form.old_password">Old Password</span> <span
+            <div class="form-group hidden" id="oldPasswordGroup">
+              <label class="label"><span data-i18n-key="users.form.old_password">كلمة المرور القديمة</span> <span
                   data-i18n-key="common.required">*</span></label>
-              <div style="position: relative;">
-                <input type="password" id="oldPassword" class="input"
-                  data-i18n-placeholder="users.form.old_password_placeholder" placeholder="Enter current password"
-                  style="padding-inline-end: 2.5rem;" />
+              <div class="relative">
+                <input type="password" id="oldPassword" class="input pe-10"
+                  data-i18n-placeholder="users.form.old_password_placeholder" placeholder="أدخل كلمة المرور الحالية" />
                 <button type="button" id="toggleOldPassword"
-                  style="position: absolute; inset-inline-end: 0; top: 0; height: 100%; padding: 0 0.75rem; background: none; border: none; cursor: pointer; color: #a5b4fc; display: flex; align-items: center; justify-content: center; transition: color 0.2s;">
+                  class="absolute top-1/2 -translate-y-1/2 end-0 flex items-center px-3 text-indigo-300 hover:text-indigo-400 transition-colors bg-transparent border-none cursor-pointer z-10"
+                  style="height: fit-content;">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="eye-icon">
@@ -87,7 +86,7 @@
                   </svg>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="eye-off-icon hidden" style="display: none;">
+                    class="eye-off-icon hidden">
                     <path
                       d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
                     </path>
@@ -99,15 +98,16 @@
 
             <!-- New Password -->
             <div class="form-group">
-              <label class="label" id="newPasswordLabel" data-i18n-key="users.edit_page.new_password">New
-                Password</label>
-              <div style="position: relative;">
-                <input type="password" id="password" name="password" class="input"
+              <label class="label" id="newPasswordLabel" data-i18n-key="users.edit_page.new_password">كلمة المرور
+                الجديدة</label>
+              <div class="relative">
+                <input type="password" id="password" name="password" class="input pe-10"
                   data-i18n-placeholder="users.form.password_placeholder"
-                  placeholder="Enter new password (min 6 characters)" style="padding-inline-end: 2.5rem;" />
+                  placeholder="أدخل كلمة المرور الجديدة (6 أحرف على الأقل)" />
                 <!-- Toggle Button reused -->
                 <button type="button" id="togglePassword"
-                  style="position: absolute; inset-inline-end: 0; top: 0; height: 100%; padding: 0 0.75rem; background: none; border: none; cursor: pointer; color: #a5b4fc; display: flex; align-items: center; justify-content: center; transition: color 0.2s;">
+                  class="absolute top-1/2 -translate-y-1/2 end-0 flex items-center px-3 text-indigo-300 hover:text-indigo-400 transition-colors bg-transparent border-none cursor-pointer z-10"
+                  style="height: fit-content;">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="eye-icon">
@@ -116,7 +116,7 @@
                   </svg>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="eye-off-icon hidden" style="display: none;">
+                    class="eye-off-icon hidden">
                     <path
                       d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
                     </path>
@@ -128,15 +128,16 @@
             </div>
 
             <!-- Confirm New Password (Only for Master Admin) -->
-            <div class="form-group" id="confirmPasswordGroup" style="display: none;">
-              <label class="label"><span data-i18n-key="users.form.confirm_password">Confirm New Password</span> <span
-                  data-i18n-key="common.required">*</span></label>
-              <div style="position: relative;">
-                <input type="password" id="confirmPassword" class="input"
-                  data-i18n-placeholder="users.form.confirm_password_placeholder" placeholder="Confirm new password"
-                  style="padding-inline-end: 2.5rem;" />
+            <div class="form-group hidden" id="confirmPasswordGroup">
+              <label class="label"><span data-i18n-key="users.form.confirm_password">تأكيد كلمة المرور الجديدة</span>
+                <span data-i18n-key="common.required">*</span></label>
+              <div class="relative">
+                <input type="password" id="confirmPassword" class="input pe-10"
+                  data-i18n-placeholder="users.form.confirm_password_placeholder"
+                  placeholder="تأكيد كلمة المرور الجديدة" />
                 <button type="button" id="toggleConfirmPassword"
-                  style="position: absolute; inset-inline-end: 0; top: 0; height: 100%; padding: 0 0.75rem; background: none; border: none; cursor: pointer; color: #a5b4fc; display: flex; align-items: center; justify-content: center; transition: color 0.2s;">
+                  class="absolute top-1/2 -translate-y-1/2 end-0 flex items-center px-3 text-indigo-300 hover:text-indigo-400 transition-colors bg-transparent border-none cursor-pointer z-10"
+                  style="height: fit-content;">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="eye-icon">
@@ -145,7 +146,7 @@
                   </svg>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="eye-off-icon hidden" style="display: none;">
+                    class="eye-off-icon hidden">
                     <path
                       d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
                     </path>
@@ -159,38 +160,37 @@
 
           <!-- Active Status -->
           <div class="form-group">
-            <label class="flex items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
-              <input type="checkbox" id="isActive" name="isActive">
-              <span class="label" style="margin: 0;" data-i18n-key="users.form.active_label">Active</span>
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" id="isActive" name="isActive" class="w-5 h-5">
+              <span class="label mb-0" data-i18n-key="users.form.active_label">نشط</span>
             </label>
           </div>
 
           <!-- Error Message -->
-          <div id="errorMessage" class="hidden mb-4"
-            style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
-            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+          <div id="errorMessage" class="hidden mb-6 glass-card p-3 border border-red-500/20 bg-red-500/10">
+            <p class="text-sm text-red-500 text-center"></p>
           </div>
 
           <!-- Buttons -->
-          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
-            <button type="submit" id="submitButton" class="btn btn-primary">
+          <div class="flex items-center justify-end gap-3 mt-8">
+            <a href="users.html" class="btn btn-secondary" data-i18n-key="common.cancel">إلغاء</a>
+            <button type="submit" id="submitButton" class="btn btn-primary px-8">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              <span data-i18n-key="users.form.update_user">Update User</span>
+              <span data-i18n-key="users.form.update_user">تحديث البيانات</span>
             </button>
-            <a href="users.html" class="btn btn-secondary" data-i18n-key="common.cancel">Cancel</a>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <script src="../js/api.js"></script>
-  <script src="../js/ui-utils.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <script src="../js/api.js?v=4"></script>
+  <script src="../js/ui-utils.js?v=3"></script>
+  <script src="../components/sidebar.js?v=12"></script>
+  <script src="../components/header.js?v=3"></script>
   <script>
     async function initPage() {
       await waitForI18n();
@@ -201,6 +201,13 @@
       }
 
       const user = getCurrentUser();
+
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
+      }
 
       // Only Super Admin and Institution can access
       if (user.roleName !== 'Super Admin' && user.roleName !== 'Institution') {
@@ -255,7 +262,7 @@
               const passwordInput = document.getElementById('password');
               const formGroup = passwordInput.closest('.form-group');
               if (formGroup) {
-                formGroup.style.display = 'none';
+                formGroup.classList.add('hidden');
               }
               // Optional: Add an info message elsewhere or just hide it silently as requested "No one else can see"
             }
@@ -272,30 +279,30 @@
             const phoneInput = document.getElementById('phoneNumber');
             const isActiveInput = document.getElementById('isActive');
 
-            nameInput.closest('.form-group').style.display = 'none';
+            nameInput.closest('.form-group').classList.add('hidden');
             nameInput.removeAttribute('required');
 
-            emailInput.closest('.form-group').style.display = 'none';
+            emailInput.closest('.form-group').classList.add('hidden');
             // emailInput.removeAttribute('required'); // Email is special, keep logic but it's hidden. 
             // Actually better to remove required to avoid browser blocking.
             emailInput.removeAttribute('required');
 
-            phoneInput.closest('.form-group').style.display = 'none';
+            phoneInput.closest('.form-group').classList.add('hidden');
             phoneInput.removeAttribute('required');
 
-            isActiveInput.closest('.form-group').style.display = 'none';
+            isActiveInput.closest('.form-group').classList.add('hidden');
 
             // Show Password Fields
-            document.getElementById('oldPasswordGroup').style.display = 'block';
-            document.getElementById('confirmPasswordGroup').style.display = 'block';
+            document.getElementById('oldPasswordGroup').classList.remove('hidden');
+            document.getElementById('confirmPasswordGroup').classList.remove('hidden');
 
             // Update labels
             const pageTitle = document.querySelector('h1[data-i18n-key="users.edit_page.title"]');
             if (pageTitle) pageTitle.textContent = t('users.change_password') || "تغيير كلمة المرور";
           }
 
-          loadingContainer.style.display = 'none';
-          formContainer.style.display = 'block';
+          loadingContainer.classList.add('hidden');
+          formContainer.classList.remove('hidden');
         } catch (error) {
           console.error('Error loading user:', error);
           showToast(t('users.edit_page.load_error'), 'error');
@@ -386,7 +393,7 @@
           onConfirm: async () => {
             // Disable submit button
             submitButton.disabled = true;
-            submitButton.innerHTML = `<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> ${t('users.edit_page.updating')}`;
+            submitButton.innerHTML = `<div class="spinner border-2 w-5 h-5"></div> ${t('users.edit_page.updating')}`;
 
             try {
               await api.users.update(userId, formData);
@@ -436,13 +443,15 @@
             const eyeOffIcon = toggleBtn.querySelector('.eye-off-icon');
 
             if (type === 'password') {
-              eyeIcon.style.display = 'block';
-              eyeOffIcon.style.display = 'none';
-              toggleBtn.style.color = '#a5b4fc';
+              eyeIcon.classList.remove('hidden');
+              eyeOffIcon.classList.add('hidden');
+              toggleBtn.classList.add('text-indigo-300');
+              toggleBtn.classList.remove('text-white');
             } else {
-              eyeIcon.style.display = 'none';
-              eyeOffIcon.style.display = 'block';
-              toggleBtn.style.color = '#fff';
+              eyeIcon.classList.add('hidden');
+              eyeOffIcon.classList.remove('hidden');
+              toggleBtn.classList.remove('text-indigo-300');
+              toggleBtn.classList.add('text-white');
             }
           });
         }

@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS institutions (
     max_users INTEGER NOT NULL DEFAULT 5,
     can_create_branches BOOLEAN DEFAULT TRUE,
     is_active BOOLEAN DEFAULT TRUE,
+    total_loans INTEGER DEFAULT 0,
+    maximum_loans INTEGER DEFAULT 1000,
     expiration_date DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

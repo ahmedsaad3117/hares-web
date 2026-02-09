@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import { SearchLog } from '../../entities/search-log.entity';
 import { CreateSearchLogDto } from './dto/create-search-log.dto';
 import { SearchLogResponseDto } from './dto/search-log-response.dto';
@@ -14,6 +14,23 @@ export class SearchLogsService {
   ) { }
 
   async create(createSearchLogDto: CreateSearchLogDto): Promise<SearchLog> {
+    // Check if a similar log exists within the last 30 minutes
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+    const existingLog = await this.searchLogRepository.findOne({
+      where: {
+        customerId: createSearchLogDto.customerId,
+        userId: createSearchLogDto.userId,
+        searchType: createSearchLogDto.searchType,
+        createdAt: MoreThan(thirtyMinutesAgo),
+      },
+      order: { createdAt: 'DESC' },
+    });
+
+    if (existingLog) {
+      return existingLog;
+    }
+
     const searchLog = this.searchLogRepository.create(createSearchLogDto);
     return await this.searchLogRepository.save(searchLog);
   }
@@ -27,6 +44,8 @@ export class SearchLogsService {
       .leftJoinAndSelect('searchLog.customer', 'customer')
       .leftJoinAndSelect('searchLog.user', 'user')
       .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('user.institution', 'institution')
+      .leftJoinAndSelect('user.branch', 'branch')
       .skip(skip)
       .take(limit)
       .orderBy('searchLog.createdAt', 'DESC');
@@ -108,7 +127,7 @@ export class SearchLogsService {
 
     const [logs, total] = await this.searchLogRepository.findAndCount({
       where: { userId },
-      relations: ['customer', 'user', 'user.role'],
+      relations: ['customer', 'user', 'user.role', 'user.institution', 'user.branch'],
       skip,
       take: limit,
       order: { createdAt: 'DESC' },

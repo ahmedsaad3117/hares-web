@@ -2,47 +2,82 @@
  * UI Utilities for Q1KEY Platform
  * Handles meatball menus and deletion modals
  */
+(function (global) {
+  'use strict';
 
-// Initialize meatball menu for a page
-function initMeatballMenu() {
-  const container = document.querySelector('.meatball-container');
-  if (!container) return;
+  console.log('Loading UI Utils...');
 
-  const btn = container.querySelector('.meatball-btn');
-  const dropdown = container.querySelector('.meatball-dropdown');
-
-  if (!btn || !dropdown) return;
-
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    dropdown.classList.toggle('show');
+  // Simple translation fallback for pages without i18n loaded
+  const t = window.t || ((key) => {
+    const translations = {
+      'help.title': 'المساعدة والدعم',
+      'help.contact_whatsapp': 'تواصل عبر واتساب',
+      'help.contact_email': 'تواصل عبر البريد الإلكتروني',
+      'help.cancel': 'إغلاق',
+      'help.no_info': 'معلومات التواصل غير متوفرة حالياً'
+    };
+    return translations[key] || key;
   });
 
-  // Close dropdown when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!container.contains(e.target)) {
-      dropdown.classList.remove('show');
+  // Initialize meatball menu for a page
+  function initMeatballMenu() {
+    const containers = document.querySelectorAll('.meatball-container');
+
+    containers.forEach(container => {
+      // Prevent multiple initializations
+      if (container.dataset.initialized === 'true') return;
+
+      const btn = container.querySelector('.meatball-btn');
+      const dropdown = container.querySelector('.meatball-dropdown');
+
+      if (!btn || !dropdown) return;
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Close all other dropdowns first
+        document.querySelectorAll('.meatball-dropdown.show').forEach(d => {
+          if (d !== dropdown) d.classList.remove('show');
+        });
+
+        dropdown.classList.toggle('show');
+      });
+
+      container.dataset.initialized = 'true';
+    });
+
+    // Global listener to close dropdowns when clicking outside
+    // Only add if not already added
+    if (!window._meatballListenerAdded) {
+      document.addEventListener('click', (e) => {
+        document.querySelectorAll('.meatball-dropdown.show').forEach(dropdown => {
+          if (!dropdown.closest('.meatball-container').contains(e.target)) {
+            dropdown.classList.remove('show');
+          }
+        });
+      });
+      window._meatballListenerAdded = true;
     }
-  });
-}
+  }
 
-/**
- * Show a custom deletion modal
- * @param {Object} options 
- * @param {string} options.title - Modal title
- * @param {string} options.itemName - Name of the item to delete
- * @param {string} options.warningText - Warning message
- * @param {Function} options.onConfirm - Callback when confirmed
- */
-function showDeleteModal(options) {
-  const { title, itemName, warningText, confirmText, onConfirm } = options;
+  /**
+   * Show a custom deletion modal
+   * @param {Object} options 
+   * @param {string} options.title - Modal title
+   * @param {string} options.itemName - Name of the item to delete
+   * @param {string} options.warningText - Warning message
+   * @param {Function} options.onConfirm - Callback when confirmed
+   */
+  function showDeleteModal(options) {
+    const { title, itemName, warningText, confirmText, onConfirm } = options;
 
-  // Remove existing modal if any
-  const existingModal = document.querySelector('.modal-overlay');
-  if (existingModal) existingModal.remove();
+    // Remove existing modal if any
+    const existingModal = document.querySelector('.modal-overlay');
+    if (existingModal) existingModal.remove();
 
-  // Create modal HTML
-  const modalHTML = `
+    // Create modal HTML
+    const modalHTML = `
     <div class="modal-overlay" id="deleteModal">
       <div class="modal-card">
         <div class="modal-card-header">
@@ -64,57 +99,76 @@ function showDeleteModal(options) {
     </div>
   `;
 
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-  const modal = document.getElementById('deleteModal');
-  const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const modal = document.getElementById('deleteModal');
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
 
-  // Show modal with animation
-  setTimeout(() => modal.classList.add('show'), 10);
+    // Show modal with animation
+    setTimeout(() => modal.classList.add('show'), 10);
 
-  // Handle confirm
-  confirmBtn.addEventListener('click', async () => {
-    confirmBtn.disabled = true;
-    confirmBtn.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>';
-    await onConfirm();
-    closeDeleteModal();
-  });
-}
-
-function closeDeleteModal() {
-  // Close Delete Modal
-  const deleteModal = document.getElementById('deleteModal');
-  if (deleteModal) {
-    deleteModal.classList.remove('show');
-    setTimeout(() => deleteModal.remove(), 300);
+    // Handle confirm
+    confirmBtn.addEventListener('click', async () => {
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>';
+      await onConfirm();
+      closeDeleteModal();
+    });
   }
 
-  // Close Help Modal
-  const helpModal = document.getElementById('helpModal');
-  if (helpModal) {
-    helpModal.classList.remove('show');
-    setTimeout(() => helpModal.remove(), 300);
+  function closeDeleteModal() {
+    // Close Delete Modal
+    const deleteModal = document.getElementById('deleteModal');
+    if (deleteModal) {
+      deleteModal.classList.remove('show');
+      setTimeout(() => deleteModal.remove(), 300);
+    }
+
+    // Close Help Modal
+    const helpModal = document.getElementById('helpModal');
+    if (helpModal) {
+      helpModal.classList.remove('show');
+      setTimeout(() => helpModal.remove(), 300);
+    }
   }
-}
 
-/**
- * Show a generic confirmation modal
- * @param {Object} options 
- * @param {string} options.title - Modal title
- * @param {string} options.message - Main message text
- * @param {string} options.subMessage - Secondary message/item name
- * @param {string} options.confirmText - Button text
- * @param {Function} options.onConfirm - Callback
- * @param {string} options.icon - Icon character/HTML (default: ✨)
- * @param {string} options.btnClass - Button class (default: btn-primary)
- */
-function showConfirmModal(options) {
-  const { title, message, subMessage, confirmText, onConfirm, icon = '✨', btnClass = 'btn-primary' } = options;
+  // Alias for clarity
+  const closeHelpModal = closeDeleteModal;
+  window.closeHelpModal = closeHelpModal;
 
-  const existingModal = document.querySelector('.modal-overlay');
-  if (existingModal) existingModal.remove();
+  /**
+   * Show a generic confirmation modal
+   * @param {Object} options 
+   * @param {string} options.title - Modal title
+   * @param {string} options.message - Main message text
+   * @param {string} options.subMessage - Secondary message/item name
+   * @param {string} options.confirmText - Button text
+   * @param {Function} options.onConfirm - Callback
+   * @param {string} options.icon - Icon character/HTML (default: ✨)
+   * @param {string} options.btnClass - Button class (default: btn-primary)
+   */
+  function showConfirmModal(options) {
+    const { title, message, subMessage, confirmText, onConfirm, icon = '✨', btnClass = 'btn-primary' } = options;
 
-  const modalHTML = `
+    // Determine theme color based on btnClass
+    let themeColor = '#6366f1'; // Default Indigo
+    let themeBg = 'rgba(99, 102, 241, 0.1)';
+    let themeBorder = 'rgba(99, 102, 241, 0.3)';
+
+    if (btnClass.includes('success')) {
+      themeColor = '#10b981'; // Emerald Green
+      themeBg = 'rgba(16, 185, 129, 0.1)';
+      themeBorder = 'rgba(16, 185, 129, 0.3)';
+    } else if (btnClass.includes('danger') || btnClass.includes('error')) {
+      themeColor = '#ef4444'; // Red
+      themeBg = 'rgba(239, 68, 68, 0.1)';
+      themeBorder = 'rgba(239, 68, 68, 0.3)';
+    }
+
+    const existingModal = document.querySelector('.modal-overlay');
+    if (existingModal) existingModal.remove();
+
+    const modalHTML = `
     <div class="modal-overlay" id="confirmModal">
       <div class="modal-card">
         <div class="modal-card-header">
@@ -122,9 +176,9 @@ function showConfirmModal(options) {
           <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
         </div>
         <div class="modal-card-body">
-          <div class="modal-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">${icon}</div>
+          <div class="modal-icon" style="background: ${themeBg}; color: ${themeColor};">${icon}</div>
           <p class="delete-warning-text" style="color: #e2e8f0;">${message}</p>
-          ${subMessage ? `<span class="item-to-delete" style="color: #6366f1; border-color: rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.1);">${subMessage}</span>` : ''}
+          ${subMessage ? `<span class="item-to-delete" style="color: ${themeColor}; border-color: ${themeBorder}; background: ${themeBg};">${subMessage}</span>` : ''}
         </div>
         <div class="modal-card-footer">
           <button class="btn btn-secondary" onclick="closeConfirmModal()">${t('common.button.cancel') || 'Cancel'}</button>
@@ -136,155 +190,166 @@ function showConfirmModal(options) {
     </div>
   `;
 
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-  const modal = document.getElementById('confirmModal');
-  const confirmBtn = document.getElementById('confirmActionBtn');
-  const closeBtn = modal.querySelector('.modal-close');
-  const cancelBtn = modal.querySelector('.btn-secondary'); // The cancel button
+    const modal = document.getElementById('confirmModal');
+    const confirmBtn = document.getElementById('confirmActionBtn');
+    const closeBtn = modal.querySelector('.modal-close');
+    const cancelBtn = modal.querySelector('.btn-secondary'); // The cancel button
 
-  setTimeout(() => modal.classList.add('show'), 10);
+    setTimeout(() => modal.classList.add('show'), 10);
 
-  // Helper to handle closing/cancelling
-  const handleCancel = () => {
-    if (options.onCancel) options.onCancel();
-    closeConfirmModal();
+    // Helper to handle closing/cancelling
+    const handleCancel = () => {
+      if (options.onCancel) options.onCancel();
+      closeConfirmModal();
+    };
+
+    // Attach handlers
+    closeBtn.onclick = handleCancel;
+    cancelBtn.onclick = handleCancel;
+
+    confirmBtn.addEventListener('click', async () => {
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>';
+      try {
+        await onConfirm();
+      } catch (e) {
+        console.error(e);
+      }
+      closeConfirmModal();
+    });
+  }
+
+  function closeConfirmModal() {
+    const modal = document.getElementById('confirmModal');
+    if (modal) {
+      modal.classList.remove('show');
+      setTimeout(() => modal.remove(), 300);
+    }
+  }
+
+  /**
+   * Create a WhatsApp link for a given phone number
+   * @param {string} phone - Phone number
+   * @returns {string|null} - WhatsApp URL or null if invalid
+   */
+  function createWhatsappLink(phone) {
+    if (!phone) return null;
+
+    // Remove non-numeric characters
+    let cleanPhone = phone.toString().replace(/\D/g, '');
+
+    // Add country code if missing (assuming SA +966 for now as per context)
+    if (cleanPhone.startsWith('05')) {
+      cleanPhone = '966' + cleanPhone.substring(1);
+    } else if (cleanPhone.length === 9 && cleanPhone.startsWith('5')) {
+      cleanPhone = '966' + cleanPhone;
+    }
+
+    // Basic validation (at least 10 digits) - Commented out to allow testing/shorter numbers temporarily
+    // if (cleanPhone.length < 10) return null;
+
+    return `https://wa.me/${cleanPhone}`;
+  }
+
+  /**
+   * Open WhatsApp chat for a given number
+   * @param {string} phone - Phone number
+   */
+  function openWhatsapp(phone) {
+    const link = createWhatsappLink(phone);
+    if (link) {
+      window.open(link, '_blank');
+    } else {
+      alert(t('common.invalid_phone') || 'Invalid phone number');
+    }
+  }
+
+  // Immediately export WhatsApp functions to global (before any other code runs)
+  global.createWhatsappLink = createWhatsappLink;
+  global.openWhatsapp = openWhatsapp;
+
+  // Auto-refresh manager
+  const refreshManager = {
+    intervalId: null,
+    isPageVisible: true,
+    listeners: []
   };
 
-  // Attach handlers
-  closeBtn.onclick = handleCancel;
-  cancelBtn.onclick = handleCancel;
-
-  confirmBtn.addEventListener('click', async () => {
-    confirmBtn.disabled = true;
-    confirmBtn.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>';
-    try {
-      await onConfirm();
-    } catch (e) {
-      console.error(e);
-    }
-    closeConfirmModal();
-  });
-}
-
-function closeConfirmModal() {
-  const modal = document.getElementById('confirmModal');
-  if (modal) {
-    modal.classList.remove('show');
-    setTimeout(() => modal.remove(), 300);
-  }
-}
-
-/**
- * Create a WhatsApp link for a given phone number
- * @param {string} phone - Phone number
- * @returns {string|null} - WhatsApp URL or null if invalid
- */
-function createWhatsappLink(phone) {
-  if (!phone) return null;
-
-  // Remove non-numeric characters
-  let cleanPhone = phone.toString().replace(/\D/g, '');
-
-  // Add country code if missing (assuming SA +966 for now as per context)
-  if (cleanPhone.startsWith('05')) {
-    cleanPhone = '966' + cleanPhone.substring(1);
-  } else if (cleanPhone.length === 9 && cleanPhone.startsWith('5')) {
-    cleanPhone = '966' + cleanPhone;
-  }
-
-  // Basic validation (at least 10 digits) - Commented out to allow testing/shorter numbers temporarily
-  // if (cleanPhone.length < 10) return null;
-
-  return `https://wa.me/${cleanPhone}`;
-}
-
-/**
- * Open WhatsApp chat for a given number
- * @param {string} phone - Phone number
- */
-function openWhatsapp(phone) {
-  const link = createWhatsappLink(phone);
-  if (link) {
-    window.open(link, '_blank');
-  } else {
-    alert(t('common.invalid_phone') || 'Invalid phone number');
-  }
-}
-
-// Auto-refresh manager
-const refreshManager = {
-  intervalId: null,
-  isPageVisible: true,
-  listeners: []
-};
-
-// Handle visibility change to pause/resume updates
-document.addEventListener('visibilitychange', () => {
-  refreshManager.isPageVisible = !document.hidden;
-  if (refreshManager.isPageVisible) {
-    // Immediate refresh when becoming visible
-    refreshManager.listeners.forEach(callback => callback());
-  }
-});
-
-/**
- * Setup auto-refresh for a page
- * @param {Function} refreshCallback - Function to call to refresh data
- * @param {number} intervalMs - Interval in milliseconds (default 15000)
- */
-function setupAutoRefresh(refreshCallback, intervalMs = 15000) {
-  // Register callback
-  refreshManager.listeners.push(refreshCallback);
-
-  // Clear existing interval if any (singleton pattern per page load)
-  if (refreshManager.intervalId) {
-    clearInterval(refreshManager.intervalId);
-  }
-
-  // Start polling
-  refreshManager.intervalId = setInterval(() => {
+  // Handle visibility change to pause/resume updates
+  document.addEventListener('visibilitychange', () => {
+    refreshManager.isPageVisible = !document.hidden;
     if (refreshManager.isPageVisible) {
-      // Check if user is interacting (optional enhancement: pause if mouse down? sticking to simple visibility for now)
-      refreshCallback();
+      // Immediate refresh when becoming visible
+      refreshManager.listeners.forEach(callback => callback());
     }
-  }, intervalMs);
+  });
 
-  // Return cleanup function
-  return () => {
-    clearInterval(refreshManager.intervalId);
-    refreshManager.listeners = refreshManager.listeners.filter(cb => cb !== refreshCallback);
-  };
-}
+  /**
+   * Setup auto-refresh for a page
+   * @param {Function} refreshCallback - Function to call to refresh data
+   * @param {number} intervalMs - Interval in milliseconds (default 15000)
+   */
+  function setupAutoRefresh(refreshCallback, intervalMs = 15000) {
+    // Register callback
+    refreshManager.listeners.push(refreshCallback);
 
-/**
- * Open Help/Support Modal
- */
-/**
- * Open Help/Support Modal
- */
-async function openHelpModal() {
-  const user = JSON.parse(localStorage.getItem('user'));
-  const isSuperAdmin = user && user.roleName === 'Super Admin';
+    // Clear existing interval if any (singleton pattern per page load)
+    if (refreshManager.intervalId) {
+      clearInterval(refreshManager.intervalId);
+    }
 
-  // Remove existing modal if any
-  const existingModal = document.querySelector('.modal-overlay');
-  if (existingModal) existingModal.remove();
+    // Start polling
+    refreshManager.intervalId = setInterval(() => {
+      if (refreshManager.isPageVisible) {
+        // Check if user is interacting (optional enhancement: pause if mouse down? sticking to simple visibility for now)
+        refreshCallback();
+      }
+    }, intervalMs);
 
-  // Load current settings
-  let supportInfo = { whatsapp: '', email: '' };
-  try {
-    supportInfo = await window.api.settings.getSupportInfo();
-  } catch (error) {
-    console.error('Failed to load support info', error);
+    // Return cleanup function
+    return () => {
+      clearInterval(refreshManager.intervalId);
+      refreshManager.listeners = refreshManager.listeners.filter(cb => cb !== refreshCallback);
+    };
   }
 
-  // Create Modal Content based on Role
-  let modalContent = '';
+  /**
+   * Open Help/Support Modal
+   */
+  /**
+   * Open Help/Support Modal
+   */
+  async function openHelpModal() {
+    console.log('openHelpModal called');
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem('user'));
+    } catch (e) {
+      // Ignore error if not logged in
+    }
 
-  if (isSuperAdmin) {
-    // Super Admin: Edit Form
-    modalContent = `
+    const isSuperAdmin = user && user.roleName === 'Super Admin';
+
+    // Remove existing modal if any
+    const existingModal = document.querySelector('.modal-overlay');
+    if (existingModal) existingModal.remove();
+
+    // Load current settings
+    let supportInfo = { whatsapp: '', email: '' };
+    try {
+      supportInfo = await window.api.settings.getSupportInfo();
+    } catch (error) {
+      console.error('Failed to load support info', error);
+    }
+
+    // Create Modal Content based on Role
+    let modalContent = '';
+
+    if (isSuperAdmin) {
+      // Super Admin: Edit Form
+      modalContent = `
       <div class="form-group mb-4">
         <label class="label">${t('help.whatsapp_label')}</label>
         <input type="text" id="supportWhatsapp" class="input" value="${supportInfo.whatsapp || ''}" placeholder="e.g. 966500000000">
@@ -295,9 +360,9 @@ async function openHelpModal() {
         <input type="email" id="supportEmail" class="input" value="${supportInfo.email || ''}" placeholder="support@domain.com">
       </div>
     `;
-  } else {
-    // Others: Contact Buttons
-    modalContent = `
+    } else {
+      // Others: Contact Buttons
+      modalContent = `
       <div style="display: flex; flex-direction: column; gap: 1rem; padding: 1rem 0;">
         ${supportInfo.whatsapp ? `
           <a href="https://wa.me/${supportInfo.whatsapp}" target="_blank" class="btn btn-whatsapp" style="justify-content: center; width: 100%; padding: 1rem;">
@@ -321,10 +386,10 @@ async function openHelpModal() {
         ${!supportInfo.whatsapp && !supportInfo.email ? `<p class="text-center text-muted">${t('help.no_info')}</p>` : ''}
       </div>
     `;
-  }
+    }
 
-  // Construct Full Modal
-  const modalHTML = `
+    // Construct Full Modal
+    const modalHTML = `
     <div class="modal-overlay" id="helpModal">
       <div class="modal-card">
         <div class="modal-card-header">
@@ -342,54 +407,110 @@ async function openHelpModal() {
     </div>
   `;
 
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-  const modal = document.getElementById('helpModal');
-  setTimeout(() => modal.classList.add('show'), 10);
-}
-
-/**
- * Handle saving support settings
- */
-async function saveSupportSettings() {
-  const saveBtn = document.getElementById('saveSupportBtn');
-  const wa = document.getElementById('supportWhatsapp').value.trim();
-  const em = document.getElementById('supportEmail').value.trim();
-
-  if (saveBtn) {
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = 'Saving...';
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = document.getElementById('helpModal');
+    setTimeout(() => modal.classList.add('show'), 10);
   }
 
-  try {
-    console.log('Saving support info:', { whatsapp: wa, email: em });
-
-    await window.api.settings.updateSupportInfo({ whatsapp: wa, email: em });
-    showToast('Support info updated successfully', 'success');
-
-    // Force close
-    const modal = document.getElementById('helpModal');
-    if (modal) {
-      modal.classList.remove('show');
-      setTimeout(() => modal.remove(), 300);
-    }
-  } catch (error) {
-    console.error('Save error:', error);
-    alert('Error saving settings: ' + (error.message || 'Unknown error. Check console.'));
+  /**
+   * Handle saving support settings
+   */
+  async function saveSupportSettings() {
+    const saveBtn = document.getElementById('saveSupportBtn');
+    const wa = document.getElementById('supportWhatsapp').value.trim();
+    const em = document.getElementById('supportEmail').value.trim();
 
     if (saveBtn) {
-      saveBtn.disabled = false;
-      saveBtn.innerHTML = 'Save Changes';
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = 'Saving...';
+    }
+
+    try {
+      console.log('Saving support info:', { whatsapp: wa, email: em });
+
+      await window.api.settings.updateSupportInfo({ whatsapp: wa, email: em });
+      showToast('Support info updated successfully', 'success');
+
+      // Force close
+      const modal = document.getElementById('helpModal');
+      if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 300);
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      alert('Error saving settings: ' + (error.message || 'Unknown error. Check console.'));
+
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = 'Save Changes';
+      }
     }
   }
-}
 
-// Global export
-window.initMeatballMenu = initMeatballMenu;
-window.showDeleteModal = showDeleteModal;
-window.closeDeleteModal = closeDeleteModal;
-window.showConfirmModal = showConfirmModal;
-window.closeConfirmModal = closeConfirmModal;
-window.createWhatsappLink = createWhatsappLink;
-window.openWhatsapp = openWhatsapp;
-window.setupAutoRefresh = setupAutoRefresh;
-window.openHelpModal = openHelpModal;
+  /**
+   * Toggle Sidebar for Mobile
+   */
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const body = document.body;
+
+    if (!sidebar) return;
+
+    const isOpen = sidebar.classList.toggle('open');
+    body.classList.toggle('menu-open', isOpen);
+
+    // Manage Overlay
+    let overlay = document.querySelector('.sidebar-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.className = 'sidebar-overlay';
+      overlay.onclick = toggleSidebar;
+      document.body.appendChild(overlay);
+    }
+
+    if (isOpen) {
+      overlay.classList.add('show');
+    } else {
+      overlay.classList.remove('show');
+    }
+  }
+
+  /**
+   * Debounce function to limit the rate at which a function can fire
+   * @param {Function} func - Function to debounce
+   * @param {number} wait - Wait time in milliseconds
+   */
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Export functions to global scope
+  try {
+    global.initMeatballMenu = initMeatballMenu;
+    global.showDeleteModal = showDeleteModal;
+    global.closeDeleteModal = closeDeleteModal;
+    global.showConfirmModal = showConfirmModal;
+    global.closeConfirmModal = closeConfirmModal;
+    global.createWhatsappLink = createWhatsappLink;
+    global.openWhatsapp = openWhatsapp;
+    global.setupAutoRefresh = setupAutoRefresh;
+    global.openHelpModal = openHelpModal;
+    global.toggleSidebar = toggleSidebar;
+    global.t = t; // Ensure translation fallback is global
+    global.debounce = debounce;
+
+    console.log('UI Utils loaded successfully');
+  } catch (e) {
+    console.error('Error exporting UI Utils:', e);
+  }
+
+})(typeof window !== 'undefined' ? window : this);

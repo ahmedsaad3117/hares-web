@@ -1,60 +1,448 @@
-// Q1KEY Platform - API Client
+// Q1KEY Platform - API Client (Enhanced v2.0)
 // Base configuration and utilities for API calls
+// Features: Timeout, Error Handling, Request Deduplication, Centralized Auth
 
-// API Configuration - can be overridden by setting window.API_CONFIG before this script loads
-// In production, create a config.js file that sets window.API_CONFIG = { baseUrl: 'https://your-api-domain.com' }
+// ============================================== //
+//              API CONFIGURATION                 //
+// ============================================== //
+
 const API_BASE_URL = (window.API_CONFIG && window.API_CONFIG.baseUrl)
   ? window.API_CONFIG.baseUrl
   : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:3001'
-    : window.location.origin.replace(/:\d+$/, ':3001'); // Use same host with API port
+    ? 'http://localhost:3001/api'
+    : window.location.origin.replace(/:\d+$/, ':3001/api');
 
-// Get auth token from localStorage
+// Default timeout in milliseconds (60 seconds)
+const API_TIMEOUT = 60000;
+
+// ============================================== //
+//          REQUEST DEDUPLICATION CACHE          //
+// ============================================== //
+
+// Store for in-flight requests to prevent duplicates
+const pendingRequests = new Map();
+
+// Generate unique key for request deduplication
+function generateRequestKey(endpoint, options) {
+  const method = options.method || 'GET';
+  const body = options.body || '';
+  return `${method}:${endpoint}:${body}`;
+}
+
+// ============================================== //
+//              AUTH UTILITIES                   //
+// ============================================== //
+
 function getToken() {
   return localStorage.getItem('token');
 }
 
-// Get current user from localStorage
+function getRefreshToken() {
+  return localStorage.getItem('refresh_token');
+}
+
 function getCurrentUser() {
   const userStr = localStorage.getItem('user');
   return userStr ? JSON.parse(userStr) : null;
 }
-// Check if user is authenticated
+
 function isAuthenticated() {
   return !!getToken();
 }
 
-// Redirect to login if not authenticated
+/**
+ * Check if a subscription is expired
+ * @param {string|Date} expirationDate 
+ * @returns {boolean}
+ */
+function isSubscriptionExpired(expirationDate) {
+  if (!expirationDate) return false;
+  const now = new Date();
+  const exp = new Date(expirationDate);
+
+  // Match backend logic precisely:
+  // expirationDate (future) - now (current)
+  const diffTime = exp.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  // It is only expired if days remaining is 0 or less
+  const isExpired = diffDays <= 0;
+
+  // Debug log for troubleshooting (will show in browser console)
+  // console.log(`[SubscriptionCheck] Exp: ${expirationDate}, Days Left: ${diffDays}, Result: ${isExpired}`);
+
+  return isExpired;
+}
+
 function requireAuth() {
   if (!isAuthenticated()) {
-    window.location.href = '../index.html';
+    const isInsidePages = window.location.pathname.includes('/pages/');
+    window.location.href = isInsidePages ? '../index.html' : 'index.html';
     return false;
   }
+
+  // Note: Local subscription enforcement is handled at Entry Points (Login)
+  // to allow the current active session to finish without interruption.
   return true;
 }
 
-// Save auth data
-function saveAuthData(token, user) {
+function saveAuthData(token, user, refreshToken) {
   localStorage.setItem('token', token);
   localStorage.setItem('user', JSON.stringify(user));
+  if (refreshToken) {
+    localStorage.setItem('refresh_token', refreshToken);
+  }
 }
 
-// Clear auth data
 function clearAuthData() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  localStorage.removeItem('refresh_token');
 }
 
-// Generic API request function
-async function apiRequest(endpoint, options = {}) {
-  const token = getToken();
+// Global check for session and subscription validity
+(function startSessionObserver() {
+  // 1. Inactivity Monitor - Auto logout after 15 minutes of inactivity
+  let inactivityTimer;
+  const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes
 
-  // Add cache busting for GET requests
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    if (isAuthenticated()) {
+      inactivityTimer = setTimeout(() => {
+        console.warn('Inactivity limit reached. Logging out...');
+        // Only log out if not on a vital page or let it be global
+        clearAuthData();
+        const isInsidePages = window.location.pathname.includes('/pages/');
+        window.location.href = isInsidePages ? '../index.html' : 'index.html';
+      }, INACTIVITY_LIMIT);
+    }
+  }
+
+  // Register activity events to reset timer
+  const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+  activityEvents.forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, true);
+  });
+
+  // Initial timer start
+  resetInactivityTimer();
+
+  setInterval(async () => {
+    // Only monitor if authenticated and NOT on index/login page
+    if (!isAuthenticated()) return;
+
+    const path = window.location.pathname.toLowerCase();
+    if (path.endsWith('index.html') || path === '/' || path.endsWith('/') || path.endsWith('login.html')) return;
+
+    try {
+      // 1. Check Session Validity (Forced Logout) via server
+      await api.auth.verifySession();
+
+      // Note: We REMOVED the strict local subscription check here 
+      // to allow the user to continue their current session until manual logout or 15min inactivity,
+      // as requested by the user.
+
+    } catch (error) {
+      // If error is 401 (Unauthorized), it means user session was invalidated (Forced Logout)
+      if (error.status === 401) {
+        console.warn('User session invalidated. Forcing logout...');
+        clearAuthData();
+        const isInsidePages = window.location.pathname.includes('/pages/');
+        window.location.href = isInsidePages ? '../index.html' : 'index.html';
+      }
+    }
+  }, 15000); // Check every 15 seconds for session validity (Force Logout)
+})();
+
+// ============================================== //
+//         CENTRALIZED ERROR HANDLING            //
+// ============================================== //
+
+function handleApiError(response, endpoint, errorData) {
+  const status = response.status;
+  const isAr = (localStorage.getItem('locale') || 'ar') === 'ar';
+
+  // Create enhanced error object
+  const error = new Error(errorData?.message?.message || errorData?.message || 'Request failed');
+  error.status = status;
+  error.code = errorData?.message?.code || errorData?.code;
+  error.customer = errorData?.message?.customer || errorData?.customer;
+  error.originalError = errorData;
+
+  // Handle specific status codes
+  switch (status) {
+    case 400:
+      // Bad Request - often used for capacity issues
+      let msg = errorData?.message || '';
+      if (isAr) {
+        if (msg.includes('Branch capacity exceeded')) {
+          msg = 'تم تجاوز الحد الأقصى للمبلغ المسموح به لهذا الفرع';
+        } else if (msg.includes('Institution capacity exceeded')) {
+          msg = 'تم تجاوز الحد الأقصى للمبلغ المسموح به لهذه المؤسسة';
+        } else {
+          msg = msg || 'طلب غير صالح';
+        }
+      }
+      error.message = msg;
+      break;
+
+    case 401:
+      // Unauthorized - handle in apiRequest (auto-refresh)
+      // but if it's explicitly for login or already failed refresh, then clear
+      if (endpoint.includes('/auth/login') || endpoint.includes('/auth/refresh')) {
+        clearAuthData();
+        if (!endpoint.includes('/auth/login')) {
+          window.location.href = '../index.html';
+        }
+
+        let customMsg = errorData?.message || '';
+        if (customMsg.includes('Account is deactivated')) {
+          error.message = isAr ? 'هذا الحساب غير نشط حالياً، يرجى مراجعة الإدارة' : 'This account is currently inactive, please contact administration';
+        } else if (customMsg.includes('Session expired or terminated')) {
+          error.message = isAr ? 'انتهت الجلسة أو تم إنهاؤها من قبل المسؤول' : 'Session expired or terminated by administrator';
+        } else {
+          error.message = isAr ? 'بيانات الدخول غير صحيحة' : 'Invalid credentials';
+        }
+      }
+      break;
+
+    case 403:
+      // Forbidden - no permission
+      error.message = isAr ? 'ليس لديك صلاحية لهذا الإجراء' : 'You do not have permission for this action';
+      console.warn('Access Denied:', endpoint);
+      break;
+
+    case 404:
+      // Not Found
+      error.message = isAr ? 'المورد المطلوب غير موجود' : 'Requested resource not found';
+      break;
+
+    case 409:
+      // Conflict - data already exists
+      error.message = errorData?.message || (isAr ? 'البيانات موجودة مسبقاً' : 'Data already exists');
+      break;
+
+    case 422:
+      // Validation Error
+      error.message = errorData?.message || (isAr ? 'بيانات غير صالحة' : 'Invalid data');
+      break;
+
+    case 429:
+      // Too Many Requests
+      const retryAfter = errorData?.retryAfter || 60;
+      error.message = isAr
+        ? `طلبات كثيرة جداً، يرجى المحاولة بعد ${retryAfter} ثانية`
+        : `Too many requests, please try again after ${retryAfter} seconds`;
+      break;
+
+    case 500:
+    case 502:
+    case 503:
+    case 504:
+      // Server Error
+      error.message = isAr ? 'خطأ في الخادم، يرجى المحاولة لاحقاً' : 'Server error, please try again later';
+      console.error('Server Error:', status, endpoint);
+      break;
+  }
+
+  return error;
+}
+
+// ============================================== //
+//         FETCH WITH TIMEOUT WRAPPER            //
+// ============================================== //
+
+async function fetchWithTimeout(url, config, timeout = API_TIMEOUT) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...config,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      const isAr = (localStorage.getItem('locale') || 'ar') === 'ar';
+      const timeoutError = new Error(isAr ? 'انتهت مهلة الطلب، يرجى المحاولة مرة أخرى' : 'Request timeout, please try again');
+      timeoutError.isTimeout = true;
+      throw timeoutError;
+    }
+    throw error;
+  }
+}
+
+// ============================================== //
+//           MAIN API REQUEST FUNCTION           //
+// ============================================== //
+
+// Track refreshing status
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+function subscribeTokenRefresh(cb) {
+  refreshSubscribers.push(cb);
+}
+
+function onTokenRefreshed(token) {
+  refreshSubscribers.map(cb => cb(token));
+  refreshSubscribers = [];
+}
+
+async function apiRequest(endpoint, options = {}) {
+  // --- STRICT SUBSCRIPTION ENFORCEMENT ---
+  // Block any API request if subscription is expired, unless it's an auth request or on subscription page
+  const user = getCurrentUser();
+  if (user && user.roleName !== 'Super Admin' && !endpoint.includes('/auth/login')) {
+    const isExpired = isSubscriptionExpired(user.expirationDate);
+    const path = window.location.pathname.toLowerCase();
+    const isSubscriptionPage = path.endsWith('/my-subscription.html');
+
+    if (isExpired && !isSubscriptionPage) {
+      console.warn('Blocking API request due to expired subscription:', endpoint);
+      // DO NOT clearAuthData here, just redirect
+      const isInsidePages = window.location.pathname.includes('/pages/');
+      window.location.href = isInsidePages ? 'my-subscription.html' : 'pages/my-subscription.html';
+      return Promise.reject(new Error('Subscription expired'));
+    }
+  }
+
   const isGetRequest = !options.method || options.method === 'GET';
+
+  // Add cache busting for GET requests - DISABLED due to strict validation logic
+  let fullEndpoint = endpoint;
+  // if (isGetRequest && !endpoint.includes('?')) {
+  //   fullEndpoint += `?_t=${Date.now()}`;
+  // } else if (isGetRequest) {
+  //   fullEndpoint += `&_t=${Date.now()}`;
+  // }
+
+  // Request deduplication for GET requests
+  const requestKey = generateRequestKey(endpoint, options);
+  if (isGetRequest && pendingRequests.has(requestKey)) {
+    return pendingRequests.get(requestKey);
+  }
+
+  // Function to perform the actual fetch
+  const performRequest = async (token) => {
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const timeout = options.timeout || API_TIMEOUT;
+    const response = await fetchWithTimeout(`${API_BASE_URL}${fullEndpoint}`, config, timeout);
+
+    // Handle error responses
+    if (!response.ok) {
+      let errorData = {};
+      try {
+        errorData = await response.json();
+      } catch (e) { }
+
+      // Special 401 Handling for Token Refresh
+      if (response.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/refresh')) {
+        const refreshTokenVal = getRefreshToken();
+
+        if (refreshTokenVal) {
+          if (!isRefreshing) {
+            isRefreshing = true;
+            try {
+              const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refresh_token: refreshTokenVal })
+              });
+
+              if (refreshResponse.ok) {
+                const newTokens = await refreshResponse.json();
+                saveAuthData(newTokens.access_token, getCurrentUser(), newTokens.refresh_token);
+                isRefreshing = false;
+                onTokenRefreshed(newTokens.access_token);
+              } else {
+                isRefreshing = false;
+                clearAuthData();
+                window.location.href = '../index.html';
+                throw handleApiError(response, endpoint, errorData);
+              }
+            } catch (err) {
+              isRefreshing = false;
+              clearAuthData();
+              window.location.href = '../index.html';
+              throw err;
+            }
+          }
+
+          // Return a promise that resolves when the refresh is done
+          return new Promise(resolve => {
+            subscribeTokenRefresh(newToken => {
+              resolve(performRequest(newToken));
+            });
+          });
+        }
+      }
+
+      throw handleApiError(response, endpoint, errorData);
+    }
+
+    if (response.status === 204) return null;
+
+    const text = await response.text();
+    try {
+      return text ? JSON.parse(text) : null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const requestPromise = (async () => {
+    try {
+      return await performRequest(getToken());
+    } catch (error) {
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        const isAr = (localStorage.getItem('locale') || 'ar') === 'ar';
+        error.message = isAr ? 'خطأ في الاتصال بالخادم' : 'Connection error to server';
+        error.isNetworkError = true;
+      }
+      throw error;
+    } finally {
+      if (isGetRequest) {
+        pendingRequests.delete(requestKey);
+      }
+    }
+  })();
+
+  if (isGetRequest) {
+    pendingRequests.set(requestKey, requestPromise);
+  }
+
+  return requestPromise;
+}
+
+// ============================================== //
+//         PUBLIC API REQUEST (NO AUTH)          //
+// ============================================== //
+
+// For public endpoints that don't require authentication (homepage, etc.)
+async function publicApiRequest(endpoint, options = {}) {
+  const isGetRequest = !options.method || options.method === 'GET';
+
+  let fullEndpoint = endpoint;
   if (isGetRequest && !endpoint.includes('?')) {
-    endpoint += `?_t=${Date.now()}`;
+    fullEndpoint += `?_t=${Date.now()}`;
   } else if (isGetRequest) {
-    endpoint += `&_t=${Date.now()}`;
+    fullEndpoint += `&_t=${Date.now()}`;
   }
 
   const config = {
@@ -65,49 +453,55 @@ async function apiRequest(endpoint, options = {}) {
     ...options,
   };
 
-  if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`;
+  // Request deduplication
+  const requestKey = `public:${generateRequestKey(endpoint, options)}`;
+  if (isGetRequest && pendingRequests.has(requestKey)) {
+    return pendingRequests.get(requestKey);
   }
 
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-
-    // Handle 401 Unauthorized - but not for login endpoint
-    if (response.status === 401 && endpoint !== '/auth/login') {
-      clearAuthData();
-      window.location.href = '../home.html';
-      throw new Error('Unauthorized');
-    }
-
-    // Handle other errors
-    if (!response.ok) {
-      const errorData = await response.json();
-      const error = new Error(errorData.message?.message || errorData.message || 'Request failed');
-      error.code = errorData.message?.code || errorData.code;
-      error.customer = errorData.message?.customer || errorData.customer;
-      error.originalError = errorData;
-      throw error;
-    }
-
-    // Handle 204 No Content
-    if (response.status === 204) {
-      return null;
-    }
-    // Safely parse JSON
-
-    // Safely parse JSON
-    const text = await response.text();
+  const requestPromise = (async () => {
     try {
-      return text ? JSON.parse(text) : null;
-    } catch (e) {
-      console.warn('Response was not JSON:', text);
-      return null; // Return null if response is not valid JSON
+      const timeout = options.timeout || API_TIMEOUT;
+      const response = await fetchWithTimeout(`${API_BASE_URL}${fullEndpoint}`, config, timeout);
+
+      if (!response.ok) {
+        let errorData = {};
+        try {
+          errorData = await response.json();
+        } catch (e) { }
+        throw handleApiError(response, endpoint, errorData);
+      }
+
+      if (response.status === 204) return null;
+
+      const text = await response.text();
+      try {
+        return text ? JSON.parse(text) : null;
+      } catch (e) {
+        return null;
+      }
+    } catch (error) {
+      if (error.message === 'Failed to fetch') {
+        const isAr = (localStorage.getItem('locale') || 'ar') === 'ar';
+        error.message = isAr ? 'خطأ في الاتصال بالخادم' : 'Connection error to server';
+      }
+      throw error;
+    } finally {
+      if (isGetRequest) {
+        pendingRequests.delete(requestKey);
+      }
     }
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
+  })();
+
+  if (isGetRequest) {
+    pendingRequests.set(requestKey, requestPromise);
   }
+
+  return requestPromise;
 }
+
+// Expose public request function globally
+window.publicApiRequest = publicApiRequest;
 
 // API methods
 const api = {
@@ -126,7 +520,14 @@ const api = {
 
     verifySession: () => apiRequest('/auth/verify-session'),
 
-    getProfile: () => apiRequest('/users/me'),
+    getProfile: async () => {
+      const user = await apiRequest('/users/me');
+      if (user) {
+        const stored = JSON.parse(localStorage.getItem('user') || '{}');
+        localStorage.setItem('user', JSON.stringify({ ...stored, ...user }));
+      }
+      return user;
+    },
   },
 
   // Users
@@ -151,6 +552,9 @@ const api = {
     delete: (id) => apiRequest(`/users/${id}`, {
       method: 'DELETE',
     }),
+    forceLogout: (id) => apiRequest(`/users/${id}/logout`, {
+      method: 'POST',
+    }),
   },
 
   // Institutions
@@ -159,6 +563,7 @@ const api = {
     getById: (id) => apiRequest(`/institutions/${id}`),
     getStatistics: (id) => apiRequest(`/institutions/${id}/statistics`),
     search: (term) => apiRequest(`/institutions/search?q=${encodeURIComponent(term)}`),
+    checkTaxId: (taxId) => apiRequest(`/institutions/check-tax-id/${taxId}`),
     create: (data) => apiRequest('/institutions', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -259,7 +664,11 @@ const api = {
 
   // Loans
   loans: {
-    getAll: (page = 1, limit = 10) => apiRequest(`/loans?page=${page}&limit=${limit}`),
+    getAll: (page = 1, limit = 10, status = '') => {
+      let url = `/loans?page=${page}&limit=${limit}`;
+      if (status) url += `&status=${encodeURIComponent(status)}`;
+      return apiRequest(url);
+    },
     getStatistics: () => apiRequest('/loans/statistics'),
     search: (searchTerm) => apiRequest(`/loans/search?q=${encodeURIComponent(searchTerm)}`),
     getByCustomer: (customerId) => apiRequest(`/loans/customer/${customerId}`),
@@ -394,29 +803,45 @@ const api = {
 
   // Reports
   reports: {
+    // Helper to clean empty values from filters
+    _cleanFilters: (filters) => {
+      const cleaned = {};
+      for (const [key, value] of Object.entries(filters)) {
+        if (value !== undefined && value !== null && value !== '') {
+          cleaned[key] = value;
+        }
+      }
+      return cleaned;
+    },
     getGeneralStats: (filters = {}) => {
       // filters: startDate, endDate, institutionId, branchId
-      const params = new URLSearchParams(filters).toString();
+      const cleanedFilters = api.reports._cleanFilters(filters);
+      const params = new URLSearchParams(cleanedFilters).toString();
       return apiRequest(`/reports/general-stats?${params}`);
     },
     getCashBoxReport: (filters = {}) => {
-      const params = new URLSearchParams(filters).toString();
+      const cleanedFilters = api.reports._cleanFilters(filters);
+      const params = new URLSearchParams(cleanedFilters).toString();
       return apiRequest(`/reports/cash-box?${params}`);
     },
     getCustomersReport: (filters = {}) => {
-      const params = new URLSearchParams(filters).toString();
+      const cleanedFilters = api.reports._cleanFilters(filters);
+      const params = new URLSearchParams(cleanedFilters).toString();
       return apiRequest(`/reports/customers?${params}`);
     },
     getLoansReport: (filters = {}) => {
-      const params = new URLSearchParams(filters).toString();
+      const cleanedFilters = api.reports._cleanFilters(filters);
+      const params = new URLSearchParams(cleanedFilters).toString();
       return apiRequest(`/reports/loans?${params}`);
     },
     getInstallmentsReport: (filters = {}) => {
-      const params = new URLSearchParams(filters).toString();
+      const cleanedFilters = api.reports._cleanFilters(filters);
+      const params = new URLSearchParams(cleanedFilters).toString();
       return apiRequest(`/reports/installments?${params}`);
     },
     getUnifiedReport: (filters = {}) => {
-      const params = new URLSearchParams(filters).toString();
+      const cleanedFilters = api.reports._cleanFilters(filters);
+      const params = new URLSearchParams(cleanedFilters).toString();
       return apiRequest(`/reports/unified?${params}`);
     }
   },
@@ -523,8 +948,7 @@ const api = {
   // Homepage Management
   homepage: {
     // Get public homepage data (no auth required)
-    getPublicData: () => fetch(`${API_BASE_URL}/homepage/public?_t=${Date.now()}`)
-      .then(res => res.json()),
+    getPublicData: () => publicApiRequest('/homepage/public'),
 
     // Get homepage settings (Super Admin only)
     getSettings: () => apiRequest('/homepage/settings'),
@@ -533,6 +957,41 @@ const api = {
     updateSettings: (data) => apiRequest('/homepage/settings', {
       method: 'PUT',
       body: JSON.stringify(data),
+    }),
+  },
+
+  // Quick Links Management
+  quickLinks: {
+    // Get active links (for dashboard display)
+    getActive: () => apiRequest('/quick-links/active'),
+
+    // Get all links (admin)
+    getAll: () => apiRequest('/quick-links'),
+
+    // Get link by ID
+    getById: (id) => apiRequest(`/quick-links/${id}`),
+
+    // Create new link
+    create: (data) => apiRequest('/quick-links', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+    // Update link
+    update: (id, data) => apiRequest(`/quick-links/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+    // Delete link
+    delete: (id) => apiRequest(`/quick-links/${id}`, {
+      method: 'DELETE',
+    }),
+
+    // Reorder links
+    reorder: (orderedIds) => apiRequest('/quick-links/reorder', {
+      method: 'POST',
+      body: JSON.stringify({ orderedIds }),
     }),
   },
 };
@@ -551,10 +1010,15 @@ function showToast(message, type = 'info') {
 
 // Format currency
 function formatCurrency(amount) {
+  const num = parseFloat(amount);
+  if (isNaN(num)) return '0.00 ر.س.';
+
   return new Intl.NumberFormat('ar-SA', {
     style: 'currency',
     currency: 'SAR',
-  }).format(amount);
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(num);
 }
 
 // Format date
@@ -625,10 +1089,15 @@ function debounce(func, wait) {
 }
 
 // Expose api to window object for strict global access
-// Expose api to window object for strict global access
 window.api = api;
+window.showToast = showToast;
 window.formatDate = formatDate;
 window.formatDateTime = formatDateTime;
 window.formatCurrency = formatCurrency;
 window.formatRelativeTime = formatRelativeTime;
 window.formatTrustStatusBadge = formatTrustStatusBadge;
+
+// Expose additional utilities
+window.API_BASE_URL = API_BASE_URL;
+window.API_TIMEOUT = API_TIMEOUT;
+window.apiRequest = apiRequest;

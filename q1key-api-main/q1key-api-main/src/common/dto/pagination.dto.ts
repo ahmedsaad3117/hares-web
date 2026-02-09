@@ -17,6 +17,12 @@ export class PaginationDto {
 
   @IsOptional()
   search?: string;
+
+  @IsOptional()
+  status?: string;
+
+  @IsOptional()
+  deleted?: string | boolean;
 }
 
 export interface PaginatedResult<T> {

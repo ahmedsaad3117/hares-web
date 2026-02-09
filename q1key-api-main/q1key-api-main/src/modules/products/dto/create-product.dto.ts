@@ -17,4 +17,7 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsOptional()
+  isVisibleToBranches?: boolean;
 }

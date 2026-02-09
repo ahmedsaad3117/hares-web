@@ -19,8 +19,10 @@
       "yes": "Yes",
       "no": "No",
       "view": "View",
+      "confirm_delete": "Confirm Delete",
       "add": "Add",
-      "reset": "Reset"
+      "reset": "Reset",
+      "print": "Print"
     },
     "message": {
       "loading": "Loading...",
@@ -30,6 +32,7 @@
       "no_data": "No data available",
       "confirm_delete": "Are you sure you want to delete this item?",
       "unsaved_changes": "You have unsaved changes. Do you want to continue?",
+      "logout_confirm_message": "Are you sure you want to logout?",
       "request_created_success": "Registration request submitted successfully. The account will be created once approved by administration."
     },
     "label": {
@@ -52,7 +55,25 @@
       "months": "Months"
     },
     "required": "*",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "subscription_expired_notice": "Your subscription has expired. Please renew your subscription to restore full access.",
+    "status": {
+      "active": "Active",
+      "paid": "Paid",
+      "late": "Late",
+      "finished": "Finished",
+      "pending": "Pending",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "trusted": "Trusted",
+      "unverified": "Unverified",
+      "suspicious": "Suspicious",
+      "flagged": "Flagged",
+      "blocked": "Blocked"
+    }
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -120,7 +141,10 @@
     "title": "Dashboard",
     "welcome_back": "Welcome back",
     "quick_actions": "Quick Actions",
-    "recent_activity": "Recent Activity",
+    "recent_activity": {
+      "title": "Recent Activity",
+      "empty": "No recent activity found"
+    },
     "stats": {
       "total_institutions": "Total Institutions",
       "total_branches": "Total Branches",
@@ -129,7 +153,11 @@
       "late_loans": "Late Loans",
       "active_loans": "Active Loans",
       "pending_loans": "Pending Loans",
-      "total_portfolio": "Total Portfolio"
+      "total_portfolio": "Total Portfolio",
+      "locations": "Locations",
+      "all_time": "All Time",
+      "disbursed": "Disbursed",
+      "late": "Late"
     },
     "actions": {
       "add_customer": "Add Customer",
@@ -179,11 +207,19 @@
       "network_error": "Network error. Please try again.",
       "required_email": "Email is required",
       "required_password": "Password is required",
-      "invalid_email": "Please enter a valid email"
+      "invalid_email": "Please enter a valid email",
+      "already_logged_in": "This account is already logged in on another device. Please log out from there or wait 30 minutes of inactivity to log in again."
     }
   },
   "customers": {
     "title": "Customers",
+    "show_deleted": "Show Deleted Customers List",
+    "show_active": "Return to Active Customers",
+    "deleted_customers_title": "Deleted Customers",
+    "exists_link_confirm": "Customer {name} already exists in the system. Do you want to link them to your branch?",
+    "link_customer_title": "Link Existing Customer",
+    "delete_confirm_title": "Delete Customer",
+    "delete_confirm_message": "Are you sure you want to delete this customer? This action may be irreversible.",
     "add_customer": "Add Customer",
     "edit_customer": "Edit Customer",
     "view_customer": "View Customer",
@@ -212,8 +248,6 @@
     "verified": "Verified",
     "trusted": "Trusted",
     "blacklisted": "Blacklisted",
-    "exists_link_confirm": "Customer {name} already exists in the system. Do you want to link them to your branch?",
-    "link_customer_title": "Link Existing Customer",
     "table": {
       "name": "Name",
       "phone": "Phone",
@@ -273,7 +307,6 @@
       "notes_title": "Customer Notes",
       "show_notes": "Show Notes",
       "hide_notes": "Hide Notes",
-      "add_note": "Add Note",
       "note_text": "Note Text",
       "note_text_placeholder": "Enter note text (max 1400 characters)",
       "category": "Category",
@@ -298,7 +331,29 @@
         "flagged": "Flagged",
         "blocked": "Blocked"
       },
-      "delete_customer_confirm": "Are you sure you want to delete this customer? This will also delete all associated data."
+      "delete_customer_confirm": "Are you sure you want to delete this customer? This will also delete all associated data.",
+      "customer_record": "Customer Record",
+      "show_record": "Show Record",
+      "hide_record": "Hide Record",
+      "no_loans_title": "No Loans",
+      "no_loans_desc": "No loans recorded for this customer currently",
+      "no_logs_title": "No Search Logs",
+      "no_logs_desc": "This customer has not been searched by any other institution",
+      "no_notes_title": "No Notes",
+      "no_notes_desc": "You can add private notes for this customer",
+      "add_note": "Add Note",
+      "note_placeholder": "Add a new note..."
+    },
+    "tabs": {
+      "loans": "Loans",
+      "search_logs": "Search Logs",
+      "notes": "Notes"
+    },
+    "notes": {
+      "general": "General",
+      "follow_up": "Follow-up",
+      "complaint": "Complaint",
+      "payment_issue": "Payment Issue"
     }
   },
   "loans": {
@@ -611,7 +666,7 @@
     },
     "view_page": {
       "institution_id": "Institution ID",
-      "tax_id": "Tax ID",
+      "tax_id": "Commercial Registration",
       "phone_number": "Phone Number",
       "email": "Email",
       "max_users": "Max Users",
@@ -660,6 +715,9 @@
     "status": "Status",
     "created": "Created",
     "actions": "Actions",
+    "visibility": "Visibility",
+    "visible": "Visible",
+    "hidden": "Hidden",
     "active": "Active",
     "inactive": "Inactive",
     "global": "Global",
@@ -713,7 +771,9 @@
       "updating": "Updating...",
       "loading_details": "Loading product details...",
       "updated_success": "Product updated successfully",
-      "update_failed": "Failed to update product"
+      "update_failed": "Failed to update product",
+      "visibility_label": "Product Visibility",
+      "visible_to_branches": "Visible to branches"
     }
   },
   "users": {
@@ -733,7 +793,9 @@
       "update_failed": "Failed to update user",
       "load_error": "Failed to load user"
     },
+    "change_password": "Change Password",
     "create_new_user": "Create a new system user",
+    "view_user": "User Details",
     "view_user_info": "View user information",
     "update_user_info": "Update user information",
     "view_details": "View Details",
@@ -749,6 +811,7 @@
     "status": "Status",
     "institution": "Institution",
     "branch": "Branch",
+    "institution_branch": "Institution / Branch",
     "actions": "Actions",
     "active": "Active",
     "inactive": "Inactive",
@@ -757,6 +820,7 @@
     "activate": "Activate",
     "delete": "Delete",
     "no_users": "No users yet",
+    "search_placeholder": "Search by name, email, or institution...",
     "failed_to_load": "Failed to load users",
     "deactivate_confirm": "Are you sure you want to deactivate this user?",
     "activate_confirm": "Are you sure you want to activate this user?",
@@ -764,6 +828,12 @@
     "deactivated_success": "User deactivated successfully",
     "activated_success": "User activated successfully",
     "deleted_success": "User deleted successfully",
+    "force_logout": "Force Logout",
+    "force_logout_confirm": "Are you sure you want to force logout",
+    "force_logout_desc": "The user's current session will be terminated immediately.",
+    "confirm_logout": "Logout",
+    "logout_success": "User logged out successfully",
+    "logout_failed": "Failed to logout user",
     "update_failed": "Failed to update user status",
     "delete_failed": "Failed to delete user",
     "roles": {
@@ -780,6 +850,10 @@
       "phone_placeholder": "Enter phone number",
       "password": "Password",
       "password_placeholder": "Enter password (min 6 characters)",
+      "old_password": "Old Password",
+      "old_password_placeholder": "Enter current password",
+      "confirm_password": "Confirm New Password",
+      "confirm_password_placeholder": "Re-enter new password",
       "role_label": "Role",
       "role_placeholder": "Select role...",
       "institution_label": "Institution",
@@ -796,7 +870,10 @@
       "create_success": "User created successfully",
       "create_failed": "Failed to create user",
       "inline_error": "All fields are required (Name, Email, and Password).",
-      "password_min_error": "Password must be at least 6 characters."
+      "password_min_error": "Password must be at least 6 characters.",
+      "old_password_required": "Old password is required",
+      "password_mismatch": "Passwords do not match",
+      "invalid_old_password": "Invalid old password"
     }
   },
   "tools": {
@@ -869,7 +946,9 @@
       "sections_visibility": "Show/Hide Sections",
       "features_section": "Features Section",
       "about_section": "About Section",
-      "footer_section": "Footer"
+      "footer_section": "Footer",
+      "save_confirm_title": "Save Settings",
+      "save_confirm_msg": "Are you sure you want to save changes to the homepage?"
     }
   },
   "my_subscription": {
@@ -1085,6 +1164,7 @@
     }
   },
   "installments": {
+    "no_installments_found": "No installments found",
     "title": "Payment Installments",
     "subtitle": "Track and manage loan payment schedules",
     "view_installment": "View Installment",
@@ -1189,6 +1269,8 @@
     "filter_by_customer": "Filter by Customer ID",
     "filter_by_type": "Filter by Search Type",
     "enter_customer_id": "Enter customer ID",
+    "search_text": "Search by Customer or User",
+    "search_text_placeholder": "Enter customer or user name...",
     "all_types": "All Types",
     "view": "View",
     "search": "Search",
@@ -1220,6 +1302,10 @@
       "branch": "Branch",
       "from_date": "From Date",
       "to_date": "To Date",
+      "scope": "Report Scope",
+      "scope_institutions": "Institution Reports",
+      "scope_admin": "Super Admin Reports",
+      "main_treasury": "Main Treasury (HQ)",
       "apply": "Apply Filters",
       "reset": "Reset"
     },
@@ -1242,7 +1328,53 @@
     },
     "charts": {
       "loans_by_status": "Loans by Status",
-      "transaction_types": "Transaction Types"
+      "transaction_types": "Transaction Types",
+      "customer_growth": "Customer Growth",
+      "loans_by_product": "Loans by Product",
+      "loans_value_by_status": "Loans Value by Status",
+      "installments_overview": "Installments Overview",
+      "segments": "Customer Segments Distribution",
+      "dataset": {
+        "number_of_loans": "Number of Loans",
+        "total_value": "Total Value",
+        "daily_signups": "Daily Signups",
+        "count": "Count",
+        "amount": "Amount"
+      }
+    },
+    "top_customers": "Top Customers and Classification"
+  },
+  "customer_analytics": {
+    "segments": {
+      "vip": "VIP Customers",
+      "active": "Active Customers",
+      "normal": "Normal Customers",
+      "low_engagement": "Low Engagement",
+      "risk": "Risk / Default Customers"
+    },
+    "kpi": {
+      "retention_rate": "Retention Rate",
+      "churn_rate": "Churn Rate",
+      "clv": "Customer Lifetime Value (CLV)",
+      "active_rate": "Activity Rate"
+    },
+    "insights": {
+      "title": "Smart Insights & Recommendations",
+      "risk_alert": "⚠️ Risk Alert",
+      "risk_alert_desc": "There are {count} customers with frequent defaults, please review their records.",
+      "opportunity": "💎 Growth Opportunity",
+      "opportunity_desc": "There are {count} customers eligible for upgrade to VIP category based on their commitment.",
+      "churn_warning": "📉 Churn Warning",
+      "churn_warning_desc": "Activity decrease of {count} customers during the last 90 days.",
+      "action_btn": "Take Action"
+    },
+    "table": {
+      "customer": "Customer",
+      "segment": "Segment",
+      "score": "Evaluation Score",
+      "last_activity": "Last Activity",
+      "total_loans": "Total Loans",
+      "status": "Status"
     }
   }
 }

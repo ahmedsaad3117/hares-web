@@ -5,6 +5,7 @@ export class ProductResponseDto {
   name: string;
   description: string;
   isActive: boolean;
+  isVisibleToBranches: boolean;
   createdAt: Date;
   updatedAt: Date;
   institutionName?: string;

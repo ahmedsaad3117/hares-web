@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Loan - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=12">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -17,9 +17,8 @@
 
     <div class="page-content">
       <!-- Page Header -->
-      <div class="flex items-center gap-3 mb-8"
-        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
-        <a href="loans.html" class="btn btn-secondary" style="padding: 0.5rem;">
+      <div class="flex items-center gap-3 mb-8">
+        <a href="loans.html" class="btn btn-secondary p-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12" />
@@ -44,28 +43,25 @@
             <!-- Customer (Read-only) -->
             <div class="form-group">
               <label class="label" data-i18n-key="loans.form.customer_label">Customer</label>
-              <input type="text" id="customerName" class="input" readonly
-                style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;" />
-              <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;"
-                data-i18n-key="loans.edit_page.customer_readonly">Customer cannot be changed after loan creation</p>
+              <input type="text" id="customerName" class="input opacity-60 cursor-not-allowed bg-white-5" readonly />
+              <p class="text-muted text-xs mt-1" data-i18n-key="loans.edit_page.customer_readonly">Customer cannot be
+                changed after loan creation</p>
             </div>
 
             <!-- Branch (Read-only) -->
             <div class="form-group">
               <label class="label" data-i18n-key="loans.form.branch_label">Branch</label>
-              <input type="text" id="branchName" class="input" readonly
-                style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;" />
-              <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;"
-                data-i18n-key="loans.edit_page.branch_readonly">Branch cannot be changed after loan creation</p>
+              <input type="text" id="branchName" class="input opacity-60 cursor-not-allowed bg-white-5" readonly />
+              <p class="text-muted text-xs mt-1" data-i18n-key="loans.edit_page.branch_readonly">Branch cannot be
+                changed after loan creation</p>
             </div>
 
             <!-- Product (Read-only) -->
             <div class="form-group">
               <label class="label" data-i18n-key="loans.form.product_label">Product</label>
-              <input type="text" id="productName" class="input" readonly
-                style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;" />
-              <p class="text-muted text-sm" style="margin-top: 0.25rem; font-size: 0.875rem;"
-                data-i18n-key="loans.edit_page.product_readonly">Product cannot be changed after loan creation</p>
+              <input type="text" id="productName" class="input opacity-60 cursor-not-allowed bg-white-5" readonly />
+              <p class="text-muted text-xs mt-1" data-i18n-key="loans.edit_page.product_readonly">Product cannot be
+                changed after loan creation</p>
             </div>
 
             <!-- Principal Amount -->
@@ -93,22 +89,19 @@
             </div>
 
             <!-- Installment Preview -->
-            <div id="installmentPreview" class="hidden"
-              style="padding: 1rem; border-radius: 8px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); margin-bottom: 1rem;">
-              <p class="text-sm font-semibold text-white mb-2" style="font-size: 0.875rem; margin-bottom: 0.5rem;">📋
-                <span data-i18n-key="loans.form.installment_preview">Installment Preview</span>
+            <div id="installmentPreview" class="hidden glass-card p-4 border border-blue-500/20 bg-blue-500/10 mb-6">
+              <p class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <span>📋</span>
+                <span data-i18n-key="loans.form.installment_preview">معاينة الأقساط</span>
               </p>
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+              <div class="grid-responsive-sm gap-4">
                 <div>
-                  <p class="text-muted" style="font-size: 0.75rem;" data-i18n-key="loans.form.monthly_payment">Monthly
-                    Payment</p>
-                  <p id="monthlyPayment" class="text-white font-medium" style="font-size: 1.125rem;">--</p>
+                  <p class="text-muted text-xs" data-i18n-key="loans.form.monthly_payment">القسط الشهري</p>
+                  <p id="monthlyPayment" class="text-white font-medium text-lg">--</p>
                 </div>
                 <div>
-                  <p class="text-muted" style="font-size: 0.75rem;" data-i18n-key="loans.form.installment_count">Number
-                    of
-                    Installments</p>
-                  <p id="installmentCount" class="text-white font-medium" style="font-size: 1.125rem;">--</p>
+                  <p class="text-muted text-xs" data-i18n-key="loans.form.installment_count">عدد الأقساط</p>
+                  <p id="installmentCount" class="text-white font-medium text-lg">--</p>
                 </div>
               </div>
             </div>
@@ -135,13 +128,12 @@
             </div>
 
             <!-- Error Message -->
-            <div id="errorMessage" class="hidden mb-4"
-              style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
-              <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+            <div id="errorMessage" class="hidden mb-6 glass-card p-3 border border-red-500/20 bg-red-500/10">
+              <p class="text-sm text-red-500 text-center"></p>
             </div>
 
             <!-- Form Actions -->
-            <div class="flex gap-3" style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 2rem;">
+            <div class="flex items-center justify-end gap-3 mt-8">
               <a href="loans.html" class="btn btn-secondary" data-i18n-key="common.button.cancel">Cancel</a>
               <button type="submit" class="btn btn-primary" id="submitBtn"
                 data-i18n-key="loans.edit_page.update_button">
@@ -157,9 +149,9 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast"></div>
 
-  <script src="../js/api.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <script src="../js/api.js?v=4"></script>
+  <script src="../components/sidebar.js?v=12"></script>
+  <script src="../components/header.js?v=3"></script>
   <script>
     async function initPage() {
       await waitForI18n();
@@ -167,6 +159,13 @@
       if (!isAuthenticated()) {
         window.location.href = '../index.html';
         return;
+      }
+
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
       }
 
       const user = getCurrentUser();

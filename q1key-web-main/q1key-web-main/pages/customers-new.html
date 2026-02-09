@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Customer - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=12">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -17,9 +17,8 @@
 
     <div class="page-content">
       <!-- Page Header -->
-      <div class="flex items-center gap-3 mb-8"
-        style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
-        <a href="customers.html" class="btn btn-secondary" style="padding: 0.5rem;">
+      <div class="flex items-center gap-3 mb-8">
+        <a href="customers.html" class="btn btn-secondary p-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12" />
@@ -27,13 +26,14 @@
           </svg>
         </a>
         <div>
-          <h1 class="text-3xl font-bold text-white" data-i18n-key="customers.add_customer">Add Customer</h1>
-          <p class="text-secondary" data-i18n-key="customers.create_new_customer">Create a new customer profile</p>
+          <h1 class="text-3xl font-bold text-white" data-i18n-key="customers.add_customer">إضافة عميل جديد</h1>
+          <p class="text-secondary" data-i18n-key="customers.create_new_customer">إنشاء ملف تعريف لعميل جديد في النظام
+          </p>
         </div>
       </div>
 
       <!-- Form -->
-      <div class="glass-card p-6" style="max-width: 800px;">
+      <div class="glass-card p-6 max-w-3xl">
         <form id="customerForm">
           <!-- Name -->
           <div class="form-group">
@@ -63,21 +63,20 @@
           </div>
 
           <!-- Error Message -->
-          <div id="errorMessage" class="hidden mb-4"
-            style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 1rem;">
-            <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+          <div id="errorMessage" class="hidden mb-6 glass-card p-3 border border-red-500/20 bg-red-500/10">
+            <p class="text-sm text-red-500 text-center"></p>
           </div>
 
           <!-- Buttons -->
-          <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
-            <button type="submit" id="submitButton" class="btn btn-primary">
+          <div class="flex items-center justify-end gap-3 mt-8">
+            <a href="customers.html" class="btn btn-secondary" data-i18n-key="customers.form.cancel">إلغاء</a>
+            <button type="submit" id="submitButton" class="btn btn-primary px-8">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              <span data-i18n-key="customers.form.create_customer">Create Customer</span>
+              <span data-i18n-key="customers.form.create_customer">حفظ البيانات</span>
             </button>
-            <a href="customers.html" class="btn btn-secondary" data-i18n-key="customers.form.cancel">Cancel</a>
           </div>
         </form>
       </div>
@@ -85,8 +84,8 @@
   </div>
 
   <script src="../js/api.js?v=2"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <script src="../components/sidebar.js?v=12"></script>
+  <script src="../components/header.js?v=3"></script>
   <script src="../js/ui-utils.js?v=8"></script>
   <script>
     async function initPage() {
@@ -96,6 +95,13 @@
       if (!isAuthenticated()) {
         window.location.href = '../index.html';
         return;
+      }
+
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
       }
 
       const user = getCurrentUser();
@@ -180,7 +186,7 @@
           try {
             // Disable submit button inside confirm callback (visual feedback only as modal blocks)
             submitButton.disabled = true;
-            submitButton.innerHTML = `<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> ${t('customers.form.creating')}`;
+            submitButton.innerHTML = `<div class="spinner border-2 w-5 h-5"></div> ${t('customers.form.creating')}`;
 
             await api.customers.create(formData);
             showToast('Customer created successfully', 'success');

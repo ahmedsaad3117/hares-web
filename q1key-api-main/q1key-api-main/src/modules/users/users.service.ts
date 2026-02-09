@@ -7,12 +7,18 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { PaginationDto, PaginatedResult } from '../../common/dto/pagination.dto';
+import { CacheService, CACHE_KEYS, CACHE_TTL } from '../../common/cache';
+
+import { Institution } from '../../entities/institution.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
+    @InjectRepository(Institution)
+    private institutionRepository: Repository<Institution>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private cacheService: CacheService,
   ) { }
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
@@ -33,6 +39,26 @@ export class UsersService {
 
       if (existingPhone) {
         throw new ConflictException('Phone number already exists');
+      }
+    }
+
+    // Check institution capacity if adding to an institution
+    if (createUserDto.institutionId) {
+      const institution = await this.institutionRepository.findOne({
+        where: { institutionId: createUserDto.institutionId }
+      });
+
+      if (institution) {
+        const currentUsersCount = await this.usersRepository.count({
+          where: { institutionId: createUserDto.institutionId, isActive: true }
+        });
+
+        if (currentUsersCount >= institution.maxUsers) {
+          // EXCEPTION: Allow creating user if it is being created by a Super Admin (we assume Super Admin knows what they are doing, OR better yet, we just block it for everyone strictly as requested).
+          // User logic: "The user created with the branch request has no relation to institution users... but manual add should be restricted."
+          // The branch request uses a different flow (SubscriptionsService), so this check here strictly affects manual adds via UsersController.
+          throw new ForbiddenException(`Cannot add user. Institution has reached its maximum capacity of ${institution.maxUsers} users.`);
+        }
       }
     }
 
@@ -97,29 +123,36 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<UserResponseDto> {
-    const user = await this.usersRepository.findOne({
-      where: { userId: id },
-      relations: ['role', 'institution', 'branch'],
-    });
+    const cacheKey = `users:detail:${id}`;
+    return this.cacheService.get(
+      cacheKey,
+      async () => {
+        const user = await this.usersRepository.findOne({
+          where: { userId: id },
+          relations: ['role', 'institution', 'branch'],
+        });
 
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
+        if (!user) {
+          throw new NotFoundException(`User with ID ${id} not found`);
+        }
 
-    return this.toResponseDto(user);
+        return this.toResponseDto(user);
+      },
+      CACHE_TTL.MEDIUM // 10 minutes
+    );
   }
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { email },
-      relations: ['role', 'institution'],
+      relations: ['role', 'institution', 'branch'],
     });
   }
 
   async findByPhone(phoneNumber: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { phoneNumber },
-      relations: ['role', 'institution'],
+      relations: ['role', 'institution', 'branch'],
     });
   }
 
@@ -140,6 +173,13 @@ export class UsersService {
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // Security: Restrict Institution Admins to their own users
+    if (currentUser && currentUser.roleName === 'Institution') {
+      if (user.institutionId !== currentUser.institutionId) {
+        throw new ForbiddenException('غير مصرح لك بتعديل بيانات مستخدمين خارج مؤسستك');
+      }
     }
 
     // Security: Prevent Super Admins from changing other Super Admin passwords
@@ -175,6 +215,10 @@ export class UsersService {
 
     Object.assign(user, updateUserDto);
     const updatedUser = await this.usersRepository.save(user);
+
+    // Invalidate caches
+    this.cacheService.invalidate(`users:detail:${id}`);
+
     return this.toResponseDto(updatedUser);
   }
 
@@ -188,6 +232,9 @@ export class UsersService {
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+
+    // Invalidate cache
+    this.cacheService.invalidate(`users:detail:${id}`);
   }
 
   async toggleActive(id: number): Promise<UserResponseDto> {
@@ -211,15 +258,29 @@ export class UsersService {
     }
 
     const updatedUser = await this.usersRepository.save(user);
+
+    // Invalidate cache
+    this.cacheService.invalidate(`users:detail:${id}`);
+
     return this.toResponseDto(updatedUser);
   }
 
   async updateSessionId(userId: number, sessionId: string): Promise<void> {
-    await this.usersRepository.update(userId, { activeSessionId: sessionId });
+    await this.usersRepository.update(userId, {
+      activeSessionId: sessionId,
+      lastActivityAt: new Date()
+    });
+  }
+
+  async updateLastActivity(userId: number): Promise<void> {
+    await this.usersRepository.update(userId, { lastActivityAt: new Date() });
   }
 
   async clearSessionId(userId: number): Promise<void> {
-    await this.usersRepository.update(userId, { activeSessionId: undefined });
+    await this.usersRepository.update(userId, {
+      activeSessionId: null,
+      lastActivityAt: null
+    });
   }
 
   private toResponseDto(user: User): UserResponseDto {
@@ -237,6 +298,7 @@ export class UsersService {
       roleName: user.role?.roleName,
       institutionName: user.institution?.name,
       branchName: user.branch?.name,
+      expirationDate: user.branch?.expirationDate || user.institution?.expirationDate || null,
     });
   }
 }

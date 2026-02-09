@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Create Loan - Q1KEY Platform</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/styles.css?v=12">
   <script src="../js/i18n.js"></script>
 </head>
 
@@ -131,21 +131,19 @@
           </div>
 
           <!-- Installment Preview -->
-          <div id="installmentPreview" class="hidden"
-            style="padding: 1rem; border-radius: 8px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); margin-bottom: 1rem;">
-            <p class="text-sm font-semibold text-white mb-2" style="font-size: 0.875rem; margin-bottom: 0.5rem;">📋
-              <span data-i18n-key="loans.form.installment_preview">Installment Preview</span>
+          <div id="installmentPreview" class="hidden glass-card p-4 border border-blue-500/20 bg-blue-500/10 mb-6">
+            <p class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <span>📋</span>
+              <span data-i18n-key="loans.form.installment_preview">معاينة الأقساط</span>
             </p>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+            <div class="grid-responsive-sm gap-4">
               <div>
-                <p class="text-muted" style="font-size: 0.75rem;" data-i18n-key="loans.form.monthly_payment">Monthly
-                  Payment</p>
-                <p id="monthlyPayment" class="text-white font-medium" style="font-size: 1.125rem;">--</p>
+                <p class="text-muted text-xs" data-i18n-key="loans.form.monthly_payment">القسط الشهري</p>
+                <p id="monthlyPayment" class="text-white font-medium text-lg">--</p>
               </div>
               <div>
-                <p class="text-muted" style="font-size: 0.75rem;" data-i18n-key="loans.form.installment_count">Number of
-                  Installments</p>
-                <p id="installmentCount" class="text-white font-medium" style="font-size: 1.125rem;">--</p>
+                <p class="text-muted text-xs" data-i18n-key="loans.form.installment_count">عدد الأقساط</p>
+                <p id="installmentCount" class="text-white font-medium text-lg">--</p>
               </div>
             </div>
           </div>
@@ -179,9 +177,9 @@
     </div>
   </div>
 
-  <script src="../js/api.js"></script>
-  <script src="../components/sidebar.js?v=4"></script>
-  <script src="../components/header.js"></script>
+  <script src="../js/api.js?v=5"></script>
+  <script src="../components/sidebar.js?v=13"></script>
+  <script src="../components/header.js?v=3"></script>
   <script>
     async function initPage() {
       await waitForI18n();
@@ -189,6 +187,13 @@
       if (!isAuthenticated()) {
         window.location.href = '../index.html';
         return;
+      }
+
+      // Refresh profile to get latest subscription data
+      try {
+        await api.auth.getProfile();
+      } catch (e) {
+        console.error('Failed to refresh profile:', e);
       }
 
       const user = getCurrentUser();
@@ -229,34 +234,29 @@
       // Load form data
       loadFormData();
 
+      // Load form data
       async function loadFormData() {
         try {
           // Show loading indicator
           document.getElementById('customerLoading').classList.remove('hidden');
 
-          // For Branch users, only load customers and products
-          // Fetch 1000 customers to allow effective local search
+          // Only products and branches (if applicable) are loaded initially
+          // Customers will be loaded via search component
           let promises = [
-            api.customers.getAll(1, 1000),
             api.products.getActive(),
           ];
 
           // For Institution users without canCreateBranches, hide branch field
           if (user.roleName === 'Institution' && user.canCreateBranches === false) {
-            // This institution acts as a branch - no branch selector needed
             institutionData = {
               institutionId: user.institutionId,
               name: user.institutionName
             };
           } else if (user.roleName !== 'Branch') {
-            // Load branches for users who can see them
-            promises.splice(1, 0, api.branches.getAll(1, 100));
+            promises.push(api.branches.getAll(1, 100));
           }
 
           const responses = await Promise.all(promises);
-
-          // Store customers for search
-          allLocalCustomers = responses[0].data || [];
 
           // Handle Pre-selected Customer from URL
           const urlParams = new URLSearchParams(window.location.search);
@@ -264,40 +264,28 @@
 
           if (preSelectedCustomerId) {
             const preSelectedId = parseInt(preSelectedCustomerId);
-            // Try to find in loaded list
-            let targetCustomer = allLocalCustomers.find(c => c.customerId === preSelectedId);
-
-            if (!targetCustomer) {
-              // Not in first 1000, fetch specifically
-              try {
-                targetCustomer = await api.customers.getById(preSelectedId);
-                if (targetCustomer) {
-                  // Add to local list so search finds it later if needed
-                  allLocalCustomers.push(targetCustomer);
-                }
-              } catch (err) {
-                console.warn('Could not fetch pre-selected customer', err);
+            try {
+              const targetCustomer = await api.customers.getById(preSelectedId);
+              if (targetCustomer) {
+                setTimeout(() => {
+                  if (window.selectCustomer) {
+                    window.selectCustomer(
+                      targetCustomer.customerId,
+                      targetCustomer.name.replace(/'/g, "\\'"),
+                      targetCustomer.nationalId
+                    );
+                  }
+                }, 100);
               }
-            }
-
-            if (targetCustomer) {
-              // Using a timeout to ensure DOM is ready and functions are defined
-              setTimeout(() => {
-                if (window.selectCustomer) {
-                  window.selectCustomer(
-                    targetCustomer.customerId,
-                    targetCustomer.name.replace(/'/g, "\\'"),
-                    targetCustomer.nationalId
-                  );
-                }
-              }, 100);
+            } catch (err) {
+              console.warn('Could not fetch pre-selected customer', err);
             }
           }
 
           document.getElementById('customerLoading').classList.add('hidden');
 
-          const products = user.roleName === 'Branch' || institutionData ? responses[1] : responses[2];
-          const branches = user.roleName === 'Branch' || institutionData ? [] : responses[1].data || [];
+          const products = responses[0];
+          const branches = (user.roleName !== 'Branch' && !institutionData) ? (responses[1]?.data || []) : [];
 
           branchesData = branches; // Store for capacity checks
 
@@ -311,17 +299,34 @@
           const branchSelect = document.getElementById('branchId');
 
           if (user.roleName === 'Branch' && user.branchId) {
-            // Hide branch field for Branch users
             branchField.style.display = 'none';
             branchSelect.removeAttribute('required');
-          } else if (institutionData) {
-            // Hide branch field for institutions without canCreateBranches
+          } else if (institutionData || (branches && branches.length === 0)) {
+            // Hide if explicitly disabled OR if no branches exist
             branchField.style.display = 'none';
             branchSelect.removeAttribute('required');
+
+            // If it's an institution without branches, we'll use institutionId on submit
+            if (!institutionData) {
+              institutionData = {
+                institutionId: user.institutionId,
+                name: user.institutionName
+              };
+            }
           } else {
-            // Show branch selector for other users
-            branchSelect.innerHTML = `<option value="">${t('loans.form.select_branch')}</option>` +
-              branches.map(b => `<option value="${b.branchId}">${b.name} - ${b.institution.name}</option>`).join('');
+            branchField.style.display = 'block';
+            branchSelect.setAttribute('required', 'required');
+
+            // Start with prompt
+            let options = `<option value="">${t('loans.form.select_branch')}</option>`;
+
+            // ALWAYS allow "Main Treasury" if user is Institution or Admin
+            if (user.roleName !== 'Branch') {
+              options += `<option value="main_treasury">${t('loans.form.main_treasury') || 'Main Treasury (Head Office)'}</option>`;
+            }
+
+            options += branches.map(b => `<option value="${b.branchId}">${b.name} - ${b.institution.name}</option>`).join('');
+            branchSelect.innerHTML = options;
           }
 
         } catch (error) {
@@ -331,60 +336,80 @@
         }
       }
 
-      // Customer Search Logic
+      // Customer Search Logic - Optimized with Debounced Server-side Search
       function initCustomerSearch() {
         const searchInput = document.getElementById('customerSearchInput');
         const searchResults = document.getElementById('customerSearchResults');
         const clearBtn = document.getElementById('clearCustomerBtn');
         const hiddenInput = document.getElementById('customerId');
+        const loader = document.getElementById('customerLoading');
 
-        // Input Handler
-        searchInput.addEventListener('input', (e) => {
-          const term = e.target.value.toLowerCase().trim();
-
+        const performCustomerSearch = async (term) => {
           if (!term) {
             searchResults.classList.add('hidden');
             return;
           }
 
-          // Show clear button
-          clearBtn.classList.remove('hidden');
-
-          // Filter Customers logic
-          // Helper to normalize arabic text
-          const normalize = (text) => (text || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-          const matches = allLocalCustomers.filter(c => {
-            const name = normalize(c.name.toLowerCase());
-            const phone = c.phoneNumber || '';
-            const nationalId = c.nationalId || '';
-            const normalizedTerm = normalize(term);
-
-            return name.includes(normalizedTerm) ||
-              phone.includes(term) ||
-              nationalId.includes(term);
-          }).slice(0, 50); // Limit results to 50
-
-          renderSearchResults(matches);
-        });
-
-        // Focus & Click Handler - Show results immediately
-        const showResults = () => {
-          if (searchResults.classList.contains('hidden')) {
-            // If empty, show recent/all customers
-            const term = searchInput.value.toLowerCase().trim();
-            if (!term) {
-              // Show first 50 customers if no term
-              renderSearchResults(allLocalCustomers.slice(0, 50));
-            } else {
-              // Trigger input event to filter current term
-              searchInput.dispatchEvent(new Event('input'));
-            }
+          loader.classList.remove('hidden');
+          try {
+            // Search via API (National ID or Name/Phone)
+            const matches = await api.customers.search({
+              nationalId: term,
+              phoneNumber: term,
+              name: term
+            });
+            renderSearchResults(matches.slice(0, 20));
+          } catch (error) {
+            console.error('Customer search error:', error);
+            renderSearchResults([]);
+          } finally {
+            loader.classList.add('hidden');
           }
         };
 
-        searchInput.addEventListener('focus', showResults);
-        searchInput.addEventListener('click', showResults);
+        const debouncedCustomerSearch = debounce((term) => performCustomerSearch(term), 400);
+
+        // Input Handler
+        searchInput.addEventListener('input', (e) => {
+          const term = e.target.value.trim();
+
+          if (!term) {
+            searchResults.classList.add('hidden');
+            clearBtn.classList.add('hidden');
+            return;
+          }
+
+          clearBtn.classList.remove('hidden');
+          debouncedCustomerSearch(term);
+        });
+
+        // Focus & Click Handler
+        searchInput.addEventListener('focus', () => {
+          const term = searchInput.value.trim();
+          if (term) {
+            if (searchResults.classList.contains('hidden')) {
+              performCustomerSearch(term);
+            }
+          } else {
+            // If empty, show recent customers
+            showRecentCustomers();
+          }
+        });
+
+        const showRecentCustomers = async () => {
+          loader.classList.remove('hidden');
+          try {
+            // Get last 10 customers added to institution
+            const response = await api.customers.getAll(1, 10);
+            if (response && response.data) {
+              renderSearchResults(response.data);
+            }
+          } catch (error) {
+            console.error('Failed to load recent customers:', error);
+          } finally {
+            loader.classList.add('hidden');
+          }
+        };
 
         // Click outside to close
         document.addEventListener('click', (e) => {
@@ -418,9 +443,15 @@
 
         if (customers.length === 0) {
           searchResults.innerHTML = `
-            <div class="p-3 text-sm text-slate-400 text-center">
-              No customers found. 
-              <a href="customers-new.html" class="text-blue-400 hover:text-blue-300 ml-1">Add New?</a>
+            <div class="p-4 text-sm text-slate-400 text-center">
+              <div class="mb-2">${t('customers.no_customers_found') || 'No customers found'}</div>
+              <a href="customers-new.html" class="btn btn-secondary btn-sm inline-block" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                ${t('customers.add_customer') || 'Add New'}
+              </a>
             </div>
           `;
           searchResults.classList.remove('hidden');
@@ -461,14 +492,14 @@
         document.getElementById('errorMessage').classList.add('hidden');
       };
 
-      // Branch selection handler - show capacity
       document.getElementById('branchId').addEventListener('change', function (e) {
-        const branchId = parseInt(e.target.value);
-        if (!branchId) {
+        const val = e.target.value;
+        if (!val || val === 'main_treasury') {
           document.getElementById('capacityInfo').classList.add('hidden');
           return;
         }
 
+        const branchId = parseInt(val);
         const branch = branchesData.find(b => b.branchId === branchId);
         if (branch) {
           updateBranchCapacityDisplay(branch);
@@ -487,6 +518,11 @@
         const capacityText = document.getElementById('capacityText');
         const capacityNumbers = document.getElementById('capacityNumbers');
         const submitButton = document.getElementById('submitButton');
+
+        if (maximumLoans === 0) {
+          capacityInfo.classList.add('hidden');
+          return;
+        }
 
         capacityInfo.classList.remove('hidden');
         capacityNumbers.textContent = `${formatCurrency(available)} / ${formatCurrency(maximumLoans)} available`;
@@ -572,14 +608,23 @@
           dueDate: document.getElementById('dueDate').value,
         };
 
-        // Add branchId or institutionId based on user role
+        // Add branchId or institutionId based on user role or branch selection
         if (user.roleName === 'Branch' && user.branchId) {
           formData.branchId = user.branchId;
         } else if (institutionData) {
-          // Institution without canCreateBranches - use institutionId
+          // Explicit Institution mode (no branches or forced)
           formData.institutionId = institutionData.institutionId;
         } else {
-          formData.branchId = parseInt(document.getElementById('branchId').value);
+          // Admin or Institution with choice
+          const branchVal = document.getElementById('branchId').value;
+          if (branchVal === 'main_treasury') {
+            formData.institutionId = user.institutionId;
+          } else if (branchVal) {
+            formData.branchId = parseInt(branchVal);
+          } else {
+            // Should be caught by 'required' but as fallback:
+            formData.institutionId = user.institutionId;
+          }
         }
 
         // Validation

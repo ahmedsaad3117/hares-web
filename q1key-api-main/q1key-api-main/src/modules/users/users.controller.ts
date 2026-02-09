@@ -20,9 +20,11 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { RateLimiterGuard, RateLimit, RATE_LIMITS } from '../../common/rate-limiter';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, RateLimiterGuard)
+@RateLimit(RATE_LIMITS.GENERAL)
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
@@ -71,5 +73,13 @@ export class UsersController {
   @Roles('Super Admin', 'Institution')
   toggleActive(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.toggleActive(id);
+  }
+
+  @Post(':id/logout')
+  @Roles('Super Admin', 'Institution')
+  @HttpCode(HttpStatus.OK)
+  async forceLogout(@Param('id', ParseIntPipe) id: number) {
+    await this.usersService.clearSessionId(id);
+    return { message: 'User session cleared successfully' };
   }
 }

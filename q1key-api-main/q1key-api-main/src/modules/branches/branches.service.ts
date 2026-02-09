@@ -34,8 +34,8 @@ export class BranchesService {
     private usersService: UsersService,
   ) { }
 
-  async create(createBranchDto: CreateBranchDto): Promise<Branch> {
-    const { userName, userEmail, userPassword, userPhoneNumber, userIsActive, planId, ...branchData } = createBranchDto as any;
+  async create(createBranchDto: CreateBranchDto): Promise<any> {
+    const { planId, ...branchData } = createBranchDto as any;
 
     // Verify institution exists
     const institution = await this.institutionsRepository.findOne({
@@ -51,8 +51,35 @@ export class BranchesService {
     // Check if institution can create branches
     if (!institution.canCreateBranches) {
       throw new ForbiddenException(
-        `Institution '${institution.name}' is not allowed to create branches`
+        `المؤسسة '${institution.name}' غير مصرح لها بإنشاء فروع إضافية`
       );
+    }
+
+    // Check if manager email is already taken in the system
+    if (branchData.userEmail) {
+      const existingUser = await this.usersRepository.findOne({
+        where: { email: branchData.userEmail.trim() }
+      });
+      if (existingUser) {
+        throw new BadRequestException('البريد الإلكتروني لمدير الفرع مسجل مسبقاً في النظام');
+      }
+    }
+
+    // Check if there's already a pending request for this branch name/email in this institution
+    const pendingRequest = await this.requestsRepository
+      .createQueryBuilder('request')
+      .where('request.institutionId = :institutionId', { institutionId: branchData.institutionId })
+      .andWhere('request.status = :status', { status: SubscriptionRequestStatus.PENDING })
+      .andWhere('request.requesterType = :type', { type: RequesterType.BRANCH })
+      .getMany();
+
+    for (const req of pendingRequest) {
+      try {
+        const pd = JSON.parse(req.pendingData || '{}');
+        if (pd.name === branchData.name || pd.userEmail === branchData.userEmail) {
+          throw new BadRequestException('يوجد طلب اشتراك قيد المراجعة لهذا الفرع أو لهذا البريد الإلكتروني');
+        }
+      } catch (e) { }
     }
 
     // Validate Plan if provided
@@ -66,40 +93,34 @@ export class BranchesService {
       throw new BadRequestException('Subscription Plan is required');
     }
 
-    // Create branch (Force INACTIVE)
-    const branch = this.branchesRepository.create({
-      ...branchData,
-      isActive: false
-    }) as unknown as Branch;
-    const savedBranch = await this.branchesRepository.save(branch);
+    // Calculate requested end date
+    const requestedEndDate = new Date();
+    requestedEndDate.setMonth(requestedEndDate.getMonth() + plan.durationMonths);
 
-    // Create Subscription Request
+    // Create ONLY the Subscription Request
+    // DO NOT change anything here, this must remain ONLY a request
     const request = this.requestsRepository.create({
-      requesterType: RequesterType.BRANCH, // Make sure correct enum is used
-      institutionId: savedBranch.institutionId,
-      branchId: savedBranch.branchId,
+      requesterType: RequesterType.BRANCH,
+      institutionId: branchData.institutionId,
+      branchId: undefined,
       planId: plan.id,
       amount: plan.price,
       status: SubscriptionRequestStatus.PENDING,
-      notes: `طلب اشتراك أولي للفرع: ${savedBranch.name}`
+      requestedStartDate: new Date(),
+      requestedEndDate: requestedEndDate,
+      notes: `طلب اشتراك أولي للفرع: ${branchData.name}`,
+      pendingData: JSON.stringify(createBranchDto)
     });
-    await this.requestsRepository.save(request);
 
-    // If user details are provided, create the branch user
-    if (userName && userEmail && userPassword) {
-      await this.usersService.create({
-        name: userName,
-        email: userEmail,
-        password: userPassword,
-        phoneNumber: userPhoneNumber,
-        roleId: 3, // Branch role
-        institutionId: savedBranch.institutionId,
-        branchId: savedBranch.branchId,
-        isActive: true, // User Active, Branch Inactive
-      });
-    }
+    const savedRequest = await this.requestsRepository.save(request);
 
-    return savedBranch;
+    // DEBUG LOG - If you see this in your console, the NEW code is working
+    console.log('DEBUG: Branch request created, ID:', (savedRequest as SubscriptionRequest).id);
+
+    return {
+      message: 'تم استقبال طلب إنشاء الفرع بنجاح، يرجى انتظار موافقة الإدارة العليا وتفعيل الاشتراك',
+      requestId: (savedRequest as SubscriptionRequest).id
+    };
   }
 
   async findAll(paginationDto: PaginationDto, institutionId?: number): Promise<PaginatedResult<Branch>> {

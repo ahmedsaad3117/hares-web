@@ -21,4 +21,8 @@ export class UpdateProductDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  isVisibleToBranches?: boolean;
 }

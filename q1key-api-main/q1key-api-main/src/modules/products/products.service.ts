@@ -43,21 +43,23 @@ export class ProductsService {
       .leftJoinAndSelect('product.branch', 'branch');
 
     if (branchId) {
-      // Branch users see: global products + institution products + branch-specific products
+      // Branch users see: global products + institution products (if visible) + branch-specific products
       queryBuilder.andWhere(
         '(product.branchId = :branchId OR ' +
-        '(product.institutionId = (SELECT institution_id FROM branches WHERE branch_id = :branchId) AND product.branchId IS NULL) OR ' +
+        '(product.institutionId = (SELECT institution_id FROM branches WHERE branch_id = :branchId) AND product.branchId IS NULL AND product.isVisibleToBranches = true) OR ' +
         '(product.institutionId IS NULL AND product.branchId IS NULL))',
         { branchId }
       );
+      queryBuilder.andWhere('product.isActive = :isActive', { isActive: true });
     } else if (institutionId) {
       // Institution users see: global products + institution products + all branch products from their institution
       queryBuilder.andWhere(
         '(product.institutionId = :institutionId OR ' +
-        '(SELECT institution_id FROM branches WHERE branch_id = product.branchId) = :institutionId OR ' +
+        '(SELECT b.institution_id FROM branches b WHERE b.branch_id = product.branchId) = :institutionId OR ' +
         '(product.institutionId IS NULL AND product.branchId IS NULL))',
         { institutionId }
       );
+      queryBuilder.andWhere('product.isActive = :isActive', { isActive: true });
     }
     // Super admin sees all products (no filter)
 
@@ -86,10 +88,10 @@ export class ProductsService {
       .where('product.isActive = :isActive', { isActive: true });
 
     if (branchId) {
-      // Branch users see: global products + institution products + branch-specific products
+      // Branch users see: global products + institution products (if visible) + branch-specific products
       queryBuilder.andWhere(
         '(product.branchId = :branchId OR ' +
-        '(product.institutionId = (SELECT institution_id FROM branches WHERE branch_id = :branchId) AND product.branchId IS NULL) OR ' +
+        '(product.institutionId = (SELECT institution_id FROM branches WHERE branch_id = :branchId) AND product.branchId IS NULL AND product.isVisibleToBranches = true) OR ' +
         '(product.institutionId IS NULL AND product.branchId IS NULL))',
         { branchId }
       );
@@ -97,7 +99,7 @@ export class ProductsService {
       // Institution users see: global products + institution products + all branch products from their institution
       queryBuilder.andWhere(
         '(product.institutionId = :institutionId OR ' +
-        '(SELECT institution_id FROM branches WHERE branch_id = product.branchId) = :institutionId OR ' +
+        '(SELECT b.institution_id FROM branches b WHERE b.branch_id = product.branchId) = :institutionId OR ' +
         '(product.institutionId IS NULL AND product.branchId IS NULL))',
         { institutionId }
       );
@@ -126,6 +128,7 @@ export class ProductsService {
   async update(
     id: number,
     updateProductDto: UpdateProductDto,
+    user: any
   ): Promise<ProductResponseDto> {
     const product = await this.productRepository.findOne({
       where: { productId: id },
@@ -135,18 +138,56 @@ export class ProductsService {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
+    const roleName = user.role?.roleName || user.roleName;
+
+    // Protection for Admin products
+    if (product.institutionId === null && product.branchId === null) {
+      if (roleName !== 'Super Admin') {
+        throw new BadRequestException('Modification of products added by the Admin is not allowed');
+      }
+    }
+
+    // Ownership check for non-Super Admins
+    if (roleName !== 'Super Admin') {
+      if (product.institutionId && product.institutionId !== user.institutionId) {
+        throw new BadRequestException('You do not have permission to modify this product');
+      }
+      if (product.branchId && product.branchId !== user.branchId) {
+        throw new BadRequestException('You do not have permission to modify this product');
+      }
+    }
+
     Object.assign(product, updateProductDto);
     const updatedProduct = await this.productRepository.save(product);
     return this.toResponseDto(updatedProduct);
   }
 
-  async remove(id: number): Promise<{ message: string }> {
+  async remove(id: number, user: any): Promise<{ message: string }> {
     const product = await this.productRepository.findOne({
       where: { productId: id },
     });
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    const roleName = user.role?.roleName || user.roleName;
+
+    // Protection for Admin products
+    if (product.institutionId === null && product.branchId === null) {
+      if (roleName !== 'Super Admin') {
+        throw new BadRequestException('Deletion of products added by the Admin is not allowed');
+      }
+    }
+
+    // Ownership check for non-Super Admins
+    if (roleName !== 'Super Admin') {
+      if (product.institutionId && product.institutionId !== user.institutionId) {
+        throw new BadRequestException('You do not have permission to delete this product');
+      }
+      if (product.branchId && product.branchId !== user.branchId) {
+        throw new BadRequestException('You do not have permission to delete this product');
+      }
     }
 
     // Check if product has any associated loans
@@ -164,13 +205,32 @@ export class ProductsService {
     return { message: 'Product deleted successfully' };
   }
 
-  async toggleActive(id: number): Promise<ProductResponseDto> {
+  async toggleActive(id: number, user: any): Promise<ProductResponseDto> {
     const product = await this.productRepository.findOne({
       where: { productId: id },
     });
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    const roleName = user.role?.roleName || user.roleName;
+
+    // Protection for Admin products
+    if (product.institutionId === null && product.branchId === null) {
+      if (roleName !== 'Super Admin') {
+        throw new BadRequestException('Modification of products added by the Admin is not allowed');
+      }
+    }
+
+    // Ownership check for non-Super Admins
+    if (roleName !== 'Super Admin') {
+      if (product.institutionId && product.institutionId !== user.institutionId) {
+        throw new BadRequestException('You do not have permission to modify this product');
+      }
+      if (product.branchId && product.branchId !== user.branchId) {
+        throw new BadRequestException('You do not have permission to modify this product');
+      }
     }
 
     product.isActive = !product.isActive;
@@ -206,6 +266,7 @@ export class ProductsService {
       name: product.name,
       description: product.description,
       isActive: product.isActive,
+      isVisibleToBranches: product.isVisibleToBranches,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
       institutionName: product.institution?.name,

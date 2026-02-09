@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Q1KEY Platform - Login</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/i18n.js"></script>
+</head>
+
+<body>
+  <div class="min-h-screen flex items-center justify-center"
+    style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+    <div class="glass-card p-8" style="padding: 2rem; width: 100%; max-width: 450px;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 class="text-3xl font-bold text-white" style="font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5rem;"
+          data-i18n-key="login.title">
+          Q1KEY Platform
+        </h1>
+        <p class="text-secondary" style="color: #cbd5e1;" data-i18n-key="login.subtitle">Sign in to your account</p>
+      </div>
+
+      <form id="loginForm" style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- Email or Phone -->
+        <div class="form-group">
+          <label class="label" data-i18n-key="login.identifier_label">Email or Phone</label>
+          <input type="text" id="identifier" name="identifier" class="input"
+            data-i18n-placeholder="login.identifier_placeholder" placeholder="admin@example.com or phone number"
+            required />
+          <div id="identifierError" class="error-text hidden"></div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="label" data-i18n-key="login.password_label">Password</label>
+          <div style="position: relative;">
+            <button type="button" id="togglePassword"
+              style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0.25rem; display: flex; align-items: center; justify-content: center; z-index: 10;"
+              aria-label="Toggle password visibility">
+              <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+            <input type="password" id="password" name="password" class="input"
+              data-i18n-placeholder="login.password_placeholder" placeholder="••••••••" style="padding-left: 2.5rem;"
+              required />
+          </div>
+          <div id="passwordError" class="error-text hidden"></div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="hidden"
+          style="padding: 0.75rem; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+          <p class="text-sm" style="color: #ef4444; font-size: 0.875rem;"></p>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="loginButton" class="btn btn-primary w-full" style="width: 100%; margin-top: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+          <span data-i18n-key="login.submit_button">Sign In</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    // Wait for i18n to be ready
+    waitForI18n().then(() => {
+      // Apply translations to the page
+      i18n.translatePage();
+
+      const loginForm = document.getElementById('loginForm');
+      const loginButton = document.getElementById('loginButton');
+      const errorMessage = document.getElementById('errorMessage');
+      const togglePassword = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('eyeIcon');
+
+      // Toggle password visibility
+      togglePassword.addEventListener('click', () => {
+        const type = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = type;
+
+        // Toggle eye icon (eye vs eye-off)
+        if (type === 'text') {
+          eyeIcon.innerHTML = `
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          `;
+        } else {
+          eyeIcon.innerHTML = `
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          `;
+        }
+      });
+
+      // Check if already logged in
+      if (isAuthenticated()) {
+        console.log('Already authenticated, redirecting to dashboard...');
+        window.location.replace('pages/dashboard.html');
+      }
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const identifier = document.getElementById('identifier').value.trim();
+        const password = document.getElementById('password').value;
+
+        // Hide previous errors
+        errorMessage.classList.add('hidden');
+        document.getElementById('identifierError').classList.add('hidden');
+        document.getElementById('passwordError').classList.add('hidden');
+
+        // Validation
+        if (!identifier) {
+          document.getElementById('identifierError').textContent = 'Email or phone is required';
+          document.getElementById('identifierError').classList.remove('hidden');
+          return;
+        }
+
+        if (!password || password.length < 6) {
+          document.getElementById('passwordError').textContent = t('validation.min_length', { field: t('login.password_label'), count: 6 });
+          document.getElementById('passwordError').classList.remove('hidden');
+          return;
+        }
+
+        // Disable button and show loading
+        loginButton.disabled = true;
+        loginButton.innerHTML = `
+        <div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
+        <span data-i18n-key="login.loading">${t('login.loading')}</span>
+      `;
+
+        try {
+          const response = await api.auth.login({ identifier, password });
+
+          console.log('Login successful:', response);
+
+          // Save auth data
+          saveAuthData(response.access_token, response.user);
+
+          console.log('Auth data saved. Token:', getToken()?.substring(0, 20) + '...');
+          console.log('User:', getCurrentUser());
+
+          // Redirect to dashboard
+          console.log('Login successful, redirecting to dashboard...');
+          window.location.replace('pages/dashboard.html');
+        } catch (error) {
+          console.error('Login error:', error);
+          let msg = error.message;
+          if (msg === 'Failed to fetch') {
+            msg = t('login.errors.network_error');
+          } else if (msg === 'Unauthorized' || msg === 'Invalid credentials') { // Handle common 401s if they come as string
+            msg = t('login.errors.invalid_credentials');
+          }
+
+          errorMessage.querySelector('p').textContent = msg || t('login.errors.invalid_credentials');
+          errorMessage.classList.remove('hidden');
+
+          // Re-enable button
+          loginButton.disabled = false;
+          loginButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          <span data-i18n-key="login.submit_button">${t('login.submit_button')}</span>
+        `;
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

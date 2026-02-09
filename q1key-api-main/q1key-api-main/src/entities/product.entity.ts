@@ -30,6 +30,9 @@ export class Product {
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
+  @Column({ name: 'is_visible_to_branches', default: true })
+  isVisibleToBranches: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

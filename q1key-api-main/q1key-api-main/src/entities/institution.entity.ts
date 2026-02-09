@@ -7,6 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Branch } from './branch.entity';
+import { User } from './user.entity';
 
 @Entity('institutions')
 export class Institution {
@@ -34,6 +35,12 @@ export class Institution {
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
+  @Column({ name: 'total_loans', default: 0 })
+  totalLoans: number;
+
+  @Column({ name: 'maximum_loans', default: 0 })
+  maximumLoans: number;
+
   @Column({ name: 'expiration_date', type: 'date', nullable: true })
   expirationDate: Date | null;
 
@@ -46,6 +53,6 @@ export class Institution {
   @OneToMany(() => Branch, (branch) => branch.institution)
   branches: Branch[];
 
-  @OneToMany('User', (user: any) => user.institution)
-  users: any[];
+  @OneToMany(() => User, (user) => user.institution)
+  users: User[];
 }

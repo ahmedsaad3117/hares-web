@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الصندوق - Q1KEY Platform</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css?v=12">
     <script src="../js/i18n.js"></script>
 </head>
 
@@ -47,13 +47,12 @@
             <div id="branchCashBoxesSection" class="glass-card p-6 mb-6" style="display: none;">
                 <h3 class="text-xl font-bold text-white mb-4" data-i18n-key="cashbox.branch_cashboxes">صناديق الفروع
                 </h3>
-                <div id="branchCashBoxesList" class="grid gap-4"
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div id="branchCashBoxesList" class="grid-responsive-sm">
                 </div>
             </div>
 
             <!-- Quick Stats (Clickable filters) -->
-            <div class="stats-grid mb-6" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+            <div class="grid grid-cols-4 gap-4 mb-6">
                 <div class="glass-card p-4 text-center cursor-pointer transition-all hover:bg-white/10"
                     onclick="toggleTypeFilter('Deposit')" id="stat-Deposit">
                     <p class="text-muted text-sm" data-i18n-key="cashbox.stats.deposits">الإيداعات</p>
@@ -87,10 +86,10 @@
                     </div>
                     <div style="display: flex; gap: 0.75rem; align-items: center;">
                         <input type="date" id="filterFromDate" class="input" style="padding: 0.5rem;"
-                            onchange="loadTransactions()">
+                            onchange="applyDateFilter()">
                         <span class="text-muted">-</span>
                         <input type="date" id="filterToDate" class="input" style="padding: 0.5rem;"
-                            onchange="loadTransactions()">
+                            onchange="applyDateFilter()">
                         <button class="btn btn-secondary" onclick="clearAllFilters()">
                             <span data-i18n-key="common.button.reset">إعادة تعيين</span>
                         </button>
@@ -98,9 +97,17 @@
                 </div>
 
                 <div id="transactionsList">
-                    <div class="loading-container">
+                    <div class="loading-container py-8">
                         <div class="spinner"></div>
                     </div>
+                </div>
+
+                <!-- Load More Button -->
+                <div id="loadMoreContainer" class="flex justify-center p-4 border-t border-slate-700/50"
+                    style="display: flex; justify-content: center; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <button id="loadMoreBtn" class="btn btn-secondary hidden" onclick="loadMoreTransactions()">
+                        <span data-i18n-key="common.button.load_more">عرض المزيد</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -162,19 +169,36 @@
         </div>
     </div>
 
-    <script src="../js/config.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../components/sidebar.js?v=4"></script>
-    <script src="../components/header.js"></script>
+    <!-- Force correct API config -->
+    <script>
+        window.API_CONFIG = { baseUrl: 'http://localhost:3001/api' };
+    </script>
+    <script src="../js/config.js?v=3"></script>
+    <script src="../js/api.js?v=4"></script>
+    <script src="../js/ui-utils.js?v=3"></script>
+    <script src="../components/sidebar.js?v=12"></script>
+    <script src="../components/header.js?v=3"></script>
     <script>
         let currentCashBox = null;
         let branchCashBoxes = [];
-        let activeTypeFilter = null;
         let activeBoxFilterId = null;
+        let activeTypeFilter = 'all';
 
-        async function startPage() {
+        // Lazy Loading state
+        let txPage = 1;
+        const txLimit = 20;
+        let allTransactions = [];
+
+        async function loadData() {
             await waitForI18n();
             if (!requireAuth()) return;
+
+            // Refresh profile to get latest subscription data
+            try {
+                await api.auth.getProfile();
+            } catch (e) {
+                console.error('Failed to refresh profile:', e);
+            }
 
             const user = getCurrentUser();
             document.getElementById('sidebar').innerHTML = createSidebar(user);
@@ -318,6 +342,34 @@
             loadTransactions();
         }
 
+        async function loadMoreTransactions() {
+            txPage++;
+            const btn = document.getElementById('loadMoreBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '...';
+            }
+            await loadTransactions();
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<span data-i18n-key="common.button.load_more">${t('common.button.load_more')}</span>`;
+            }
+        }
+
+        async function applyDateFilter() {
+            txPage = 1;
+            allTransactions = [];
+            await loadTransactions();
+        }
+
+        async function clearDateFilter() {
+            document.getElementById('filterFromDate').value = '';
+            document.getElementById('filterToDate').value = '';
+            txPage = 1;
+            allTransactions = [];
+            await loadTransactions();
+        }
+
         function clearAllFilters() {
             activeTypeFilter = null;
             activeBoxFilterId = null;
@@ -378,74 +430,81 @@
                 const fromDate = document.getElementById('filterFromDate').value;
                 const toDate = document.getElementById('filterToDate').value;
 
-                const filter = { page: 1, limit: 50 };
+                const filter = {};
                 if (fromDate) filter.fromDate = fromDate;
                 if (toDate) filter.toDate = toDate;
-                if (activeTypeFilter === 'NewSubscription' || activeTypeFilter === 'SubscriptionRenewal') {
-                    filter.type = 'Subscription';
-                } else if (activeTypeFilter) {
-                    filter.type = activeTypeFilter;
+
+                if (activeTypeFilter && activeTypeFilter !== 'all') {
+                    if (activeTypeFilter === 'NewSubscription' || activeTypeFilter === 'SubscriptionRenewal') {
+                        filter.type = 'Subscription';
+                    } else {
+                        filter.type = activeTypeFilter;
+                    }
                 }
 
                 let result;
-                if (activeBoxFilterId !== null) {
-                    // Fetch for specific box
-                    result = await api.cashBox.getTransactionsFor(activeBoxFilterId, filter);
+                if (activeBoxFilterId) {
+                    result = await api.cashBox.getTransactionsFor(activeBoxFilterId, { ...filter, page: txPage, limit: txLimit });
                 } else {
-                    // Fetch default (Aggregated or User's Main)
-                    result = await api.cashBox.getTransactions(filter);
+                    result = await api.cashBox.getTransactions({ ...filter, page: txPage, limit: txLimit });
                 }
 
-                const transactions = result.data || [];
-
-                // Recalculate stats based on visible DATA (simplified approach)
-                let deposits = 0, withdrawals = 0, loansOut = 0, paymentsIn = 0, newSubs = 0, renewals = 0;
-
-                // Filter transactions locally if virtual filter is active
-                let displayTransactions = transactions;
-                if (activeTypeFilter === 'NewSubscription') {
-                    displayTransactions = transactions.filter(tx => tx.transactionType === 'Subscription' && (tx.description || '').startsWith('جديد:'));
-                } else if (activeTypeFilter === 'SubscriptionRenewal') {
-                    displayTransactions = transactions.filter(tx => tx.transactionType === 'Subscription' && (tx.description || '').startsWith('تجديد:'));
+                const newTransactions = result.data || [];
+                if (txPage === 1) {
+                    allTransactions = newTransactions;
+                } else {
+                    allTransactions = [...allTransactions, ...newTransactions];
                 }
 
-                transactions.forEach(tx => {
-                    const amount = parseFloat(tx.amount || 0);
-                    switch (tx.transactionType) {
-                        case 'Deposit': deposits += amount; break;
-                        case 'Withdrawal': withdrawals += amount; break;
-                        case 'LoanDisbursement': loansOut += amount; break;
-                        case 'LoanPayment': paymentsIn += amount; break;
-                        case 'Subscription':
-                            if ((tx.description || '').startsWith('جديد:')) {
-                                newSubs += amount;
-                            } else if ((tx.description || '').startsWith('تجديد:')) {
-                                renewals += amount;
-                            } else {
-                                newSubs += amount; // Fallback
-                            }
-                            break;
+                // Show/Hide Load More
+                const loadMoreBtn = document.getElementById('loadMoreBtn');
+                if (loadMoreBtn) { // Check if button exists
+                    if (newTransactions.length < txLimit) {
+                        loadMoreBtn.classList.add('hidden');
+                    } else {
+                        loadMoreBtn.classList.remove('hidden');
+                    }
+                }
+
+
+                // Recalculate stats based on ALL transactions for the period
+                // Ideally, this should come from a stats endpoint, but for now we fetch the full report for stats
+                const report = activeBoxFilterId
+                    ? await api.cashBox.getReportFor(activeBoxFilterId, filter.fromDate, filter.toDate)
+                    : await api.cashBox.getReport(filter.fromDate, filter.toDate);
+
+                document.getElementById('totalDeposits').textContent = formatCurrency(report.totalDeposits || 0);
+                document.getElementById('totalWithdrawals').textContent = formatCurrency(report.totalWithdrawals || 0);
+
+                const loansEl = document.getElementById('totalLoansOut');
+                if (loansEl) loansEl.textContent = formatCurrency(report.totalLoanDisbursements || 0);
+
+                const paymentsEl = document.getElementById('totalPaymentsIn');
+                if (paymentsEl) paymentsEl.textContent = formatCurrency(report.totalLoanPayments || 0);
+
+                // Update Subscription stats if applicable (manual calculation from report transactions if not in summary)
+                let newSubs = 0, renewals = 0;
+                report.transactions.forEach(tx => {
+                    if (tx.transactionType === 'Subscription') {
+                        if ((tx.description || '').startsWith('جديد:')) newSubs += parseFloat(tx.amount || 0);
+                        else if ((tx.description || '').startsWith('تجديد:')) renewals += parseFloat(tx.amount || 0);
                     }
                 });
 
-                document.getElementById('totalDeposits').textContent = formatCurrency(deposits);
-                document.getElementById('totalWithdrawals').textContent = formatCurrency(withdrawals);
-
-                const loansEl = document.getElementById('totalLoansOut');
-                if (loansEl) loansEl.textContent = formatCurrency(loansOut);
-
-                const paymentsEl = document.getElementById('totalPaymentsIn');
-                if (paymentsEl) paymentsEl.textContent = formatCurrency(paymentsIn);
-
-                // Update Admin subscription boxes
                 const newSubsEl = document.getElementById('totalNewSubscriptions');
                 if (newSubsEl) newSubsEl.textContent = formatCurrency(newSubs);
 
                 const renewalsEl = document.getElementById('totalSubscriptionRenewals');
                 if (renewalsEl) renewalsEl.textContent = formatCurrency(renewals);
 
-                // Render transactions
-                if (displayTransactions.length === 0) {
+                let displayTransactions = allTransactions;
+                if (activeTypeFilter === 'NewSubscription') {
+                    displayTransactions = allTransactions.filter(tx => tx.transactionType === 'Subscription' && (tx.description || '').startsWith('جديد:'));
+                } else if (activeTypeFilter === 'SubscriptionRenewal') {
+                    displayTransactions = allTransactions.filter(tx => tx.transactionType === 'Subscription' && (tx.description || '').startsWith('تجديد:'));
+                }
+
+                if (displayTransactions.length === 0 && txPage === 1) { // Only show no transactions if on first page and no transactions
                     document.getElementById('transactionsList').innerHTML = `
             <p class="text-muted text-center py-8">${t('cashbox.no_transactions')}</p>
           `;
@@ -480,6 +539,12 @@
                         typeLabel = 'تعديل على قرض';
                     }
 
+                    // Append customer name to description if available
+                    let descriptionText = tx.description || '';
+                    if (tx.customerName) {
+                        descriptionText += ` • ${tx.customerName}`;
+                    }
+
                     return `
             <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
               <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; background: ${colorClass === 'text-success' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'};">
@@ -487,7 +552,7 @@
               </div>
               <div style="flex: 1;">
                 <p class="font-medium text-white">${typeLabel}</p>
-                 <p class="text-sm" style="color: #fbbf24;">${tx.description || ''}</p>
+                 <p class="text-sm" style="color: #fbbf24;">${descriptionText}</p>
                 <p class="text-xs text-muted">${formatDateTime(tx.createdAt)} ${tx.createdByName ? '• ' + tx.createdByName : ''}</p>
               </div>
               <div class="text-right">
@@ -656,9 +721,9 @@
 
         // Start
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', startPage);
+            document.addEventListener('DOMContentLoaded', loadData);
         } else {
-            startPage();
+            loadData();
         }
     </script>
 

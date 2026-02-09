@@ -19,6 +19,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { InstallmentsService } from '../installments/installments.service';
+import { RateLimiterGuard, RateLimit, RATE_LIMITS } from '../../common/rate-limiter';
 
 @Controller('loans')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -40,10 +41,17 @@ export class LoansController {
     return this.loansService.findAll(paginationDto, user);
   }
 
+  /**
+   * Search loans with rate limiting
+   * - 30 requests per minute per user
+   * - Prevents search abuse
+   */
   @Get('search')
   @Roles('Super Admin', 'Institution', 'Branch')
-  search(@Query('q') searchTerm: string) {
-    return this.loansService.search(searchTerm || '');
+  @UseGuards(RateLimiterGuard)
+  @RateLimit(RATE_LIMITS.SEARCH)
+  search(@Query('q') searchTerm: string, @CurrentUser() user?: any) {
+    return this.loansService.search(searchTerm || '', user);
   }
 
   @Get('statistics')
@@ -54,26 +62,26 @@ export class LoansController {
 
   @Get('customer/:customerId')
   @Roles('Super Admin', 'Institution', 'Branch')
-  findByCustomer(@Param('customerId') customerId: string) {
-    return this.loansService.findByCustomer(+customerId);
+  findByCustomer(@Param('customerId') customerId: string, @CurrentUser() user?: any) {
+    return this.loansService.findByCustomer(+customerId, user);
   }
 
   @Get('branch/:branchId')
   @Roles('Super Admin', 'Institution', 'Branch')
-  findByBranch(@Param('branchId') branchId: string) {
-    return this.loansService.findByBranch(+branchId);
+  findByBranch(@Param('branchId') branchId: string, @CurrentUser() user?: any) {
+    return this.loansService.findByBranch(+branchId, user);
   }
 
   @Get('status/:status')
   @Roles('Super Admin', 'Institution', 'Branch')
-  findByStatus(@Param('status') status: LoanStatus) {
-    return this.loansService.findByStatus(status);
+  findByStatus(@Param('status') status: LoanStatus, @CurrentUser() user?: any) {
+    return this.loansService.findByStatus(status, user);
   }
 
   @Get(':id')
   @Roles('Super Admin', 'Institution', 'Branch')
-  findOne(@Param('id') id: string) {
-    return this.loansService.findOne(+id);
+  findOne(@Param('id') id: string, @CurrentUser() user?: any) {
+    return this.loansService.findOne(+id, user);
   }
 
   @Patch(':id')

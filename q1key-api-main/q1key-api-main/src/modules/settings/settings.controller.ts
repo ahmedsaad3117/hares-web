@@ -5,7 +5,6 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('settings')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class SettingsController {
     constructor(private readonly settingsService: SettingsService) { }
 
@@ -15,6 +14,7 @@ export class SettingsController {
     }
 
     @Put('support-contact')
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles('Super Admin')
     async updateSupportInfo(@Body() body: { whatsapp: string; email: string }) {
         return this.settingsService.updateSupportInfo(body.whatsapp, body.email);
