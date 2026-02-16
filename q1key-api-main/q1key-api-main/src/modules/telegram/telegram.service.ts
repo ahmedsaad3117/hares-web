@@ -394,11 +394,20 @@ export class TelegramService implements OnModuleInit {
     const settings = await this.getSettings();
     if (!settings || !settings.botToken || !settings.chatId)
       throw new HttpException("Settings missing", 400);
+
     const res = await this.sendTelegramMessage(
       settings.botToken,
       settings.chatId,
       "🔔 اختبار الاتصال بنظام Q1KEY",
     );
+
+    // Update settings with test result
+    settings.lastTestAt = new Date();
+    settings.lastTestSuccess = res.success;
+    settings.lastTestError = res.success ? null : res.error || "Unknown error";
+
+    await this.telegramSettingsRepo.save(settings);
+
     return {
       success: res.success,
       message: res.success ? "تم بنجاح" : res.error || "فشل",
